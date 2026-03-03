@@ -37,52 +37,54 @@ class SparkExternalSeeder(ExternalSeeder):
         print(f"Connecting to Spark Thrift at {host}:{port}...")
         conn = hive.Connection(host=host, port=port, username="dbt")
         cursor = conn.cursor()
+        try:
+            print(f"Creating schema '{seed_schema}'...")
+            cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{seed_schema}`")
 
-        print(f"Creating schema '{seed_schema}'...")
-        cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{seed_schema}`")
+            for subdir, csv_path, table_name in self.iter_seed_csvs():
+                fname = os.path.basename(csv_path)
 
-        for subdir, csv_path, table_name in self.iter_seed_csvs():
-            fname = os.path.basename(csv_path)
-
-            if not self.csv_has_data(csv_path):
-                cols = self.csv_columns(csv_path)
-                if not cols:
-                    print(f"  Skipping {table_name} (completely empty file)")
+                if not self.csv_has_data(csv_path):
+                    cols = self.csv_columns(csv_path)
+                    if not cols:
+                        print(f"  Skipping {table_name} (completely empty file)")
+                        continue
+                    col_defs = ", ".join(f"{q(c)} STRING" for c in cols)
+                    print(f"  Creating empty table: {table_name}")
+                    try:
+                        cursor.execute(
+                            f"DROP TABLE IF EXISTS {q(seed_schema)}.{q(table_name)}"
+                        )
+                        cursor.execute(
+                            f"CREATE TABLE {q(seed_schema)}.{q(table_name)} "
+                            f"({col_defs}) USING delta"
+                        )
+                    except Exception as e:
+                        failures.append(f"{table_name}: {e}")
                     continue
-                col_defs = ", ".join(f"{q(c)} STRING" for c in cols)
-                print(f"  Creating empty table: {table_name}")
+
+                container_path = f"/seed-data/{subdir}/{fname}"
+                tmp_view = f"_tmp_csv_{table_name}"
+                print(f"  Loading: {table_name}")
                 try:
+                    cursor.execute(
+                        f"CREATE OR REPLACE TEMPORARY VIEW {q(tmp_view)} "
+                        f"USING csv "
+                        f"OPTIONS (path '{container_path}', header 'true', "
+                        f"inferSchema 'true')"
+                    )
                     cursor.execute(
                         f"DROP TABLE IF EXISTS {q(seed_schema)}.{q(table_name)}"
                     )
                     cursor.execute(
                         f"CREATE TABLE {q(seed_schema)}.{q(table_name)} "
-                        f"({col_defs}) USING delta"
+                        f"USING delta AS SELECT * FROM {q(tmp_view)}"
                     )
                 except Exception as e:
                     failures.append(f"{table_name}: {e}")
-                continue
-
-            container_path = f"/seed-data/{subdir}/{fname}"
-            tmp_view = f"_tmp_csv_{table_name}"
-            print(f"  Loading: {table_name}")
-            try:
-                cursor.execute(
-                    f"CREATE OR REPLACE TEMPORARY VIEW {q(tmp_view)} "
-                    f"USING csv "
-                    f"OPTIONS (path '{container_path}', header 'true', "
-                    f"inferSchema 'true')"
-                )
-                cursor.execute(f"DROP TABLE IF EXISTS {q(seed_schema)}.{q(table_name)}")
-                cursor.execute(
-                    f"CREATE TABLE {q(seed_schema)}.{q(table_name)} "
-                    f"USING delta AS SELECT * FROM {q(tmp_view)}"
-                )
-            except Exception as e:
-                failures.append(f"{table_name}: {e}")
-
-        cursor.close()
-        conn.close()
+        finally:
+            cursor.close()
+            conn.close()
         if failures:
             raise RuntimeError(
                 "Spark seed loading failed:\n - " + "\n - ".join(failures)

@@ -32,7 +32,6 @@
     {% elif datepart == 'day' %}
         TIMESTAMPADD(SQL_TSI_DAY, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
     {% else %}
-        {# Fallback for unrecognized dateparts — default to day #}
-        TIMESTAMPADD(SQL_TSI_DAY, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
+        {{ exceptions.raise_compiler_error("dremio__dateadd: unrecognized datepart '" ~ datepart ~ "'. Supported: year, quarter, month, week, day, hour, minute, second.") }}
     {% endif %}
 {% endmacro %}

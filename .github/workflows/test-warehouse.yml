@@ -90,7 +90,7 @@ jobs:
       # This ensures Docker volumes are populated before containers initialize.
       - name: Compute seed cache key
         id: seed-cache-key
-        if: inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.warehouse-type == 'trino' || inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark' || inputs.warehouse-type == 'duckdb'
+        if: inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse' || inputs.warehouse-type == 'duckdb'
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: |
           # Cache key is a hash of seed-related files so that cache busts when
@@ -146,10 +146,12 @@ jobs:
         if: inputs.warehouse-type == 'dremio'
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: |
-          # Run dremio-setup in foreground so it blocks until the init script
-          # finishes creating the NessieSource.  The container's depends_on
-          # ensures Dremio + MinIO are healthy before the script starts.
-          docker compose up --exit-code-from dremio-setup dremio-setup
+          # Start Dremio services in detached mode with healthchecks, then
+          # run the setup container separately.  Using --exit-code-from would
+          # imply --abort-on-container-exit, killing all services when the
+          # setup container finishes.
+          docker compose up -d --wait dremio dremio-minio nessie
+          docker compose run --rm dremio-setup
 
       - name: Start Spark
         if: inputs.warehouse-type == 'spark'
@@ -252,7 +254,7 @@ jobs:
         run: dbt seed -f --target "${{ inputs.warehouse-type }}"
 
       - name: Save seed cache from Docker volumes
-        if: steps.seed-cache.outputs.cache-hit != 'true' && inputs.warehouse-type != 'duckdb' && inputs.warehouse-type != 'trino' && inputs.warehouse-type != 'spark' && inputs.warehouse-type != 'dremio' && (inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse')
+        if: steps.seed-cache.outputs.cache-hit != 'true' && (inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse')
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: bash ci/save_seed_cache.sh "${{ inputs.warehouse-type }}"
 

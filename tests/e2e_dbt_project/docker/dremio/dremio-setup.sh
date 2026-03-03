@@ -4,10 +4,17 @@ set -e
 # Install required tools
 apk add --no-cache curl jq
 
-# Wait for Dremio to be ready
-until curl -s http://dremio:9047; do
-  echo "Waiting for Dremio..."
+# Wait for Dremio to be ready (bounded to avoid CI hangs)
+max_attempts=60
+attempt=1
+until curl --silent --fail --max-time 3 http://dremio:9047 >/dev/null; do
+  if [ "$attempt" -ge "$max_attempts" ]; then
+    echo "Dremio did not become ready after $max_attempts attempts" >&2
+    exit 1
+  fi
+  echo "Waiting for Dremio... ($attempt/$max_attempts)"
   sleep 5
+  attempt=$((attempt + 1))
 done
 
 echo "Dremio is up. Proceeding with configuration..."

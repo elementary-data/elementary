@@ -55,7 +55,7 @@ class ExternalSeeder(ABC):
             csv_dir = os.path.join(self.data_dir, subdir)
             for csv_path in sorted(glob.glob(os.path.join(csv_dir, "*.csv"))):
                 fname = os.path.basename(csv_path)
-                table_name = fname.replace(".csv", "")
+                table_name, _ = os.path.splitext(fname)
                 yield subdir, csv_path, table_name
 
     # ------------------------------------------------------------------

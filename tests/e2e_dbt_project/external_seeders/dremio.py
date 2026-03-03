@@ -86,8 +86,13 @@ class DremioExternalSeeder(ExternalSeeder):
         )
 
     # ------------------------------------------------------------------
-    # REST helpers
+    # Helpers
     # ------------------------------------------------------------------
+
+    @staticmethod
+    def _quote_ident(name: str) -> str:
+        """Double-quote a SQL identifier, escaping embedded double-quotes."""
+        return '"' + name.replace('"', '""') + '"'
 
     def _headers(self, token: str) -> dict[str, str]:
         return {
@@ -149,7 +154,8 @@ class DremioExternalSeeder(ExternalSeeder):
         Dremio-Nessie integration and is more reliable than calling
         the Nessie REST API directly.
         """
-        folder_sql = f'CREATE FOLDER IF NOT EXISTS NessieSource."{namespace}"'
+        qi = self._quote_ident
+        folder_sql = f"CREATE FOLDER IF NOT EXISTS NessieSource.{qi(namespace)}"
         try:
             self._sql(token, folder_sql, timeout=30)
             print(f"  Created Nessie namespace '{namespace}' via CREATE FOLDER")
@@ -345,7 +351,8 @@ class DremioExternalSeeder(ExternalSeeder):
         print("\nStep 3: Creating Nessie namespace...")
         self._create_nessie_namespace(token, seed_schema)
 
-        nessie_ns = f'NessieSource."{seed_schema}"'
+        qi = self._quote_ident
+        nessie_ns = f"NessieSource.{qi(seed_schema)}"
 
         print(f"\nStep 4: Creating Iceberg tables at '{nessie_ns}'...")
         created_tables: list[str] = []
@@ -355,10 +362,10 @@ class DremioExternalSeeder(ExternalSeeder):
                 print(f"  Skipping {table_name} (completely empty file)")
                 continue
 
-            fqn = f'{nessie_ns}."{table_name}"'
+            fqn = f"{nessie_ns}.{qi(table_name)}"
 
             # Create empty Iceberg table with VARCHAR columns
-            col_defs = ", ".join(f'"{c}" VARCHAR' for c in cols)
+            col_defs = ", ".join(f"{qi(c)} VARCHAR" for c in cols)
             create_sql = f"CREATE TABLE IF NOT EXISTS {fqn} ({col_defs})"
             try:
                 self._sql(token, create_sql, timeout=60)
