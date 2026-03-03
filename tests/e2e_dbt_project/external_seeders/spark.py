@@ -29,7 +29,12 @@ class SparkExternalSeeder(ExternalSeeder):
             f"(schema={seed_schema}) ==="
         )
 
-        from pyhive import hive
+        try:
+            from pyhive import hive
+        except ImportError as e:
+            raise RuntimeError(
+                "pyhive is required for SparkExternalSeeder. Install dbt-spark[PyHive] (CI does this automatically)."
+            ) from e
 
         host = os.environ.get("SPARK_HOST", "127.0.0.1")
         port = int(os.environ.get("SPARK_PORT", "10000"))
