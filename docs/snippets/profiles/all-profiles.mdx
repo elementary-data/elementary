@@ -198,18 +198,36 @@ elementary:
 ## Configure the database and schema of elementary models.     ##
 ## Check where 'elementary_test_results' is to find it.        ##
 
+## -- Dremio Cloud -- ##
 elementary:
   outputs:
     default:
       type: dremio
-      software_host: [hostname]
-      port: [port]
+      cloud_host: api.dremio.cloud  # or api.eu.dremio.cloud for EU
+      cloud_project_id: [project ID]
+      user: [email address]
+      pat: [personal access token]
+      use_ssl: true
+      object_storage_source: [name]  # alias: datalake
+      object_storage_path: [path]    # alias: root_path
+      dremio_space: [name]           # alias: database
+      dremio_space_folder: [path]    # alias: schema, usually [schema]_elementary
+      threads: [1 or more]
+
+## -- Dremio Software -- ##
+elementary:
+  outputs:
+    default:
+      type: dremio
+      software_host: [hostname or IP address]
+      port: 9047
       user: [username]
-      password: [password]
+      password: [password]  # or use pat: [personal access token]
       use_ssl: [true or false]
-      datalake: [datalake source name]
-      database: [database name]
-      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      object_storage_source: [name]  # alias: datalake
+      object_storage_path: [path]    # alias: root_path
+      dremio_space: [name]           # alias: database
+      dremio_space_folder: [path]    # alias: schema, usually [schema]_elementary
       threads: [1 or more]
 ```
 
