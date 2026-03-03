@@ -28,8 +28,16 @@ clean-targets: # directories to be removed by `dbt clean`
 
 # Configuring models
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
+dispatch:
+  - macro_namespace: elementary
+    search_order: ["elementary_cli", "elementary"]
+
 vars:
   edr_cli_run: true
+
+models:
+  elementary_cli:
+    +file_format: "{{ 'delta' if target.type == 'spark' else none }}"
 
 quoting:
   database: "{{ env_var('DATABASE_QUOTING', 'None') | as_native }}"

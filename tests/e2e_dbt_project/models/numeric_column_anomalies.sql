@@ -16,14 +16,14 @@ source as (
      select
          updated_at,
          occurred_at,
-         min,
-         max,
+         min_val,
+         max_val,
          zero_count,
          zero_percent,
          average,
          standard_deviation,
          variance,
-         sum
+         sum_val
      from source
  )
 

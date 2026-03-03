@@ -7,7 +7,7 @@ models:
     meta:
       owner: "{{ var('one_owner', none) }}"
     columns:
-      - name: one
+      - name: col1
         tests:
           - accepted_values:
               meta:
@@ -255,7 +255,7 @@ models:
             - average_length
             - null_count
     columns:
-      - name: min
+      - name: min_val
         tests:
           - elementary.column_anomalies:
               tags: ["numeric_column_anomalies", "column_anomalies"]
@@ -269,7 +269,7 @@ models:
               tags: ["numeric_column_anomalies", "column_anomalies"]
               column_anomalies:
                 - average
-      - name: max
+      - name: max_val
         tests:
           - elementary.column_anomalies:
               tags: ["numeric_column_anomalies", "column_anomalies"]
@@ -327,7 +327,7 @@ models:
         tests:
           - elementary.column_anomalies:
               tags: ["numeric_column_anomalies", "column_anomalies"]
-      - name: sum
+      - name: sum_val
         tests:
           - elementary.column_anomalies:
               column_anomalies:
@@ -347,7 +347,7 @@ models:
   - name: groups
     columns:
       - name: group_a
-        data_type: "{{ 'strIng' if (target.type == 'bigquery' or target.type == 'databricks' or target.type == 'athena') else 'CHArACTER varying' if target.type == 'redshift' else 'teXt' }}"
+        data_type: "{{ 'strIng' if (target.type == 'bigquery' or target.type == 'databricks' or target.type == 'athena' or target.type == 'spark') else 'varchar' if (target.type == 'trino' or target.type == 'dremio' or target.type == 'duckdb') else 'CHArACTER varying' if target.type == 'redshift' else 'teXt' }}"
       - name: group_b
         data_type: double
       - name: group_c
@@ -365,7 +365,7 @@ models:
   - name: stats_players
     columns:
       - name: player
-        data_type: "{{ 'STRING' if (target.type == 'bigquery' or target.type == 'databricks' or target.type == 'athena') else 'character varying' if target.type == 'redshift' else 'TEXT' }}"
+        data_type: "{{ 'STRING' if (target.type == 'bigquery' or target.type == 'databricks' or target.type == 'athena' or target.type == 'spark') else 'varchar' if (target.type == 'trino' or target.type == 'dremio' or target.type == 'duckdb') else 'character varying' if target.type == 'redshift' else 'TEXT' }}"
       - name: goals
         data_type: BOOLEAN
       - name: coffee_cups_consumed
@@ -530,7 +530,7 @@ models:
 
 sources:
   - name: training
-    schema: test_seeds
+    schema: "{{ target.schema if target.type == 'dremio' else 'test_seeds' }}"
     tables:
       - name: users_per_hour_daily_seasonal_training
         columns:
@@ -633,7 +633,7 @@ sources:
 
       - name: users_per_day_weekly_seasonal_training
   - name: validation
-    schema: test_seeds
+    schema: "{{ target.schema if target.type == 'dremio' else 'test_seeds' }}"
     tables:
       - name: users_per_hour_daily_seasonal_validation
       - name: any_type_column_anomalies_validation

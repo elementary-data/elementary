@@ -27,5 +27,9 @@ seeds:
   +schema: test_seeds
 
 models:
+  elementary_integration_tests:
+    +file_format: "{{ 'delta' if target.type == 'spark' else none }}"
+
   elementary:
     +schema: elementary
+    +file_format: "{{ 'delta' if target.type == 'spark' else none }}"

@@ -7,7 +7,7 @@
   select
     elementary_test_results_id,
     result_row
-  from {{ ref("elementary", "test_result_rows") }}
+  from {{ ref("test_result_rows", package="elementary") }}
   where {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('detected_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
   {% if valid_ids_query %}
     and elementary_test_results_id in ({{ valid_ids_query }})
@@ -25,7 +25,7 @@
   select
     elementary_test_results_id,
     result_row
-  from {{ ref("elementary", "test_result_rows") }}
+  from {{ ref("test_result_rows", package="elementary") }}
   where detected_at > {{ elementary.edr_timeadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
   {% if valid_ids_query %}
     and elementary_test_results_id in ({{ valid_ids_query }})

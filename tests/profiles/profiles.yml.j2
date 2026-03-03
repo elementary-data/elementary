@@ -23,6 +23,43 @@ elementary_tests:
       schema: {{ schema_name }}
       threads: 4
 
+    trino: &trino
+      type: trino
+      method: none
+      host: localhost
+      port: 8086
+      user: admin
+      database: iceberg
+      schema: {{ schema_name }}
+      threads: 4
+
+    dremio: &dremio
+      type: dremio
+      software_host: localhost
+      port: 9047
+      user: dremio
+      password: dremio123
+      use_ssl: false
+      enterprise_catalog_namespace: NessieSource
+      enterprise_catalog_folder: {{ schema_name }}
+      threads: 4
+
+    duckdb: &duckdb
+      type: duckdb
+      path: /tmp/elementary_test.duckdb
+      schema: {{ schema_name }}
+      threads: 1
+
+    spark: &spark
+      type: spark
+      method: thrift
+      host: 127.0.0.1
+      port: 10000
+      user: dbt
+      schema: {{ schema_name }}
+      file_format: delta
+      threads: 4
+
     # ── Cloud targets (secrets substituted at CI time) ─────────────────
 
     snowflake: &snowflake
@@ -83,9 +120,9 @@ elementary_tests:
 elementary:
   target: postgres
   outputs:
-{%- set targets = ['postgres', 'clickhouse', 'snowflake', 'bigquery', 'redshift', 'databricks_catalog', 'athena'] %}
+{%- set targets = ['postgres', 'clickhouse', 'trino', 'dremio', 'duckdb', 'spark', 'snowflake', 'bigquery', 'redshift', 'databricks_catalog', 'athena'] %}
 {%- for t in targets %}
     {{ t }}:
       <<: *{{ t }}
-      {{ 'dataset' if t == 'bigquery' else 'schema' }}: {{ schema_name }}_elementary
+      {{ 'dataset' if t == 'bigquery' else ('enterprise_catalog_folder' if t == 'dremio' else 'schema') }}: {% if t == 'dremio' %}{{ schema_name }}.elementary{% else %}{{ schema_name }}_elementary{% endif %}
 {%- endfor %}

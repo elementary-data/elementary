@@ -100,6 +100,15 @@ _ADAPTER_PATTERNS: Dict[str, Tuple[str, ...]] = {
         "connection timed out",
         "broken pipe",
     ),
+    "spark": (
+        "thrift transport is closed",
+        "could not connect to any thrift server",
+        "connection refused",
+    ),
+    "duckdb": (
+        # DuckDB runs in-process; transient errors are rare.
+        # Common patterns (connection reset, broken pipe) are in _COMMON.
+    ),
 }
 
 # Pre-computed union of all adapter-specific patterns for the fallback path

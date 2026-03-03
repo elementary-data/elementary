@@ -33,7 +33,7 @@
             {% if error_after_column_exists %}
                 freshness.error_after,
                 freshness.warn_after,
-                freshness.filter,
+                freshness.{{ elementary.escape_reserved_keywords('filter') }},
             {% endif %}
             freshness.max_loaded_at_time_ago_in_s,
             freshness.snapshotted_at,

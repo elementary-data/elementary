@@ -34,3 +34,23 @@
     {% set schema_relation = api.Relation.create(database=target.database, schema=schema_name) %}
     {% do dbt.drop_schema(schema_relation) %}
 {% endmacro %}
+
+{% macro trino__edr_drop_schema(schema_name) %}
+    {% set schema_relation = api.Relation.create(database=target.database, schema=schema_name) %}
+    {% do dbt.drop_schema(schema_relation) %}
+{% endmacro %}
+
+{% macro dremio__edr_drop_schema(schema_name) %}
+    {# Dremio does not support DROP SCHEMA; Docker container cleanup handles this in CI #}
+    {% do log("Skipping schema drop for Dremio (not supported); Docker cleanup handles this.", info=true) %}
+{% endmacro %}
+
+{% macro duckdb__edr_drop_schema(schema_name) %}
+    {% set quoted_schema = adapter.quote(schema_name) %}
+    {% do run_query("DROP SCHEMA IF EXISTS " ~ quoted_schema ~ " CASCADE") %}
+{% endmacro %}
+
+{% macro spark__edr_drop_schema(schema_name) %}
+    {% set quoted_schema = adapter.quote(schema_name) %}
+    {% do run_query("DROP DATABASE IF EXISTS " ~ quoted_schema ~ " CASCADE") %}
+{% endmacro %}

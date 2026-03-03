@@ -15,7 +15,7 @@
 {% set schema_changes_relation = adapter.get_relation(this.database, this.schema, 'alerts_schema_changes') %}
 
 with failed_tests as (
-    select * from {{ ref('elementary', 'alerts_dbt_tests') }}
+    select * from {{ ref('alerts_dbt_tests', package='elementary') }}
 
     {% if schema_changes_relation %}
         union all
@@ -32,7 +32,7 @@ with failed_tests as (
 )
 
 select
-    {{ dbt_utils.star(from=ref('elementary', 'alerts_dbt_tests'), except=["detected_at"]) }},
+    {{ dbt_utils.star(from=ref('alerts_dbt_tests', package='elementary'), except=["detected_at"]) }},
     {{ elementary_cli.get_alerts_model_detected_at_expr(this) }} as detected_at,
     false as alert_sent,  {# backwards compatibility #}
     'pending' as suppression_status,
