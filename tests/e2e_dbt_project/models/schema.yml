@@ -150,7 +150,7 @@ models:
     columns:
       - name: "missing_column"
         tests:
-          - uniques:
+          - unique:
               tags: ["error_test", "regular_tests"]
 
   - name: backfill_days_column_anomalies
