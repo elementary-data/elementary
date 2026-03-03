@@ -184,12 +184,18 @@ class DremioExternalSeeder(ExternalSeeder):
         )
         self.run(
             [
-                "docker", "run", "--rm",
-                "--network", network,
-                "-v", f"{self.data_dir}:/seed-data:ro",
-                "--entrypoint", "/bin/sh",
+                "docker",
+                "run",
+                "--rm",
+                "--network",
+                network,
+                "-v",
+                f"{self.data_dir}:/seed-data:ro",
+                "--entrypoint",
+                "/bin/sh",
                 "minio/mc",
-                "-c", mc_cmds,
+                "-c",
+                mc_cmds,
             ]
         )
 
@@ -391,7 +397,5 @@ class DremioExternalSeeder(ExternalSeeder):
         time.sleep(10)
 
         if failures:
-            raise RuntimeError(
-                "Dremio seeding failed:\n - " + "\n - ".join(failures)
-            )
+            raise RuntimeError("Dremio seeding failed:\n - " + "\n - ".join(failures))
         print("\nDremio seed loading complete.")

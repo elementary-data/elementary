@@ -71,9 +71,7 @@ class SparkExternalSeeder(ExternalSeeder):
                     f"OPTIONS (path '{container_path}', header 'true', "
                     f"inferSchema 'true')"
                 )
-                cursor.execute(
-                    f"DROP TABLE IF EXISTS {q(seed_schema)}.{q(table_name)}"
-                )
+                cursor.execute(f"DROP TABLE IF EXISTS {q(seed_schema)}.{q(table_name)}")
                 cursor.execute(
                     f"CREATE TABLE {q(seed_schema)}.{q(table_name)} "
                     f"USING delta AS SELECT * FROM {q(tmp_view)}"
