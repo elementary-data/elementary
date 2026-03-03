@@ -27,18 +27,31 @@ done
 docker compose start || true
 
 # Wait for services to be ready after restart
+ready=0
 case "$WAREHOUSE_TYPE" in
   clickhouse)
     for i in $(seq 1 30); do
-      curl -sf http://localhost:8123/ping > /dev/null && break
+      if curl -sf http://localhost:8123/ping > /dev/null; then
+        ready=1; break
+      fi
       echo "Waiting for ClickHouse after restart... ($i/30)"; sleep 2
     done
     ;;
   postgres)
     for i in $(seq 1 30); do
-      pg_isready -h localhost -p 5432 > /dev/null 2>&1 && break
+      if pg_isready -h localhost -p 5432 > /dev/null 2>&1; then
+        ready=1; break
+      fi
       echo "Waiting for Postgres after restart... ($i/30)"; sleep 2
     done
     ;;
+  *)
+    ready=1
+    ;;
 esac
+
+if [ "$ready" -ne 1 ]; then
+  echo "ERROR: $WAREHOUSE_TYPE did not become ready after restart" >&2
+  exit 1
+fi
 echo "Seed cache saved."

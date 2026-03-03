@@ -1,7 +1,7 @@
 {% macro get_model_resources(exclude_elementary=true) %}
     {% set model_resources_query %}
         with dbt_models as (
-            select * from {{ ref('dbt_models', package='elementary') }}
+            select * from {{ ref('elementary', 'dbt_models') }}
         )
 
         select
@@ -24,7 +24,7 @@
 {% macro get_source_resources(exclude_elementary=true) %}
     {% set source_resources_query %}
         with dbt_sources as (
-            select * from {{ ref('dbt_sources', package='elementary') }}
+            select * from {{ ref('elementary', 'dbt_sources') }}
         )
 
         select
@@ -62,19 +62,19 @@
 {% macro get_resources_meta() %}
     {% set resources_meta_query %}
         with dbt_models as (
-            select * from {{ ref('dbt_models', package='elementary') }}
+            select * from {{ ref('elementary', 'dbt_models') }}
         ),
 
         dbt_sources as (
-            select * from {{ ref('dbt_sources', package='elementary') }}
+            select * from {{ ref('elementary', 'dbt_sources') }}
         ),
 
         dbt_seeds as (
-            select * from {{ ref('dbt_seeds', package='elementary') }}
+            select * from {{ ref('elementary', 'dbt_seeds') }}
         ),
 
         dbt_tests as (
-            select * from {{ ref('dbt_tests', package='elementary') }}
+            select * from {{ ref('elementary', 'dbt_tests') }}
         )
 
         select meta from dbt_tests

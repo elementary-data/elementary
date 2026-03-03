@@ -13,7 +13,7 @@
             package_name,
             description,
             original_path as full_path
-          from {{ ref('dbt_seeds', package='elementary') }}
+          from {{ ref('elementary', 'dbt_seeds') }}
         )
 
         select * from dbt_artifacts_seeds

@@ -11,6 +11,9 @@
 
 {% macro dremio__dateadd(datepart, interval, from_date_or_timestamp) %}
     {% set interval = interval | string %}
+    {# dbt-dremio's original macro wraps the result in a scalar subquery
+       ("select TIMESTAMPADD(...) order by 1"), so when we receive the
+       interval from upstream it may carry a trailing "order by 1". #}
     {% set interval = interval.replace('order by 1', '') %}
     {% if datepart == 'year' %}
         TIMESTAMPADD(SQL_TSI_YEAR, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
@@ -26,7 +29,10 @@
         TIMESTAMPADD(SQL_TSI_MINUTE, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
     {% elif datepart == 'second' %}
         TIMESTAMPADD(SQL_TSI_SECOND, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
+    {% elif datepart == 'day' %}
+        TIMESTAMPADD(SQL_TSI_DAY, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
     {% else %}
+        {# Fallback for unrecognized dateparts — default to day #}
         TIMESTAMPADD(SQL_TSI_DAY, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
     {% endif %}
 {% endmacro %}

@@ -1,19 +1,19 @@
 {% macro get_project_owners() %}
     {% set project_owners_query %}
         with dbt_models as (
-            select * from {{ ref('dbt_models', package='elementary') }}
+            select * from {{ ref('elementary', 'dbt_models') }}
         ),
 
         dbt_sources as (
-            select * from {{ ref('dbt_sources', package='elementary') }}
+            select * from {{ ref('elementary', 'dbt_sources') }}
         ),
 
         dbt_seeds as (
-            select * from {{ ref('dbt_seeds', package='elementary') }}
+            select * from {{ ref('elementary', 'dbt_seeds') }}
         ),
 
         dbt_tests as (
-            select * from {{ ref('dbt_tests', package='elementary') }}
+            select * from {{ ref('elementary', 'dbt_tests') }}
         )
 
         select model_owners as owner from dbt_tests

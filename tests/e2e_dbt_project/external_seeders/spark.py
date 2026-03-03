@@ -15,7 +15,14 @@ class SparkExternalSeeder(ExternalSeeder):
     # schema is always ``test_seeds`` regardless of the target schema name.
     SEED_SCHEMA = "test_seeds"
 
+    @staticmethod
+    def _q(name: str) -> str:
+        """Quote a Spark SQL identifier, escaping any embedded backticks."""
+        return f"`{name.replace('`', '``')}`"
+
     def load(self) -> None:
+        failures: list[str] = []
+        q = self._q
         seed_schema = self.SEED_SCHEMA
         print(
             f"\n=== Loading Spark seeds via external CSV tables "
@@ -42,16 +49,16 @@ class SparkExternalSeeder(ExternalSeeder):
                 if not cols:
                     print(f"  Skipping {table_name} (completely empty file)")
                     continue
-                col_defs = ", ".join(f"`{c}` STRING" for c in cols)
+                col_defs = ", ".join(f"{q(c)} STRING" for c in cols)
                 sql = (
                     f"CREATE TABLE IF NOT EXISTS "
-                    f"`{seed_schema}`.`{table_name}` ({col_defs}) USING delta"
+                    f"{q(seed_schema)}.{q(table_name)} ({col_defs}) USING delta"
                 )
                 print(f"  Creating empty table: {table_name}")
                 try:
                     cursor.execute(sql)
                 except Exception as e:
-                    print(f"    Error: {e}")
+                    failures.append(f"{table_name}: {e}")
                 continue
 
             container_path = f"/seed-data/{subdir}/{fname}"
@@ -59,19 +66,25 @@ class SparkExternalSeeder(ExternalSeeder):
             print(f"  Loading: {table_name}")
             try:
                 cursor.execute(
-                    f"CREATE OR REPLACE TEMPORARY VIEW `{tmp_view}` "
+                    f"CREATE OR REPLACE TEMPORARY VIEW {q(tmp_view)} "
                     f"USING csv "
                     f"OPTIONS (path '{container_path}', header 'true', "
                     f"inferSchema 'true')"
                 )
-                cursor.execute(f"DROP TABLE IF EXISTS `{seed_schema}`.`{table_name}`")
                 cursor.execute(
-                    f"CREATE TABLE `{seed_schema}`.`{table_name}` "
-                    f"USING delta AS SELECT * FROM `{tmp_view}`"
+                    f"DROP TABLE IF EXISTS {q(seed_schema)}.{q(table_name)}"
+                )
+                cursor.execute(
+                    f"CREATE TABLE {q(seed_schema)}.{q(table_name)} "
+                    f"USING delta AS SELECT * FROM {q(tmp_view)}"
                 )
             except Exception as e:
-                print(f"    Error: {e}")
+                failures.append(f"{table_name}: {e}")
 
         cursor.close()
         conn.close()
+        if failures:
+            raise RuntimeError(
+                "Spark seed loading failed:\n - " + "\n - ".join(failures)
+            )
         print("\nSpark seed loading complete.")

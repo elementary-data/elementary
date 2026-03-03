@@ -1,5 +1,5 @@
 {% macro get_snapshots() %}
-    {% set dbt_snapshots_relation = ref('dbt_snapshots', package='elementary') %}
+    {% set dbt_snapshots_relation = ref('elementary', 'dbt_snapshots') %}
     {%- if elementary.relation_exists(dbt_snapshots_relation) -%}
         {% set get_snapshots_query %}
             with dbt_artifacts_snapshots as (

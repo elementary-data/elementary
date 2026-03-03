@@ -267,11 +267,11 @@ jobs:
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: |
           # Dremio needs single-threaded execution to avoid Nessie catalog race conditions
-          EXTRA_ARGS=""
+          EXTRA_ARGS=()
           if [ "${{ inputs.warehouse-type }}" = "dremio" ]; then
-            EXTRA_ARGS="--threads 1"
+            EXTRA_ARGS+=(--threads 1)
           fi
-          dbt run --target "${{ inputs.warehouse-type }}" $EXTRA_ARGS || true
+          dbt run --target "${{ inputs.warehouse-type }}" "${EXTRA_ARGS[@]}" || true
 
           # Validate run_results.json: only error_model should be non-success
           jq -e '
@@ -291,14 +291,13 @@ jobs:
 
       - name: Test e2e dbt project
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        continue-on-error: true
         run: |
           # Dremio needs single-threaded execution to avoid Nessie catalog race conditions
-          EXTRA_ARGS=""
+          EXTRA_ARGS=()
           if [ "${{ inputs.warehouse-type }}" = "dremio" ]; then
-            EXTRA_ARGS="--threads 1 --exclude tag:ephemeral_model"
+            EXTRA_ARGS+=(--threads 1 --exclude tag:ephemeral_model)
           fi
-          dbt test --target "${{ inputs.warehouse-type }}" $EXTRA_ARGS
+          dbt test --target "${{ inputs.warehouse-type }}" "${EXTRA_ARGS[@]}"
 
       - name: Run help
         run: edr --help

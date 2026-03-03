@@ -65,6 +65,8 @@ class DremioExternalSeeder(ExternalSeeder):
     works out-of-the-box in the CI Docker environment.
     """
 
+    HTTP_TIMEOUT = (5, 30)  # (connect, read) in seconds
+
     def __init__(self, data_dir: str, schema_name: str) -> None:
         super().__init__(data_dir, schema_name)
         _defaults = _docker_defaults()
@@ -99,6 +101,7 @@ class DremioExternalSeeder(ExternalSeeder):
         resp = requests.post(
             f"http://{self.dremio_host}:{self.dremio_port}/apiv2/login",
             json={"userName": self.dremio_user, "password": self.dremio_pass},
+            timeout=self.HTTP_TIMEOUT,
         )
         resp.raise_for_status()
         return resp.json()["token"]
@@ -112,6 +115,7 @@ class DremioExternalSeeder(ExternalSeeder):
             f"http://{self.dremio_host}:{self.dremio_port}/api/v3/sql",
             headers=headers,
             json={"sql": sql},
+            timeout=self.HTTP_TIMEOUT,
         )
         resp.raise_for_status()
         job_id = resp.json()["id"]
@@ -121,6 +125,7 @@ class DremioExternalSeeder(ExternalSeeder):
             resp = requests.get(
                 f"http://{self.dremio_host}:{self.dremio_port}/api/v3/job/{job_id}",
                 headers=headers,
+                timeout=self.HTTP_TIMEOUT,
             )
             resp.raise_for_status()
             state = resp.json()["jobState"]
@@ -162,10 +167,14 @@ class DremioExternalSeeder(ExternalSeeder):
         Mounts the local ``data_dir`` into a temporary ``minio/mc`` container
         and copies files directly into the MinIO bucket.
         """
+        import shlex
+
         network = os.environ.get("DREMIO_NETWORK", "e2e_dbt_project_dremio-lakehouse")
         mc_cmds = " && ".join(
             [
-                f"mc alias set myminio http://dremio-storage:9000 {self.minio_access_key} {self.minio_secret_key}",
+                "mc alias set myminio http://dremio-storage:9000"
+                f" {shlex.quote(self.minio_access_key)}"
+                f" {shlex.quote(self.minio_secret_key)}",
                 "mc mb --ignore-existing myminio/datalake/seeds/training",
                 "mc mb --ignore-existing myminio/datalake/seeds/validation",
                 "mc cp --recursive /seed-data/training/ myminio/datalake/seeds/training/",
@@ -174,12 +183,14 @@ class DremioExternalSeeder(ExternalSeeder):
             ]
         )
         self.run(
-            f"docker run --rm "
-            f"--network {network} "
-            f"-v {self.data_dir}:/seed-data:ro "
-            f"--entrypoint /bin/sh "
-            f"minio/mc "
-            f'-c "{mc_cmds}"'
+            [
+                "docker", "run", "--rm",
+                "--network", network,
+                "-v", f"{self.data_dir}:/seed-data:ro",
+                "--entrypoint", "/bin/sh",
+                "minio/mc",
+                "-c", mc_cmds,
+            ]
         )
 
     # ------------------------------------------------------------------
@@ -232,6 +243,7 @@ class DremioExternalSeeder(ExternalSeeder):
                 f"http://{self.dremio_host}:{self.dremio_port}/api/v3/catalog",
                 headers=headers,
                 json=payload,
+                timeout=self.HTTP_TIMEOUT,
             )
             if resp.status_code in (200, 201):
                 print("  SeedFiles S3 source created via v3 Catalog API")
@@ -243,6 +255,7 @@ class DremioExternalSeeder(ExternalSeeder):
                 get_resp = requests.get(
                     f"http://{self.dremio_host}:{self.dremio_port}/api/v3/catalog/by-path/SeedFiles",
                     headers=headers,
+                    timeout=self.HTTP_TIMEOUT,
                 )
                 if get_resp.status_code == 200:
                     existing = get_resp.json()
@@ -252,6 +265,7 @@ class DremioExternalSeeder(ExternalSeeder):
                         f"http://{self.dremio_host}:{self.dremio_port}/api/v3/catalog/{existing['id']}",
                         headers=headers,
                         json=payload,
+                        timeout=self.HTTP_TIMEOUT,
                     )
                     if put_resp.status_code == 200:
                         print("  SeedFiles S3 source updated")
@@ -266,6 +280,7 @@ class DremioExternalSeeder(ExternalSeeder):
                 f"http://{self.dremio_host}:{self.dremio_port}/apiv2/source/SeedFiles",
                 headers=headers,
                 json=payload,
+                timeout=self.HTTP_TIMEOUT,
             )
             if resp2.status_code in (200, 409):
                 print("  SeedFiles S3 source created/updated via v2 API")
@@ -278,7 +293,7 @@ class DremioExternalSeeder(ExternalSeeder):
             )
             time.sleep(5)
 
-        print("  ERROR: Failed to create SeedFiles source after 3 attempts")
+        raise RuntimeError("Failed to create SeedFiles source after 3 attempts")
 
     # ------------------------------------------------------------------
     # Public API
@@ -298,6 +313,7 @@ class DremioExternalSeeder(ExternalSeeder):
         REST API is stateless and the VDS view validator cannot resolve
         cross-namespace Nessie references.
         """
+        failures: list[str] = []
         # For Dremio, seeds must live in the same Nessie namespace as models
         # because the REST API is stateless (no persistent USE BRANCH) and
         # the VDS view validator cannot resolve cross-namespace references.
@@ -337,7 +353,7 @@ class DremioExternalSeeder(ExternalSeeder):
                 self._sql(token, create_sql, timeout=60)
                 created_tables.append(table_name)
             except Exception as e:
-                print(f"  Error creating table {table_name}: {e}")
+                failures.append(f"create {table_name}: {e}")
                 continue
 
             if not self.csv_has_data(csv_path):
@@ -357,7 +373,7 @@ class DremioExternalSeeder(ExternalSeeder):
             try:
                 self._sql(token, copy_sql, timeout=120)
             except Exception as e:
-                print(f"    Error: {e}")
+                failures.append(f"copy {table_name}: {e}")
 
         # Force Dremio to refresh its metadata cache for the Nessie source.
         # The VDS view validator uses a separate metadata system that may not
@@ -368,10 +384,14 @@ class DremioExternalSeeder(ExternalSeeder):
             self._sql(token, "ALTER SOURCE NessieSource REFRESH STATUS", timeout=30)
             print("  Metadata refresh triggered")
         except Exception as e:
-            print(f"  Warning: metadata refresh failed: {e}")
+            failures.append(f"metadata refresh: {e}")
 
         # Give Dremio a moment to complete the background metadata scan.
         print("  Waiting 10s for metadata propagation...")
         time.sleep(10)
 
+        if failures:
+            raise RuntimeError(
+                "Dremio seeding failed:\n - " + "\n - ".join(failures)
+            )
         print("\nDremio seed loading complete.")

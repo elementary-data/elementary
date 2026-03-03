@@ -1,7 +1,7 @@
 {% macro get_nodes_depends_on_nodes(exclude_elementary=false) %}
     {% set exposures_relation = ref('elementary_cli', 'enriched_exposures') %}
     {% if not elementary.relation_exists(exposures_relation) %}
-        {% set exposures_relation = ref('dbt_exposures', package='elementary') %}
+        {% set exposures_relation = ref('elementary', 'dbt_exposures') %}
     {% endif %}
 
     {% set models_depends_on_nodes_query %}
@@ -10,21 +10,21 @@
             null as depends_on_nodes,
             null as materialization,
             'seed' as type
-        from {{ ref('dbt_seeds', package='elementary') }}
+        from {{ ref('elementary', 'dbt_seeds') }}
         union all
         select
             unique_id,
             depends_on_nodes,
             materialization,
             'snapshot' as type
-        from {{ ref('dbt_snapshots', package='elementary') }}
+        from {{ ref('elementary', 'dbt_snapshots') }}
         union all
         select
             unique_id,
             depends_on_nodes,
             materialization,
             'model' as type
-        from {{ ref('dbt_models', package='elementary') }}
+        from {{ ref('elementary', 'dbt_models') }}
         {% if exclude_elementary %}
             where package_name != 'elementary'
         {% endif %}
@@ -34,7 +34,7 @@
             null as depends_on_nodes,
             null as materialization,
             'source' as type
-        from {{ ref('dbt_sources', package='elementary') }}
+        from {{ ref('elementary', 'dbt_sources') }}
         union all
         select
             unique_id,

@@ -1,15 +1,15 @@
 {% macro get_project_tags() %}
     {% set project_tags_query %}
         with dbt_models as (
-            select * from {{ ref('dbt_models', package='elementary') }}
+            select * from {{ ref('elementary', 'dbt_models') }}
         ),
 
         dbt_sources as (
-            select * from {{ ref('dbt_sources', package='elementary') }}
+            select * from {{ ref('elementary', 'dbt_sources') }}
         ),
 
         dbt_tests as (
-            select * from {{ ref('dbt_tests', package='elementary') }}
+            select * from {{ ref('elementary', 'dbt_tests') }}
         )
 
         select tags from dbt_models

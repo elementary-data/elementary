@@ -1,5 +1,5 @@
 {% macro get_models(exclude_elementary=false) %}
-    {% set dbt_models_relation = ref('dbt_models', package='elementary') %}
+    {% set dbt_models_relation = ref('elementary', 'dbt_models') %}
     {%- if elementary.relation_exists(dbt_models_relation) -%}
         {% set patch_path_column_exists = elementary.column_exists_in_relation(dbt_models_relation, 'patch_path') %}
 

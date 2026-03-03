@@ -1,8 +1,8 @@
 {% macro get_source_freshness_results(days_back = 7, invocations_per_test = 720) %}
-    {% set source_freshness_results_relation = ref('dbt_source_freshness_results', package='elementary') %}
+    {% set source_freshness_results_relation = ref('elementary', 'dbt_source_freshness_results') %}
     {% set error_after_column_exists = elementary.column_exists_in_relation(source_freshness_results_relation, 'error_after') %}
 
-    {% set sources_relation = ref('dbt_sources', package='elementary') %}
+    {% set sources_relation = ref('elementary', 'dbt_sources') %}
     {% set freshness_description_column_exists = elementary.column_exists_in_relation(sources_relation, 'freshness_description') %}
 
 
@@ -12,14 +12,14 @@
                 *,
                 {{ elementary_cli.normalized_source_freshness_status('status')}},
                 rank() over (partition by unique_id order by generated_at desc) as invocations_rank_index
-            from {{ ref('dbt_source_freshness_results', package='elementary') }}
+            from {{ ref('elementary', 'dbt_source_freshness_results') }}
             {% if days_back %}
                 where {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('generated_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
             {% endif %}
         ),
 
         dbt_sources as (
-            select * from {{ ref('dbt_sources', package='elementary') }}
+            select * from {{ ref('elementary', 'dbt_sources') }}
         )
 
         select

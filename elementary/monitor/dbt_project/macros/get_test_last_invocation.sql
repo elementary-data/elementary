@@ -4,7 +4,7 @@
 
     {% set last_invocation_query %}
         with elementary_test_results as (
-            select * from {{ ref('elementary_test_results', package='elementary') }}
+            select * from {{ ref('elementary', 'elementary_test_results') }}
         ),
 
         test_invocation as (
@@ -26,7 +26,7 @@
                 invocations.command,
                 invocations.selected,
                 invocations.full_refresh
-            from test_invocation left join {{ ref('dbt_invocations', package='elementary') }} as invocations
+            from test_invocation left join {{ ref('elementary', 'dbt_invocations') }} as invocations
             on test_invocation.invocation_id = invocations.invocation_id
         {% else %}
             select 

@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import glob
 import os
+import shlex
 import subprocess
 from abc import ABC, abstractmethod
 
@@ -21,10 +22,10 @@ class ExternalSeeder(ABC):
     # ------------------------------------------------------------------
 
     @staticmethod
-    def run(cmd: str, check: bool = True, **kw: object) -> subprocess.CompletedProcess:  # type: ignore[type-arg]
-        """Run a shell command, printing it first."""
-        print(f"  -> {cmd}")
-        return subprocess.run(cmd, shell=True, check=check, **kw)
+    def run(cmd: list[str], check: bool = True, **kw: object) -> subprocess.CompletedProcess:  # type: ignore[type-arg]
+        """Run a command, printing it first."""
+        print(f"  -> {shlex.join(cmd)}")
+        return subprocess.run(cmd, check=check, **kw)
 
     @staticmethod
     def csv_has_data(path: str) -> bool:

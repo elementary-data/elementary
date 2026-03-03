@@ -57,10 +57,10 @@
 
 
 {% macro populate_source_freshness_alerts_query(days_back=1) %}
-  {% set source_freshness_results_relation = ref('dbt_source_freshness_results', package='elementary') %}
+  {% set source_freshness_results_relation = ref('elementary', 'dbt_source_freshness_results') %}
   {% set error_after_column_exists = elementary.column_exists_in_relation(source_freshness_results_relation, 'error_after') %}
 
-  {% set sources_relation = ref('dbt_sources', package='elementary') %}
+  {% set sources_relation = ref('elementary', 'dbt_sources') %}
   {% set freshness_description_column_exists = elementary.column_exists_in_relation(sources_relation, 'freshness_description') %}
 
   with dbt_source_freshness_results as (
@@ -72,11 +72,11 @@
   ),
 
   dbt_invocations as (
-    select * from {{ ref('dbt_invocations', package='elementary') }}
+    select * from {{ ref('elementary', 'dbt_invocations') }}
   ),
 
   dbt_run_results as (
-    select * from {{ ref('dbt_run_results', package='elementary') }}
+    select * from {{ ref('elementary', 'dbt_run_results') }}
   ),
 
   source_freshness_alerts as (

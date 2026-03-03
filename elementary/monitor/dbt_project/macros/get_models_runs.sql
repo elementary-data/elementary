@@ -4,7 +4,7 @@
             select
                 *,
                 row_number() over (partition by unique_id order by generated_at desc) as invocations_rank_index
-            from {{ ref('model_run_results', package='elementary') }}
+            from {{ ref('elementary', 'model_run_results') }}
         )
 
         select
