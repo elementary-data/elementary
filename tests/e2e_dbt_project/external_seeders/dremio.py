@@ -6,9 +6,8 @@ import os
 import re
 import time
 
-from ruamel.yaml import YAML
-
 from external_seeders.base import ExternalSeeder
+from ruamel.yaml import YAML
 
 
 def _docker_defaults() -> dict[str, str]:
