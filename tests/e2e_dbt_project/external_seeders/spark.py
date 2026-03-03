@@ -40,9 +40,11 @@ class SparkExternalSeeder(ExternalSeeder):
         port = int(os.environ.get("SPARK_PORT", "10000"))
 
         print(f"Connecting to Spark Thrift at {host}:{port}...")
-        conn = hive.Connection(host=host, port=port, username="dbt")
-        cursor = conn.cursor()
+        conn = None
+        cursor = None
         try:
+            conn = hive.Connection(host=host, port=port, username="dbt")
+            cursor = conn.cursor()
             print(f"Creating schema '{seed_schema}'...")
             cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{seed_schema}`")
 
@@ -69,13 +71,15 @@ class SparkExternalSeeder(ExternalSeeder):
                     continue
 
                 container_path = f"/seed-data/{subdir}/{fname}"
+                # Escape single quotes in path to prevent SQL injection
+                safe_path = container_path.replace("'", "''")
                 tmp_view = f"_tmp_csv_{table_name}"
                 print(f"  Loading: {table_name}")
                 try:
                     cursor.execute(
                         f"CREATE OR REPLACE TEMPORARY VIEW {q(tmp_view)} "
                         f"USING csv "
-                        f"OPTIONS (path '{container_path}', header 'true', "
+                        f"OPTIONS (path '{safe_path}', header 'true', "
                         f"inferSchema 'true')"
                     )
                     cursor.execute(
@@ -88,8 +92,10 @@ class SparkExternalSeeder(ExternalSeeder):
                 except Exception as e:
                     failures.append(f"{table_name}: {e}")
         finally:
-            cursor.close()
-            conn.close()
+            if cursor is not None:
+                cursor.close()
+            if conn is not None:
+                conn.close()
         if failures:
             raise RuntimeError(
                 "Spark seed loading failed:\n - " + "\n - ".join(failures)

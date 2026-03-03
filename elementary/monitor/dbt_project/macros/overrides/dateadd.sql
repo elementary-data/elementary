@@ -10,27 +10,28 @@
 #}
 
 {% macro dremio__dateadd(datepart, interval, from_date_or_timestamp) %}
+    {% set datepart = datepart | lower %}
     {% set interval = interval | string %}
     {# dbt-dremio's original macro wraps the result in a scalar subquery
        ("select TIMESTAMPADD(...) order by 1"), so when we receive the
        interval from upstream it may carry a trailing "order by 1". #}
     {% set interval = interval.replace('order by 1', '') %}
     {% if datepart == 'year' %}
-        TIMESTAMPADD(SQL_TSI_YEAR, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
+        TIMESTAMPADD(YEAR, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
     {% elif datepart == 'quarter' %}
-        TIMESTAMPADD(SQL_TSI_QUARTER, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
+        TIMESTAMPADD(QUARTER, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
     {% elif datepart == 'month' %}
-        TIMESTAMPADD(SQL_TSI_MONTH, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
+        TIMESTAMPADD(MONTH, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
     {% elif datepart == 'week' %}
-        TIMESTAMPADD(SQL_TSI_WEEK, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
+        TIMESTAMPADD(WEEK, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
     {% elif datepart == 'hour' %}
-        TIMESTAMPADD(SQL_TSI_HOUR, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
+        TIMESTAMPADD(HOUR, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
     {% elif datepart == 'minute' %}
-        TIMESTAMPADD(SQL_TSI_MINUTE, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
+        TIMESTAMPADD(MINUTE, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
     {% elif datepart == 'second' %}
-        TIMESTAMPADD(SQL_TSI_SECOND, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
+        TIMESTAMPADD(SECOND, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
     {% elif datepart == 'day' %}
-        TIMESTAMPADD(SQL_TSI_DAY, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
+        TIMESTAMPADD(DAY, CAST({{interval}} as int), CAST({{from_date_or_timestamp}} as TIMESTAMP))
     {% else %}
         {{ exceptions.raise_compiler_error("dremio__dateadd: unrecognized datepart '" ~ datepart ~ "'. Supported: year, quarter, month, week, day, hour, minute, second.") }}
     {% endif %}

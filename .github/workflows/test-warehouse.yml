@@ -186,14 +186,10 @@ jobs:
           # Docker-based adapters use ephemeral containers, so a fixed schema
           # name is safe (the concurrency group prevents parallel collisions).
           # This enables caching the seeded database state between runs.
-          DOCKER_ADAPTERS="postgres clickhouse trino dremio duckdb spark"
           IS_DOCKER=false
-          for adapter in $DOCKER_ADAPTERS; do
-            if [ "$adapter" = "${{ inputs.warehouse-type }}" ]; then
-              IS_DOCKER=true
-              break
-            fi
-          done
+          case "${{ inputs.warehouse-type }}" in
+            postgres|clickhouse|trino|dremio|duckdb|spark) IS_DOCKER=true ;;
+          esac
 
           if [ "$IS_DOCKER" = "true" ]; then
             SCHEMA_NAME="elementary_tests"

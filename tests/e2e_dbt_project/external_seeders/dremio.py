@@ -6,7 +6,8 @@ import os
 import re
 import time
 
-import yaml
+from ruamel.yaml import YAML
+
 from external_seeders.base import ExternalSeeder
 
 
@@ -21,8 +22,9 @@ def _docker_defaults() -> dict[str, str]:
     # --- docker-compose.yml: MinIO credentials ---
     compose_path = os.path.join(project_dir, "docker-compose.yml")
     try:
+        _yaml = YAML()
         with open(compose_path) as fh:
-            cfg = yaml.safe_load(fh)
+            cfg = _yaml.load(fh)
         services = cfg.get("services", {})
         for item in services.get("dremio-minio", {}).get("environment", []):
             if isinstance(item, str) and "=" in item:
@@ -35,8 +37,10 @@ def _docker_defaults() -> dict[str, str]:
                     defaults["MINIO_ACCESS_KEY"] = v
                 elif k == "MINIO_ROOT_PASSWORD":
                     defaults["MINIO_SECRET_KEY"] = v
-    except Exception:
+    except FileNotFoundError:
         pass
+    except Exception as e:
+        print(f"  Warning: failed parsing docker defaults from {compose_path}: {e}")
 
     # --- dremio-setup.sh: Dremio login credentials ---
     # Extract default values from bash variable assignments like:
@@ -51,8 +55,10 @@ def _docker_defaults() -> dict[str, str]:
         m = re.search(r'DREMIO_USER="\$\{DREMIO_USER:-([^}]+)\}"', content)
         if m:
             defaults["DREMIO_USER"] = m.group(1)
-    except Exception:
+    except FileNotFoundError:
         pass
+    except Exception as e:
+        print(f"  Warning: failed parsing dremio defaults from {setup_path}: {e}")
 
     return defaults
 
@@ -364,9 +370,13 @@ class DremioExternalSeeder(ExternalSeeder):
 
             fqn = f"{nessie_ns}.{qi(table_name)}"
 
-            # Create empty Iceberg table with VARCHAR columns
+            # Drop + recreate to ensure idempotent seeding (no stale data)
             col_defs = ", ".join(f"{qi(c)} VARCHAR" for c in cols)
-            create_sql = f"CREATE TABLE IF NOT EXISTS {fqn} ({col_defs})"
+            try:
+                self._sql(token, f"DROP TABLE IF EXISTS {fqn}", timeout=30)
+            except Exception:
+                pass  # Table may not exist yet
+            create_sql = f"CREATE TABLE {fqn} ({col_defs})"
             try:
                 self._sql(token, create_sql, timeout=60)
                 created_tables.append(table_name)
