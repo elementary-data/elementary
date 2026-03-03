@@ -279,7 +279,12 @@ class DremioExternalSeeder(ExternalSeeder):
                     print(
                         f"  Warning: update returned {put_resp.status_code}: {put_resp.text}"
                     )
-                return
+                else:
+                    print(
+                        f"  Warning: failed fetching existing source "
+                        f"({get_resp.status_code}: {get_resp.text[:200]})"
+                    )
+                # Continue to v2 fallback / retry.
 
             # v2 fallback
             resp2 = requests.put(

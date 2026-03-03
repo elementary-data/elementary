@@ -50,13 +50,15 @@ class SparkExternalSeeder(ExternalSeeder):
                     print(f"  Skipping {table_name} (completely empty file)")
                     continue
                 col_defs = ", ".join(f"{q(c)} STRING" for c in cols)
-                sql = (
-                    f"CREATE TABLE IF NOT EXISTS "
-                    f"{q(seed_schema)}.{q(table_name)} ({col_defs}) USING delta"
-                )
                 print(f"  Creating empty table: {table_name}")
                 try:
-                    cursor.execute(sql)
+                    cursor.execute(
+                        f"DROP TABLE IF EXISTS {q(seed_schema)}.{q(table_name)}"
+                    )
+                    cursor.execute(
+                        f"CREATE TABLE {q(seed_schema)}.{q(table_name)} "
+                        f"({col_defs}) USING delta"
+                    )
                 except Exception as e:
                     failures.append(f"{table_name}: {e}")
                 continue
