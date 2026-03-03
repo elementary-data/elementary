@@ -611,7 +611,7 @@
     }
   },
   "banner": {
-    "content": "[What does it require to build your data platform for AI agents? Join the webinar, Feb 25th, 11 AM EST.](https://www.elementary-data.com/webinar/how-to-prepare-your-data-platform-for-analytics-agents)",
+    "content": "[Monitor Python pipelines alongside dbt. Explore the Python SDK.](https://www.elementary-data.com/post/data-quality-in-python-pipelines)",
     "dismissible": false
   },
   "search": {
