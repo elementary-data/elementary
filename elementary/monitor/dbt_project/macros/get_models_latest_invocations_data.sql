@@ -18,16 +18,16 @@
     )
 
     select
-      invocation_id,
-      command,
-      selected,
-      full_refresh,
+      invocations.invocation_id,
+      invocations.command,
+      invocations.selected,
+      invocations.full_refresh,
       {% if column_exists %}
-        job_url,
+        invocations.job_url,
       {% endif %}
-      job_name,
-      job_id,
-      orchestrator
+      invocations.job_name,
+      invocations.job_id,
+      invocations.orchestrator
     from {{ invocations_relation }} invocations
     join latest_models_invocations on invocations.invocation_id = latest_models_invocations.invocation_id
   {% endset %}
