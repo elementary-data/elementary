@@ -97,7 +97,7 @@
       {% if error_after_column_exists %}
         results.error_after,
         results.warn_after,
-        {% if target.type == 'dremio' %}results."filter"{% else %}results.filter{% endif %},
+        results.{{ elementary.escape_reserved_keywords('filter') }},
       {% endif %}
       results.error,
       sources.database_name,
