@@ -23,6 +23,7 @@ from elementary.monitor.data_monitoring.alerts.integrations.slack.slack import (
 )
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
+from elementary.utils.ssl import create_ssl_context
 
 logger = get_logger(__name__)
 
@@ -43,6 +44,7 @@ class Integrations:
         tracking: Optional[Tracking] = None,
     ) -> Union[BaseMessagingIntegration, BaseIntegration]:
         if config.has_slack:
+            ssl_context = create_ssl_context(config.ssl_ca_bundle)
             if config.is_slack_workflow:
                 return SlackIntegration(
                     config=config,
@@ -50,11 +52,11 @@ class Integrations:
                 )
             if config.slack_token:
                 return SlackWebMessagingIntegration.from_token(
-                    config.slack_token, tracking
+                    config.slack_token, tracking, ssl_context=ssl_context
                 )
             elif config.slack_webhook:
                 return SlackWebhookMessagingIntegration.from_url(
-                    config.slack_webhook, tracking
+                    config.slack_webhook, tracking, ssl_context=ssl_context
                 )
             else:
                 raise UnsupportedAlertIntegrationError
