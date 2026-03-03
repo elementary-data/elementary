@@ -6,7 +6,7 @@
     with ordered_run_results as (
       select
         *,
-        row_number() over (partition by unique_id order by run_results.generated_at desc) as row_number
+        row_number() over (partition by unique_id order by run_results.generated_at desc) as {% if target.type == 'dremio' %}"row_number"{% else %}row_number{% endif %}
       from {{ ref("dbt_run_results", package="elementary") }} run_results
       join {{ ref("dbt_models", package="elementary") }} using (unique_id)
     ),
@@ -14,7 +14,7 @@
     latest_models_invocations as (
       select distinct invocation_id
       from ordered_run_results
-      where row_number = 1
+      where {% if target.type == 'dremio' %}"row_number"{% else %}row_number{% endif %} = 1
     )
 
     select
