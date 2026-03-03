@@ -2,6 +2,7 @@
     {%- if execute and elementary.is_test_command() %}
         {%- set unexpected_config = [] %}
         {%- set model_relation = dbt.load_relation(model) %}
+        {%- set mandatory_params = none %}
 
         {% set configuration_dict, metric_properties_dict =
                elementary.get_anomalies_test_configuration(model_relation,
