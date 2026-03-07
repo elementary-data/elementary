@@ -72,6 +72,19 @@ elementary_tests:
       trust_cert: true
       threads: 4
 
+    sqlserver: &sqlserver
+      type: sqlserver
+      driver: "ODBC Driver 18 for SQL Server"
+      server: 127.0.0.1
+      port: 1433
+      database: master
+      schema: {{ schema_name }}
+      user: sa
+      password: "Elementary123!"
+      encrypt: false
+      trust_cert: true
+      threads: 4
+
     # ── Cloud targets (secrets substituted at CI time) ─────────────────
 
     snowflake: &snowflake
@@ -132,7 +145,7 @@ elementary_tests:
 elementary:
   target: postgres
   outputs:
-{%- set targets = ['postgres', 'clickhouse', 'trino', 'dremio', 'duckdb', 'spark', 'fabric', 'snowflake', 'bigquery', 'redshift', 'databricks_catalog', 'athena'] %}
+{%- set targets = ['postgres', 'clickhouse', 'trino', 'dremio', 'duckdb', 'spark', 'fabric', 'sqlserver', 'snowflake', 'bigquery', 'redshift', 'databricks_catalog', 'athena'] %}
 {%- for t in targets %}
     {{ t }}:
       <<: *{{ t }}
