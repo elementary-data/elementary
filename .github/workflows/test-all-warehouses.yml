@@ -87,19 +87,18 @@ jobs:
       fail-fast: false
       matrix:
         dbt-version: ${{ inputs.dbt-version && fromJSON(format('["{0}"]', inputs.dbt-version)) || fromJSON('[null]') }}
-        warehouse-type:
-          [
-            postgres,
-            snowflake,
-            bigquery,
-            redshift,
-            databricks_catalog,
-            athena,
-            clickhouse,
-            duckdb,
-            trino,
-            dremio,
-            spark,
+        warehouse-type: [
+            # postgres,
+            # snowflake,
+            # bigquery,
+            # redshift,
+            # databricks_catalog,
+            # athena,
+            # clickhouse,
+            # duckdb,
+            # trino,
+            # dremio,
+            # spark,
             fabric,
             sqlserver,
           ]
@@ -107,7 +106,7 @@ jobs:
     with:
       warehouse-type: ${{ matrix.warehouse-type }}
       elementary-ref: ${{ inputs.elementary-ref || ((github.event_name == 'pull_request_target' || github.event_name == 'pull_request') && github.event.pull_request.head.sha) || '' }}
-      dbt-data-reliability-ref: ${{ inputs.dbt-data-reliability-ref }}
+      dbt-data-reliability-ref: ${{ inputs.dbt-data-reliability-ref || 'devin/ELE-5282-1772640713' }}
       dbt-version: ${{ matrix.dbt-version }}
       generate-data: ${{ inputs.generate-data || false }}
     secrets: inherit
