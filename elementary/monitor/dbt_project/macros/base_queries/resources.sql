@@ -7,10 +7,10 @@
         select
             unique_id,
             name,
-            schema_name as schema,
+            schema_name as "schema",
             tags,
             owner as owners,
-            database_name as database
+            database_name as "database"
         from dbt_models
         {% if exclude_elementary %}
             where package_name != 'elementary'
@@ -31,10 +31,10 @@
             unique_id,
             name,
             source_name,
-            schema_name AS schema,
+            schema_name AS "schema",
             tags,
             owner AS owners,
-            database_name as database
+            database_name as "database"
         from dbt_sources
         {% if exclude_elementary %}
             where package_name != 'elementary'
