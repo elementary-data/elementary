@@ -56,6 +56,7 @@ dbt-trino = {version = ">=1.5.0,<2.0.0", optional = true}
 dbt-clickhouse = {version = ">=0.20,<2.0.0", optional = true}
 dbt-duckdb = {version = ">=1.5.0,<2.0.0", optional = true}
 dbt-dremio = {version = ">=1.5.0,<2.0.0", optional = true}
+dbt-fabric = {version = ">=1.4,<2.0.0", optional = true}
 [tool.poetry.extras]
 snowflake = ["dbt-snowflake"]
 bigquery = ["dbt-bigquery"]
@@ -68,7 +69,8 @@ clickhouse = ["dbt-clickhouse"]
 trino = ["dbt-trino"]
 duckdb = ["dbt-duckdb"]
 dremio = ["dbt-dremio"]
-all = ["dbt-snowflake", "dbt-bigquery", "dbt-redshift", "dbt-postgres", "dbt-databricks", "dbt-spark", "dbt-clickhouse", "dbt-athena-community", "dbt-trino", "dbt-duckdb", "dbt-dremio"]
+fabric = ["dbt-fabric"]
+all = ["dbt-snowflake", "dbt-bigquery", "dbt-redshift", "dbt-postgres", "dbt-databricks", "dbt-spark", "dbt-clickhouse", "dbt-athena-community", "dbt-trino", "dbt-duckdb", "dbt-dremio", "dbt-fabric"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
