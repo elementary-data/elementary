@@ -60,18 +60,6 @@ elementary_tests:
       file_format: delta
       threads: 4
 
-    fabric: &fabric
-      type: fabric
-      driver: "ODBC Driver 18 for SQL Server"
-      server: 127.0.0.1
-      port: 1433
-      database: master
-      schema: {{ schema_name }}
-      user: sa
-      password: "Elementary123!"
-      trust_cert: true
-      threads: 4
-
     sqlserver: &sqlserver
       type: sqlserver
       driver: "ODBC Driver 18 for SQL Server"
@@ -86,6 +74,21 @@ elementary_tests:
       threads: 4
 
     # ── Cloud targets (secrets substituted at CI time) ─────────────────
+
+    fabric: &fabric
+      type: fabric
+      driver: "ODBC Driver 18 for SQL Server"
+      server: {{ fabric_server | toyaml }}
+      port: 1433
+      database: {{ fabric_database | toyaml }}
+      schema: {{ schema_name }}
+      authentication: ServicePrincipal
+      tenant_id: {{ fabric_tenant_id | toyaml }}
+      client_id: {{ fabric_client_id | toyaml }}
+      client_secret: {{ fabric_client_secret | toyaml }}
+      encrypt: true
+      trust_cert: false
+      threads: 4
 
     snowflake: &snowflake
       type: snowflake

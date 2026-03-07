@@ -162,7 +162,7 @@ jobs:
           docker compose up -d --build --wait spark-thrift
 
       - name: Start SQL Server
-        if: inputs.warehouse-type == 'fabric' || inputs.warehouse-type == 'sqlserver'
+        if: inputs.warehouse-type == 'sqlserver'
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: |
           docker compose up -d sqlserver
@@ -205,7 +205,7 @@ jobs:
           # This enables caching the seeded database state between runs.
           IS_DOCKER=false
           case "${{ inputs.warehouse-type }}" in
-            postgres|clickhouse|trino|dremio|duckdb|spark|fabric|sqlserver) IS_DOCKER=true ;;
+            postgres|clickhouse|trino|dremio|duckdb|spark|sqlserver) IS_DOCKER=true ;;
           esac
 
           if [ "$IS_DOCKER" = "true" ]; then
