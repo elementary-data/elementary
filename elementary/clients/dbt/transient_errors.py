@@ -109,6 +109,22 @@ _ADAPTER_PATTERNS: Dict[str, Tuple[str, ...]] = {
         # DuckDB runs in-process; transient errors are rare.
         # Common patterns (connection reset, broken pipe) are in _COMMON.
     ),
+    "fabric": (
+        "connection timed out",
+        "could not connect to the server",
+        "ssl syscall error",
+        "communication link failure",
+        "tcp provider: an existing connection was forcibly closed",
+        "login timeout expired",
+    ),
+    "sqlserver": (
+        "connection timed out",
+        "could not connect to the server",
+        "ssl syscall error",
+        "communication link failure",
+        "tcp provider: an existing connection was forcibly closed",
+        "login timeout expired",
+    ),
 }
 
 # Pre-computed union of all adapter-specific patterns for the fallback path

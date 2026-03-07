@@ -290,6 +290,22 @@ services:
       timeout: 5s
       retries: 10
 
+  # ── SQL Server (for Fabric / SQL Server adapters) ─────────────────
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    ports:
+      - "127.0.0.1:1433:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-Elementary123!}"
+      MSSQL_PID: "Developer"
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "${MSSQL_SA_PASSWORD:-Elementary123!}" -C -Q "SELECT 1" -b
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
 networks:
   dremio-lakehouse:
 
