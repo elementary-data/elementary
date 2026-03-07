@@ -288,7 +288,7 @@
         CASE
             WHEN etr.test_type = 'schema_change' THEN etr.test_unique_id
             WHEN dt.short_name = 'dimension_anomalies' THEN etr.test_unique_id
-            ELSE concat(coalesce(etr.test_unique_id, 'None'), '.', coalesce(nullif(etr.column_name, ''), 'None'), '.', coalesce(etr.test_sub_type, 'None'))
+            ELSE {{ dbt.concat(["coalesce(etr.test_unique_id, 'None')", "'.'", "coalesce(nullif(etr.column_name, ''), 'None')", "'.'", "coalesce(etr.test_sub_type, 'None')"]) }}
         END AS elementary_unique_id,
         etr.detected_at,
         etr.database_name,
