@@ -7,7 +7,7 @@
   {% endif %}
 
   {% set get_pkg_version_query %}
-    {% if target.type in ('fabric', 'sqlserver') %}
+    {% if elementary.is_tsql() %}
     select top 1 * from {{ invocations_relation }} order by generated_at desc
     {% else %}
     select * from {{ invocations_relation }} order by generated_at desc limit 1

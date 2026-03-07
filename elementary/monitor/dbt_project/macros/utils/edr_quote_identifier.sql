@@ -1,5 +1,5 @@
 {%- macro edr_quote_identifier(identifier) -%}
-    {%- if target.type in ('fabric', 'sqlserver') -%}
+    {%- if elementary.is_tsql() -%}
         [{{ identifier }}]
     {%- else -%}
         {{ identifier }}
