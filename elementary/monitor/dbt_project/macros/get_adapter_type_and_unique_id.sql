@@ -25,3 +25,7 @@
 {% macro fabric__get_adapter_unique_id() %}
     {{ return(target.server) }}
 {% endmacro %}
+
+{% macro sqlserver__get_adapter_unique_id() %}
+    {{ return(target.server) }}
+{% endmacro %}
