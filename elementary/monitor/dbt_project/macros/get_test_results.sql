@@ -177,15 +177,16 @@
             test_results.result_rows
         from {{ ordered_relation }} as test_results
         where test_results.invocations_rank_index <= {{ invocations_per_test }}
-        order by test_results.elementary_unique_id, test_results.invocations_rank_index desc
     {%- endset -%}
 
     {% set final_relation = elementary.create_temp_table(elementary_database, elementary_schema, 'final_test_results', select_test_results) %}
 
     {% set test_results = [] %}
 
+    {# ORDER BY must be here, not inside create_temp_table — T-SQL forbids ORDER BY in views/subqueries without TOP #}
     {% set test_results_agate_sql %}
         select * from {{ final_relation }}
+        order by elementary_unique_id, invocations_rank_index desc
     {% endset %}
 
     {% set valid_ids_query %}
