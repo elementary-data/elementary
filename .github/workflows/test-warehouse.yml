@@ -165,8 +165,7 @@ jobs:
         if: inputs.warehouse-type == 'sqlserver'
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: |
-          docker compose up -d sqlserver
-          timeout 120 bash -c 'until docker exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "${MSSQL_SA_PASSWORD:-Elementary123!}" -C -Q "SELECT 1" -b 2>/dev/null; do sleep 5; done'
+          docker compose up -d --wait sqlserver
 
       - name: Setup Python
         uses: actions/setup-python@v5
