@@ -8,7 +8,7 @@
         ),
 
         test_invocation as (
-            select distinct invocation_id, detected_at
+            select {% if elementary.is_tsql() %}top 1{% endif %} distinct invocation_id, detected_at
             from elementary_test_results
             {% if invocation_id %}
                 where invocation_id = {{ "'" ~ invocation_id ~ "'" }}
@@ -16,7 +16,7 @@
                 where detected_at < {{ "'" ~ invocation_max_time ~ "'" }}
             {% endif %}
             order by detected_at desc
-            limit 1
+            {% if not elementary.is_tsql() %}limit 1{% endif %}
         )
 
         {% if invocations_relation %}

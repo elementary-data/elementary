@@ -347,7 +347,7 @@ models:
   - name: groups
     columns:
       - name: group_a
-        data_type: "{{ 'strIng' if (target.type == 'bigquery' or target.type == 'databricks' or target.type == 'athena' or target.type == 'spark') else 'varchar' if (target.type == 'trino' or target.type == 'dremio' or target.type == 'duckdb') else 'CHArACTER varying' if target.type == 'redshift' else 'teXt' }}"
+        data_type: "{{ 'strIng' if (target.type == 'bigquery' or target.type == 'databricks' or target.type == 'athena' or target.type == 'spark') else 'varchar' if (target.type == 'trino' or target.type == 'dremio' or target.type == 'duckdb' or target.type == 'fabric' or target.type == 'sqlserver') else 'CHArACTER varying' if target.type == 'redshift' else 'teXt' }}"
       - name: group_b
         data_type: double
       - name: group_c
@@ -365,7 +365,7 @@ models:
   - name: stats_players
     columns:
       - name: player
-        data_type: "{{ 'STRING' if (target.type == 'bigquery' or target.type == 'databricks' or target.type == 'athena' or target.type == 'spark') else 'varchar' if (target.type == 'trino' or target.type == 'dremio' or target.type == 'duckdb') else 'character varying' if target.type == 'redshift' else 'TEXT' }}"
+        data_type: "{{ 'STRING' if (target.type == 'bigquery' or target.type == 'databricks' or target.type == 'athena' or target.type == 'spark') else 'varchar' if (target.type == 'trino' or target.type == 'dremio' or target.type == 'duckdb' or target.type == 'fabric' or target.type == 'sqlserver') else 'character varying' if target.type == 'redshift' else 'TEXT' }}"
       - name: goals
         data_type: BOOLEAN
       - name: coffee_cups_consumed

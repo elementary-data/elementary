@@ -45,6 +45,15 @@ _DATABRICKS_PATTERNS: Tuple[str, ...] = (
     "service unavailable",
 )
 
+_TSQL_TRANSIENT: Tuple[str, ...] = (
+    "connection timed out",
+    "could not connect to the server",
+    "ssl syscall error",
+    "communication link failure",
+    "tcp provider: an existing connection was forcibly closed",
+    "login timeout expired",
+)
+
 _ADAPTER_PATTERNS: Dict[str, Tuple[str, ...]] = {
     "bigquery": (
         # Streaming-buffer delay after a streaming insert.
@@ -109,6 +118,8 @@ _ADAPTER_PATTERNS: Dict[str, Tuple[str, ...]] = {
         # DuckDB runs in-process; transient errors are rare.
         # Common patterns (connection reset, broken pipe) are in _COMMON.
     ),
+    "fabric": _TSQL_TRANSIENT,
+    "sqlserver": _TSQL_TRANSIENT,
 }
 
 # Pre-computed union of all adapter-specific patterns for the fallback path

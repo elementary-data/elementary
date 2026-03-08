@@ -2,6 +2,44 @@
     {{ return(adapter.dispatch('get_test_results', 'elementary_cli')(days_back, invocations_per_test, disable_passed_test_metrics)) }}
 {%- endmacro -%}
 
+{#
+    Shared post-processing helper: filters tests by meta, attaches sample data.
+    Called by both default__ and fabric__ dispatches to avoid duplicating the
+    Jinja processing loop.
+#}
+{%- macro _process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status) -%}
+    {% set test_results = [] %}
+    {% set tests = elementary.agate_to_dicts(test_results_agate) %}
+
+    {% set filtered_tests = [] %}
+    {% for test in tests %}
+        {% set test_meta = fromjson(test.meta) %}
+        {% if test_meta.get("elementary", {}).get("include", true) %}
+            {% do filtered_tests.append(test) %}
+        {% endif %}
+    {% endfor %}
+
+    {% for test in filtered_tests %}
+        {% set test_rows_sample = none %}
+        {% if test.invocations_rank_index == 1 %}
+            {% set test_type = test.test_type %}
+            {% set test_params = fromjson(test.test_params) %}
+            {% set status = test.status | lower %}
+
+            {%- if (test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status in elementary_tests_allowlist_status) -%}
+                {% set test_rows_sample = elementary_cli.get_test_rows_sample(test.result_rows, test_result_rows_agate.get(test.id)) %}
+            {%- endif -%}
+        {% else %}
+            {# Null out test_results_query for non-latest invocations to save memory #}
+            {% do test.update({"test_results_query": none}) %}
+        {% endif %}
+        {# Adding sample data to test results #}
+        {% do test.update({"sample_data": test_rows_sample}) %}
+        {% do test_results.append(test) %}
+    {%- endfor -%}
+    {% do return(test_results) %}
+{%- endmacro -%}
+
 {%- macro default__get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false) -%}
     {% set elementary_tests_allowlist_status = ['fail', 'warn'] if disable_passed_test_metrics else ['fail', 'warn', 'pass']  %}
     {% set select_test_results %}
@@ -59,8 +97,6 @@
         order by test_results.elementary_unique_id, test_results.invocations_rank_index desc
     {%- endset -%}
 
-    {% set test_results = [] %}
-
     {% set elementary_database, elementary_schema = elementary.get_package_database_and_schema() %}
     {% set ordered_test_results_relation = elementary.create_temp_table(elementary_database, elementary_schema, 'ordered_test_results', select_test_results) %}
 
@@ -79,32 +115,63 @@
     {% if not elementary.has_temp_table_support() %}
         {% do elementary.fully_drop_relation(ordered_test_results_relation) %}
     {% endif %}
-    {% set tests = elementary.agate_to_dicts(test_results_agate) %}
 
-    {% set filtered_tests = [] %}
-    {% for test in tests %}
-        {% set test_meta = fromjson(test.meta) %}
-        {% if test_meta.get("elementary", {}).get("include", true) %}
-            {% do filtered_tests.append(test) %}
-        {% endif %}
-    {% endfor %}
+    {% do return(elementary_cli._process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status)) %}
+{%- endmacro -%}
 
-    {% for test in filtered_tests %}
-        {% set test_rows_sample = none %}
-        {% if test.invocations_rank_index == 1 %}
-            {% set test_type = test.test_type %}
-            {% set test_params = fromjson(test.test_params) %}
-            {% set status = test.status | lower %}
+{%- macro fabric__get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false) -%}
+    {#
+        T-SQL does not allow nested CTEs (WITH inside WITH).
+        current_tests_run_results_query already starts with WITH, so we
+        cannot wrap it in another CTE.  Instead we materialise it into a
+        temp table first, then build ordered_test_results on top.
+        Note: sqlserver adapter inherits from fabric, so this dispatch
+        covers both fabric and sqlserver targets automatically.
+    #}
+    {% set elementary_tests_allowlist_status = ['fail', 'warn'] if disable_passed_test_metrics else ['fail', 'warn', 'pass']  %}
 
-            {%- if (test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status in elementary_tests_allowlist_status) -%}
-                {% set test_rows_sample = elementary_cli.get_test_rows_sample(test.result_rows, test_result_rows_agate.get(test.id)) %}
-            {%- endif -%}
-        {% endif %}
-        {# Adding sample data to test results #}
-        {% do test.update({"sample_data": test_rows_sample}) %}
-        {% do test_results.append(test) %}
-    {%- endfor -%}
-    {% do return(test_results) %}
+    {# Step 1 – materialise the base test-results query into a temp table #}
+    {% set base_query %}
+        {{ elementary_cli.current_tests_run_results_query(days_back=days_back) }}
+    {% endset %}
+
+    {% set elementary_database, elementary_schema = elementary.get_package_database_and_schema() %}
+    {% set base_relation = elementary.create_temp_table(elementary_database, elementary_schema, 'test_results_base', base_query) %}
+
+    {# Step 2 – build ordered_test_results from the materialised base (no nested CTE) #}
+    {% set select_ordered %}
+        select
+            *,
+            {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('detected_at'), elementary.edr_current_timestamp(), 'day') }} as days_diff,
+            row_number() over (partition by elementary_unique_id order by {{elementary.edr_cast_as_timestamp('detected_at')}} desc) as invocations_rank_index
+        from {{ base_relation }}
+    {% endset %}
+
+    {% set ordered_relation = elementary.create_temp_table(elementary_database, elementary_schema, 'ordered_test_results', select_ordered) %}
+
+    {# Step 3 – final query: filter by invocations_per_test #}
+    {# ORDER BY must be here, not inside create_temp_table — T-SQL forbids ORDER BY in views/subqueries without TOP #}
+    {% set test_results_agate_sql %}
+        select *
+        from {{ ordered_relation }}
+        where invocations_rank_index <= {{ invocations_per_test }}
+        order by elementary_unique_id, invocations_rank_index desc
+    {% endset %}
+
+    {% set valid_ids_query %}
+        select distinct id
+        from {{ ordered_relation }}
+        where invocations_rank_index = 1
+    {% endset %}
+
+    {% set test_results_agate = elementary.run_query(test_results_agate_sql) %}
+    {% set test_result_rows_agate = elementary_cli.get_result_rows_agate(days_back, valid_ids_query) %}
+
+    {# Clean up intermediate tables #}
+    {% do elementary.fully_drop_relation(base_relation) %}
+    {% do elementary.fully_drop_relation(ordered_relation) %}
+
+    {% do return(elementary_cli._process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status)) %}
 {%- endmacro -%}
 
 {%- macro clickhouse__get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false) -%}
@@ -162,7 +229,7 @@
         CASE
             WHEN etr.test_type = 'schema_change' THEN etr.test_unique_id
             WHEN dt.short_name = 'dimension_anomalies' THEN etr.test_unique_id
-            ELSE coalesce(etr.test_unique_id, 'None') || '.' || coalesce(nullif(etr.column_name, ''), 'None') || '.' || coalesce(etr.test_sub_type, 'None')
+            ELSE {{ dbt.concat(["coalesce(etr.test_unique_id, 'None')", "'.'", "coalesce(nullif(etr.column_name, ''), 'None')", "'.'", "coalesce(etr.test_sub_type, 'None')"]) }}
         END AS elementary_unique_id,
         etr.detected_at,
         etr.database_name,
@@ -239,31 +306,6 @@
     {% if not elementary.has_temp_table_support() %}
         {% do elementary.fully_drop_relation(ordered_test_results_relation) %}
     {% endif %}
-    {% set tests = elementary.agate_to_dicts(test_results_agate) %}
 
-    {% set filtered_tests = [] %}
-    {% for test in tests %}
-        {% set test_meta = fromjson(test.meta) %}
-        {% if test_meta.get("elementary", {}).get("include", true) %}
-            {% do filtered_tests.append(test) %}
-        {% endif %}
-    {% endfor %}
-
-    {% for test in filtered_tests %}
-        {% set test_rows_sample = none %}
-        {% if test.invocations_rank_index == 1 %}
-            {% set test_type = test.test_type %}
-            {% set test_params = fromjson(test.test_params) %}
-            {% set status = test.status | lower %}
-
-            {%- if (test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status in elementary_tests_allowlist_status) -%}
-                {% set test_rows_sample = elementary_cli.get_test_rows_sample(test.result_rows, test_result_rows_agate.get(test.id)) %}
-            {%- endif -%}
-        {% endif %}
-        {# Adding sample data to test results #}
-        {% do test.update({"sample_data": test_rows_sample}) %}
-        {% do test_results.append(test) %}
-    {%- endfor -%}
-
-    {% do return(test_results) %}
+    {% do return(elementary_cli._process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status)) %}
 {%- endmacro -%}
