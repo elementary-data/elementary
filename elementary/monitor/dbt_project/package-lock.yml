@@ -4,5 +4,5 @@ packages:
     version: 0.8.6
   - git: https://github.com/elementary-data/dbt-data-reliability.git
     name: elementary
-    revision: 72c3f8e9d35bb71bc03e66046de360680156a293
-sha1_hash: a84c14a4032dd29a0a679e48976d600a25582a86
+    revision: 534afc63c75d28b87d7cbd3b222dd3ea9a980f7b
+sha1_hash: cb18b7df65415901187dcf469dcd377e56c0dc70
