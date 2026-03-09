@@ -250,4 +250,48 @@ elementary:
       # token: [optional, used with http method]
 ```
 
+```yml Fabric
+## FABRIC ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: fabric
+      driver: ODBC Driver 18 for SQL Server
+      server: [hostname]
+      port: 1433
+      database: [database name]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      authentication: ActiveDirectoryServicePrincipal
+      tenant_id: [tenant_id]
+      client_id: [client_id]
+      client_secret: [client_secret]
+      threads: [1 or more]
+```
+
+```yml SQL Server
+## SQL SERVER ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: sqlserver
+      driver: ODBC Driver 18 for SQL Server
+      server: [hostname]
+      port: 1433
+      database: [database name]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      user: [username]
+      password: [password]
+      threads: [1 or more]
+      # encrypt: true # default true in dbt-sqlserver >= 1.2.0
+      # trust_cert: false
+```
+
 </CodeGroup>
