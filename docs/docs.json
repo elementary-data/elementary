@@ -631,7 +631,7 @@
     "primary": {
       "type": "button",
       "label": "Join the Community",
-      "href": "https://join.slack.com/t/elementary-community/shared_invite/zt-38gg3xy5u-exKL8vkQpoFkng0MAzt1Pg"
+      "href": "https://join.slack.com/t/elementary-community/shared_invite/zt-3s3uv8znb-7eBuG~ApwOa637dpVFo9Yg"
     }
   },
   "banner": {
@@ -657,6 +657,10 @@
   },
   "js": ["kapa-widget.js"],
   "redirects": [
+    {
+      "source": "/cloud/features/collaboration-and-communication/user-activity-logs",
+      "destination": "/cloud/features/collaboration-and-communication/audit_logs/user-activity-logs"
+    },
     {
       "source": "/features/lineage",
       "destination": "/features/data-lineage/lineage"
