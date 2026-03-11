@@ -100,7 +100,8 @@
                 ]
               },
               "cloud/features/alerts-and-incidents/incidents",
-              "cloud/features/alerts-and-incidents/incident-management"
+              "cloud/features/alerts-and-incidents/incident-management",
+              "cloud/features/alerts-and-incidents/incident-digest"
             ]
           },
           {
