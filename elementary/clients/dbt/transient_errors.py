@@ -124,7 +124,6 @@ _ADAPTER_PATTERNS: Dict[str, Tuple[str, ...]] = {
         "connection timed out",
         "could not connect to the server",
         "ssl syscall error",
-        "no transaction in progress",
     ),
 }
 
