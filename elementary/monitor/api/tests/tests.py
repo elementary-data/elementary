@@ -168,12 +168,12 @@ class TestsAPI(APIClient):
                 for test_result in filtered_test_results_db_rows
                 if test_result.invocation_id == invocation_id
             ]
-
-        filtered_test_results_db_rows = [
-            test_result
-            for test_result in filtered_test_results_db_rows
-            if test_result.invocations_rank_index == 1
-        ]
+        else:
+            filtered_test_results_db_rows = [
+                test_result
+                for test_result in filtered_test_results_db_rows
+                if test_result.invocations_rank_index == 1
+            ]
 
         tests_results: DefaultDict[str, List[TestResultSchema]] = defaultdict(list)
         for test_result_db_row in filtered_test_results_db_rows:
