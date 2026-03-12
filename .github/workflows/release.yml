@@ -1,6 +1,11 @@
 name: Release package
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v0.23.0)"
+        required: true
+        type: string
   push:
     tags:
       - v[0-9].[0-9]+.[0-9]+
@@ -15,6 +20,8 @@ jobs:
     steps:
       - name: Checkout Elementary
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -64,6 +71,8 @@ jobs:
     steps:
       - name: Checkout Elementary
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -98,6 +107,8 @@ jobs:
     steps:
       - name: Checkout Elementary
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Set up QEMU for multi-platform support
         uses: docker/setup-qemu-action@v3
@@ -117,6 +128,9 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ inputs.tag || '' }}
+            type=ref,event=tag
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
@@ -132,6 +146,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
       - name: PR master to docs
         uses: repo-sync/pull-request@v2
         with:
