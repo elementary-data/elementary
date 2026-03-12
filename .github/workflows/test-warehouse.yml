@@ -200,17 +200,26 @@ jobs:
 
       # dbt-vertica pins dbt-core~=1.8 which lacks the 'arguments' attribute
       # used by newer dbt-core.  Install dbt-vertica without deps first, then
-      # install the latest compatible dbt-core separately.
+      # install the latest compatible dbt-core separately.  We also install
+      # vertica-python (dbt-vertica's runtime dep) explicitly.
       - name: Install dbt (Vertica)
         if: inputs.warehouse-type == 'vertica'
         run: |
           pip install --no-deps dbt-vertica
+          pip install vertica-python
           pip install "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
 
       - name: Install Elementary
         run: |
           pip install -r dev-requirements.txt
-          pip install ".[${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || inputs.warehouse-type }}]"
+          # For Vertica, dbt-vertica is already installed with --no-deps above;
+          # using ".[vertica]" would re-resolve dbt-vertica's deps and downgrade
+          # dbt-core to ~=1.8.  Install elementary without the adapter extra.
+          if [ "${{ inputs.warehouse-type }}" = "vertica" ]; then
+            pip install "."
+          else
+            pip install ".[${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || inputs.warehouse-type }}]"
+          fi
 
       - name: Write dbt profiles
         env:
