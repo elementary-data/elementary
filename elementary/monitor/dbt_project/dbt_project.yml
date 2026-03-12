@@ -37,7 +37,7 @@ vars:
 
 models:
   elementary_cli:
-    +file_format: "{{ 'delta' if target.type == 'spark' else none }}"
+    +file_format: "{{ 'delta' if target.type in ['spark', 'fabricspark'] else none }}"
 
 quoting:
   database: "{{ env_var('DATABASE_QUOTING', 'None') | as_native }}"
