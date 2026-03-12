@@ -81,14 +81,16 @@ jobs:
         with:
           python-version: "3.12"
       # dbt-core==1.8 is the first dbt version we support
-      - name: Install dbt-core
-        run: pip install "dbt-core==1.8"
+      - name: Install dependencies
+        run: pip install "dbt-core==1.8" "ruamel.yaml==0.18.10"
       - name: Bump version
         run: |
           sed -i "s/^version = \"[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\"/version = \"$CLI_VERSION\"/" ./pyproject.toml
       - name: Bump dbt package version
+        env:
+          PKG_VERSION: ${{ env.DBT_PACKAGE_VERSION }}
         run: |
-          sed -i "s/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: $DBT_PACKAGE_VERSION/" ./elementary/monitor/dbt_project/packages.yml
+          python .github/scripts/bump_packages_version.py
           dbt deps --lock --project-dir elementary/monitor/dbt_project
       - name: Create pull request
         uses: peter-evans/create-pull-request@v8.0.0
