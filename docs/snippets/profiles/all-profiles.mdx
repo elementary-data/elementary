@@ -294,4 +294,25 @@ elementary:
       # trust_cert: false
 ```
 
+```yml Vertica
+## VERTICA ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: vertica
+      host: [hostname]
+      port: 5433
+      database: [database name]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      username: [username]
+      password: [password]
+      threads: [1 or more]
+      # connection_load_balance: true
+      # backup_server_node: [comma separated list of backup hostnames or IPs]
+```
+
 </CodeGroup>
