@@ -108,9 +108,7 @@ jobs:
     with:
       warehouse-type: ${{ matrix.warehouse-type }}
       elementary-ref: ${{ inputs.elementary-ref || ((github.event_name == 'pull_request_target' || github.event_name == 'pull_request') && github.event.pull_request.head.sha) || '' }}
-      # Vertica support lives on the vertica-compat branch of dbt-data-reliability
-      # until PR #963 merges.  After that, remove this override.
-      dbt-data-reliability-ref: ${{ inputs.dbt-data-reliability-ref || (matrix.warehouse-type == 'vertica' && 'vertica-compat') || '' }}
+      dbt-data-reliability-ref: ${{ inputs.dbt-data-reliability-ref }}
       dbt-version: ${{ matrix.dbt-version }}
       generate-data: ${{ inputs.generate-data || false }}
     secrets: inherit
