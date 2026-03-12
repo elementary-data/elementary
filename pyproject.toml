@@ -57,6 +57,7 @@ dbt-clickhouse = {version = ">=0.20,<2.0.0", optional = true}
 dbt-duckdb = {version = ">=1.5.0,<2.0.0", optional = true}
 dbt-dremio = {version = ">=1.5.0,<2.0.0", optional = true}
 dbt-fabric = {version = ">=1.4,<2.0.0", optional = true}
+dbt-fabricspark = {version = ">=1.4,<2.0.0", optional = true}
 dbt-sqlserver = {version = ">=1.4,<2.0.0", optional = true}
 dbt-vertica = {version = ">=1.7,<2.0.0", optional = true}
 [tool.poetry.extras]
@@ -72,9 +73,10 @@ trino = ["dbt-trino"]
 duckdb = ["dbt-duckdb"]
 dremio = ["dbt-dremio"]
 fabric = ["dbt-fabric"]
+fabricspark = ["dbt-fabricspark"]
 sqlserver = ["dbt-sqlserver"]
 vertica = ["dbt-vertica"]
-all = ["dbt-snowflake", "dbt-bigquery", "dbt-redshift", "dbt-postgres", "dbt-databricks", "dbt-spark", "dbt-clickhouse", "dbt-athena-community", "dbt-trino", "dbt-duckdb", "dbt-dremio", "dbt-fabric", "dbt-sqlserver", "dbt-vertica"]
+all = ["dbt-snowflake", "dbt-bigquery", "dbt-redshift", "dbt-postgres", "dbt-databricks", "dbt-spark", "dbt-clickhouse", "dbt-athena-community", "dbt-trino", "dbt-duckdb", "dbt-dremio", "dbt-fabric", "dbt-fabricspark", "dbt-sqlserver", "dbt-vertica"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -118,6 +118,11 @@ _ADAPTER_PATTERNS: Dict[str, Tuple[str, ...]] = {
         # DuckDB runs in-process; transient errors are rare.
         # Common patterns (connection reset, broken pipe) are in _COMMON.
     ),
+    "fabricspark": (
+        "502 bad gateway",
+        "503 service unavailable",
+        "connection timed out",
+    ),
     "fabric": _TSQL_TRANSIENT,
     "sqlserver": _TSQL_TRANSIENT,
     "vertica": (
