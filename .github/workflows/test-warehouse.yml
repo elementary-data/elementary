@@ -20,6 +20,7 @@ on:
           - dremio
           - fabric
           - sqlserver
+          - vertica
       elementary-ref:
         type: string
         required: false
@@ -167,6 +168,12 @@ jobs:
         run: |
           docker compose up -d --wait sqlserver
 
+      - name: Start Vertica
+        if: inputs.warehouse-type == 'vertica'
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        run: |
+          docker compose up -d --wait vertica
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -185,15 +192,34 @@ jobs:
           sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18 unixodbc-dev
 
       - name: Install dbt
+        if: inputs.warehouse-type != 'vertica'
         run: >
           pip install
           "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
           "dbt-${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || (inputs.warehouse-type == 'athena' && 'athena-community') || (inputs.warehouse-type == 'dremio' && 'dremio') || inputs.warehouse-type }}${{ (inputs.warehouse-type == 'spark' && '[PyHive]') || '' }}${{ inputs.dbt-version && format('~={0}', inputs.dbt-version) }}"
 
+      # dbt-vertica pins dbt-core~=1.8 which lacks the 'arguments' attribute
+      # used by newer dbt-core.  Install dbt-vertica without deps first, then
+      # install the latest compatible dbt-core separately.  We also install
+      # vertica-python (dbt-vertica's runtime dep) explicitly.
+      - name: Install dbt (Vertica)
+        if: inputs.warehouse-type == 'vertica'
+        run: |
+          pip install --no-deps dbt-vertica
+          pip install vertica-python
+          pip install "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
+
       - name: Install Elementary
         run: |
           pip install -r dev-requirements.txt
-          pip install ".[${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || inputs.warehouse-type }}]"
+          # For Vertica, dbt-vertica is already installed with --no-deps above;
+          # using ".[vertica]" would re-resolve dbt-vertica's deps and downgrade
+          # dbt-core to ~=1.8.  Install elementary without the adapter extra.
+          if [ "${{ inputs.warehouse-type }}" = "vertica" ]; then
+            pip install "."
+          else
+            pip install ".[${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || inputs.warehouse-type }}]"
+          fi
 
       - name: Write dbt profiles
         env:
@@ -204,7 +230,7 @@ jobs:
           # This enables caching the seeded database state between runs.
           IS_DOCKER=false
           case "${{ inputs.warehouse-type }}" in
-            postgres|clickhouse|trino|dremio|duckdb|spark|sqlserver) IS_DOCKER=true ;;
+            postgres|clickhouse|trino|dremio|duckdb|spark|sqlserver|vertica) IS_DOCKER=true ;;
           esac
 
           if [ "$IS_DOCKER" = "true" ]; then

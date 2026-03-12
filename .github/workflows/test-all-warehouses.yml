@@ -102,6 +102,7 @@ jobs:
             spark,
             fabric,
             sqlserver,
+            vertica,
           ]
     uses: ./.github/workflows/test-warehouse.yml
     with:

@@ -120,6 +120,11 @@ _ADAPTER_PATTERNS: Dict[str, Tuple[str, ...]] = {
     ),
     "fabric": _TSQL_TRANSIENT,
     "sqlserver": _TSQL_TRANSIENT,
+    "vertica": (
+        "connection timed out",
+        "could not connect to the server",
+        "ssl syscall error",
+    ),
 }
 
 # Pre-computed union of all adapter-specific patterns for the fallback path
