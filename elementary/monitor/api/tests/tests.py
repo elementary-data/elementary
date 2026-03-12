@@ -429,12 +429,12 @@ class TestsAPI(APIClient):
             ),
             created_at=test_db_row.created_at if test_db_row.created_at else None,
             latest_run_time=(
-                latest_run_datetime.isoformat() if latest_run_datetime else None
-            ),
-            latest_run_time_utc=(
                 latest_run_datetime.astimezone(tz.tzlocal()).isoformat()
                 if latest_run_datetime
                 else None
+            ),
+            latest_run_time_utc=(
+                latest_run_datetime.isoformat() if latest_run_datetime else None
             ),
             latest_run_status=(
                 test_db_row.latest_run_status if test_db_row.latest_run_status else None
