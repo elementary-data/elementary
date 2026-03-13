@@ -70,7 +70,10 @@ jobs:
       - name: Determine package version
         id: pkg-version
         run: |
-          if [ -n "${{ needs.validate-version.outputs.validated-dbt-package-version }}" ]; then
+          if [ -n "${{ inputs.dbt-package-version }}" ] && [ -z "${{ needs.validate-version.outputs.validated-dbt-package-version }}" ]; then
+            echo "::error::Invalid dbt-package-version input"
+            exit 1
+          elif [ -n "${{ needs.validate-version.outputs.validated-dbt-package-version }}" ]; then
             echo "version=${{ needs.validate-version.outputs.validated-dbt-package-version }}" >> $GITHUB_OUTPUT
           else
             echo "version=${{ needs.validate-version.outputs.default-dbt-package-version }}" >> $GITHUB_OUTPUT
