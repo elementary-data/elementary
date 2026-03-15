@@ -85,7 +85,7 @@ Go to **Settings > Secrets and variables > Actions** and add:
 | `ANTHROPIC_API_KEY` | Your Anthropic API key |
 | `ELEMENTARY_API_KEY` | Your Elementary Cloud API key |
 
-That's it. Open a PR that touches a model file and the review comment appears automatically.
+That's it. The review only runs on PRs that touch files matching the path filter — other PRs are ignored entirely.
 
 <Warning>
 This works for pull requests opened from branches within the same repository. GitHub does not pass repository secrets to `pull_request` workflows triggered by forks or Dependabot.
@@ -130,7 +130,7 @@ Go to **Settings > CI/CD > Variables** and add:
 
 GitLab's built-in `CI_JOB_TOKEN` is used to post the MR comment — no extra token setup needed.
 
-Open an MR that touches a model file and the review comment appears automatically.
+The review only runs on MRs that touch files matching the changes filter — other MRs are ignored entirely.
 
 ## Troubleshooting
 
