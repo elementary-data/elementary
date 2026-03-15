@@ -12,7 +12,7 @@ On new releases, you will need to upgrade the Elementary dbt package.
 ```yml packages.yml
 packages:
   - package: elementary-data/elementary
-    version: 0.22.0
+    version: 0.23.0
 ```
 
 2. Run the command:
@@ -21,7 +21,7 @@ packages:
 dbt deps
 ```
 
-3. When there's a change in the structure of the Elementary tables, the minor version is raised. If you're updating a minor version (for example 0.21.X -> 0.22.X), run this command to rebuild the Elementary tables:
+3. When there's a change in the structure of the Elementary tables, the minor version is raised. If you're updating a minor version (for example 0.22.X -> 0.23.X), run this command to rebuild the Elementary tables:
 
 ```shell
 dbt run --select elementary
