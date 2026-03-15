@@ -63,6 +63,7 @@ jobs:
   elementary-review:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
@@ -86,12 +87,16 @@ Go to **Settings > Secrets and variables > Actions** and add:
 
 That's it. Open a PR that touches a model file and the review comment appears automatically.
 
+<Warning>
+This works for pull requests opened from branches within the same repository. GitHub does not pass repository secrets to `pull_request` workflows triggered by forks or Dependabot.
+</Warning>
+
 <Accordion title="Optional: customize the action">
 
 | Input | Default | Description |
 |---|---|---|
 | `models-path` | `models/` | Path to your dbt models directory |
-| `diff-filter` | `ACM` | File changes to include: A=Added, C=Copied, M=Modified |
+| `diff-filter` | `ACMR` | File changes to include: A=Added, C=Copied, M=Modified, R=Renamed |
 | `claude-model` | `claude-haiku-4-5-20251001` | Claude model to use. Switch to `claude-sonnet-4-6` for deeper analysis on complex changes |
 | `base-ref` | PR base branch | Branch to diff against |
 
@@ -130,7 +135,7 @@ Open an MR that touches a model file and the review comment appears automaticall
 
 **No comment appears after the job runs**
 
-For GitHub, make sure `pull-requests: write` is set under `permissions` in the workflow file. GitHub Actions requires this explicitly to post PR comments.
+Make sure both `contents: read` and `pull-requests: write` are set under `permissions` in the workflow. An explicit `permissions` block sets any unlisted scope to `none` — omitting `contents: read` causes the checkout step to fail before Elementary runs.
 
 **`git diff` returns no changed models**
 
