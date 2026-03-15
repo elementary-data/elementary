@@ -97,8 +97,9 @@ This works for pull requests opened from branches within the same repository. Gi
 |---|---|---|
 | `models-path` | `models/` | Path to your dbt models directory |
 | `diff-filter` | `ACMR` | File changes to include: A=Added, C=Copied, M=Modified, R=Renamed |
-| `claude-model` | `claude-haiku-4-5-20251001` | Claude model to use. Switch to `claude-sonnet-4-6` for deeper analysis on complex changes |
+| `claude-model` | `claude-haiku-4-5-latest` | Claude model to use. Switch to `claude-sonnet-4-latest` for deeper analysis on complex changes |
 | `base-ref` | PR base branch | Branch to diff against |
+| `mcp-config-path` | _(auto-generated)_ | Path to a custom MCP config file. Only needed for self-hosted Elementary setups |
 
 ```yaml
 - uses: elementary-data/elementary-ci@v1
@@ -106,7 +107,7 @@ This works for pull requests opened from branches within the same repository. Gi
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     elementary-api-key: ${{ secrets.ELEMENTARY_API_KEY }}
     models-path: "dbt/models/"
-    claude-model: "claude-sonnet-4-6"
+    claude-model: "claude-sonnet-4-latest"
 ```
 </Accordion>
 
@@ -149,3 +150,7 @@ Verify `ELEMENTARY_API_KEY` is correctly set and the MCP server is enabled for y
 <Warning>
 If a model has never been synced through Elementary, the comment will note that no history is available yet. Results populate automatically after the next Elementary sync.
 </Warning>
+
+## Using a different AI provider?
+
+The review currently uses Claude via the Anthropic API. If your team uses a different provider and you'd like to see it supported, we'd love to hear from you — reach out at [support@elementary-data.com](mailto:support@elementary-data.com) or on the [Community Slack](https://elementary-data.com/community).
