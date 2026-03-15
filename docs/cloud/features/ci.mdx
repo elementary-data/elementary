@@ -1,21 +1,151 @@
 ---
-title: "Elementary CI"
-sidebarTitle: "Elementary CI"
+title: "PR / MR Data Quality Review"
+sidebarTitle: "PR / MR Review"
 ---
 
-### Closed beta - Elementary Pull request impact analysis!
+Every time a developer changes a dbt model, there's a question no one can easily answer before merging: _is this safe to ship?_
 
-When making changes to your data project, it can sometimes be hard to fully understand the impact of your changes and be certain that there are no unintended consequences.
+Your dbt tests tell you if the code compiles. They don't tell you if the model you just refactored has been failing tests for the past week, whether it feeds a dashboard your CEO looks at every morning, or whether there's already an open incident on it that your data team is investigating.
 
-Our impact analysis will run on every pull request in your dbt project, so that you can see the downstream impact of your changes.
-You'll also be able to see if any of your dbt tests are failing or your models aren't being built successfully.
+Elementary's PR / MR Review answers all of that automatically. The moment a pull request touches your dbt models, a structured comment appears with everything your team needs to make a confident merge decision — without leaving the PR.
 
-![](/pics/cloud/pr_impact_example.png)
+![Elementary PR review comment](/pics/cloud/pr_impact_example.png)
 
-Elementary CI automations help you make changes with confidence by providing a comprehensive view before merging your pull request.
+## Why it matters
 
-## Want to join the beta?
+Data quality issues are exponentially cheaper to catch before merge than after. But today, most teams have no visibility into data health at review time — reviewers check the SQL, not the data. By the time a broken model hits production, it's already in dashboards, downstream models, and stakeholder reports.
 
-<Card title="Schedule a call" href="https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs" />
+Elementary closes that gap by bringing live data quality context directly into the code review workflow.
 
-<Card title="Reach out to us on Slack" href="https://elementary-data.com/community" />
+## What you get on every PR
+
+- **Test history** — pass/fail counts for each changed model over the last 7 days, so reviewers know if they're touching something that's already fragile
+- **Active incidents** — any open data quality issues on those models right now, before the change lands on top of them
+- **Downstream blast radius** — exactly which models, pipelines, and dashboards depend on what's changing, two levels deep
+- **Health summary** — a plain-language signal on whether it's safe to merge, powered by Claude
+
+The comment updates automatically on every new push, so the review always reflects the latest state. No noise, no duplicate comments.
+
+## How it works
+
+The review is powered by [Claude](https://www.anthropic.com) connected to the [Elementary MCP server](/cloud/mcp/intro). When a PR is opened or updated:
+
+1. A CI job detects which models changed using `git diff`
+2. Claude queries Elementary for live data quality context on those exact models
+3. A structured Markdown summary is posted as a comment on the PR or MR
+
+No custom scripts. No webhook setup. No infrastructure to manage. Two secrets and one file.
+
+## Setup
+
+### Prerequisites
+
+- An Elementary Cloud account with the [MCP server enabled](/cloud/mcp/setup-guide)
+- An [Anthropic API key](https://console.anthropic.com)
+
+### GitHub Actions
+
+**Step 1 — Add the workflow file**
+
+Create `.github/workflows/elementary-review.yml` in your dbt repository:
+
+```yaml
+name: Elementary Data Quality Review
+
+on:
+  pull_request:
+    paths:
+      - "models/**/*.sql"
+      - "models/**/*.yml"
+      - "dbt_project.yml"
+
+jobs:
+  elementary-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: elementary-data/elementary-ci@v1
+        with:
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          elementary-api-key: ${{ secrets.ELEMENTARY_API_KEY }}
+```
+
+**Step 2 — Add two repository secrets**
+
+Go to **Settings > Secrets and variables > Actions** and add:
+
+| Secret | Description |
+|---|---|
+| `ANTHROPIC_API_KEY` | Your Anthropic API key |
+| `ELEMENTARY_API_KEY` | Your Elementary Cloud API key |
+
+That's it. The review only runs on PRs that touch files matching the path filter — other PRs are ignored entirely.
+
+<Warning>
+This works for pull requests opened from branches within the same repository. GitHub does not pass repository secrets to `pull_request` workflows triggered by forks or Dependabot.
+</Warning>
+
+<Accordion title="Optional: customize the action">
+
+| Input | Default | Description |
+|---|---|---|
+| `models-path` | `models/` | Path to your dbt models directory |
+| `diff-filter` | `ACMR` | File changes to include: A=Added, C=Copied, M=Modified, R=Renamed |
+| `claude-model` | `claude-haiku-4-5-20251001` | Claude model to use. Switch to `claude-sonnet-4-6` for deeper analysis on complex changes |
+| `base-ref` | PR base branch | Branch to diff against |
+
+```yaml
+- uses: elementary-data/elementary-ci@v1
+  with:
+    anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+    elementary-api-key: ${{ secrets.ELEMENTARY_API_KEY }}
+    models-path: "dbt/models/"
+    claude-model: "claude-sonnet-4-6"
+```
+</Accordion>
+
+### GitLab CI
+
+**Step 1 — Add the include to your `.gitlab-ci.yml`**
+
+```yaml
+include:
+  - remote: 'https://raw.githubusercontent.com/elementary-data/elementary-ci/v1/templates/mr-review.yml'
+```
+
+**Step 2 — Add two CI/CD variables**
+
+Go to **Settings > CI/CD > Variables** and add:
+
+| Variable | Masked | Description |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | Yes | Your Anthropic API key |
+| `ELEMENTARY_API_KEY` | Yes | Your Elementary Cloud API key |
+
+GitLab's built-in `CI_JOB_TOKEN` is used to post the MR comment — no extra token setup needed.
+
+The review only runs on MRs that touch files matching the changes filter — other MRs are ignored entirely.
+
+## Troubleshooting
+
+**No comment appears after the job runs**
+
+Make sure both `contents: read` and `pull-requests: write` are set under `permissions` in the workflow. An explicit `permissions` block sets any unlisted scope to `none` — omitting `contents: read` causes the checkout step to fail before Elementary runs.
+
+**`git diff` returns no changed models**
+
+Make sure `fetch-depth: 0` is set on the checkout step. Without full git history the runner cannot compare branches and the diff will be empty.
+
+**The comment says the MCP server is unreachable**
+
+Verify `ELEMENTARY_API_KEY` is correctly set and the MCP server is enabled for your account. See the [MCP setup guide](/cloud/mcp/setup-guide).
+
+<Warning>
+If a model has never been synced through Elementary, the comment will note that no history is available yet. Results populate automatically after the next Elementary sync.
+</Warning>
