@@ -5,28 +5,36 @@ sidebarTitle: "PR / MR Review"
 
 Every time a developer changes a dbt model, there's a question no one can easily answer before merging: _is this safe to ship?_
 
-Elementary's PR / MR Review answers that question automatically. When a pull request touches your dbt models, a comment appears with everything your team needs to review the data quality impact — test results, active incidents, and downstream blast radius — without leaving the PR.
+Your dbt tests tell you if the code compiles. They don't tell you if the model you just refactored has been failing tests for the past week, whether it feeds a dashboard your CEO looks at every morning, or whether there's already an open incident on it that your data team is investigating.
 
-![Elementary PR review comment posted on a GitHub pull request](/pics/cloud/pr_impact_example.png)
+Elementary's PR / MR Review answers all of that automatically. The moment a pull request touches your dbt models, a structured comment appears with everything your team needs to make a confident merge decision — without leaving the PR.
+
+![Elementary PR review comment](/pics/cloud/pr_impact_example.png)
+
+## Why it matters
+
+Data quality issues are exponentially cheaper to catch before merge than after. But today, most teams have no visibility into data health at review time — reviewers check the SQL, not the data. By the time a broken model hits production, it's already in dashboards, downstream models, and stakeholder reports.
+
+Elementary closes that gap by bringing live data quality context directly into the code review workflow.
 
 ## What you get on every PR
 
-- **Test history** — pass/fail counts for each changed model over the last 7 days
-- **Active incidents** — any open data quality issues affecting those models right now
-- **Downstream impact** — which models, pipelines, and dashboards depend on what you're changing
-- **Health summary** — a clear signal on whether it's safe to merge
+- **Test history** — pass/fail counts for each changed model over the last 7 days, so reviewers know if they're touching something that's already fragile
+- **Active incidents** — any open data quality issues on those models right now, before the change lands on top of them
+- **Downstream blast radius** — exactly which models, pipelines, and dashboards depend on what's changing, two levels deep
+- **Health summary** — a plain-language signal on whether it's safe to merge, powered by Claude
 
-The comment updates automatically on every new push, so the review stays current without cluttering the PR thread.
+The comment updates automatically on every new push, so the review always reflects the latest state. No noise, no duplicate comments.
 
 ## How it works
 
-The review is powered by [Claude](https://www.anthropic.com) connected to the [Elementary MCP server](/cloud/mcp/intro). When a PR is opened:
+The review is powered by [Claude](https://www.anthropic.com) connected to the [Elementary MCP server](/cloud/mcp/intro). When a PR is opened or updated:
 
 1. A CI job detects which models changed using `git diff`
-2. Claude queries Elementary for live data quality context on those models
-3. A formatted summary is posted as a comment on the PR or MR
+2. Claude queries Elementary for live data quality context on those exact models
+3. A structured Markdown summary is posted as a comment on the PR or MR
 
-No custom scripts, no webhook setup, no infrastructure to manage.
+No custom scripts. No webhook setup. No infrastructure to manage. Two secrets and one file.
 
 ## Setup
 
@@ -84,7 +92,7 @@ That's it. Open a PR that touches a model file and the review comment appears au
 |---|---|---|
 | `models-path` | `models/` | Path to your dbt models directory |
 | `diff-filter` | `ACM` | File changes to include: A=Added, C=Copied, M=Modified |
-| `claude-model` | `claude-haiku-4-5-20251001` | Claude model to use. Switch to `claude-sonnet-4-6` for deeper analysis |
+| `claude-model` | `claude-haiku-4-5-20251001` | Claude model to use. Switch to `claude-sonnet-4-6` for deeper analysis on complex changes |
 | `base-ref` | PR base branch | Branch to diff against |
 
 ```yaml
@@ -122,16 +130,16 @@ Open an MR that touches a model file and the review comment appears automaticall
 
 **No comment appears after the job runs**
 
-For GitHub, make sure `pull-requests: write` is set under `permissions` in the workflow. GitHub Actions requires this to post PR comments.
+For GitHub, make sure `pull-requests: write` is set under `permissions` in the workflow file. GitHub Actions requires this explicitly to post PR comments.
 
 **`git diff` returns no changed models**
 
-Make sure `fetch-depth: 0` is set on the checkout step. Without full git history the runner cannot compare branches.
+Make sure `fetch-depth: 0` is set on the checkout step. Without full git history the runner cannot compare branches and the diff will be empty.
 
 **The comment says the MCP server is unreachable**
 
 Verify `ELEMENTARY_API_KEY` is correctly set and the MCP server is enabled for your account. See the [MCP setup guide](/cloud/mcp/setup-guide).
 
 <Warning>
-If a model has never been synced through Elementary, the comment will note that no history is available yet. Results appear automatically after the next Elementary sync.
+If a model has never been synced through Elementary, the comment will note that no history is available yet. Results populate automatically after the next Elementary sync.
 </Warning>
