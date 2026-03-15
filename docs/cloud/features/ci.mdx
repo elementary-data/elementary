@@ -119,7 +119,7 @@ include:
   - remote: 'https://raw.githubusercontent.com/elementary-data/elementary-ci/v1/templates/mr-review.yml'
 ```
 
-**Step 2 — Add three CI/CD variables**
+**Step 2 — Add two CI/CD variables**
 
 Go to **Settings > CI/CD > Variables** and add:
 
@@ -127,7 +127,8 @@ Go to **Settings > CI/CD > Variables** and add:
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Yes | Your Anthropic API key |
 | `ELEMENTARY_API_KEY` | Yes | Your Elementary Cloud API key |
-| `GITLAB_API_TOKEN` | Yes | A project or group token with `api` scope |
+
+GitLab's built-in `CI_JOB_TOKEN` is used to post the MR comment — no extra token setup needed.
 
 Open an MR that touches a model file and the review comment appears automatically.
 
