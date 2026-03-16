@@ -7,22 +7,22 @@ Every time a developer changes a dbt model, there's a question no one can easily
 
 Your dbt tests tell you if the code compiles. They don't tell you if the model you just refactored has been failing tests for the past week, whether it feeds a dashboard your CEO looks at every morning, or whether there's already an open incident on it that your data team is investigating.
 
-Elementary's PR / MR Review answers all of that automatically. The moment a pull request touches your dbt models, a structured comment appears with everything your team needs to make a confident merge decision — without leaving the PR.
+Elementary's code review automatically answers all of that. The moment a pull request touches your dbt models, a structured comment appears with everything your team needs to make a confident merge decision, without leaving the PR.
 
 ![Elementary code review comment](/pics/cloud/code_review_comment.png)
 
 ## Why it matters
 
-Data quality issues are exponentially cheaper to catch before merge than after. But today, most teams have no visibility into data health at review time — reviewers check the SQL, not the data. By the time a broken model hits production, it's already in dashboards, downstream models, and stakeholder reports.
+Data quality issues are exponentially cheaper to catch before merge than after. But today, most teams have no visibility into data health at review time. Reviewers check the SQL, not the data. By the time a broken model hits production, it's already in dashboards, downstream models, and stakeholder reports.
 
 Elementary closes that gap by bringing live data quality context directly into the code review workflow.
 
 ## What you get on every PR
 
-- **Test history** — pass/fail counts for each changed model over the last 7 days, so reviewers know if they're touching something that's already fragile
-- **Active incidents** — any open data quality issues on those models right now, before the change lands on top of them
-- **Downstream blast radius** — exactly which models, pipelines, and dashboards depend on what's changing, two levels deep
-- **Health summary** — a plain-language signal on whether it's safe to merge, powered by Claude
+- **Test history:** pass/fail counts for each changed model over the last 7 days, so reviewers know if they're touching something that's already fragile
+- **Active incidents:** any open data quality issues on those models right now, before the change lands on top of them
+- **Downstream blast radius:** exactly which models, pipelines, and dashboards depend on what's changing, two levels deep
+- **Health summary:** a plain-language signal on whether it's safe to merge, powered by Claude
 
 The comment updates automatically on every new push, so the review always reflects the latest state. No noise, no duplicate comments.
 
@@ -85,7 +85,7 @@ Go to **Settings > Secrets and variables > Actions** and add:
 | `ANTHROPIC_API_KEY` | Your Anthropic API key |
 | `ELEMENTARY_API_KEY` | Your Elementary Cloud API key |
 
-That's it. The review only runs on PRs that touch files matching the path filter — other PRs are ignored entirely.
+That's it. The review only runs on PRs that touch model files — other PRs are ignored entirely.
 
 <Warning>
 This works for pull requests opened from branches within the same repository. GitHub does not pass repository secrets to `pull_request` workflows triggered by forks or Dependabot.
@@ -131,13 +131,13 @@ Go to **Settings > CI/CD > Variables** and add:
 
 GitLab's built-in `CI_JOB_TOKEN` is used to post the MR comment — no extra token setup needed.
 
-The review only runs on MRs that touch files matching the changes filter — other MRs are ignored entirely.
+The review only runs on MRs that touch model files — other MRs are ignored entirely.
 
 ## Troubleshooting
 
 **No comment appears after the job runs**
 
-Make sure both `contents: read` and `pull-requests: write` are set under `permissions` in the workflow. An explicit `permissions` block sets any unlisted scope to `none` — omitting `contents: read` causes the checkout step to fail before Elementary runs.
+Make sure both `contents: read` and `pull-requests: write` are set under `permissions` in the workflow. An explicit `permissions` block sets any unlisted scope to `none`, so omitting `contents: read` causes the checkout step to fail before Elementary runs.
 
 **`git diff` returns no changed models**
 
@@ -153,4 +153,4 @@ If a model has never been synced through Elementary, the comment will note that 
 
 ## Using a different AI provider?
 
-The review currently uses Claude via the Anthropic API. If your team uses a different provider and you'd like to see it supported, we'd love to hear from you — reach out at [support@elementary-data.com](mailto:support@elementary-data.com) or on the [Community Slack](https://elementary-data.com/community).
+The review currently uses Claude via the Anthropic API. If your team uses a different provider and you'd like to see it supported, reach out at [support@elementary-data.com](mailto:support@elementary-data.com) or on the [Community Slack](https://elementary-data.com/community).
