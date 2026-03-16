@@ -128,8 +128,12 @@ Go to **Settings > CI/CD > Variables** and add:
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Yes | Your Anthropic API key |
 | `ELEMENTARY_API_KEY` | Yes | Your Elementary Cloud API key |
+| `GITLAB_API_TOKEN` | Yes | Optional. Project Access Token with `api` scope. Set this if you cannot enable CI/CD job token API access in project settings. |
 
-GitLab's built-in `CI_JOB_TOKEN` is used to post the MR comment, no extra token setup needed.
+To post the MR comment, the template uses one of two authentication methods:
+
+- **`CI_JOB_TOKEN` (default):** GitLab's built-in job token, available automatically in every pipeline. Requires a project admin to enable **Settings > CI/CD > Token Access > Allow CI/CD job tokens to access this project's API**.
+- **`GITLAB_API_TOKEN` (alternative):** If this variable is set, it takes priority over `CI_JOB_TOKEN`. Use a Project Access Token with `api` scope. This works without any admin settings change and is the easier option if you don't have project admin access.
 
 The review only runs on MRs that touch model files. Other MRs are ignored entirely.
 
