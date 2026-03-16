@@ -129,9 +129,11 @@ Go to **Settings > CI/CD > Variables** and add:
 | `ANTHROPIC_API_KEY` | Yes | Your Anthropic API key |
 | `ELEMENTARY_API_KEY` | Yes | Your Elementary Cloud API key |
 
-GitLab's built-in `CI_JOB_TOKEN` is used to post the MR comment — no extra token setup needed.
+GitLab's built-in `CI_JOB_TOKEN` is used to post the MR comment, no extra token setup needed.
 
-The review only runs on MRs that touch model files — other MRs are ignored entirely.
+The review only runs on MRs that touch model files. Other MRs are ignored entirely.
+
+![Elementary code review comment on GitLab](/pics/cloud/code_review_comment_gitlab.png)
 
 ## Troubleshooting
 
