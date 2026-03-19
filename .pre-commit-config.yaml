@@ -46,6 +46,29 @@ repos:
 
   - repo: local
     hooks:
+      - id: strip-name-from-package-lock
+        name: Strip 'name' fields from package-lock.yml (unsupported in dbt 1.8)
+        entry: |
+          python -c "
+          import yaml, sys
+          lock_file = 'elementary/monitor/dbt_project/package-lock.yml'
+          with open(lock_file) as f:
+              data = yaml.safe_load(f)
+          changed = False
+          for pkg in data.get('packages', []):
+              if 'name' in pkg:
+                  del pkg['name']
+                  changed = True
+          if changed:
+              with open(lock_file, 'w') as f:
+                  yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+              print(f'Removed unsupported name fields from {lock_file}')
+              sys.exit(1)
+          "
+        language: system
+        files: package-lock\.yml$
+        pass_filenames: false
+
       - id: verify-dbt-project-packages-lock
         name: Verify internal dbt project package lock
         entry: |
