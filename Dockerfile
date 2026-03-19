@@ -18,7 +18,7 @@ RUN apt-get update \
     /var/tmp/*
 
 COPY . /app
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir "/app[all]"
+RUN pip install uv
+RUN uv pip install --no-cache --system "/app[all]"
 
 ENTRYPOINT ["edr"]
