@@ -76,7 +76,7 @@ fabric = ["dbt-fabric"]
 fabricspark = ["dbt-fabricspark"]
 sqlserver = ["dbt-sqlserver"]
 vertica = ["dbt-vertica"]
-all = ["dbt-snowflake", "dbt-bigquery", "dbt-redshift", "dbt-postgres", "dbt-databricks", "dbt-spark", "dbt-clickhouse", "dbt-athena-community", "dbt-trino", "dbt-duckdb", "dbt-dremio", "dbt-fabric", "dbt-sqlserver", "dbt-vertica"]
+all = ["dbt-snowflake", "dbt-bigquery", "dbt-redshift", "dbt-postgres", "dbt-databricks", "dbt-spark", "dbt-athena-community", "dbt-trino", "dbt-duckdb", "dbt-dremio", "dbt-fabric"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
