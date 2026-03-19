@@ -65,6 +65,29 @@ jobs:
           print("packages.yml validation passed - using proper package version reference.")
           EOF
 
+      - name: Validate package-lock.yml has no deprecated 'name' fields
+        run: |
+          python - <<'EOF'
+          import yaml
+          import sys
+
+          lock_file = "./elementary/monitor/dbt_project/package-lock.yml"
+          with open(lock_file) as f:
+              data = yaml.safe_load(f)
+
+          packages = data.get("packages", [])
+          bad_packages = [pkg for pkg in packages if "name" in pkg]
+
+          if bad_packages:
+              names = ", ".join(pkg["name"] for pkg in bad_packages)
+              print(f"::error::package-lock.yml contains deprecated 'name' fields: {names}. "
+                    "dbt 1.8+ rejects this format. Remove the 'name' fields from the lock file "
+                    "or delete it and let dbt regenerate it.")
+              sys.exit(1)
+
+          print("package-lock.yml validation passed - no deprecated 'name' fields found.")
+          EOF
+
   publish-to-pypi:
     needs: validate-packages-yml
     runs-on: ubuntu-latest
