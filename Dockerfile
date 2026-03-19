@@ -1,4 +1,4 @@
-FROM python:3.10.7
+FROM python:3.12
 
 ARG USR_APP_PATH=/usr/app
 ENV DBT_LOG_PATH=$USR_APP_PATH/logs
@@ -7,9 +7,8 @@ WORKDIR $USR_APP_PATH
 RUN chmod 777 .
 
 RUN apt-get update \
-    && apt-get dist-upgrade -y \
     && apt-get install -y --no-install-recommends \
-    python-dev \
+    python3-dev \
     libsasl2-dev \
     && apt-get clean \
     && rm -rf \
