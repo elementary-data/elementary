@@ -18,7 +18,8 @@ RUN apt-get update \
     /var/tmp/*
 
 COPY . /app
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir "/app[all]"
+ARG UV_VERSION=0.10.11
+RUN pip install --no-cache-dir "uv==${UV_VERSION}" \
+    && uv pip install --no-cache --system "/app[all]"
 
 ENTRYPOINT ["edr"]
