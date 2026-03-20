@@ -26,9 +26,6 @@ logger = get_logger(__name__)
 
 Channel: TypeAlias = Optional[str]
 ONE_SECOND = 1
-# Teams webhook payload size limit in bytes. The actual limit is 28KB for
-# Adaptive Cards, but we use a slightly lower threshold to leave room for
-# the envelope (message wrapper, attachment metadata, etc.).
 TEAMS_PAYLOAD_SIZE_LIMIT = 27 * 1024
 
 
@@ -65,8 +62,6 @@ def _truncation_notice_item() -> Dict[str, Any]:
 
 
 def _minimal_card(card: dict) -> dict:
-    """Return a minimal card with just a truncation notice when even a single
-    body item is too large."""
     return {
         **card,
         "body": [
@@ -82,9 +77,6 @@ def _minimal_card(card: dict) -> dict:
 
 
 def _truncate_card(card: dict) -> dict:
-    """Progressively remove body items from the card until the payload fits
-    within the Teams size limit.  A truncation notice is appended so the
-    recipient knows content was removed."""
     body: List[Dict[str, Any]] = list(card.get("body", []))
     if not body:
         return card
@@ -93,11 +85,9 @@ def _truncate_card(card: dict) -> dict:
         payload = _build_payload({**card, "body": body + [_truncation_notice_item()]})
         if len(json.dumps(payload)) <= TEAMS_PAYLOAD_SIZE_LIMIT:
             break
-        body.pop()  # remove the last body item
+        body.pop()
 
     truncated = {**card, "body": body + [_truncation_notice_item()]}
-    # If even a single body item plus the notice is too large, fall back to
-    # a minimal card.
     if len(json.dumps(_build_payload(truncated))) > TEAMS_PAYLOAD_SIZE_LIMIT:
         return _minimal_card(card)
     return truncated
@@ -105,8 +95,6 @@ def _truncate_card(card: dict) -> dict:
 
 def send_adaptive_card(webhook_url: str, card: dict) -> requests.Response:
     payload = _build_payload(card)
-
-    # Proactively truncate if the payload exceeds the Teams size limit.
     payload_json = json.dumps(payload)
     if len(payload_json) > TEAMS_PAYLOAD_SIZE_LIMIT:
         logger.warning(
