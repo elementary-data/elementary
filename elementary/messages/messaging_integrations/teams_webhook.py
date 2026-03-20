@@ -107,9 +107,26 @@ def send_adaptive_card(webhook_url: str, card: dict) -> requests.Response:
     response = requests.post(
         webhook_url,
         json=payload,
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json; charset=utf-8"},
     )
     response.raise_for_status()
+    if (
+        response.status_code == HTTPStatus.OK
+        and len(response.text) > 1
+        and "413" in response.text
+    ):
+        logger.warning(
+            "Teams webhook returned 413 in response body (payload size issue), "
+            "retrying with minimal card"
+        )
+        minimal = _minimal_card(card)
+        payload = _build_payload(minimal)
+        response = requests.post(
+            webhook_url,
+            json=payload,
+            headers={"Content-Type": "application/json; charset=utf-8"},
+        )
+        response.raise_for_status()
     if response.status_code == HTTPStatus.ACCEPTED:
         logger.debug(
             f"Got {HTTPStatus.ACCEPTED} response from Teams webhook, assuming success"
