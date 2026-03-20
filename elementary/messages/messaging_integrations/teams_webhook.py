@@ -57,11 +57,27 @@ def _build_payload(card: dict) -> dict:
 def _truncation_notice_item() -> Dict[str, Any]:
     return {
         "type": "TextBlock",
-        "text": "... Content truncated due to message size limits. "
-        "View full details in Elementary Cloud.",
+        "text": "_... Content truncated due to message size limits. "
+        "View full details in Elementary Cloud._",
         "wrap": True,
         "isSubtle": True,
-        "italic": True,
+    }
+
+
+def _minimal_card(card: dict) -> dict:
+    """Return a minimal card with just a truncation notice when even a single
+    body item is too large."""
+    return {
+        **card,
+        "body": [
+            {
+                "type": "TextBlock",
+                "text": "Alert content too large to display in Teams. "
+                "View full details in Elementary Cloud.",
+                "wrap": True,
+                "weight": "bolder",
+            }
+        ],
     }
 
 
@@ -79,7 +95,12 @@ def _truncate_card(card: dict) -> dict:
             break
         body.pop()  # remove the last body item
 
-    return {**card, "body": body + [_truncation_notice_item()]}
+    truncated = {**card, "body": body + [_truncation_notice_item()]}
+    # If even a single body item plus the notice is too large, fall back to
+    # a minimal card.
+    if len(json.dumps(_build_payload(truncated))) > TEAMS_PAYLOAD_SIZE_LIMIT:
+        return _minimal_card(card)
+    return truncated
 
 
 def send_adaptive_card(webhook_url: str, card: dict) -> requests.Response:
