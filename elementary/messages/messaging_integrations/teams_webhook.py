@@ -27,6 +27,7 @@ logger = get_logger(__name__)
 Channel: TypeAlias = Optional[str]
 ONE_SECOND = 1
 TEAMS_PAYLOAD_SIZE_LIMIT = 27 * 1024
+REQUEST_TIMEOUT_SECONDS = (3.05, 10)
 
 
 class TeamsWebhookHttpError(MessagingIntegrationError):
@@ -62,7 +63,8 @@ def _truncation_notice_item() -> Dict[str, Any]:
 
 def _minimal_card(card: dict) -> dict:
     return {
-        **card,
+        "type": "AdaptiveCard",
+        "version": card.get("version", "1.5"),
         "body": [
             {
                 "type": "TextBlock",
@@ -107,9 +109,28 @@ def send_adaptive_card(webhook_url: str, card: dict) -> requests.Response:
     response = requests.post(
         webhook_url,
         json=payload,
-        headers={"Content-Type": "application/json"},
+        headers={"Content-Type": "application/json; charset=utf-8"},
+        timeout=REQUEST_TIMEOUT_SECONDS,
     )
     response.raise_for_status()
+    if (
+        response.status_code == HTTPStatus.OK
+        and len(response.text) > 1
+        and "413" in response.text
+    ):
+        logger.warning(
+            "Teams webhook returned 413 in response body (payload size issue), "
+            "retrying with minimal card"
+        )
+        minimal = _minimal_card(card)
+        payload = _build_payload(minimal)
+        response = requests.post(
+            webhook_url,
+            json=payload,
+            headers={"Content-Type": "application/json; charset=utf-8"},
+            timeout=REQUEST_TIMEOUT_SECONDS,
+        )
+        response.raise_for_status()
     if response.status_code == HTTPStatus.ACCEPTED:
         logger.debug(
             f"Got {HTTPStatus.ACCEPTED} response from Teams webhook, assuming success"
