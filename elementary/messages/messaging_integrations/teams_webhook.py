@@ -54,8 +54,7 @@ def _build_payload(card: dict) -> dict:
 def _truncation_notice_item() -> Dict[str, Any]:
     return {
         "type": "TextBlock",
-        "text": "_... Content truncated due to message size limits. "
-        "View full details in Elementary Cloud._",
+        "text": "_... Content truncated due to message size limits._",
         "wrap": True,
         "isSubtle": True,
     }
@@ -67,8 +66,7 @@ def _minimal_card(card: dict) -> dict:
         "body": [
             {
                 "type": "TextBlock",
-                "text": "Alert content too large to display in Teams. "
-                "View full details in Elementary Cloud.",
+                "text": "Alert content too large to display in Teams.",
                 "wrap": True,
                 "weight": "bolder",
             }
