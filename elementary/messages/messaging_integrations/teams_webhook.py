@@ -27,6 +27,7 @@ logger = get_logger(__name__)
 Channel: TypeAlias = Optional[str]
 ONE_SECOND = 1
 TEAMS_PAYLOAD_SIZE_LIMIT = 27 * 1024
+REQUEST_TIMEOUT_SECONDS = (3.05, 10)
 
 
 class TeamsWebhookHttpError(MessagingIntegrationError):
@@ -62,7 +63,8 @@ def _truncation_notice_item() -> Dict[str, Any]:
 
 def _minimal_card(card: dict) -> dict:
     return {
-        **card,
+        "type": "AdaptiveCard",
+        "version": card.get("version", "1.5"),
         "body": [
             {
                 "type": "TextBlock",
@@ -108,6 +110,7 @@ def send_adaptive_card(webhook_url: str, card: dict) -> requests.Response:
         webhook_url,
         json=payload,
         headers={"Content-Type": "application/json; charset=utf-8"},
+        timeout=REQUEST_TIMEOUT_SECONDS,
     )
     response.raise_for_status()
     if (
@@ -125,6 +128,7 @@ def send_adaptive_card(webhook_url: str, card: dict) -> requests.Response:
             webhook_url,
             json=payload,
             headers={"Content-Type": "application/json; charset=utf-8"},
+            timeout=REQUEST_TIMEOUT_SECONDS,
         )
         response.raise_for_status()
     if response.status_code == HTTPStatus.ACCEPTED:
