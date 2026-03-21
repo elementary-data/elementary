@@ -269,8 +269,7 @@ class Config:
             return True
         except ImportError:
             return False
-        except Exception:
-            # google.auth.exceptions.DefaultCredentialsError or similar
+        except google.auth.exceptions.DefaultCredentialsError:
             return False
 
     @property

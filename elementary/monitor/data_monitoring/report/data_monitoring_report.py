@@ -11,9 +11,6 @@ from elementary.monitor.api.report.report import ReportAPI
 from elementary.monitor.api.report.schema import ReportDataSchema
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
-from elementary.monitor.data_monitoring.report.slack_report_summary_message_builder import (
-    SlackReportSummaryMessageBuilder,
-)
 from elementary.monitor.data_monitoring.schema import FiltersSchema
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.tracking.tracking_interface import Tracking
@@ -55,7 +52,7 @@ class DataMonitoringReport(DataMonitoring):
                 )
 
         self.gcs_client = None
-        if self.config.has_gcs:
+        if self.config.gcs_bucket_name:
             try:
                 from elementary.clients.gcs.client import GCSClient
 
@@ -342,6 +339,10 @@ class DataMonitoringReport(DataMonitoring):
             dbt_invocation=invocation,
         )
         if self.slack_client:
+            from elementary.monitor.data_monitoring.report.slack_report_summary_message_builder import (
+                SlackReportSummaryMessageBuilder,
+            )
+
             send_succeeded = self.slack_client.send_message(
                 channel_name=self.config.slack_channel_name,
                 message=SlackReportSummaryMessageBuilder().get_slack_message(
