@@ -36,6 +36,15 @@ class TeamsWebhookHttpError(MessagingIntegrationError):
         )
 
 
+class TeamsWebhookPayloadTooLargeError(MessagingIntegrationError):
+    def __init__(self, response: requests.Response):
+        self.status_code = response.status_code
+        self.response = response
+        super().__init__(
+            f"Teams webhook payload size ({len(response.text)} bytes) exceeds limit"
+        )
+
+
 def send_adaptive_card(webhook_url: str, card: dict) -> requests.Response:
     payload = {
         "type": "message",
@@ -89,6 +98,9 @@ class TeamsWebhookMessagingIntegration(
             if response.status_code not in (HTTPStatus.OK, HTTPStatus.ACCEPTED) or (
                 response.status_code == HTTPStatus.OK and len(response.text) > 1
             ):
+                if "HTTP error 413" in response.text:
+                    raise TeamsWebhookPayloadTooLargeError(response)
+
                 raise MessagingIntegrationError(
                     f"Could not post message to Teams via webhook. Status code: {response.status_code}, Error: {response.text}"
                 )
