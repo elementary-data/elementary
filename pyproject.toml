@@ -76,6 +76,11 @@ fabric = ["dbt-fabric"]
 fabricspark = ["dbt-fabricspark"]
 sqlserver = ["dbt-sqlserver"]
 vertica = ["dbt-vertica"]
+s3 = ["boto3"]
+gcs = ["google-cloud-storage"]
+azure = ["azure-storage-blob"]
+slack = ["slack-sdk"]
+teams = ["pymsteams"]
 # dbt-fabricspark is excluded due to broken upstream dependencies (azure-cli pre-release pins).
 # dbt-vertica is excluded because it pins dbt-core==1.8.5, forcing the entire resolution to dbt 1.8.
 # Both are still available as individual extras (e.g. pip install elementary-data[vertica]).

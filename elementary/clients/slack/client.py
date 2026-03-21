@@ -1,18 +1,21 @@
+from __future__ import annotations
+
 import json
 import ssl
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
+
+if TYPE_CHECKING:
+    from slack_sdk.errors import SlackApiError
+    from slack_sdk.webhook import WebhookResponse
 
 import requests
 from ratelimit import limits, sleep_and_retry
-from slack_sdk import WebClient, WebhookClient
-from slack_sdk.errors import SlackApiError
-from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
-from slack_sdk.webhook.webhook_response import WebhookResponse
 
 from elementary.clients.slack.schema import SlackMessageSchema
 from elementary.config.config import Config
 from elementary.tracking.tracking_interface import Tracking
+from elementary.utils.deps import import_optional_dependency
 from elementary.utils.log import get_logger
 from elementary.utils.ssl import create_ssl_context
 
@@ -59,7 +62,10 @@ class SlackClient(ABC):
         raise NotImplementedError
 
     def _initial_retry_handlers(self):
-        if isinstance(self.client, WebClient):
+        slack_sdk = import_optional_dependency("slack_sdk", "slack")
+        if isinstance(self.client, slack_sdk.WebClient):
+            from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
+
             rate_limit_handler = RateLimitErrorRetryHandler(max_retry_count=5)
             self.client.retry_handlers.append(rate_limit_handler)
 
@@ -96,13 +102,16 @@ class SlackWebClient(SlackClient):
         super().__init__(tracking, ssl_context)
 
     def _initial_client(self, ssl_context: Optional[ssl.SSLContext]):
-        return WebClient(token=self.token, ssl=ssl_context)
+        slack_sdk = import_optional_dependency("slack_sdk", "slack")
+        return slack_sdk.WebClient(token=self.token, ssl=ssl_context)
 
     @sleep_and_retry
     @limits(calls=1, period=ONE_SECOND)
     def send_message(
         self, channel_name: str, message: SlackMessageSchema, **kwargs
     ) -> bool:
+        from slack_sdk.errors import SlackApiError
+
         try:
             self.client.chat_postMessage(
                 channel=channel_name,
@@ -128,6 +137,8 @@ class SlackWebClient(SlackClient):
         file_path: str,
         message: Optional[SlackMessageSchema] = None,
     ) -> bool:
+        from slack_sdk.errors import SlackApiError
+
         channel_id = self._get_channel_id(channel_name)
         try:
             self.client.files_upload_v2(
@@ -157,6 +168,8 @@ class SlackWebClient(SlackClient):
     @sleep_and_retry
     @limits(calls=50, period=ONE_MINUTE)
     def get_user_id_from_email(self, email: str) -> Optional[str]:
+        from slack_sdk.errors import SlackApiError
+
         try:
             if email not in self.email_to_user_id_cache:
                 user_id = self.client.users_lookupByEmail(email=email)["user"]["id"]
@@ -197,6 +210,8 @@ class SlackWebClient(SlackClient):
                 return None
 
     def _join_channel(self, channel_id: str) -> bool:
+        from slack_sdk.errors import SlackApiError
+
         try:
             self.client.conversations_join(channel=channel_id)
             logger.info("Elementary app joined the channel successfully.")
@@ -249,7 +264,8 @@ class SlackWebhookClient(SlackClient):
             # requests.Session() uses the requests default CA bundle (certifi).
             return requests.Session()
 
-        return WebhookClient(
+        slack_sdk = import_optional_dependency("slack_sdk", "slack")
+        return slack_sdk.WebhookClient(
             url=self.webhook,
             default_headers={"Content-type": "application/json"},
             ssl=ssl_context,

@@ -1,10 +1,9 @@
 from os import path
 from typing import Optional, Tuple
 
-from azure.storage.blob import BlobServiceClient
-
 from elementary.config.config import Config
 from elementary.tracking.tracking_interface import Tracking
+from elementary.utils.deps import import_optional_dependency
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -13,7 +12,8 @@ logger = get_logger(__name__)
 class AzureClient:
     def __init__(self, config: Config, tracking: Optional[Tracking] = None):
         self.config = config
-        self.blob_service_client = BlobServiceClient.from_connection_string(
+        azure_blob = import_optional_dependency("azure.storage.blob", "azure")
+        self.blob_service_client = azure_blob.BlobServiceClient.from_connection_string(
             self.config.azure_connection_string
         )
         self.tracking = tracking

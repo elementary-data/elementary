@@ -1,11 +1,14 @@
+from __future__ import annotations
+
 import ssl
 from datetime import datetime, timezone
 from http import HTTPStatus
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from ratelimit import limits, sleep_and_retry
-from slack_sdk import WebhookClient
-from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
+
+if TYPE_CHECKING:
+    from slack_sdk import WebhookClient
 
 from elementary.messages.formats.block_kit import (
     FormattedBlockKitMessage,
@@ -23,6 +26,7 @@ from elementary.messages.messaging_integrations.exceptions import (
     MessagingIntegrationError,
 )
 from elementary.tracking.tracking_interface import Tracking
+from elementary.utils.deps import import_optional_dependency
 
 ONE_SECOND = 1
 
@@ -43,7 +47,10 @@ class SlackWebhookMessagingIntegration(
         tracking: Optional[Tracking] = None,
         ssl_context: Optional[ssl.SSLContext] = None,
     ) -> "SlackWebhookMessagingIntegration":
-        client = WebhookClient(url, ssl=ssl_context)
+        slack_sdk = import_optional_dependency("slack_sdk", "slack")
+        from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
+
+        client = slack_sdk.WebhookClient(url, ssl=ssl_context)
         client.retry_handlers.append(RateLimitErrorRetryHandler(max_retry_count=5))
         return cls(client, tracking)
 

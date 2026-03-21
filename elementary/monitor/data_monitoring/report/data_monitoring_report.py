@@ -5,10 +5,6 @@ import os.path
 import webbrowser
 from typing import Optional, Tuple
 
-from elementary.clients.azure.client import AzureClient
-from elementary.clients.gcs.client import GCSClient
-from elementary.clients.s3.client import S3Client
-from elementary.clients.slack.client import SlackClient
 from elementary.config.config import Config
 from elementary.monitor.api.invocations.invocations import InvocationsAPI
 from elementary.monitor.api.report.report import ReportAPI
@@ -43,6 +39,12 @@ class DataMonitoringReport(DataMonitoring):
             config, tracking, force_update_dbt_package, disable_samples, selector_filter
         )
         self.report_api = ReportAPI(self.internal_dbt_runner)
+
+        from elementary.clients.azure.client import AzureClient
+        from elementary.clients.gcs.client import GCSClient
+        from elementary.clients.s3.client import S3Client
+        from elementary.clients.slack.client import SlackClient
+
         self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
         self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
         self.azure_client = AzureClient.create_client(
@@ -165,9 +167,9 @@ class DataMonitoringReport(DataMonitoring):
             report_data.tracking = dict(
                 posthog_api_key=self.tracking.POSTHOG_PROJECT_API_KEY,
                 report_generator_anonymous_user_id=self.tracking.anonymous_user_id,
-                anonymous_warehouse_id=self.warehouse_info.id
-                if self.warehouse_info
-                else None,
+                anonymous_warehouse_id=(
+                    self.warehouse_info.id if self.warehouse_info else None
+                ),
             )
 
     def send_report(
