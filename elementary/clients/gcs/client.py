@@ -2,10 +2,14 @@ from os import path
 from typing import Optional, Tuple
 from urllib.parse import urljoin
 
+import google  # type: ignore[import]
+from google.auth.credentials import Credentials  # type: ignore[import]
+from google.cloud import storage  # type: ignore[attr-defined, import]
+from google.oauth2 import service_account  # type: ignore[import]
+
 from elementary.config.config import Config
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils import bucket_path
-from elementary.utils.deps import import_optional_dependency
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -83,21 +87,16 @@ class GCSClient:
         return bucket_website_url
 
     def get_client(self, config: Config):
-        storage = import_optional_dependency("google.cloud.storage", "gcs")
         creds = self.get_credentials(config)
         if config.google_project_name:
             return storage.Client(config.google_project_name, credentials=creds)
         return storage.Client(credentials=creds)
 
     @staticmethod
-    def get_credentials(config: Config):
+    def get_credentials(config: Config) -> Credentials:
         if config.google_service_account_path:
-            service_account = import_optional_dependency(
-                "google.oauth2.service_account", "gcs"
-            )
             return service_account.Credentials.from_service_account_file(
                 config.google_service_account_path
             )
-        google_auth = import_optional_dependency("google.auth", "gcs")
-        credentials, _ = google_auth.default()
+        credentials, _ = google.auth.default()
         return credentials

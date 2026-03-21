@@ -40,19 +40,61 @@ class DataMonitoringReport(DataMonitoring):
         )
         self.report_api = ReportAPI(self.internal_dbt_runner)
 
-        from elementary.clients.azure.client import AzureClient
-        from elementary.clients.gcs.client import GCSClient
-        from elementary.clients.s3.client import S3Client
-        from elementary.clients.slack.client import SlackClient
+        self.s3_client = None
+        if self.config.has_s3:
+            try:
+                from elementary.clients.s3.client import S3Client
 
-        self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
-        self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
-        self.azure_client = AzureClient.create_client(
-            self.config, tracking=self.tracking
-        )
-        self.slack_client = SlackClient.create_client(
-            self.config, tracking=self.tracking
-        )
+                self.s3_client = S3Client.create_client(
+                    self.config, tracking=self.tracking
+                )
+            except ImportError:
+                logger.warning(
+                    "S3 dependencies are not installed. "
+                    "Install them with: pip install 'elementary-data[s3]'"
+                )
+
+        self.gcs_client = None
+        if self.config.has_gcs:
+            try:
+                from elementary.clients.gcs.client import GCSClient
+
+                self.gcs_client = GCSClient.create_client(
+                    self.config, tracking=self.tracking
+                )
+            except ImportError:
+                logger.warning(
+                    "GCS dependencies are not installed. "
+                    "Install them with: pip install 'elementary-data[gcs]'"
+                )
+
+        self.azure_client = None
+        if self.config.has_blob:
+            try:
+                from elementary.clients.azure.client import AzureClient
+
+                self.azure_client = AzureClient.create_client(
+                    self.config, tracking=self.tracking
+                )
+            except ImportError:
+                logger.warning(
+                    "Azure dependencies are not installed. "
+                    "Install them with: pip install 'elementary-data[azure]'"
+                )
+
+        self.slack_client = None
+        if self.config.has_slack:
+            try:
+                from elementary.clients.slack.client import SlackClient
+
+                self.slack_client = SlackClient.create_client(
+                    self.config, tracking=self.tracking
+                )
+            except ImportError:
+                logger.warning(
+                    "Slack dependencies are not installed. "
+                    "Install them with: pip install 'elementary-data[slack]'"
+                )
 
     def generate_report(
         self,

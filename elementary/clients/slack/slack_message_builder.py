@@ -1,13 +1,11 @@
 from enum import Enum
 from typing import List, Optional, Union
 
+from slack_sdk.models.blocks import HeaderBlock, SectionBlock
+
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 from elementary.utils.json_utils import unpack_and_flatten_str_to_list
 from elementary.utils.pydantic_shim import BaseModel
-
-# Slack Block Kit limits (avoid module-level slack_sdk import)
-_HEADER_TEXT_MAX_LENGTH = 150
-_SECTION_TEXT_MAX_LENGTH = 3000
 
 
 class OptionSchema(BaseModel):
@@ -58,11 +56,11 @@ class SlackMessageBuilder:
 
     @staticmethod
     def get_limited_markdown_msg(section_msg: str) -> str:
-        if len(section_msg) < _SECTION_TEXT_MAX_LENGTH:
+        if len(section_msg) < SectionBlock.text_max_length:
             return section_msg
         return (
             section_msg[
-                : _SECTION_TEXT_MAX_LENGTH
+                : SectionBlock.text_max_length
                 - len(SlackMessageBuilder._CONTINUATION_SYMBOL)
                 - SlackMessageBuilder._LONGEST_MARKDOWN_SUFFIX_LEN
             ]
@@ -122,8 +120,8 @@ class SlackMessageBuilder:
 
     @staticmethod
     def create_header_block(msg: str) -> dict:
-        if len(msg) > _HEADER_TEXT_MAX_LENGTH:
-            final_msg = msg[: _HEADER_TEXT_MAX_LENGTH - 3] + "..."
+        if len(msg) > HeaderBlock.text_max_length:
+            final_msg = msg[: HeaderBlock.text_max_length - 3] + "..."
         else:
             final_msg = msg
 

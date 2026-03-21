@@ -30,17 +30,12 @@ requests = ">=2.28.1,<3.0.0"
 beautifulsoup4 = "<5.0.0"
 ratelimit = "*"
 posthog = "<3.0.0"
-boto3 = "<2.0.0"
-google-cloud-storage = ">=2.4,<3.2"
 "ruamel.yaml" = "<1.0.0"
 alive-progress = "<=2.3.1"
-slack-sdk = ">=3.20.1,<4.0.0"
 
 pydantic = "<3.0"
 networkx = ">=2.3,<3"
 packaging = ">=20.9"
-azure-storage-blob = ">=12.11.0"
-pymsteams = ">=0.2.2,<1.0.0"
 tabulate = ">= 0.9.0"
 tenacity = ">=8.0,<10.0"
 pytz = ">= 2025.1"
@@ -60,6 +55,12 @@ dbt-fabric = {version = ">=1.8,<2.0.0", optional = true}
 dbt-fabricspark = {version = ">=1.8,<2.0.0", optional = true}
 dbt-sqlserver = {version = ">=1.8,<2.0.0", optional = true}
 dbt-vertica = {version = ">=1.8,<2.0.0", optional = true}
+boto3 = {version = "<2.0.0", optional = true}
+google-cloud-storage = {version = ">=2.4,<3.2", optional = true}
+azure-storage-blob = {version = ">=12.11.0", optional = true}
+slack-sdk = {version = ">=3.20.1,<4.0.0", optional = true}
+pymsteams = {version = ">=0.2.2,<1.0.0", optional = true}
+
 [tool.poetry.extras]
 snowflake = ["dbt-snowflake"]
 bigquery = ["dbt-bigquery"]
@@ -76,15 +77,17 @@ fabric = ["dbt-fabric"]
 fabricspark = ["dbt-fabricspark"]
 sqlserver = ["dbt-sqlserver"]
 vertica = ["dbt-vertica"]
+
 s3 = ["boto3"]
 gcs = ["google-cloud-storage"]
 azure = ["azure-storage-blob"]
 slack = ["slack-sdk"]
 teams = ["pymsteams"]
+
 # dbt-fabricspark is excluded due to broken upstream dependencies (azure-cli pre-release pins).
 # dbt-vertica is excluded because it pins dbt-core==1.8.5, forcing the entire resolution to dbt 1.8.
 # Both are still available as individual extras (e.g. pip install elementary-data[vertica]).
-all = ["dbt-snowflake", "dbt-bigquery", "dbt-redshift", "dbt-postgres", "dbt-databricks", "dbt-spark", "dbt-athena-community", "dbt-trino", "dbt-clickhouse", "dbt-duckdb", "dbt-dremio", "dbt-fabric", "dbt-sqlserver"]
+all = ["dbt-snowflake", "dbt-bigquery", "dbt-redshift", "dbt-postgres", "dbt-databricks", "dbt-spark", "dbt-athena-community", "dbt-trino", "dbt-clickhouse", "dbt-duckdb", "dbt-dremio", "dbt-fabric", "dbt-sqlserver", "boto3", "google-cloud-storage", "azure-storage-blob", "slack-sdk", "pymsteams"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

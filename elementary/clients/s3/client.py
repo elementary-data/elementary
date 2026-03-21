@@ -1,10 +1,11 @@
 from os import path
 from typing import Optional, Tuple
 
+import boto3
+
 from elementary.config.config import Config
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils import bucket_path
-from elementary.utils.deps import import_optional_dependency
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
@@ -13,7 +14,6 @@ logger = get_logger(__name__)
 class S3Client:
     def __init__(self, config: Config, tracking: Optional[Tracking] = None):
         self.config = config
-        boto3 = import_optional_dependency("boto3", "s3")
         aws_session = boto3.Session(
             profile_name=config.aws_profile_name,
             region_name=config.aws_region_name,

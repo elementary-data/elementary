@@ -263,10 +263,9 @@ class Config:
         if self.google_service_account_path:
             return True
         try:
-            from elementary.utils.deps import import_optional_dependency
+            import google.auth  # type: ignore[import]
 
-            google_auth = import_optional_dependency("google.auth", "gcs")
-            google_auth.default()
+            google.auth.default()
             return True
         except ImportError:
             return False

@@ -1,16 +1,13 @@
-from __future__ import annotations
-
 import json
 import ssl
 import time
-from typing import TYPE_CHECKING, Any, Dict, Iterator, Optional
+from typing import Any, Dict, Iterator, Optional
 
 from ratelimit import limits, sleep_and_retry
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
+from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
 from typing_extensions import TypeAlias
-
-if TYPE_CHECKING:
-    from slack_sdk import WebClient
-    from slack_sdk.errors import SlackApiError
 
 from elementary.messages.formats.block_kit import (
     FormattedBlockKitMessage,
@@ -25,7 +22,6 @@ from elementary.messages.messaging_integrations.exceptions import (
     MessagingIntegrationError,
 )
 from elementary.tracking.tracking_interface import Tracking
-from elementary.utils.deps import import_optional_dependency
 from elementary.utils.log import get_logger
 from elementary.utils.pydantic_shim import BaseModel
 
@@ -65,10 +61,7 @@ class SlackWebMessagingIntegration(
         ssl_context: Optional[ssl.SSLContext] = None,
         **kwargs: Any,
     ) -> "SlackWebMessagingIntegration":
-        slack_sdk = import_optional_dependency("slack_sdk", "slack")
-        from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
-
-        client = slack_sdk.WebClient(token=token, ssl=ssl_context)
+        client = WebClient(token=token, ssl=ssl_context)
         client.retry_handlers.append(RateLimitErrorRetryHandler(max_retry_count=5))
         return cls(client, tracking, **kwargs)
 
@@ -110,8 +103,6 @@ class SlackWebMessagingIntegration(
         thread_ts: Optional[str] = None,
         reply_broadcast: bool = False,
     ) -> MessageSendResult[SlackWebMessageContext]:
-        from slack_sdk.errors import SlackApiError
-
         try:
             response = self.client.chat_postMessage(
                 channel=destination,
@@ -189,8 +180,6 @@ class SlackWebMessagingIntegration(
         raise MessagingIntegrationError(f"Channel {channel_name} not found")
 
     def _join_channel(self, channel_id: str) -> None:
-        from slack_sdk.errors import SlackApiError
-
         try:
             self.client.conversations_join(channel=channel_id)
         except SlackApiError as e:
@@ -201,8 +190,6 @@ class SlackWebMessagingIntegration(
     @sleep_and_retry
     @limits(calls=50, period=ONE_MINUTE)
     def get_user_id_from_email(self, email: str) -> Optional[str]:
-        from slack_sdk.errors import SlackApiError
-
         if email in self._email_to_user_id_cache:
             return self._email_to_user_id_cache[email]
         try:
