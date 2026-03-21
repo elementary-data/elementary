@@ -17,7 +17,7 @@ jobs:
 
       # mainly needed so mypy will have the dependencies it needs
       - name: Install elementary
-        run: pip install -e .
+        run: pip install -e ".[integrations]"
 
       - name: Install dev requirements
         run: pip install -r dev-requirements.txt

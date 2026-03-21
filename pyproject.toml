@@ -40,6 +40,12 @@ tabulate = ">= 0.9.0"
 tenacity = ">=8.0,<10.0"
 pytz = ">= 2025.1"
 
+boto3 = {version = "<2.0.0", optional = true}
+google-cloud-storage = {version = ">=2.4,<3.2", optional = true}
+slack-sdk = {version = ">=3.20.1,<4.0.0", optional = true}
+azure-storage-blob = {version = ">=12.11.0", optional = true}
+pymsteams = {version = ">=0.2.2,<1.0.0", optional = true}
+
 dbt-snowflake = {version = ">=1.8,<2.0.0", optional = true}
 dbt-bigquery = {version = ">=1.8,<2.0.0", optional = true}
 dbt-redshift = {version = ">=1.8,<2.0.0", optional = true}
@@ -55,11 +61,6 @@ dbt-fabric = {version = ">=1.8,<2.0.0", optional = true}
 dbt-fabricspark = {version = ">=1.8,<2.0.0", optional = true}
 dbt-sqlserver = {version = ">=1.8,<2.0.0", optional = true}
 dbt-vertica = {version = ">=1.8,<2.0.0", optional = true}
-boto3 = {version = "<2.0.0", optional = true}
-google-cloud-storage = {version = ">=2.4,<3.2", optional = true}
-azure-storage-blob = {version = ">=12.11.0", optional = true}
-slack-sdk = {version = ">=3.20.1,<4.0.0", optional = true}
-pymsteams = {version = ">=0.2.2,<1.0.0", optional = true}
 
 [tool.poetry.extras]
 snowflake = ["dbt-snowflake"]
@@ -83,6 +84,7 @@ gcs = ["google-cloud-storage"]
 azure = ["azure-storage-blob"]
 slack = ["slack-sdk"]
 teams = ["pymsteams"]
+integrations = ["boto3", "google-cloud-storage", "azure-storage-blob", "slack-sdk", "pymsteams"]
 
 # dbt-fabricspark is excluded due to broken upstream dependencies (azure-cli pre-release pins).
 # dbt-vertica is excluded because it pins dbt-core==1.8.5, forcing the entire resolution to dbt 1.8.
