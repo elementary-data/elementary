@@ -1,7 +1,7 @@
 import json
 from datetime import datetime, timezone
 from http import HTTPStatus
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import requests
 from ratelimit import limits, sleep_and_retry
@@ -26,7 +26,6 @@ logger = get_logger(__name__)
 
 Channel: TypeAlias = Optional[str]
 ONE_SECOND = 1
-TEAMS_PAYLOAD_SIZE_LIMIT = 27 * 1024
 
 
 class TeamsWebhookHttpError(MessagingIntegrationError):
@@ -38,8 +37,16 @@ class TeamsWebhookHttpError(MessagingIntegrationError):
         )
 
 
-def _build_payload(card: dict) -> dict:
-    return {
+class TeamsWebhookPayloadTooLargeError(MessagingIntegrationError):
+    def __init__(self, response: requests.Response, payload_size: int | None = None):
+        self.status_code = response.status_code
+        self.response = response
+        size_info = f" ({payload_size} bytes)" if payload_size is not None else ""
+        super().__init__(f"Teams webhook payload size{size_info} exceeds limit")
+
+
+def send_adaptive_card(webhook_url: str, card: dict) -> requests.Response:
+    payload = {
         "type": "message",
         "attachments": [
             {
@@ -49,60 +56,6 @@ def _build_payload(card: dict) -> dict:
             }
         ],
     }
-
-
-def _truncation_notice_item() -> Dict[str, Any]:
-    return {
-        "type": "TextBlock",
-        "text": "_... Content truncated due to message size limits._",
-        "wrap": True,
-        "isSubtle": True,
-    }
-
-
-def _minimal_card(card: dict) -> dict:
-    return {
-        **card,
-        "body": [
-            {
-                "type": "TextBlock",
-                "text": "Alert content too large to display in Teams.",
-                "wrap": True,
-                "weight": "bolder",
-            }
-        ],
-    }
-
-
-def _truncate_card(card: dict) -> dict:
-    body: List[Dict[str, Any]] = list(card.get("body", []))
-    if not body:
-        return card
-
-    while len(body) > 1:
-        payload = _build_payload({**card, "body": body + [_truncation_notice_item()]})
-        if len(json.dumps(payload)) <= TEAMS_PAYLOAD_SIZE_LIMIT:
-            break
-        body.pop()
-
-    truncated = {**card, "body": body + [_truncation_notice_item()]}
-    if len(json.dumps(_build_payload(truncated))) > TEAMS_PAYLOAD_SIZE_LIMIT:
-        return _minimal_card(card)
-    return truncated
-
-
-def send_adaptive_card(webhook_url: str, card: dict) -> requests.Response:
-    payload = _build_payload(card)
-    payload_json = json.dumps(payload)
-    if len(payload_json) > TEAMS_PAYLOAD_SIZE_LIMIT:
-        logger.warning(
-            "Teams webhook payload size (%d bytes) exceeds limit (%d bytes), "
-            "truncating card body",
-            len(payload_json),
-            TEAMS_PAYLOAD_SIZE_LIMIT,
-        )
-        card = _truncate_card(card)
-        payload = _build_payload(card)
 
     response = requests.post(
         webhook_url,
@@ -134,6 +87,7 @@ class TeamsWebhookMessagingIntegration(
         body: MessageBody,
     ) -> MessageSendResult[EmptyMessageContext]:
         card = format_adaptive_card(body)
+        payload_json = json.dumps(card)
         try:
             response = send_adaptive_card(self.url, card)
             # For the old teams webhook version of Teams simply returning status code 200
@@ -145,6 +99,11 @@ class TeamsWebhookMessagingIntegration(
             if response.status_code not in (HTTPStatus.OK, HTTPStatus.ACCEPTED) or (
                 response.status_code == HTTPStatus.OK and len(response.text) > 1
             ):
+                if "HTTP error 413" in response.text:
+                    raise TeamsWebhookPayloadTooLargeError(
+                        response, payload_size=len(payload_json)
+                    )
+
                 raise MessagingIntegrationError(
                     f"Could not post message to Teams via webhook. Status code: {response.status_code}, Error: {response.text}"
                 )
