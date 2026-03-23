@@ -13,12 +13,38 @@ This guide contains the necessary steps to connect a Databricks environment to y
 In the Elementary platform, go to Environments in the left menu, and click on the "Create Environment" button.
 Choose a name for your environment, and then choose Databricks as your data warehouse type.
 
-Provide the following fields in the form:
+Provide the following common fields in the form:
 
 - **Server Host**: The hostname of your Databricks account to connect to.
 - **Http path**: The path to the Databricks cluster or SQL warehouse.
-- **Access token**: The token you generated for the Elementary service principal (see step 7 under "Create service principal" above)
 - **Catalog (optional)**: The name of the Databricks Catalog.
 - **Elementary schema**: The name of your Elementary schema. Usually `[your dbt target schema]_elementary`.
+
+Then, select your authentication method:
+
+#### OAuth (M2M) — Recommended
+
+{/* TODO: Add screenshot of the Elementary environment form with OAuth (M2M) selected */}
+
+- **Client ID**: The Application (client) ID of the service principal (the "Application ID" you copied in [step 5](#create-service-principal)).
+- **Client secret**: The OAuth secret you generated for the service principal (see [step 7](#create-service-principal)).
+
+<Info>
+  OAuth machine-to-machine (M2M) authentication is the recommended method for connecting to Databricks.
+  It uses short-lived tokens that are automatically refreshed, providing better security compared to
+  long-lived personal access tokens.
+</Info>
+
+#### Access token (legacy)
+
+{/* TODO: Add screenshot of the Elementary environment form with Access token (legacy) selected */}
+
+- **Access token**: A personal access token generated for the Elementary service principal.
+
+<Warning>
+  Personal access tokens are considered legacy authentication. We recommend using OAuth (M2M) instead
+  for improved security and automatic token rotation. If you are currently using a personal access token,
+  consider migrating to OAuth (M2M).
+</Warning>
 
 <IpAllowlist />

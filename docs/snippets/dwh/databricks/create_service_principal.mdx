@@ -32,15 +32,30 @@ to access your Databricks instance.
   alt="Add databricks SQL access"
 />
 
-6. Next, you may also need to allow Token Usage for this service principal (if it is not allowed for all users). To do so, under the settings menu choose Advanced -> Personal Access Tokens -> Permission Settings.
-Then add the service principal there.
+6. Next, generate credentials for your service principal. Choose one of the following methods:
 
-<img
-  src="https://res.cloudinary.com/dgpojk42n/image/upload/v1763316575/databricks_06_token_usage_eufjwv.png"
-  alt="Add databricks SQL access"
-/>
+   **Option A: Generate an OAuth secret (Recommended)**
 
-7. Create a personal access token for your service principal. For more details, please click [here](https://docs.databricks.com/aws/en/dev-tools/auth/pat#databricks-personal-access-tokens-for-service-principals)
+   On the service principal page, go to the *Secrets* tab and click *Generate secret*. Copy the **Client ID** (this is the same as the "Application ID" from step 5) and the generated **Client secret** — you will need both when configuring the Elementary environment.
 
-8. Finally, in order to enable Elementary's automated monitors feature, please ensure [predictive optimization](https://docs.databricks.com/aws/en/optimizations/predictive-optimization#enable-or-disable-predictive-optimization-for-your-account) is enabled in your account.
+   {/* TODO: Add screenshot of Databricks service principal Secrets tab with "Generate secret" button */}
+
+   <Info>
+     OAuth secrets are the recommended authentication method. They enable short-lived token generation
+     with automatic refresh, providing better security than long-lived personal access tokens.
+   </Info>
+
+   **Option B: Create a personal access token (legacy)**
+
+   You may also need to allow Token Usage for this service principal (if it is not allowed for all users). To do so, under the settings menu choose Advanced -> Personal Access Tokens -> Permission Settings.
+   Then add the service principal there.
+
+   <img
+     src="https://res.cloudinary.com/dgpojk42n/image/upload/v1763316575/databricks_06_token_usage_eufjwv.png"
+     alt="Allow token usage for service principal"
+   />
+
+   Then, create a personal access token for your service principal. For more details, please click [here](https://docs.databricks.com/aws/en/dev-tools/auth/pat#databricks-personal-access-tokens-for-service-principals).
+
+7. Finally, in order to enable Elementary's automated monitors feature, please ensure [predictive optimization](https://docs.databricks.com/aws/en/optimizations/predictive-optimization#enable-or-disable-predictive-optimization-for-your-account) is enabled in your account.
 This is required for table statistics to be updated (Elementary relies on this to obtain up-to-date row counts)
