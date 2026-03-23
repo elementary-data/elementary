@@ -203,7 +203,12 @@
                   "cloud/integrations/dwh/athena",
                   "cloud/integrations/dwh/dremio",
                   "cloud/integrations/dwh/clickhouse",
-                  "cloud/integrations/dwh/trino"
+                  "cloud/integrations/dwh/trino",
+                  "cloud/integrations/dwh/duckdb",
+                  "cloud/integrations/dwh/spark",
+                  "cloud/integrations/dwh/fabric",
+                  "cloud/integrations/dwh/sqlserver",
+                  "cloud/integrations/dwh/vertica"
                 ]
               },
               {
