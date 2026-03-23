@@ -77,13 +77,13 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: Checkout Elementary
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: elementary
           ref: ${{ inputs.elementary-ref }}
 
       - name: Checkout dbt package
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: elementary-data/dbt-data-reliability
           path: dbt-data-reliability
