@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - name: Checkout Elementary
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up QEMU for multi-platform support
         uses: docker/setup-qemu-action@v3

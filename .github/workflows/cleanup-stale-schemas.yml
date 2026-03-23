@@ -31,7 +31,7 @@ jobs:
           - athena
     steps:
       - name: Checkout dbt package
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: elementary-data/dbt-data-reliability
           path: dbt-data-reliability
