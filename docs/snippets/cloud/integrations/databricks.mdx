@@ -24,7 +24,10 @@ Then, select your authentication method:
 
 #### OAuth (M2M) — Recommended
 
-{/* TODO: Add screenshot of the Elementary environment form with OAuth (M2M) selected */}
+<img
+  src="https://res.cloudinary.com/dgpojk42n/image/upload/v1774307890/databricks_form_oauth_m2m_v0jhp9.png"
+  alt="Authenticate with M2M OAuth"
+/>
 
 - **Client ID**: The Application (client) ID of the service principal (the "Application ID" you copied in [step 5](#create-service-principal)).
 - **Client secret**: The OAuth secret you generated for the service principal (see [step 7](#create-service-principal)).
@@ -37,14 +40,11 @@ Then, select your authentication method:
 
 #### Access token (legacy)
 
-{/* TODO: Add screenshot of the Elementary environment form with Access token (legacy) selected */}
+<img
+  src="https://res.cloudinary.com/dgpojk42n/image/upload/v1774307890/databricks_form_token_dluwcr.png"
+  alt="Authenticate with Access Token"
+/>
 
 - **Access token**: A personal access token generated for the Elementary service principal.
-
-<Warning>
-  Personal access tokens are considered legacy authentication. We recommend using OAuth (M2M) instead
-  for improved security and automatic token rotation. If you are currently using a personal access token,
-  consider migrating to OAuth (M2M).
-</Warning>
 
 <IpAllowlist />

@@ -39,6 +39,14 @@ to access your Databricks instance.
    On the service principal page, go to the *Secrets* tab and click *Generate secret*. Copy the **Client ID** (this is the same as the "Application ID" from step 5) and the generated **Client secret** — you will need both when configuring the Elementary environment.
 
    {/* TODO: Add screenshot of Databricks service principal Secrets tab with "Generate secret" button */}
+   <img
+     src="https://res.cloudinary.com/dgpojk42n/image/upload/v1774307890/databricks_m2m_oauth_1_lzix16.png"
+     alt="Generate OAuth M2M Secret (1)"
+   />
+   <img
+     src="https://res.cloudinary.com/dgpojk42n/image/upload/v1774307890/databrick_m2m_oauth_2_yhwws8.png"
+     alt="Generate OAuth M2M Secret (2)"
+   />
 
    <Info>
      OAuth secrets are the recommended authentication method. They enable short-lived token generation
@@ -47,8 +55,8 @@ to access your Databricks instance.
 
    **Option B: Create a personal access token (legacy)**
 
-   You may also need to allow Token Usage for this service principal (if it is not allowed for all users). To do so, under the settings menu choose Advanced -> Personal Access Tokens -> Permission Settings.
-   Then add the service principal there.
+   In order to generate a personal access token for your service principal, you may first need to allow Token Usage for it.
+   To do so, go to the settings menu and choose Advanced -> Personal Access Tokens -> Permission Settings, then make sure the service principal is in the list.
 
    <img
      src="https://res.cloudinary.com/dgpojk42n/image/upload/v1763316575/databricks_06_token_usage_eufjwv.png"
