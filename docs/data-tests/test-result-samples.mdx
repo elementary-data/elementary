@@ -186,46 +186,34 @@ models:
             tags: ['show_sample_rows']
 ```
 
-### Using both PII and `show_sample_rows` together
-
-Both features can be enabled at the same time. **PII always takes precedence** -- if a model, column, or test has a PII tag, samples remain hidden even if `show_sample_rows` is also present.
-
-```yaml
-vars:
-  disable_samples_on_pii_tags: true
-  enable_samples_on_show_sample_rows_tags: true
-```
-
 ## Behavior matrix
 
-| `enable_samples_on_show_sample_rows_tags` | `disable_samples_on_pii_tags` | Level | Tags | Samples shown? |
-| --- | --- | --- | --- | --- |
-| `true` | `false` | model | none | No (hidden by default) |
-| `true` | `false` | model | `show_sample_rows` | Yes |
-| `true` | `false` | model | `pii` | No (hidden by default, PII feature not active) |
-| `true` | `false` | test | `show_sample_rows` | Yes |
-| `true` | `false` | column | `show_sample_rows` | Yes |
-| `true` | `true` | model | none | No (hidden by default) |
-| `true` | `true` | model | `show_sample_rows` | Yes |
-| `true` | `true` | model | `pii` | No (PII wins) |
-| `true` | `true` | model | `pii` + `show_sample_rows` | No (PII wins) |
-| `true` | `true` | test | `show_sample_rows` | Yes |
-| `true` | `true` | test | `pii` | No (PII wins) |
-| `true` | `true` | column | `show_sample_rows` (no pii) | Yes |
-| `true` | `true` | column | `pii` + `show_sample_rows` | No (PII wins) |
-| `false` | `true` | model | none | Yes |
-| `false` | `true` | model | `pii` | No |
-| `false` | `true` | test | `pii` | No |
-| `false` | `true` | column | `pii` | No |
-| `false` | `true` | column | `show_sample_rows` (no pii) | Yes (excluded from PII columns) |
-| `false` | `false` | any | any | Yes (both features off) |
+### `enable_samples_on_show_sample_rows_tags: true`
+
+| Level | Tags | Samples shown? |
+| --- | --- | --- |
+| model | none | No (hidden by default) |
+| model | `show_sample_rows` | Yes |
+| model | `pii` | No (hidden by default) |
+| test | `show_sample_rows` | Yes |
+| column | `show_sample_rows` | Yes |
+
+### `disable_samples_on_pii_tags: true`
+
+| Level | Tags | Samples shown? |
+| --- | --- | --- |
+| model | none | Yes |
+| model | `pii` | No |
+| test | `pii` | No |
+| column | `pii` | No |
+| column | `show_sample_rows` (no pii) | Yes (excluded from PII columns) |
 
 ## Configuration precedence
 
 When multiple settings apply, Elementary follows this order (highest priority first):
 
 1. **`disable_test_samples` in test meta** -- per-test on/off switch
-2. **`show_sample_rows` tag** -- when `enable_samples_on_show_sample_rows_tags: true` and the model, column, or test has a matching tag (unless overridden by PII)
+2. **`show_sample_rows` tag** -- when `enable_samples_on_show_sample_rows_tags: true` and the model, column, or test has a matching tag
 3. **`enable_samples_on_show_sample_rows_tags`** -- hides all samples by default when enabled
 4. **PII tag detection** -- when `disable_samples_on_pii_tags: true` and the model, column, or test has a matching tag
 5. **`test_sample_row_count` global var** -- project-wide sample size
