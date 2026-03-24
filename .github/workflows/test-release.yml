@@ -64,7 +64,7 @@ jobs:
           echo "Everything ran successfully, you can bump version to ${{ needs.get-latest-release-tags.outputs.py-bumped-number }}"
       - name: recommend breaking change upgrade
         if: ${{ failure() }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         with:
           script: |
             core.setFailed("Upgrade validation failed. Make sure you do anything to keep backwards compatibility - If not possible, update minor.")
