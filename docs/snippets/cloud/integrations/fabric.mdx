@@ -1,4 +1,5 @@
 import IpAllowlist from '/snippets/cloud/integrations/ip-allowlist.mdx';
+import PermissionsAndSecurity from '/snippets/cloud/integrations/permissions-and-security.mdx';
 
 This guide contains the necessary steps to connect a Microsoft Fabric environment to your Elementary account.
 
@@ -16,7 +17,25 @@ If you don't already have a service principal configured:
 2. Give it a name (e.g. `elementary-fabric`) and register it.
 3. Note the **Application (client) ID** and **Directory (tenant) ID**.
 4. Go to **Certificates & secrets** > **New client secret**, create a secret, and copy the **Value**.
-5. In your Fabric workspace, grant the service principal access (e.g. add it as a **Contributor** or **Member** in the workspace settings).
+5. In your Fabric workspace, add the service principal as a **Viewer** in the workspace settings. This is the minimum workspace-level role required for connectivity.
+
+### Grant minimal permissions
+
+Elementary Cloud only requires **read-only access to the Elementary schema** and **metadata access** (e.g. `INFORMATION_SCHEMA`). We recommend granting only the minimum permissions needed.
+
+After the service principal can connect, run the following statements in your Fabric warehouse with admin permissions:
+
+```sql
+-- Grant read-only access to the Elementary schema
+GRANT SELECT ON SCHEMA :: [<your_elementary_schema>] TO [<service_principal_name>];
+
+-- Grant access to view metadata (table definitions, columns, etc.)
+GRANT VIEW DEFINITION ON SCHEMA :: [<your_elementary_schema>] TO [<service_principal_name>];
+```
+
+Replace `<your_elementary_schema>` with the name of your Elementary schema (usually `[your dbt target schema]_elementary`), and `<service_principal_name>` with the display name of your service principal.
+
+<PermissionsAndSecurity />
 
 ### Fill the connection form
 
