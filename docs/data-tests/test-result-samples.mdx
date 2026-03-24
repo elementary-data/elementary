@@ -139,9 +139,18 @@ models:
 
 ```yaml
 vars:
-  enable_samples_on_show_sample_rows_tags: true     # Hide all samples by default (default: false)
-  show_sample_rows_tags: ['show_sample_rows']        # Tags that allow samples (default: ['show_sample_rows'])
+  enable_samples_on_show_sample_rows_tags: true   # Hide all samples by default (default: false)
 ```
+
+By default, the tag `show_sample_rows` is used to opt in. You can customize this with the `show_sample_rows_tags` variable -- just like `pii_tags` lets you customize which tags trigger PII protection:
+
+```yaml
+vars:
+  enable_samples_on_show_sample_rows_tags: true
+  show_sample_rows_tags: ['show_sample_rows', 'debug']   # default: ['show_sample_rows']
+```
+
+Tag matching is **case-insensitive**.
 
 ### Tag levels
 
@@ -179,7 +188,7 @@ models:
 
 ### Using both PII and `show_sample_rows` together
 
-Both features can be enabled at the same time. **PII always takes precedence** -- if a model or column has a PII tag, samples remain hidden even if `show_sample_rows` is also present.
+Both features can be enabled at the same time. **PII always takes precedence** -- if a model, column, or test has a PII tag, samples remain hidden even if `show_sample_rows` is also present.
 
 ```yaml
 vars:
@@ -187,14 +196,42 @@ vars:
   enable_samples_on_show_sample_rows_tags: true
 ```
 
-| Model tags | Column tags | Samples shown? |
+## Behavior matrix
+
+The table below shows the resulting behavior for all combinations of the two feature flags.
+
+### Only `enable_samples_on_show_sample_rows_tags: true`
+
+| Level | Tags | Samples shown? |
 | --- | --- | --- |
-| `show_sample_rows` | -- | Yes |
-| `pii` | -- | No |
-| `pii` + `show_sample_rows` | -- | No (PII wins) |
-| `show_sample_rows` | `pii` on test column | No (PII wins) |
-| `show_sample_rows` | `show_sample_rows` on test column | Yes |
-| none | none | No (hidden by default) |
+| model | none | No (hidden by default) |
+| model | `show_sample_rows` | Yes |
+| model | `pii` (only) | No (hidden by default, PII feature not active) |
+| test | `show_sample_rows` | Yes |
+| column | `show_sample_rows` | Yes |
+
+### Only `disable_samples_on_pii_tags: true`
+
+| Level | Tags | Samples shown? |
+| --- | --- | --- |
+| model | none | Yes |
+| model | `pii` | No |
+| test | `pii` | No |
+| column | `pii` | No |
+| column | `show_sample_rows` (no pii) | Yes (excluded from PII columns) |
+
+### Both flags enabled
+
+| Level | Tags | Samples shown? |
+| --- | --- | --- |
+| model | none | No (hidden by default) |
+| model | `show_sample_rows` | Yes |
+| model | `pii` | No (PII wins) |
+| model | `pii` + `show_sample_rows` | No (PII wins) |
+| test | `show_sample_rows` | Yes |
+| test | `pii` | No (PII wins) |
+| column | `show_sample_rows` (no pii) | Yes |
+| column | `pii` + `show_sample_rows` | No (PII wins) |
 
 ## Configuration precedence
 
