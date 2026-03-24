@@ -112,7 +112,7 @@ jobs:
       - name: Restore seed cache
         id: seed-cache
         if: steps.seed-cache-key.outputs.seed-hash
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: /tmp/seed-cache-${{ inputs.warehouse-type }}
           key: seed-${{ inputs.warehouse-type }}-${{ steps.seed-cache-key.outputs.seed-hash }}
@@ -175,7 +175,7 @@ jobs:
           docker compose up -d --wait vertica
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
 
@@ -374,7 +374,7 @@ jobs:
           echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Upload report artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ steps.set_report_artifact_name.outputs.artifact_name }}
           path: elementary/edr_target/elementary_report.html
@@ -416,7 +416,7 @@ jobs:
 
       - name: Upload edr log
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ steps.set_artifact_name.outputs.artifact_name }}
           path: elementary/edr_target/edr.log
