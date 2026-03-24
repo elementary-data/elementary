@@ -198,40 +198,27 @@ vars:
 
 ## Behavior matrix
 
-The table below shows the resulting behavior for all combinations of the two feature flags.
-
-### Only `enable_samples_on_show_sample_rows_tags: true`
-
-| Level | Tags | Samples shown? |
-| --- | --- | --- |
-| model | none | No (hidden by default) |
-| model | `show_sample_rows` | Yes |
-| model | `pii` (only) | No (hidden by default, PII feature not active) |
-| test | `show_sample_rows` | Yes |
-| column | `show_sample_rows` | Yes |
-
-### Only `disable_samples_on_pii_tags: true`
-
-| Level | Tags | Samples shown? |
-| --- | --- | --- |
-| model | none | Yes |
-| model | `pii` | No |
-| test | `pii` | No |
-| column | `pii` | No |
-| column | `show_sample_rows` (no pii) | Yes (excluded from PII columns) |
-
-### Both flags enabled
-
-| Level | Tags | Samples shown? |
-| --- | --- | --- |
-| model | none | No (hidden by default) |
-| model | `show_sample_rows` | Yes |
-| model | `pii` | No (PII wins) |
-| model | `pii` + `show_sample_rows` | No (PII wins) |
-| test | `show_sample_rows` | Yes |
-| test | `pii` | No (PII wins) |
-| column | `show_sample_rows` (no pii) | Yes |
-| column | `pii` + `show_sample_rows` | No (PII wins) |
+| `enable_samples_on_show_sample_rows_tags` | `disable_samples_on_pii_tags` | Level | Tags | Samples shown? |
+| --- | --- | --- | --- | --- |
+| `true` | `false` | model | none | No (hidden by default) |
+| `true` | `false` | model | `show_sample_rows` | Yes |
+| `true` | `false` | model | `pii` | No (hidden by default, PII feature not active) |
+| `true` | `false` | test | `show_sample_rows` | Yes |
+| `true` | `false` | column | `show_sample_rows` | Yes |
+| `true` | `true` | model | none | No (hidden by default) |
+| `true` | `true` | model | `show_sample_rows` | Yes |
+| `true` | `true` | model | `pii` | No (PII wins) |
+| `true` | `true` | model | `pii` + `show_sample_rows` | No (PII wins) |
+| `true` | `true` | test | `show_sample_rows` | Yes |
+| `true` | `true` | test | `pii` | No (PII wins) |
+| `true` | `true` | column | `show_sample_rows` (no pii) | Yes |
+| `true` | `true` | column | `pii` + `show_sample_rows` | No (PII wins) |
+| `false` | `true` | model | none | Yes |
+| `false` | `true` | model | `pii` | No |
+| `false` | `true` | test | `pii` | No |
+| `false` | `true` | column | `pii` | No |
+| `false` | `true` | column | `show_sample_rows` (no pii) | Yes (excluded from PII columns) |
+| `false` | `false` | any | any | Yes (both features off) |
 
 ## Configuration precedence
 
