@@ -74,7 +74,7 @@ models:
 
 ## PII protection
 
-Elementary provides built-in protection for sensitive data by automatically disabling test sample collection for tables tagged as PII.
+Elementary provides built-in protection for sensitive data by automatically disabling test sample collection when a PII tag is detected.
 
 ### Enable PII protection
 
@@ -83,12 +83,16 @@ Add these variables to your `dbt_project.yml`:
 ```yaml
 vars:
   disable_samples_on_pii_tags: true   # Enable PII protection (default: false)
-  pii_tags: ['pii', 'sensitive']      # Tags that identify PII tables (default: ['pii'])
+  pii_tags: ['pii', 'sensitive']      # Tags that identify PII data (default: ['pii'])
 ```
 
-### Tag tables as PII
+PII tag matching is **case-insensitive** -- `PII`, `pii`, and `Pii` are all equivalent.
 
-Tag individual models:
+### Tag levels
+
+PII tags are evaluated at three levels:
+
+**Model level** -- disables samples for all tests on that model:
 
 ```yaml
 models:
@@ -97,43 +101,111 @@ models:
       tags: ['pii']
 ```
 
-Or tag entire directories:
+**Column level** -- disables samples for tests that reference that column:
 
 ```yaml
-# dbt_project.yml
+models:
+  - name: customer_data
+    columns:
+      - name: email
+        tags: ['pii']
+```
+
+**Test level** -- disables samples for that specific test:
+
+```yaml
+models:
+  - name: customer_data
+    data_tests:
+      - elementary.volume_anomalies:
+          config:
+            tags: ['pii']
+```
+
+You can also tag entire directories in `dbt_project.yml`:
+
+```yaml
 models:
   my_project:
     sensitive_data:
       +tags: ['pii']
 ```
 
-PII tag matching is **case-insensitive** -- `PII`, `pii`, and `Pii` are all equivalent.
+## Showing samples selectively with `show_sample_rows`
 
-### Override PII protection for specific tests
+`show_sample_rows` is the inverse of PII protection. When enabled, **all samples are hidden by default** and only shown for models, columns, or tests that are explicitly tagged.
 
-If a table is tagged as PII but you want to allow samples for a specific test, you can override:
+### Enable selective sample display
+
+```yaml
+vars:
+  enable_samples_on_show_sample_rows_tags: true     # Hide all samples by default (default: false)
+  show_sample_rows_tags: ['show_sample_rows']        # Tags that allow samples (default: ['show_sample_rows'])
+```
+
+### Tag levels
+
+Works at the same three levels as PII:
+
+**Model level** -- shows samples for all tests on that model:
 
 ```yaml
 models:
-  - name: customer_data
+  - name: orders
     config:
-      tags: ['pii']
+      tags: ['show_sample_rows']
+```
+
+**Column level** -- shows samples for tests that target that column:
+
+```yaml
+models:
+  - name: orders
+    columns:
+      - name: status
+        tags: ['show_sample_rows']
+```
+
+**Test level** -- shows samples for that specific test:
+
+```yaml
+models:
+  - name: orders
     data_tests:
       - elementary.volume_anomalies:
           config:
-            meta:
-              disable_test_samples: false  # Allow samples despite PII tag
+            tags: ['show_sample_rows']
 ```
+
+### Using both PII and `show_sample_rows` together
+
+Both features can be enabled at the same time. **PII always takes precedence** -- if a model or column has a PII tag, samples remain hidden even if `show_sample_rows` is also present.
+
+```yaml
+vars:
+  disable_samples_on_pii_tags: true
+  enable_samples_on_show_sample_rows_tags: true
+```
+
+| Model tags | Column tags | Samples shown? |
+| --- | --- | --- |
+| `show_sample_rows` | -- | Yes |
+| `pii` | -- | No |
+| `pii` + `show_sample_rows` | -- | No (PII wins) |
+| `show_sample_rows` | `pii` on test column | No (PII wins) |
+| `show_sample_rows` | `show_sample_rows` on test column | Yes |
+| none | none | No (hidden by default) |
 
 ## Configuration precedence
 
 When multiple settings apply, Elementary follows this order (highest priority first):
 
 1. **`disable_test_samples` in test meta** -- per-test on/off switch
-2. **`test_sample_row_count` in test meta** -- per-test sample size
-3. **PII tag detection** -- when `disable_samples_on_pii_tags: true` and the table has a matching tag
-4. **`test_sample_row_count` global var** -- project-wide sample size
-5. **Default** -- 5 rows
+2. **`show_sample_rows` tag** -- when `enable_samples_on_show_sample_rows_tags: true` and the model, column, or test has a matching tag (unless overridden by PII)
+3. **`enable_samples_on_show_sample_rows_tags`** -- hides all samples by default when enabled
+4. **PII tag detection** -- when `disable_samples_on_pii_tags: true` and the model, column, or test has a matching tag
+5. **`test_sample_row_count` global var** -- project-wide sample size
+6. **Default** -- 5 rows
 
 ## Elementary Cloud: additional controls
 
@@ -164,5 +236,7 @@ The Elementary team can configure an environment so that the `test_result_rows` 
 | `disable_test_samples` | Per-test | Test meta | `false` |
 | `disable_samples_on_pii_tags` | Global | `dbt_project.yml` vars | `false` |
 | `pii_tags` | Global | `dbt_project.yml` vars | `['pii']` |
+| `enable_samples_on_show_sample_rows_tags` | Global | `dbt_project.yml` vars | `false` |
+| `show_sample_rows_tags` | Global | `dbt_project.yml` vars | `['show_sample_rows']` |
 | Disable samples for environment | Per-environment | Contact Elementary team | Disabled |
 | Skip DB storage of sample rows | Per-environment | Contact Elementary team | Disabled |
