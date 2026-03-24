@@ -1,0 +1,39 @@
+import IpAllowlist from '/snippets/cloud/integrations/ip-allowlist.mdx';
+
+This guide contains the necessary steps to connect a Microsoft Fabric environment to your Elementary account.
+
+### Prerequisites
+
+- A Microsoft Fabric workspace with a warehouse or lakehouse SQL endpoint.
+- An Azure AD (Entra ID) app registration (service principal) with access to your Fabric workspace.
+- ODBC Driver 18 for SQL Server is used under the hood — no action needed on your side, it is pre-installed in Elementary Cloud.
+
+### Create an Azure AD service principal
+
+If you don't already have a service principal configured:
+
+1. In the [Azure portal](https://portal.azure.com), go to **Azure Active Directory** > **App registrations** > **New registration**.
+2. Give it a name (e.g. `elementary-fabric`) and register it.
+3. Note the **Application (client) ID** and **Directory (tenant) ID**.
+4. Go to **Certificates & secrets** > **New client secret**, create a secret, and copy the **Value**.
+5. In your Fabric workspace, grant the service principal access (e.g. add it as a **Contributor** or **Member** in the workspace settings).
+
+### Fill the connection form
+
+In the Elementary platform, go to **Environments** in the left menu, and click on the **Create Environment** button.
+Choose a name for your environment, and then choose **Fabric** as your data warehouse type.
+
+Provide the following fields:
+
+- **Server**: The Fabric SQL connection endpoint. You can find this in the Fabric portal under your warehouse settings. It typically looks like `<identifier>.datawarehouse.fabric.microsoft.com`.
+- **Port**: The port to connect to. Default is `1433`.
+- **Tenant ID**: The Azure AD (Entra ID) Directory (tenant) ID.
+- **Client ID**: The Azure AD Application (client) ID of the service principal.
+- **Client Secret**: The client secret value you generated for the service principal.
+
+Then, for each dbt project in your environment, provide:
+
+- **Database name**: The name of the Fabric warehouse or lakehouse SQL endpoint.
+- **Elementary schema**: The name of your Elementary schema. Usually `[your dbt target schema]_elementary`.
+
+<IpAllowlist />
