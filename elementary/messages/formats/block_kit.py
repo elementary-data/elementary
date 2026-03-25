@@ -1,7 +1,6 @@
 import json
 from typing import Any, Callable, List, Optional, Tuple
 
-from slack_sdk.models import blocks as slack_blocks
 from tabulate import tabulate
 
 from elementary.messages.blocks import (
@@ -105,11 +104,15 @@ class BlockKitBuilder:
             return value[: max_cell_length - 2] + ".."
         return value
 
+    # Slack Block Kit limits (avoid module-level slack_sdk import).
+    _SECTION_TEXT_MAX_LENGTH = 3000
+    _HEADER_TEXT_MAX_LENGTH = 150
+
     def _format_markdown_section_text(self, text: str) -> dict:
-        if len(text) > slack_blocks.SectionBlock.text_max_length:
+        if len(text) > self._SECTION_TEXT_MAX_LENGTH:
             text = (
                 text[
-                    : slack_blocks.SectionBlock.text_max_length
+                    : self._SECTION_TEXT_MAX_LENGTH
                     - len("...")
                     - self._LONGEST_MARKDOWN_SUFFIX_LEN
                 ]
@@ -198,8 +201,8 @@ class BlockKitBuilder:
         self._add_block(self._format_markdown_section("\n".join(formatted_lines)))
 
     def _add_header_block(self, block: HeaderBlock) -> None:
-        if len(block.text) > slack_blocks.HeaderBlock.text_max_length:
-            text = block.text[: slack_blocks.HeaderBlock.text_max_length - 3] + "..."
+        if len(block.text) > self._HEADER_TEXT_MAX_LENGTH:
+            text = block.text[: self._HEADER_TEXT_MAX_LENGTH - 3] + "..."
         else:
             text = block.text
         self._add_block(

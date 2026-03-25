@@ -216,9 +216,9 @@ jobs:
           # using ".[vertica]" would re-resolve dbt-vertica's deps and downgrade
           # dbt-core to ~=1.8.  Install elementary without the adapter extra.
           if [ "${{ inputs.warehouse-type }}" = "vertica" ]; then
-            pip install "."
+            pip install ".[s3,gcs,azure,slack]"
           else
-            pip install ".[${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || inputs.warehouse-type }}]"
+            pip install ".[${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || inputs.warehouse-type }},s3,gcs,azure,slack]"
           fi
 
       - name: Write dbt profiles

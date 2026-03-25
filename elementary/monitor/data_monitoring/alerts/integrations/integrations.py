@@ -6,20 +6,8 @@ from elementary.messages.messaging_integrations.base_messaging_integration impor
     BaseMessagingIntegration,
     DestinationType,
 )
-from elementary.messages.messaging_integrations.slack_web import (
-    SlackWebMessagingIntegration,
-)
-from elementary.messages.messaging_integrations.slack_webhook import (
-    SlackWebhookMessagingIntegration,
-)
-from elementary.messages.messaging_integrations.teams_webhook import (
-    TeamsWebhookMessagingIntegration,
-)
 from elementary.monitor.data_monitoring.alerts.integrations.base_integration import (
     BaseIntegration,
-)
-from elementary.monitor.data_monitoring.alerts.integrations.slack.slack import (
-    SlackIntegration,
 )
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils.log import get_logger
@@ -44,6 +32,16 @@ class Integrations:
         tracking: Optional[Tracking] = None,
     ) -> Union[BaseMessagingIntegration, BaseIntegration]:
         if config.has_slack:
+            from elementary.messages.messaging_integrations.slack_web import (
+                SlackWebMessagingIntegration,
+            )
+            from elementary.messages.messaging_integrations.slack_webhook import (
+                SlackWebhookMessagingIntegration,
+            )
+            from elementary.monitor.data_monitoring.alerts.integrations.slack.slack import (
+                SlackIntegration,
+            )
+
             ssl_context = create_ssl_context(config.ssl_ca_bundle)
             if config.is_slack_workflow:
                 return SlackIntegration(
@@ -61,6 +59,10 @@ class Integrations:
             else:
                 raise UnsupportedAlertIntegrationError
         elif config.has_teams:
+            from elementary.messages.messaging_integrations.teams_webhook import (
+                TeamsWebhookMessagingIntegration,
+            )
+
             return TeamsWebhookMessagingIntegration(config.teams_webhook)
         else:
             raise UnsupportedAlertIntegrationError
@@ -72,6 +74,16 @@ class Integrations:
         metadata: dict,
         override_config_defaults: bool = False,
     ) -> DestinationType:
+        from elementary.messages.messaging_integrations.slack_web import (
+            SlackWebMessagingIntegration,
+        )
+        from elementary.messages.messaging_integrations.slack_webhook import (
+            SlackWebhookMessagingIntegration,
+        )
+        from elementary.messages.messaging_integrations.teams_webhook import (
+            TeamsWebhookMessagingIntegration,
+        )
+
         if (
             isinstance(integration, TeamsWebhookMessagingIntegration)
             and config.has_teams
