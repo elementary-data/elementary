@@ -1,0 +1,242 @@
+---
+title: "Tests with context"
+sidebarTitle: "Tests with context"
+---
+
+A set of generic tests that extend common dbt, dbt-utils, and dbt-expectations tests with a `context_columns` parameter.
+When a test fails, the failing rows are returned together with the columns you care about — making it much easier to investigate the root cause directly from the test results.
+
+If `context_columns` is omitted, **all columns** are returned alongside failing rows.
+
+<Note>
+  If a column listed in `context_columns` does not exist on the model, a warning
+  is logged and that column is skipped. The test continues and will not error.
+</Note>
+
+---
+
+## not_null_with_context
+
+`elementary.not_null_with_context`
+
+Validates that there are no null values in a column. Extends dbt's built-in `not_null` test.
+
+### Parameters
+
+| Parameter         | Required | Default | Description                                                                     |
+| ----------------- | -------- | ------- | ------------------------------------------------------------------------------- |
+| `column_name`     | Yes      | —       | The column to test for null values.                                             |
+| `context_columns` | No       | `none`  | List of additional columns to return with failing rows. Omit to return all columns. |
+
+<RequestExample>
+
+```yml With context columns
+models:
+  - name: orders
+    columns:
+      - name: order_id
+        data_tests:
+          - elementary.not_null_with_context:
+              context_columns: [customer_id, order_date, amount]
+```
+
+```yml Return all columns
+models:
+  - name: orders
+    columns:
+      - name: order_id
+        data_tests:
+          - elementary.not_null_with_context
+```
+
+</RequestExample>
+
+---
+
+## accepted_range_with_context
+
+`elementary.accepted_range_with_context`
+
+Validates that column values fall within an accepted range. Extends `dbt_utils.accepted_range`.
+
+### Parameters
+
+| Parameter         | Required | Default | Description                                                                          |
+| ----------------- | -------- | ------- | ------------------------------------------------------------------------------------ |
+| `column_name`     | Yes      | —       | The column to test.                                                                  |
+| `min_value`       | No*      | `none`  | Minimum accepted value (inclusive by default). At least one bound must be provided. |
+| `max_value`       | No*      | `none`  | Maximum accepted value (inclusive by default). At least one bound must be provided. |
+| `inclusive`       | No       | `true`  | Whether the bounds are inclusive.                                                    |
+| `context_columns` | No       | `none`  | List of additional columns to return with failing rows. Omit to return all columns.  |
+
+\* At least one of `min_value` or `max_value` must be provided.
+
+<RequestExample>
+
+```yml With context columns
+models:
+  - name: orders
+    columns:
+      - name: amount
+        data_tests:
+          - elementary.accepted_range_with_context:
+              min_value: 0
+              max_value: 10000
+              context_columns: [order_id, customer_id, order_date]
+```
+
+```yml Min bound only
+models:
+  - name: orders
+    columns:
+      - name: amount
+        data_tests:
+          - elementary.accepted_range_with_context:
+              min_value: 0
+              inclusive: false
+```
+
+</RequestExample>
+
+---
+
+## expect_column_values_to_not_be_null_with_context
+
+`elementary.expect_column_values_to_not_be_null_with_context`
+
+Expects column values to not be null. Extends `dbt_expectations.expect_column_values_to_not_be_null`.
+
+### Parameters
+
+| Parameter         | Required | Default | Description                                                                     |
+| ----------------- | -------- | ------- | ------------------------------------------------------------------------------- |
+| `column_name`     | Yes      | —       | The column to test for null values.                                             |
+| `row_condition`   | No       | `none`  | Optional SQL filter applied before testing (e.g. `"status = 'active'"`).       |
+| `context_columns` | No       | `none`  | List of additional columns to return with failing rows. Omit to return all columns. |
+
+<RequestExample>
+
+```yml With row condition and context columns
+models:
+  - name: subscriptions
+    columns:
+      - name: end_date
+        data_tests:
+          - elementary.expect_column_values_to_not_be_null_with_context:
+              row_condition: "status = 'active'"
+              context_columns: [subscription_id, customer_id, start_date]
+```
+
+</RequestExample>
+
+---
+
+## expect_column_values_to_be_unique_with_context
+
+`elementary.expect_column_values_to_be_unique_with_context`
+
+Expects column values to be unique. Returns all duplicate rows (not just a count), so you can see the full context of each duplicate. Extends `dbt_expectations.expect_column_values_to_be_unique`.
+
+### Parameters
+
+| Parameter         | Required | Default | Description                                                                     |
+| ----------------- | -------- | ------- | ------------------------------------------------------------------------------- |
+| `column_name`     | Yes      | —       | The column to test for uniqueness.                                              |
+| `row_condition`   | No       | `none`  | Optional SQL filter applied before testing.                                     |
+| `context_columns` | No       | `none`  | List of additional columns to return with failing rows. Omit to return all columns. |
+
+<RequestExample>
+
+```yml With context columns
+models:
+  - name: customers
+    columns:
+      - name: email
+        data_tests:
+          - elementary.expect_column_values_to_be_unique_with_context:
+              context_columns: [customer_id, created_at, name]
+```
+
+</RequestExample>
+
+---
+
+## expect_column_values_to_match_regex_with_context
+
+`elementary.expect_column_values_to_match_regex_with_context`
+
+Expects column values to match a given regular expression. Extends `dbt_expectations.expect_column_values_to_match_regex`.
+
+<Info>
+  Requires `dbt_expectations` to be installed in your project.
+</Info>
+
+### Parameters
+
+| Parameter         | Required | Default | Description                                                                     |
+| ----------------- | -------- | ------- | ------------------------------------------------------------------------------- |
+| `column_name`     | Yes      | —       | The column to test.                                                             |
+| `regex`           | Yes      | —       | The regular expression pattern to match.                                        |
+| `row_condition`   | No       | `none`  | Optional SQL filter applied before testing.                                     |
+| `is_raw`          | No       | `false` | Whether the regex is a raw string.                                              |
+| `flags`           | No       | `""`    | Optional regex flags (adapter-dependent).                                       |
+| `context_columns` | No       | `none`  | List of additional columns to return with failing rows. Omit to return all columns. |
+
+<RequestExample>
+
+```yml Email format validation with context
+models:
+  - name: customers
+    columns:
+      - name: email
+        data_tests:
+          - elementary.expect_column_values_to_match_regex_with_context:
+              regex: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+              context_columns: [customer_id, name, created_at]
+```
+
+</RequestExample>
+
+---
+
+## relationships_with_context
+
+`elementary.relationships_with_context`
+
+Validates referential integrity between a child and parent table. Extends dbt's built-in `relationships` test.
+
+### Parameters
+
+| Parameter         | Required | Default | Description                                                                     |
+| ----------------- | -------- | ------- | ------------------------------------------------------------------------------- |
+| `column_name`     | Yes      | —       | The foreign key column in the child model.                                      |
+| `to`              | Yes      | —       | The parent model (use `ref()` or `source()`).                                   |
+| `field`           | Yes      | —       | The column in the parent model to join to.                                      |
+| `context_columns` | No       | `none`  | List of additional columns from the child model to return with failing rows. Omit to return all columns. |
+
+<RequestExample>
+
+```yml With context columns
+models:
+  - name: orders
+    columns:
+      - name: customer_id
+        data_tests:
+          - elementary.relationships_with_context:
+              to: ref('customers')
+              field: id
+              context_columns: [order_id, order_date, amount]
+```
+
+```yml Return all columns
+models:
+  - name: orders
+    columns:
+      - name: customer_id
+        data_tests:
+          - elementary.relationships_with_context:
+              to: ref('customers')
+              field: id
+```
+
+</RequestExample>

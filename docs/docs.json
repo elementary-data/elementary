@@ -423,7 +423,8 @@
               "data-tests/python-tests",
               "data-tests/execution-sla",
               "data-tests/data-freshness-sla",
-              "data-tests/volume-threshold"
+              "data-tests/volume-threshold",
+              "data-tests/with-context-tests"
             ]
           },
           {
