@@ -57,14 +57,14 @@ In the Elementary UI, choose **Credentials vending** under **Storage access meth
 
 This requires granting `EXTERNAL USE SCHEMA` on the relevant schemas.
 
-When using this option, Elementary only reads the Delta transaction log files from storage.
+When using this option, Elementary does not read the table data itself. It only reads the Delta transaction log, which contains metadata about the transactions.
 
 #### Option 3: Direct storage access
 
 Elementary can access the storage directly using credentials that you configure.
 In the Elementary UI, choose **Direct storage access** under **Storage access method**.
 
-When using this option, Elementary only reads the Delta transaction log files from storage.
+When using this option, Elementary does not read the table data itself. It only reads the Delta transaction log, which contains metadata about the transactions.
 
 For S3-backed Databricks storage, you can configure access in one of the following ways:
 
@@ -105,6 +105,8 @@ Use a policy similar to the following:
   ]
 }
 ```
+
+This policy is scoped to the bucket itself and objects matching `*_delta_log*`, so it does not grant access to other objects in the bucket.
 
 Provide the role ARN in the Elementary UI, and the external ID as well if you configured one.
 
