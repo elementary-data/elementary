@@ -44,7 +44,7 @@
         fields: [{ name: 'email', value: email }],
         context: {
           pageUri: window.location.href,
-          pageName: 'Elementary Docs - Community Agent',
+          pageName: 'Elementary Docs - Ask Elementary AI',
         },
       }),
     }).catch(function () {});
@@ -62,9 +62,9 @@
     var pointerStyle = 'pointer-events:auto;';
     var button = document.createElement('button');
     button.type = 'button';
-    button.setAttribute('aria-label', 'OSS Support');
+    button.setAttribute('aria-label', 'Ask AI');
     button.innerHTML =
-      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:8px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> OSS Support';
+      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:8px;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Ask AI';
     button.style.cssText =
       pointerStyle +
       'display:inline-flex;align-items:center;position:fixed;bottom:24px;right:24px;padding:12px 20px;background-color:' +
@@ -88,7 +88,7 @@
     var message = document.createElement('div');
     message.style.cssText = 'font-size:14px;color:#374151;margin:0 0 16px;line-height:1.5;';
     message.innerHTML =
-      'Ask the Community Agent anything about Elementary OSS.<br>Leave your email in case a follow up is needed:';
+      'Ask any question about Elementary.<br><br>Leave your email in case a follow up is needed:';
     popover.appendChild(message);
 
     var form = document.createElement('form');
@@ -184,7 +184,11 @@
     script.src = 'https://widget.kapa.ai/kapa-widget.bundle.js';
     script.async = true;
     script.setAttribute('data-website-id', 'e558d15b-d976-4a89-b2f0-e33ee6dab58b');
-    script.setAttribute('data-project-name', 'Elementary Community Agent');
+    script.setAttribute('data-project-name', 'Ask Elementary AI');
+    script.setAttribute('data-modal-title', 'Ask Elementary AI');
+    script.setAttribute('data-modal-title-ask-ai', 'Ask Elementary AI');
+    script.setAttribute('data-modal-title-search', 'Ask Elementary AI');
+    script.setAttribute('data-modal-ask-ai-input-placeholder', 'Ask any question about Elementary...');
     script.setAttribute('data-project-color', '#FF20B8');
     script.setAttribute('data-project-logo', 'https://res.cloudinary.com/do5hrgokq/image/upload/v1771424391/Elementary_2025_Pink_Mark_Black_Frame_rbexli.png');
     script.setAttribute('data-button-hide', 'true');
