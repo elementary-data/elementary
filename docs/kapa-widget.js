@@ -7,6 +7,44 @@
   var HUBSPOT_SUBMIT_URL = 'https://api.hsforms.com/submissions/v3/integration/submit/' + HUBSPOT_PORTAL_ID + '/' + HUBSPOT_FORM_ID;
   var PRIMARY = '#FF20B8';
   var PRIMARY_HOVER = '#E01A9F';
+  /** Consumer domains — HubSpot "block free emails" often does not apply to the Forms API; mirror policy in-app. */
+  var BLOCKED_CONSUMER_EMAIL_DOMAINS = {
+    '163.com': true,
+    '126.com': true,
+    'aol.com': true,
+    'duck.com': true,
+    'fastmail.com': true,
+    'gmail.com': true,
+    'googlemail.com': true,
+    'gmx.com': true,
+    'gmx.de': true,
+    'gmx.net': true,
+    'hey.com': true,
+    'hotmail.com': true,
+    'hotmail.co.uk': true,
+    'icloud.com': true,
+    'live.com': true,
+    'mac.com': true,
+    'mail.com': true,
+    'me.com': true,
+    'msn.com': true,
+    'outlook.com': true,
+    'pm.me': true,
+    'proton.me': true,
+    'protonmail.com': true,
+    'qq.com': true,
+    'skiff.com': true,
+    'tuta.io': true,
+    'tutanota.com': true,
+    'tutanota.de': true,
+    'yahoo.com': true,
+    'yahoo.co.uk': true,
+    'yahoo.de': true,
+    'yahoo.fr': true,
+    'yandex.com': true,
+    'yandex.ru': true,
+  };
+  var FREE_EMAIL_NOT_ACCEPTED_MSG = 'Please use your work email.';
 
   function getStoredEmail() {
     try {
@@ -36,8 +74,34 @@
     }
   }
 
+  function emailDomain(email) {
+    var i = email.lastIndexOf('@');
+    if (i < 0) return '';
+    return email
+      .slice(i + 1)
+      .toLowerCase()
+      .trim();
+  }
+
+  function isBlockedConsumerEmailDomain(email) {
+    return !!BLOCKED_CONSUMER_EMAIL_DOMAINS[emailDomain(email)];
+  }
+
+  function hubspotErrorMessage(body) {
+    var fallback =
+      'We could not accept this email. Please try again, or use a work email if your company requires it.';
+    if (!body || typeof body !== 'object') return fallback;
+    if (Array.isArray(body.errors) && body.errors.length) {
+      var first = body.errors[0];
+      if (first && first.message) return first.message;
+    }
+    if (typeof body.message === 'string' && body.message) return body.message;
+    if (typeof body.inlineMessage === 'string' && body.inlineMessage) return body.inlineMessage;
+    return fallback;
+  }
+
   function submitToHubSpot(email) {
-    fetch(HUBSPOT_SUBMIT_URL, {
+    return fetch(HUBSPOT_SUBMIT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -47,7 +111,27 @@
           pageName: 'Elementary Docs - Ask Elementary AI',
         },
       }),
-    }).catch(function () {});
+    })
+      .then(function (res) {
+        return res.text().then(function (text) {
+          var body = null;
+          try {
+            body = text ? JSON.parse(text) : null;
+          } catch (parseErr) {
+            body = null;
+          }
+          if (res.ok) {
+            if (body && Array.isArray(body.errors) && body.errors.length) {
+              return { ok: false, message: hubspotErrorMessage(body) };
+            }
+            return { ok: true };
+          }
+          return { ok: false, message: hubspotErrorMessage(body) };
+        });
+      })
+      .catch(function () {
+        return { ok: false, message: 'Something went wrong. Check your connection and try again.' };
+      });
   }
 
   function injectButtonAndPopover() {
@@ -145,16 +229,49 @@
         errEl.style.display = 'block';
         return;
       }
-      storeEmail(emailVal);
-      submitToHubSpot(emailVal);
-      openKapa(emailVal);
-      hidePopover();
+      if (isBlockedConsumerEmailDomain(emailVal)) {
+        errEl.textContent = FREE_EMAIL_NOT_ACCEPTED_MSG;
+        errEl.style.display = 'block';
+        return;
+      }
+      errEl.style.display = 'none';
+      errEl.textContent = '';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting…';
+      submitToHubSpot(emailVal).then(function (result) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Start chat';
+        if (!result.ok) {
+          errEl.textContent = result.message || 'Please try a different email.';
+          errEl.style.display = 'block';
+          return;
+        }
+        storeEmail(emailVal);
+        openKapa(emailVal);
+        hidePopover();
+      });
     };
 
     button.onclick = function () {
       var stored = getStoredEmail();
       if (stored && stored.trim()) {
-        openKapa(stored.trim());
+        var s = stored.trim();
+        var reStored = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!reStored.test(s)) {
+          try {
+            localStorage.removeItem(STORAGE_KEY);
+          } catch (removeErr) {}
+          showPopover();
+          return;
+        }
+        if (isBlockedConsumerEmailDomain(s)) {
+          try {
+            localStorage.removeItem(STORAGE_KEY);
+          } catch (removeErr2) {}
+          showPopover();
+          return;
+        }
+        openKapa(s);
         return;
       }
       if (popover.style.display === 'block') {
