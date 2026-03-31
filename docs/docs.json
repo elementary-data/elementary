@@ -645,7 +645,7 @@
     "dismissible": false
   },
   "search": {
-    "prompt": "Ask me anything..."
+    "prompt": "Search..."
   },
   "footer": {
     "socials": {
