@@ -362,21 +362,12 @@ class SlackIntegration(BaseIntegration):
             )
 
         if DESCRIPTION_FIELD in (alert.alert_fields or DEFAULT_ALERT_FIELDS):
-            if alert.test_description:
-                preview.extend(
-                    [
-                        self.message_builder.create_text_section_block("*Description*"),
-                        self.message_builder.create_context_block(
-                            [alert.test_description]
-                        ),
-                    ]
+            description_text = alert.test_description or "_No description_"
+            preview.append(
+                self.message_builder.create_text_section_block(
+                    f"*Description*\n{description_text}"
                 )
-            else:
-                preview.append(
-                    self.message_builder.create_text_section_block(
-                        "*Description*\n_No description_"
-                    )
-                )
+            )
 
         result = []
         if (
