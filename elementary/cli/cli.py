@@ -5,6 +5,7 @@ import click
 
 import elementary.cli.logo
 import elementary.cli.upgrade
+from elementary.code.cli import code
 from elementary.config.config import Config
 from elementary.monitor.cli import monitor, report, send_report
 from elementary.operations.cli import run_operation
@@ -82,6 +83,7 @@ cli.add_command(monitor)
 cli.add_command(report)
 cli.add_command(send_report, name="send-report")
 cli.add_command(run_operation, name="run-operation")
+cli.add_command(code)
 
 
 if __name__ == "__main__":

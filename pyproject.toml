@@ -60,7 +60,9 @@ dbt-fabric = {version = ">=1.8,<2.0.0", optional = true}
 dbt-fabricspark = {version = ">=1.8,<2.0.0", optional = true}
 dbt-sqlserver = {version = ">=1.8,<2.0.0", optional = true}
 dbt-vertica = {version = ">=1.8,<2.0.0", optional = true}
+elementary-code = {version = ">=0.1.0", optional = true}
 [tool.poetry.extras]
+code = ["elementary-code"]
 snowflake = ["dbt-snowflake"]
 bigquery = ["dbt-bigquery"]
 redshift = ["dbt-redshift"]
