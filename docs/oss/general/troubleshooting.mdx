@@ -51,7 +51,7 @@ models:
   elementary:
     +schema: 'elementary'
 ```
-**5. Still not working? Collect the following logs and reach our to the elementary team at [#community-support](https://elementary-data.com/community) on Slack**
+**5. Still not working? Collect the following logs and reach out to the elementary team at [#community-support](https://elementary-data.com/community) on Slack**
 
 - **edr.log** - Created on the execution folder of the CLI.
 - **dbt.log** - Created under the package location at
@@ -177,14 +177,14 @@ python3 -m pip install elementary-data[<adapter>]
   Instead, please add a file named `elementary_materialization.sql` to your macros folder, with the following contents -
 
   If you use Snowflake:
-  ```
+  ```sql
   {% materialization test, adapter='snowflake' %}
     {{ return(elementary.materialization_test_snowflake()) }}
   {% endmaterialization %}
-          ```
-  
+  ```
+
   If you use any other DWH:
-          ```
+  ```sql
   {% materialization test, default %}
     {{ return(elementary.materialization_test_default()) }}
   {% endmaterialization %}
