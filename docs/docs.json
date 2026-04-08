@@ -670,35 +670,35 @@
     },
     {
       "source": "/features/lineage",
-      "destination": "/features/data-lineage/lineage"
+      "destination": "/cloud/features/data-lineage/lineage"
     },
     {
       "source": "/features/exposures-lineage",
-      "destination": "/features/data-lineage/exposures-lineage"
+      "destination": "/cloud/features/data-lineage/exposures-lineage"
     },
     {
       "source": "/features/column-level-lineage",
-      "destination": "/features/data-lineage/column-level-lineage"
+      "destination": "/cloud/features/data-lineage/column-level-lineage"
     },
     {
       "source": "/features/automated-monitors",
-      "destination": "/features/anomaly-detection/automated-monitors"
+      "destination": "/cloud/features/anomaly-detection/automated-monitors"
     },
     {
       "source": "/features/data-tests",
-      "destination": "/features/data-tests/dbt-tests"
+      "destination": "/cloud/features/data-tests/dbt-tests"
     },
     {
       "source": "/features/elementary-alerts",
-      "destination": "/features/alerts-and-incidents/alerts-and-incidents-overview"
+      "destination": "/cloud/features/alerts-and-incidents/alerts-and-incidents-overview"
     },
     {
       "source": "/features/catalog",
-      "destination": "/features/collaboration-and-communication/catalog"
+      "destination": "/cloud/features/collaboration-and-communication/catalog"
     },
     {
       "source": "/features/data-observability-dashboard",
-      "destination": "/features/collaboration-and-communication/data-observability-dashboard"
+      "destination": "/cloud/features/collaboration-and-communication/data-observability-dashboard"
     }
   ]
 }
