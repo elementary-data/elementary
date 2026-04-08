@@ -233,6 +233,7 @@
                   "cloud/integrations/bi/thoughtspot",
                   "cloud/integrations/bi/mode",
                   "cloud/integrations/bi/hex",
+                  "cloud/integrations/bi/lightdash",
                   "cloud/integrations/bi/explo"
                 ]
               },
