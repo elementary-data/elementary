@@ -1,4 +1,4 @@
-FROM node:23
+FROM node:20.3.0
 
 WORKDIR /app
 RUN npm i -g mintlify

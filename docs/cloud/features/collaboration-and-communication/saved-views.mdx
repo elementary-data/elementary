@@ -1,0 +1,47 @@
+---
+title: "Saved Views"
+---
+
+Saved Views in Elementary allow you to create and save filter groups that persist across all screens in your workspace. Instead of manually applying the same filters every time you navigate to different pages, you can save your preferred filter combinations and have them automatically applied wherever you go.
+
+## Why it matters
+
+- **Consistency** — Your filter preferences stick with you across all screens, from the Catalog to Data Health to Lineage views.
+- **Efficiency** — No need to recreate complex filter combinations repeatedly. Set them once and they're always available.
+- **Personalization** — Each user can create their own saved views tailored to their specific needs and workflows.
+- **Focus** — Quickly switch between different perspectives on your data (e.g., "Marketing Assets", "Production Critical", "My Team's Datasets").
+
+## How it works
+
+Saved Views are built from **filter groups** that you configure in the side tree. The side tree appears on various screens throughout Elementary (Catalog, Data Health, Lineage, etc.) and allows you to filter assets by:
+
+- **Tags** — Filter by asset tags (e.g., `#marketing`, `#production`)
+- **Owners** — Filter by asset owners (e.g., `@data-team`, `@analytics`)
+- **Paths** — Filter by dbt project paths or data warehouse locations
+- **Other metadata** — Filter by any asset property or metadata field
+
+Once you've configured your desired filter groups in the side tree, you can save this combination as a Saved View with a descriptive name. The saved view will then be available to you across all screens in your environment.
+
+## Creating a Saved View
+
+1. **Configure your filters** in the side tree on any screen (Catalog, Data Health, Lineage, etc.)
+   - Select the tree view type (e.g., Tags, Owners, Paths)
+   - Apply your desired filter groups
+2. **Save the view** — Click the save icon or "Save View" option in the side tree
+3. **Name your view** — Give it a clear, descriptive name (e.g., "Marketing Production Assets", "Critical Data Health View")
+4. **Confirm** — Your saved view is now created and will persist across all screens
+
+## Using Saved Views
+
+Once created, your saved views appear in the side tree dropdown or menu. You can:
+
+- **Select a saved view** — Click on any saved view to apply its filter groups to the current screen
+- **Switch between views** — Quickly toggle between different saved views to see different perspectives
+- **Edit a saved view** — Modify the filter groups and update the saved view
+- **Delete a saved view** — Remove saved views you no longer need
+
+Saved views are **user-specific** and **environment-specific**, meaning:
+- Each user has their own set of saved views
+- Saved views are scoped to the environment where they were created
+- You can have different saved views for different environments (e.g., Production vs. Staging)
+

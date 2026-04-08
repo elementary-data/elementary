@@ -3,6 +3,11 @@ title: "exclude_regexp"
 sidebarTitle: "exclude_regexp"
 ---
 
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+
+
+<AiGenerateTest />
+
 `exclude_regexp: [regex]`
 
 Param for the `all_columns_anomalies` test only, which enables to exclude a column from the tests based on regular expression match.
@@ -16,9 +21,10 @@ Param for the `all_columns_anomalies` test only, which enables to exclude a colu
 ```yml test
 models:
   - name: this_is_a_model
-    tests:
+    data_tests:
       - elementary.column_anomalies:
-          exclude_regexp: ".*SDC$"
+          arguments:
+            exclude_regexp: ".*SDC$"
 ```
 
 </RequestExample>

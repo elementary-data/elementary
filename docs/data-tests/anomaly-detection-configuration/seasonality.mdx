@@ -3,6 +3,11 @@ title: "seasonality"
 sidebarTitle: "seasonality"
 ---
 
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+
+
+<AiGenerateTest />
+
 `seasonality: day_of_week | hour_of_day | hour_of_week`
 
 Some data sets have patterns that repeat over a time period, and are expected.
@@ -33,7 +38,7 @@ The expected range for Monday will be based on a training set of previous Monday
 #### How it works?
 
 - The test will compare the value of a bucket to previous bucket with the same seasonality attribute, and not to the adjacent previous data points.
-- The `training_period` of the test will be changed by default to assure a minimal training set. When `seasonality: day_of_week` is configured, `training_period` is by default multiplied by 7.
+- **The `training_period` of the test will be changed by default to assure a minimal training set. When `seasonality: day_of_week` is configured, `training_period` is by default multiplied by 7.**
 
 
 <Frame caption="seasonality change impact">
@@ -48,9 +53,10 @@ The expected range for Monday will be based on a training set of previous Monday
 ```yml test
 models:
   - name: this_is_a_model
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          seasonality: day_of_week
+          arguments:
+            seasonality: day_of_week
 ```
 
 ```yml model

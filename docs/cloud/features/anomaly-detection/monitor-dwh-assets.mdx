@@ -1,0 +1,43 @@
+---
+title: Monitor DWH Assets
+sidebarTitle: "Monitor DWH assets"
+---
+
+By default, Elementary monitors assets that are defined as models and sources in your dbt projects. This approach ensures that we focus on assets that are actively used in production, as defined in your dbt codebase.
+
+However, you can now extend monitoring to additional data warehouse assets that are not part of your dbt project. This enables comprehensive observability across your entire data warehouse, including tables and views that exist outside of your dbt transformations.
+
+<Warning>
+This feature is currently in **beta** and is only supported for **BigQuery**, **Snowflake**, and **Databricks**. Self-serve schema syncing will be available soon. Until then, to sync additional assets to Elementary, please contact support.
+</Warning>
+
+## Syncing DWH schemas
+
+You can sync schemas directly from your data warehouse to Elementary. Once synced, these assets will appear in the side tree under the **DWH view**, making them easily accessible alongside your dbt models and sources.
+
+This feature allows you to:
+- Monitor assets that are created outside of dbt (e.g., tables created by other tools, ETL processes, or direct SQL scripts)
+- Gain visibility into your entire data warehouse inventory
+- Apply the same monitoring and testing capabilities to non-dbt assets
+
+## Configuring tests on DWH assets
+
+After syncing your DWH schemas, you can configure freshness and volume tests on these assets directly from the **test configuration menu**. The process is the same as configuring tests on dbt models:
+
+1. Navigate to the test configuration page
+2. Select the DWH asset you want to monitor
+3. Choose either a **freshness** or **volume** test
+4. Configure the test parameters as needed
+5. Submit the test configuration
+
+These tests will run alongside your dbt tests and provide the same level of monitoring and alerting capabilities.
+
+## Lineage integration
+
+DWH assets that have dependencies within your dbt projects will appear in the lineage view. Currently, **views** are fully supported in the lineage visualization, and **tables** support is coming soon.
+
+This integration helps you:
+- Understand how your dbt models depend on or are used by non-dbt assets
+- Visualize the complete data flow across your warehouse
+- Identify dependencies and impacts across your entire data ecosystem
+

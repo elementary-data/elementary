@@ -3,9 +3,20 @@ title: "Alerts Configuration and Customization"
 sidebarTitle: "Alerts configuration"
 ---
 
-<Snippet file="guides/alerts-code-configuration.mdx" />
+import AlertsCodeConfiguration from '/snippets/guides/alerts-code-configuration.mdx';
+
+
+
+<AlertsCodeConfiguration />
 
 ## Alerts CLI flags
+
+<Warning>
+  Alert vars are deprecated! We recommend filtering the alerts
+  using CLI selectors instead.
+</Warning>
+
+
 
 #### Filter alerts
 
@@ -13,9 +24,9 @@ Elementary supports filtering the alerts by tag, owner, model, status or resourc
 
 Using filters, you can send alerts to the relevant people and teams by running `edr` multiple times with different filters on each run.
 
-<Warning>
-alerts on skipped tests and models are filtered out by default. if you want to receive those alerts, apply the statuses filter and include them explicitly.
-</Warning>
+<Info>
+Alerts on skipped tests and models are filtered out by default. if you want to receive those alerts, apply the statuses filter and include them explicitly.
+</Info>
 
 <CodeGroup>
 
@@ -86,4 +97,12 @@ If configured otherwise in the dbt project config block or meta, the CLI value w
 
 ```shell
 edr monitor --suppression-interval 24
+```
+
+#### Alert group threshold
+
+Set a minimum alert threshold before grouping notifications into a summary alert — keeping noise low while ensuring nothing gets missed.
+
+```shell
+edr monitor --group-alerts-threshold 5
 ```

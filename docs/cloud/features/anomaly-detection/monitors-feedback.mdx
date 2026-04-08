@@ -1,0 +1,41 @@
+---
+title: Monitors Feedback
+sidebarTitle: "Monitors feedback"
+---
+
+Using the `Result feedback` button, you can mark results as true or false positives. 
+This feedback can significantly improve the accuracy of detection.
+
+Some results trigger an automated workflow, and all are manually reveiewd by the Elementary team.
+
+Just so you know - Our machine learning models thrive on your feedback!
+We're always hustling to make them even better, and your feedback play a huge role in helping us achieve that. So keep those comments coming!
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1721134143/result_feedback_tr5p45.png"
+      alt="Anomaly result feedback"
+    />
+  </div>
+</Frame>
+
+### False positive feedback
+
+To get context on your false positive result feedback and trigger a response, we ask you to select a reason:
+
+- **Insignificant change** - The anomaly is not drastic enough for me to care about it. Usually the action item is to relax anomaly detection sensitivity.
+- **Expected outlier** - This isn't an anomaly and should be within the expected range. The action item will be to re-train the model, sometimes with a wider training set.
+- **Business anomaly** - This is an anomaly, but one we expected to happen due to intentional change or business event. The action item will be to exclude the anomaly from the training set.
+- **Not an interesting table** - I don't want to monitor this table. The action item is to delete the monitor.
+- **Other** - Non of the other reasons are a fit. Please add a comment to describe the use case.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1721134747/feedback_reason_dwh6e5.png"
+      alt="False positive result feedback"
+      width="400"
+    />
+  </div>
+</Frame>

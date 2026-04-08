@@ -4,6 +4,10 @@ sidebarTitle: "Security and privacy"
 icon: "lock"
 ---
 
+import HowItWorks from '/snippets/cloud/how-it-works.mdx';
+
+
+
 ## Security highlights
 
 Our product is designed with security and privacy in mind.
@@ -15,7 +19,7 @@ Our product is designed with security and privacy in mind.
 - Elementary offers deployment options with no direct access from Elementary Cloud to your data warehouse and third-party tools.
 
 <Check>
-  **SOC 2 certification:** Elementary Cloud is SOC2 type II certified!
+  Elementary Cloud is SOC2 type II certified and HIPAA compliant!
 </Check>
 
 <Note>
@@ -34,18 +38,7 @@ Our product and architecture are always evolving, but our commitment to secure d
 
 ## How it works?
 
-1. You install the Elementary dbt package in your dbt project and configure it to write to it's own schema, the Elementary schema.
-2. The package writes test results, run results, logs and metadata to the Elementary schema.
-3. The cloud service only requires `read access` to the Elementary schema, not to schemas where your sensitive data is stored.
-4. The cloud service connects to sync the Elementary schema using an **encrypted connection** and a **static IP address** that you will need to add to your allowlist.
-
-<Frame>
-  <img
-    src="https://res.cloudinary.com/diuctyblm/image/upload/v1709155128/security_kodcx7.png"
-    alt="Elementary cloud security"
-    width="400"
-  />
-</Frame>
+<HowItWorks />
 
 ## What information does Elementary collect?
 
@@ -54,9 +47,9 @@ The collected information is detailed in the table below.
 
 You can see all the data that Elementary collects and stores in your local Elementary schema.
 
-In general, Elementary does not collect any raw data. The only exception is the failed rows sample (stored in table `test_results_samples`) which can be disabled.
+In general, Elementary does not collect any raw data. The only exception is the failed rows sample (stored in table `test_result_rows`) which can be disabled.
 This is an opt-out feature that shows a sample of a few raw failed rows for failed tests, to help users triage and understand the problem.
-To avoid this sampling, set the var `test_sample_row_count: 0` in your `dbt_project.yml` (default is 5 sample rows).
+To avoid this sampling, set the var `test_sample_row_count: 0` in your `dbt_project.yml` (default is 5 sample rows). You can also disable samples for specific tests, protect PII-tagged tables, and request environment-level controls. See [Test Result Samples](/data-tests/test-result-samples) for all available options.
 
 | Information        | Details                                                                                                                                                                           | Usage                                                                                                                                                                              |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -88,6 +81,21 @@ We continuously implement evolving privacy and data protection processes, proced
 For more information, see our [Data Protection Agreement](https://www.elementary-data.com/privacy).
 
 Contact us at `legal@elementary-data.com` if you need us to review and sign your company's DPA and MNDA.
+
+## Samples storage in the US
+
+As mentioned above, Elementary generally avoids storing raw data and relies on high level metrics and metadata. 
+That being said, one feature (that is opt-out) that may contain such data is storage of sample rows for failed tests in your pipeline.
+
+For customers that require it, Elementary has the option to store such information in the US, instead of the EU which is the default. 
+In this case, the data will specifically be stored in S3 buckets in the us-east-1 (Virginia) AWS region, instead of eu-central-1 (Frankfurt).
+
+The relevant datasets that will be stored in the US are:
+1. The S3 bucket that contains the samples served by the Elementary UI.
+2. The S3 bucket used for AI chat history - as these may potentially interact with sample data.
+3. Intermediate S3 buckets used for Elementary's internal data pipeline, that may temporarily store samples.
+
+This mechanism ensures, if enabled, that sample data and related datasets will never be persisted outside of the US, permanently or temporarily.
 
 ## Have more questions?
 

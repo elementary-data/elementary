@@ -1,0 +1,94 @@
+---
+title: "MCP Setup Guide"
+sidebarTitle: "MCP setup guide"
+---
+
+
+This document walks you through connecting any MCP‑compatible client (Cursor, Claude Desktop, and others) to **Elementary’s production remote MCP server**. 
+It covers prerequisites, installation of the `mcp-remote` helper, authentication, and per‑client configuration steps.
+
+## Prerequisites
+| Requirement | Why it’s needed |
+|-------------|-----------------|
+| **Node.js 18 LTS or newer** | `mcp-remote` (and many editors) run on Node. Verify wit `node --version`. |
+| **npm / npx** | `npx` fetches `mcp-remote` on demand. Bundled with Node. |
+
+> **Recommended:** If you don't have Node.js installed, we recommend using `nvm` (Node Version Manager) for easy installation and management:
+> ```bash
+> # Install nvm (if not already installed)
+> curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+> # Restart your terminal or run: source ~/.bashrc
+> 
+> # Install and use the latest LTS version
+> nvm install --lts
+> nvm use --lts
+> ```
+
+---
+
+## 1 – Generate an access token
+You can now generate tokens directly from the Elementary UI: go to [User → Personal Tokens](https://app.elementary-data.com/settings/user-tokens) or [Account → Account Tokens](https://app.elementary-data.com/settings/account-tokens).
+
+Quick steps:
+1. Open the **User → Personal Tokens** or **Account → Account Tokens** page and click **Generate token**.
+2. (Optional) Add a name/description.
+3. Copy the token and store it securely — it is shown once. Manage (revoke/rotate) anytime from the same page.
+
+### Security
+User tokens are **user‑scoped bearer tokens** and inherit your workspace permissions.
+Account tokens are **account‑scoped bearer tokens** and have "Can View" permissions.
+Treat them like passwords — do not share or commit them. Keep them secret, rotate regularly, and revoke immediately if compromised.
+
+
+---
+
+## 2 – Install `mcp-remote` (optional)
+You don't have to install anything globally, our configs use npx to fetch the latest version automatically. If you do prefer a global install, use:
+```bash
+# Optional: global install
+npm install -g mcp-remote@latest
+```
+
+> **Important:** `mcp-remote` expects the **server URL as the first argument** (flags come **after** the URL). It does **not** implement `--help`; running `mcp-remote --help` will error because `--help` is treated as a URL.
+
+---
+
+## 3 – Configure your client
+Most MCP‑compatible clients read a JSON config that defines mcpServers. Use one of the following patterns.
+```jsonc
+{
+  "mcpServers": {
+    "elementary-remote": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote@latest",
+        "https://prod.api.elementary-data.com/mcp/",
+        "--header",
+        "Authorization:${AUTH_HEADER}"
+      ],
+      "env": {
+        "AUTH_HEADER": "Bearer <AUTH_TOKEN>"
+      }
+    }
+  }
+}
+```
+**Why the `-y` flag?**  
+It makes `npx` skip the interactive “install this package?” prompt.
+
+### Client‑specific steps
+
+#### 3.1 Cursor IDE
+1. **Settings → Model Context Protocol → Add Custom Server**  
+   or edit `~/.cursor/mcp.json` (global) / `<project>/.cursor/mcp.json` (workspace).
+2. Paste the JSON above.
+3. Save – Cursor auto‑restarts its MCP agent.
+
+#### 3.2 Claude Desktop
+1. In the menu bar choose **Claude → Settings -> Developer**.
+2. Under **Local MCP Servers**, click **Edit**.
+3. Paste the JSON block
+4. Restart Claude
+
+

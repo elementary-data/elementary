@@ -1,0 +1,21 @@
+import CloudServiceAccount from '/snippets/dwh/bigquery/cloud_service_account.mdx';
+import PermissionsAndSecurity from '/snippets/cloud/integrations/permissions-and-security.mdx';
+import IpAllowlist from '/snippets/cloud/integrations/ip-allowlist.mdx';
+
+This guide contains the necessary steps to connect a BigQuery environment to your Elementary account.
+
+<CloudServiceAccount />
+
+<PermissionsAndSecurity />
+
+### Fill the connection form
+
+Provide the following fields:
+
+- **Service account file**: The service account file you generated for Elementary. For more information, refer to [Create BigQuery service account](./bigquery#create-bigquery-service-account).
+- **Project**: The name of your BigQuery project.
+- **Elementary dataset**: The name of your Elementary dataset. Usually `[dataset name]_elementary`.
+- **Location**: Use this field to configure the location of BigQuery datasets as per [the BigQuery documentation](https://cloud.google.com/bigquery/docs/locations).
+- **Workload Identity Federation**: Support for Workload Identity Federation with BigQuery service accounts is coming soon
+
+<IpAllowlist />

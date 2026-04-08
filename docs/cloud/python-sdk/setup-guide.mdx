@@ -1,0 +1,65 @@
+---
+title: "Python SDK Setup Guide"
+sidebarTitle: "Setup Guide"
+---
+
+This guide walks you through installing and configuring the Elementary Python SDK to report assets, test results, and execution metadata from your Python pipelines.
+
+## Installation
+
+The Python SDK is installed via pip. Installation instructions and package requirements will be provided when you get access to the beta.
+
+## Configuration
+
+The Python SDK requires configuration to connect to your Elementary Cloud environment. You'll need:
+
+1. **Elementary Cloud API Key** - Get this from your Elementary Cloud account settings
+2. **Environment ID** - Your Elementary environment identifier
+
+Configuration can be done via environment variables or a configuration file, similar to how the Elementary CLI is configured.
+
+## Basic Concepts
+
+The SDK is designed to work with any Python testing framework. The core functionality includes:
+
+- **Reporting assets** - Tables, files, vector stores, or any data entity produced by your Python pipeline
+- **Reporting test results** - Results from any testing framework (Great Expectations, pytest, custom frameworks, etc.)
+- **Tracking execution metadata** - Pipeline runs, timing, status, and errors
+- **Reporting lineage** - Connecting Python assets to upstream and downstream dependencies
+
+## Integration with Existing Frameworks
+
+The SDK works with any Python testing framework. You can wrap your existing tests to report results to Elementary without changing your test logic:
+
+- **Great Expectations** - Report GE validation results
+- **Pytest** - Report pytest test outcomes
+- **Custom frameworks** - Report results from any homegrown testing solution
+- **DQX and other tools** - The SDK is framework-agnostic
+
+## Reporting Execution Metadata
+
+Track pipeline execution details including:
+- Pipeline name and environment
+- Start and end times
+- Duration
+- Success/failure status
+- Error messages and stack traces
+
+## Reporting Lineage
+
+Connect your Python assets to upstream and downstream dependencies, creating a complete lineage graph that includes:
+- Python pipeline outputs
+- dbt models
+- Warehouse tables
+- Unstructured data sources
+- Vector stores
+- ML model outputs
+
+## Next Steps
+
+- See [Usage Examples](/cloud/python-sdk/usage-examples) for conceptual examples
+- Learn about the [SDK Overview](/cloud/python-sdk/overview)
+
+## Need Help?
+
+If you need assistance with setup or have questions about the SDK, [reach out to the team](https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs?uuid=17a4a61f-d0d3-4cbc-9362-56e37483f6f5).

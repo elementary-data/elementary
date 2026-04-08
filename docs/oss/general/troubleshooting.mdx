@@ -3,6 +3,10 @@ title: "Troubleshooting"
 description: "This section is aimed at collecting common issues users have to provide quick debug solutions."
 ---
 
+import Dbt18MaterializationsCommon from '/snippets/dbt-18-materializations-common.mdx';
+
+
+
 <Accordion title="I run `edr report` and get an empty report">
   
 If you get an empty report, there are several steps to understand what went wrong and try and fix it.
@@ -32,12 +36,22 @@ If you get an empty report, there are several steps to understand what went wron
 - Run the CLI with the flag for force updating the packages:
   `edr report -u true`
 
-**3. Validate that the CLI has a working connection profile**
+**3. Validate that the CLI has a working connection profile in the [right path and format](https://docs.elementary-data.com/oss/cli-install#how-to-create-profiles-yml)**
 
-- **Check that the connection profile exists in the right path and format**
-- **Check that the connection profile points to the elementary package schema**
+-  Default path: `HOME_DIR/.dbt/profiles.yml` . If saved elsewhere, make sure to run dbt run and dbt test with `—profiles-dir <profiles.yml path>`
+- Profile name: `elementary`
+- Make sure that the elementary profile is a top-level profile, with the same indentation of the profiles you have already set up
+- Schema name: The schema of the elementary models. The default name is  `<your_dbt_project_schema>_elementary`
 
-**4. Still not working? Collect the following logs and reach our to the elementary team at [#support](https://elementary-data.com/community) on Slack**
+**4. Validate the schema configuration for elementary models in your dbt_project.yml**
+```yaml
+models:
+  jaffle_shop:
+    +materialized: table
+  elementary:
+    +schema: 'elementary'
+```
+**5. Still not working? Collect the following logs and reach our to the elementary team at [#community-support](https://elementary-data.com/community) on Slack**
 
 - **edr.log** - Created on the execution folder of the CLI.
 - **dbt.log** - Created under the package location at
@@ -154,14 +168,29 @@ python3 -m pip install elementary-data[<adapter>]
 </Accordion>
 
 <Accordion title="WARNING - Installed package 'elementary' is overriding the built-in materialization 'XXX'">
-  <Snippet file="dbt-18-materializations-common.mdx" />
+  <Dbt18MaterializationsCommon />
 
-  The warning above may appear in one of the following two cases: 
-  * If you are using the most recent version of dbt 1.6 or 1.7 - this warning will appear by default, since it indicates the aforementioned behavior change in dbt 1.8.
-  * If you are using dbt 1.8 and above, this warning will NOT appear by default, however it will start appearing once you set the flag `require_explicit_package_overrides_for_builtin_materializations` to `false` 
-  as required in the [dbt package installation guide](/oss/quickstart/quickstart-cli-package#step-by-step-install-elementary-dbt-package).
+  If you are encountering the warning above though, it means that you have previously added the flag 
+  `require_explicit_package_overrides_for_builtin_materializations=False` to `dbt-project.yml`.
+  This is no longer required!.
 
-  In either case, please ignore it for now. This is a temporary measure and we are working with the dbt team on a [longer term solution](https://github.com/dbt-labs/dbt-core/issues/10090).
+  Instead, please add a file named `elementary_materialization.sql` to your macros folder, with the following contents -
+
+  If you use Snowflake:
+  ```
+  {% materialization test, adapter='snowflake' %}
+    {{ return(elementary.materialization_test_snowflake()) }}
+  {% endmaterialization %}
+          ```
+  
+  If you use any other DWH:
+          ```
+  {% materialization test, default %}
+    {{ return(elementary.materialization_test_default()) }}
+  {% endmaterialization %}
+  ```
+
+  This will ensure Elementary's test materialization is run but will avoid the warning.   
 </Accordion>
 
 <Accordion title="I changed the training period but the results are the same">
@@ -179,26 +208,52 @@ If you want the Elementary UI to show data for a longer period of time, use the 
 
 </Accordion>
 
-<Accordion title="I want to disable elementary models and / or tests temporarily">
-  
-If you want to prevent elementary tests from running the simplest way is to exclude the tag that marks all of them in your dbt command:
 
-```shell
-dbt test --exclude tag:elementary-tests
+
+<Accordion title="Error when trying to run parallel dbt jobs">
+
+When writing to the `dbt_artifacts` tables in the Elementary schema, data is deleted and reinserted. Running parallel jobs through an orchestrator can lead to errors, as multiple jobs may attempt to modify the same tables simultaneously. 
+To prevent this, you should:
+1. [Disable the on-run-end hooks](/oss/general/faq#can-i-disable-the-on-run-end-hooks-or-results-uploading)
+2. [Exclude the Elementary models](/oss/general/faq#can-i-disable-exclude-the-elementary-models)
+
+For scheduled updates to `dbt_artifacts` (e.g., a daily job), run:
+
+```
+dbt run --select elementary --vars '{"enable_elementary_models": true}'
 ```
 
-If you add the following to your dbt_project.yml, elementary models will not run and elementary tests will be executed but will do nothing and always pass.
-```shell
-models:
-  elementary:
-    enabled: false
+</Accordion>
+
+
+<Accordion title="Elementary on-run-end hooks are taking a long time">
+
+The `dbt_columns` table in the Elementary schema can take a while to update, especially for large projects. This table is only used by Elementary Cloud, so if you're not relying on it (or want to speed up your runs), you can disable it safely without affecting any other functionality.
+
+To skip updating this table, add the following to your dbt_project.yml: 
+
 ```
+vars:
+  columns_upload_strategy: none
+
+```
+
+For more comprehensive strategies to reduce on-run-end hooks time, see the [Reduce On-Run-End Hooks Time guide](/oss/guides/reduce-on-run-end-time).
+
+</Accordion>
+
+<Accordion title="I'm trying to run Elementary with dbt-fusion but encountering issues">
+
+dbt-fusion support in Elementary is still in beta. 
+
+While most of the core features should work, some features may not work as expected.
+For more details, please click [here](/oss/integrations/dbt-fusion)
 
 </Accordion>
 
 <Accordion title="My problem is not listed here">
 
-If you're experiencing issues of any kind, please contact us on the [#support](https://elementary-community.slack.com/archives/C02CTC89LAX) channel.
+If you're experiencing issues of any kind, reach out on the [#community-support](https://elementary-community.slack.com/archives/C02CTC89LAX) channel. Elementary AI and the team will be happy to help.
 
 </Accordion>
 

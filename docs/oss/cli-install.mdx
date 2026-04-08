@@ -2,9 +2,16 @@
 title: "CLI install & configure"
 ---
 
+import InstallCli from '/snippets/install-cli.mdx';
+import AddConnectionProfile from '/snippets/add-connection-profile.mdx';
+import QuestionConnectionProfile from '/snippets/faq/question-connection-profile.mdx';
+import QuestionProfilePermissions from '/snippets/faq/question-profile-permissions.mdx';
+
+
+
 We recommend you install Elementary CLI using one of the following methods:
 
-<Snippet file="install-cli.mdx" />
+<InstallCli />
 
 ## Install from source
 
@@ -33,7 +40,7 @@ Elementary CLI requires a connection profile to connect to DWH. Additional confi
 (These default paths and names may be changed using the [CLI options](/oss/cli-commands#cli-advanced-options)).
 
 <Accordion title="How to create 'profiles.yml'?">
-  <Snippet file="add-connection-profile.mdx" />
+  <AddConnectionProfile />
 </Accordion>
 
 <Accordion title="dbt-core user? You already have profiles.yml">
@@ -44,8 +51,8 @@ If you are a dbt user, you already have a `profiles.yml` file that you can use. 
 
 </Accordion>
 
-<Snippet file="faq/question-connection-profile.mdx" />
-<Snippet file="faq/question-profile-permissions.mdx" />
+<QuestionConnectionProfile />
+<QuestionProfilePermissions />
 
 <Accordion title="How to create 'config.yml'?">
 

@@ -21,7 +21,7 @@ packages:
 dbt deps
 ```
 
-3. If this is a change of minor version (like `0.4.X` -> `0.5.X`), run also:
+3. When there's a change in the structure of the Elementary tables, the minor version is raised. If you're updating a minor version (for example 0.17.X -> 0.18.X), run this command to rebuild the Elementary tables:
 
 ```shell
 dbt run --select elementary

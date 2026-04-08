@@ -1,0 +1,50 @@
+import CreateUserOperationSnowflake from '/snippets/cloud/integrations/create-user-operation-snowflake.mdx';
+
+This guide contains the necessary steps to connect a Snowflake environment to your Elementary account.
+
+<CreateUserOperationSnowflake />
+
+### Fill the connection form
+
+Provide the following fields:
+
+- **Account**: Find your account by using the Snowflake account URL and removing `snowflakecomputing.com`. e.g. `example.us-east-1`. For more information, see [Account Identifiers](https://docs.snowflake.com/en/user-guide/admin-account-identifier.html) in the Snowflake docs.
+- **Database name**: The name of the database where your Elementary schema exist. e.g. `analytics`.
+- **Warehouse**: e.g. `ELEMENTARY_WAREHOUSE`.
+- **Elementary schema**: The name of your Elementary schema. Usually `[schema name]_elementary`.
+- **Role (optional)**: e.g. `ELEMENTARY_ROLE`.
+
+Elementary Cloud supports the following authentication methods:
+
+- **Key pair** (Recommended):
+  - User: The user created for Elementary.
+  - Private key: The private key you generated for Elementary. For more information, see [Generate Private Key](https://docs.snowflake.com/en/user-guide/key-pair-auth#configuring-key-pair-authentication) in the Snowflake docs.
+  - Private key passphrase (optional)
+- **User password** (Deprecated, not recommended):
+  - User: The user created for Elementary.
+  - Password: The password you set when creating your Snowflake account.
+
+<Warning>
+  Snowflake are in the process of deprecating single-factor username & password authentication for all human users. As a result, while still supported,
+  we recommend configuring the user in advance using key-pair authentication rather than username & password, and configuring the user as TYPE=SERVICE 
+  (this is automatically handled in the user creation macro above).
+ 
+  See [here](https://docs.snowflake.com/en/user-guide/security-mfa-rollout) for more information regarding this change.
+</Warning>
+
+### Add the Elementary IP to allowlist
+
+If you use network policies to restrict access, run this query on your data warehouse with **admin permissions**:
+
+```sql
+CREATE NETWORK POLICY ELEMENTARY_CLOUD
+	ALLOWED_IP_LIST=('3.126.156.226')
+	BLOCKED_IP_LIST=()
+COMMENT='IP used by Elementary Cloud to sync the Elementary schema';
+```
+
+After creating a network policy you would need to activate it. To activate a network policy for the elementary user simply run the following command -
+
+```sql
+ALTER USER <user_name> SET NETWORK_POLICY = ELEMENTARY_CLOUD;
+```

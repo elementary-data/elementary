@@ -1,0 +1,69 @@
+### Create service principal
+
+1. Open your Databricks console, and then open your relevant workspace.
+
+2. Click on your Profile icon on the right and choose Settings.
+
+<img
+  src="https://res.cloudinary.com/dgpojk42n/image/upload/v1763312536/databricks_01_choose_settings.png"
+  alt="Choose settings"
+/>
+
+3. On the sidebar, click on *Identity and access*, and then under the *Service Principals* row click on *Manage*.
+
+<img
+  src="https://res.cloudinary.com/dgpojk42n/image/upload/v1763313131/databricks_02_manage_service_principal_b5gc72.png"
+  alt="Choose settings"
+/>
+
+4. Click on the *Add service principal* button, choose "Add new" and give a name to the service principal. This will be used by Elementary Cloud 
+to access your Databricks instance.
+
+<img
+  src="https://res.cloudinary.com/dgpojk42n/image/upload/v1763313361/databricks_04_add_service_principal_e54raz.png"
+  alt="Add service principal"
+/>
+
+5. Click on your newly created service principal, add the "Databricks SQL access" entitlement, and click Update. Also, please copy the 
+"Application ID" field as it will be used later in the permissions section.
+
+<img
+  src="https://res.cloudinary.com/dgpojk42n/image/upload/v1763313542/databricks_05_add_databricks_sql_access_zzdcf7.png"
+  alt="Add databricks SQL access"
+/>
+
+6. Next, generate credentials for your service principal. Choose one of the following methods:
+
+   **Option A: Generate an OAuth secret (Recommended)**
+
+   On the service principal page, go to the *Secrets* tab and click *Generate secret*. Copy the **Client ID** (this is the same as the "Application ID" from step 5) and the generated **Client secret** — you will need both when configuring the Elementary environment.
+
+   {/* TODO: Add screenshot of Databricks service principal Secrets tab with "Generate secret" button */}
+   <img
+     src="https://res.cloudinary.com/dgpojk42n/image/upload/v1774307890/databricks_m2m_oauth_1_lzix16.png"
+     alt="Generate OAuth M2M Secret (1)"
+   />
+   <img
+     src="https://res.cloudinary.com/dgpojk42n/image/upload/v1774307890/databrick_m2m_oauth_2_yhwws8.png"
+     alt="Generate OAuth M2M Secret (2)"
+   />
+
+   <Info>
+     OAuth secrets are the recommended authentication method. They enable short-lived token generation
+     with automatic refresh, providing better security than long-lived personal access tokens.
+   </Info>
+
+   **Option B: Create a personal access token (legacy)**
+
+   In order to generate a personal access token for your service principal, you may first need to allow Token Usage for it.
+   To do so, go to the settings menu and choose Advanced -> Personal Access Tokens -> Permission Settings, then make sure the service principal is in the list.
+
+   <img
+     src="https://res.cloudinary.com/dgpojk42n/image/upload/v1763316575/databricks_06_token_usage_eufjwv.png"
+     alt="Allow token usage for service principal"
+   />
+
+   Then, create a personal access token for your service principal. For more details, please click [here](https://docs.databricks.com/aws/en/dev-tools/auth/pat#databricks-personal-access-tokens-for-service-principals).
+
+7. Finally, in order to enable Elementary's automated monitors feature, please ensure [predictive optimization](https://docs.databricks.com/aws/en/optimizations/predictive-optimization#enable-or-disable-predictive-optimization-for-your-account) is enabled in your account.
+This is required for table statistics to be updated (Elementary relies on this to obtain up-to-date row counts)

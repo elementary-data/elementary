@@ -3,6 +3,11 @@ title: "timestamp_column"
 sidebarTitle: "timestamp_column"
 ---
 
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+
+
+<AiGenerateTest />
+
 `timestamp_column: [column name]`
 
 <Tip>
@@ -29,9 +34,10 @@ If undefined, default is null (no time buckets).
 ```yml test
 models:
   - name: this_is_a_model
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          timestamp_column: created_at
+          arguments:
+            timestamp_column: created_at
 ```
 
 ```yml model
@@ -48,7 +54,7 @@ sources:
     schema: raw
     tables:
       - name: source_table
-        meta:
+        config:
           elementary:
             timestamp_column: loaded_at
 ```

@@ -1,0 +1,80 @@
+---
+title: "What is Elementary?"
+mode: "wide"
+
+---
+Elementary transforms data reliability from an engineering focus into a shared foundation of trust for the entire organization. As analytics and AI pipelines grow in complexity, teams wrestle with test maintenance, incident triage, and data governance—diverting time and attention from innovation.
+
+Elementary bridges the gap by offering:
+
+- **Developer-first workflows** that integrate seamlessly with dbt, Git, and CI/CD
+- **Business-ready visibility** that makes data health accessible to analysts and leaders
+- **AI-powered reliability**, turning observability into proactive, automated action.
+
+## How it works
+
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1747823535/image_8_jizmvr.png" />
+
+Elementary offers a modular observability stack built for dbt-based data workflows. At the foundation is an open-source dbt package that captures key metadata and test results from your dbt project. This package powers both the self-hosted CLI and the fully managed Cloud Platform, which is built on top of it to provide wider visibility, automations, scale and advanced reports.
+
+## Products
+
+Whether you're starting small or scaling observability across your organization, you can choose the setup that fits your team—while unlocking more value as your needs evolve.
+
+### [**Elementary dbt package (OSS)**](/data-tests/dbt/dbt-package)
+
+The Elementary dbt package is open source and runs in your existing dbt workflows. It collects metadata, test results, and lineage from your dbt runs, and also enables Elementary’s anomaly detection tests. 
+
+Use it to:
+- Save dbt artifacts, test and run results in your data warehouse
+- Run pre-built anomaly detection and schema changes tests
+
+### [Elementary CLI (OSS)](/oss/oss-introduction)
+
+### 
+
+Elementary CLI help teams adopt foundational data observability within dbt. It centralizes metadata and test results to a self-hosted report, and provides a starting point for alerts and monitoring. It’s a great way to introduce reliability into engineering workflows.
+
+Use it to:
+
+- Present test results and metadata from your dbt project in a visual report
+- Send basic alerts over test and schema failures
+
+Setup Elementary OSS [here](https://docs.elementary-data.com/oss/quickstart/quickstart-cli-package). 
+
+### [**Elementary Cloud Platform**](/cloud/introduction)
+
+Elementary Cloud builds on the dbt package by adding a fully managed, AI-powered platform for organization-wide reliability. It includes smart alerting, incident management, column-level lineage, anomaly detection, AI agents, and enterprise features like RBAC and audit logs. It’s designed for teams that want to scale trust, automation, and collaboration across engineering and business.
+
+Use it to:
+
+- Integrate with your entire stack - from DWH to BI, AI tools and ticketing systems
+- Give engineers, analysts, and stakeholders shared visibility into data health
+- Scale reliability efforts across large teams and complex environments
+- Reduce alert fatigue - group and route alerts based on criticality, ownership, and impact
+- Automate test recommendations, metadata coverage, and root cause analysis with AI agents
+- Track progress over time, enforce governance, and support AI readiness
+
+Learn more about Elementary Cloud’s features and integrations [here](https://docs.elementary-data.com/cloud/introduction), and get started with a 30-day free trial [here](https://docs.elementary-data.com/quickstart).
+
+To further understand the differences, check out the full [**OSS vs. Cloud comparison**](/cloud/cloud-vs-oss).
+
+## **Security and Privacy**
+
+Elementary is designed with security and privacy in mind.
+
+- Elementary Cloud does not have read access to raw data in your data warehouse.
+- Elementary Cloud only extracts and stores metadata, logs and aggregated metrics.
+- All data is encrypted at rest and in transit using industry standard protocols.
+- Elementary uses service accounts or authentication tokens with granular and minimal permissions.
+- Elementary offers deployment options with no direct access from Elementary Cloud to your data warehouse and third-party tools.
+- Advanced authentication such as MFA, Okta SSO, Microsoft AD are available upon request.
+
+<Tip>**SOC 2 certification:** Elementary Cloud is SOC2 type II certified!</Tip>
+
+Learn more about how Elementary ensures security and privacy [here](https://docs.elementary-data.com/cloud/general/security-and-privacy).
+
+**Want to know more?**
+
+- [Book a call with our team](https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs)
+- [Join the community and reach out on Slack](https://elementary-community.slack.com/ssb/redirect)

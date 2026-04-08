@@ -3,6 +3,11 @@ title: "training_period"
 sidebarTitle: "training_period"
 ---
 
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+
+
+<AiGenerateTest />
+
 ```
 training_period:
   period: < time period > # supported periods: day, week, month
@@ -22,11 +27,12 @@ This timeframe includes the training period and detection period. If a detection
 ```yml test
 models:
   - name: this_is_a_model
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          training_period:
-            period: day
-            count: 30
+          arguments:
+            training_period:
+              period: day
+              count: 30
 ```
 
 ```yml model
@@ -61,6 +67,10 @@ It works differently according to the table materialization:
 
 - **Full time buckets** - Elementary will increase the `training_period` automatically to insure full time buckets. For example if the `time_bucket` of the test is `period: week`, and 14 days `training_period` result in Tuesday, the test will collect 2 more days back to complete a week (starting on Sunday).
 - **Seasonality training set** - If seasonality is configured, Elementary will increase the `training_period` automatically to ensure there are enough training set values to calculate an anomaly. For example if the `seasonality` of the test is `day_of_week`, `training_period` will be increased to ensure enough Sundays, Mondays, Tuesdays, etc. to calculate an anomaly for each.
+
+**Overlap with detection period:**
+
+When the `detection_period` spans multiple time buckets, it can overlap with the training period. By default, values in the detection period are included in the training calculation, which can lead to false negatives because detection period values influence the expected range used to evaluate those same values. To prevent this overlap and improve anomaly detection accuracy, use [`exclude_detection_period_from_training`](/data-tests/anomaly-detection-configuration/exclude_detection_period_from_training) set to `true`.
 
 #### The impact of changing `training_period`
 

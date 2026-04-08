@@ -4,26 +4,46 @@ sidebarTitle: "Introduction"
 icon: "square-terminal"
 ---
 
-Elementary OSS is a CLI tool you can deploy on top of the Elementary dbt package and orchestrate to send Slack alerts and self-host the Elementary report.
+import AdaptersCards from '/snippets/oss/adapters-cards.mdx';
 
-To gain the most value from the Elementary dbt package, we recommend using it with the Elementary Cloud Platform.  
+**Elementary OSS is a CLI tool that works alongside the [Elementary dbt package](/data-tests/dbt/dbt-package).** With the dbt package, you gain powerful anomaly detection tests and metadata tables to monitor data quality trends over time.
 
-The difference between the CLI and the Elementary Cloud Platform
+By deploying the CLI, you can **send alerts and self-host the Elementary data observability report**, a comprehensive view of your dbt runs and all dbt test results, helping you track data lineage, test coverage, and overall pipeline health. 
 
-- **The Elementary Cloud Platform  - for** **organizational data quality initiatives** (e.g., platform refactoring, governance projects, or AI/ML adoption).
-The Elementary Cloud Platform offers pipeline monitoring, incident management, lineage tracking, dashboards, health scores, and alerts. It empowers data engineers, analytics engineers, and data analysts to collaborate, resolve issues efficiently, and deliver trusted data products. Learn more about the [Elementary Cloud Platform](https://docs.elementary-data.com/cloud/introduction) or [book a demo](https://cal.com/maayansa/elementary-intro-docs).
-- **The CLI tool - for individual use**
-The CLI tool is used to detect issues, send Slack alerts, and self-host the Elementary report. It is the right choice if you’ll be the primary user of Elementary. Learn more about the CLI tool below.
+For a scalable and collaborative data quality platform, **look into the [Elementary Cloud Platform](/cloud/introduction)** - A fully managed, enterprise-ready solution with ML-powered anomaly detection, flexible data discovery, integrated incident management, and collaboration tools—all with minimal setup and infrastructure maintenance. See here a [detailed features comparison](cloud/cloud-vs-oss).
 
-<CardGroup cols={1}>
-  <Card
-    title="Quickstart Elementary OSS"
-    href="/oss/quickstart/quickstart-cli-package"
-    icon="circle-play"
-    iconType="solid"
-  >
-    Install the Elementary dbt package and CLI tool.
-  </Card>
+### What can you do with Elementary OSS?
+
+<Card title="Utilize the Elementary dbt package for Elementary tests and tables" icon="gear" iconType="solid" href="/data-tests/introduction" />
+
+<CardGroup cols={2}>
+
+  <Card title="Generate an observability report" icon="browsers" iconType="solid" href="/oss/guides/generate-report-ui" />
+
+  <Card title="Send alerts" icon="bell-exclamation" href="/oss/guides/alerts/elementary-alerts" />
+
+  <Card title="Share the report" icon="share-all" iconType="solid" href="/oss/guides/share-report-ui" />
+
+  <Card title="Deploy in production" icon="gear" iconType="solid" href="/oss/deployment-and-configuration/elementary-in-production" />
 </CardGroup>
 
-<Snippet file="oss/oss-introduction.mdx" />
+<br />
+
+<Frame>
+  <img src="https://raw.githubusercontent.com/elementary-data/elementary/master/static/report_ui.gif" alt="Demo" />
+</Frame>
+
+### Supported adapters
+
+<AdaptersCards />
+
+
+<CardGroup cols={1}>
+  <Card title="Quickstart Elementary OSS" href="/oss/quickstart/quickstart-cli-package" icon="circle-play" iconType="solid">
+    Install the Elementary dbt package and CLI tool.
+  </Card>
+
+  <Card title="Webinar: Getting Started with Elementary OSS" href="https://www.elementary-data.com/webinar/getting-started-with-elementary" icon="video">
+    Watch the webinar to learn how to get started with the Elementary dbt package and CLI tool.
+  </Card>
+</CardGroup>

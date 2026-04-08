@@ -3,6 +3,11 @@ title: "where_expression"
 sidebarTitle: "where_expression"
 ---
 
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+
+
+<AiGenerateTest />
+
 `where_expression: [sql expression]`
 
 Filter the tested data using a valid sql expression.
@@ -10,14 +15,21 @@ Filter the tested data using a valid sql expression.
 - _Default: None_
 - _Relevant tests: All anomaly detection tests_
 
+The `where_expression` is used to filter out the data that you want to test. For example, to only test weekdays for anomalies, you can filter on the day of the week:
+```yml
+where_expression: EXTRACT(DOW FROM timestamp_column) BETWEEN 2 AND 6 
+#Test Monday through Friday
+```
+
 <RequestExample>
 
 ```yml test
 models:
   - name: this_is_a_model
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          where_expression: "user_name != 'test'"
+          arguments:
+            where_expression: "user_name != 'test'"
 ```
 
 ```yml model
