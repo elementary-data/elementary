@@ -1,6 +1,8 @@
 import json
 import math
-from typing import Any, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
+
+from tabulate import tabulate
 
 
 def try_load_json(value: Optional[Union[str, dict, list]]):
@@ -94,3 +96,70 @@ def inf_and_nan_to_str(obj) -> Any:
         return [inf_and_nan_to_str(i) for i in obj]
     else:
         return obj
+
+
+def _format_value(value: Any) -> str:
+    """Format a value for table display, avoiding scientific notation for floats."""
+    if value is None:
+        return ""
+    if isinstance(value, float):
+        if math.isinf(value) or math.isnan(value):
+            return str(value)
+        # Format floats without scientific notation
+        if value == int(value) and abs(value) < 1e15:
+            return str(int(value))
+        return f"{value:.10f}".rstrip("0").rstrip(".")
+    return str(value)
+
+
+def list_of_dicts_to_markdown_table(
+    data: List[Dict[str, Any]], max_length: Optional[int] = None
+) -> str:
+    """
+    Convert a list of dictionaries with consistent keys to a markdown table string.
+
+    Args:
+        data: List of dictionaries
+        max_length: Optional maximum character length for the output. If the full
+            table exceeds this limit, rows are removed from the end and a
+            "(truncated)" note is appended to avoid cutting mid-row.
+
+    Returns:
+        A markdown-formatted table string using GitHub table format
+    """
+    if not data:
+        return ""
+
+    processed_data = [{k: _format_value(v) for k, v in row.items()} for row in data]
+    full_table = tabulate(
+        processed_data, headers="keys", tablefmt="github", disable_numparse=True
+    )
+
+    if max_length is None or len(full_table) <= max_length:
+        return full_table
+
+    if max_length <= 0:
+        return ""
+    truncation_note = "\n(truncated)"
+    if max_length <= len(truncation_note):
+        return "(truncated)"[:max_length]
+    effective_max = max_length - len(truncation_note)
+    for row_count in range(len(processed_data) - 1, 0, -1):
+        table = tabulate(
+            processed_data[:row_count],
+            headers="keys",
+            tablefmt="github",
+            disable_numparse=True,
+        )
+        if len(table) <= effective_max:
+            return table + truncation_note
+
+    single_row_table = tabulate(
+        processed_data[:1],
+        headers="keys",
+        tablefmt="github",
+        disable_numparse=True,
+    )
+    if len(single_row_table) <= effective_max:
+        return single_row_table + truncation_note
+    return single_row_table[:effective_max].rstrip() + truncation_note
