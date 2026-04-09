@@ -1,0 +1,58 @@
+import IpAllowlist from '/snippets/cloud/integrations/ip-allowlist.mdx';
+import PermissionsAndSecurity from '/snippets/cloud/integrations/permissions-and-security.mdx';
+
+This guide contains the necessary steps to connect a Microsoft Fabric environment to your Elementary account.
+
+### Prerequisites
+
+- A Microsoft Fabric workspace with a warehouse or lakehouse SQL endpoint.
+- An Azure AD (Entra ID) app registration (service principal) with access to your Fabric workspace.
+- ODBC Driver 18 for SQL Server is used under the hood — no action needed on your side, it is pre-installed in Elementary Cloud.
+
+### Create an Azure AD service principal
+
+If you don't already have a service principal configured:
+
+1. In the [Azure portal](https://portal.azure.com), go to **Azure Active Directory** > **App registrations** > **New registration**.
+2. Give it a name (e.g. `elementary-fabric`) and register it.
+3. Note the **Application (client) ID** and **Directory (tenant) ID**.
+4. Go to **Certificates & secrets** > **New client secret**, create a secret, and copy the **Value**.
+5. In your Fabric workspace, add the service principal as a **Viewer** in the workspace settings. This is the minimum workspace-level role required for connectivity.
+
+### Grant minimal permissions
+
+Elementary Cloud only requires **read-only access to the Elementary schema** and **metadata access** (e.g. `INFORMATION_SCHEMA`). We recommend granting only the minimum permissions needed.
+
+After the service principal can connect, run the following statements in your Fabric warehouse with admin permissions:
+
+```sql
+-- Grant read-only access to the Elementary schema
+GRANT SELECT ON SCHEMA :: [<your_elementary_schema>] TO [<service_principal_name>];
+
+-- Grant access to view metadata (table definitions, columns, etc.)
+GRANT VIEW DEFINITION ON SCHEMA :: [<your_elementary_schema>] TO [<service_principal_name>];
+```
+
+Replace `<your_elementary_schema>` with the name of your Elementary schema (usually `[your dbt target schema]_elementary`), and `<service_principal_name>` with the display name of your service principal.
+
+<PermissionsAndSecurity />
+
+### Fill the connection form
+
+In the Elementary platform, go to **Environments** in the left menu, and click on the **Create Environment** button.
+Choose a name for your environment, and then choose **Fabric** as your data warehouse type.
+
+Provide the following fields:
+
+- **Server**: The Fabric SQL connection endpoint. You can find this in the Fabric portal under your warehouse settings. It typically looks like `<identifier>.datawarehouse.fabric.microsoft.com`.
+- **Port**: The port to connect to. Default is `1433`.
+- **Tenant ID**: The Azure AD (Entra ID) Directory (tenant) ID.
+- **Client ID**: The Azure AD Application (client) ID of the service principal.
+- **Client Secret**: The client secret value you generated for the service principal.
+
+Then, for each dbt project in your environment, provide:
+
+- **Database name**: The name of the Fabric warehouse or lakehouse SQL endpoint.
+- **Elementary schema**: The name of your Elementary schema. Usually `[your dbt target schema]_elementary`.
+
+<IpAllowlist />
