@@ -218,7 +218,8 @@
                   "cloud/integrations/transformation-and-orchestration/dbt-cloud",
                   "cloud/integrations/transformation-and-orchestration/dbt-fusion",
                   "cloud/integrations/transformation-and-orchestration/airflow",
-                  "cloud/integrations/transformation-and-orchestration/orchestration-tools"
+                  "cloud/integrations/transformation-and-orchestration/orchestration-tools",
+                  "cloud/integrations/pipeline/fivetran"
                 ]
               },
               {
