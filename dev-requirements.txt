@@ -1,6 +1,7 @@
 pytest
 pytest-parametrization>=2022.2.1
 pre-commit
+# Pinned below 1.16 because mypy >=1.16 crashes with INTERNAL ERROR on this codebase.
 mypy<1.16
 deepdiff
 # MyPy stubs
