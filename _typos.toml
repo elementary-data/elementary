@@ -1,0 +1,6 @@
+[default.extend-identifiers]
+# Vertica logo SVG gradient IDs contain "ot" which is flagged as a typo.
+# These are intentional SVG element identifiers, not misspellings.
+vertica_page_ot_gradient = "vertica_page_ot_gradient"
+vertica_oss_ot_gradient = "vertica_oss_ot_gradient"
+vertica_cloud_ot_gradient = "vertica_cloud_ot_gradient"
