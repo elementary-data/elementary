@@ -249,7 +249,7 @@ class ModelAlertDataSchema(BaseAlertDataSchema):
     alias: str
     path: str
     original_path: str
-    materialization: str
+    materialization: Optional[str] = None
     full_refresh: bool
     message: Optional[str] = None
     resource_type: ResourceType = Field(ResourceType.MODEL, const=True)  # type: ignore  # noqa
