@@ -70,7 +70,7 @@ vars:
   disable_dbt_artifacts_autoupload: true
 ```
 
-2. Make sure to run `dbt run --select edr.dbt_artifacts` upon merging PRs.
+2. Make sure to run `dbt run --select elementary --vars '{"enable_elementary_models": true}'` upon merging PRs.
 
 </Accordion>
 
@@ -100,9 +100,7 @@ vars:
 ```
 
 <Warning>
-  If you disable the artifacts autoupload, we recommend your run `dbt run
-  --select elementary.edr.dbt_artifacts` every time you deploy changes to your
-  project.
+  If you disable the artifacts autoupload, we recommend you run `dbt run --select elementary --vars '{"enable_elementary_models": true}'` every time you deploy changes to your project.
 </Warning>
 
 #### Disable result models updates

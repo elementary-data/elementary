@@ -28,8 +28,10 @@ vars:
 When you need to update metadata (e.g., after schema changes or adding new models), upload artifacts either manually or via a recurring job (e.g., daily):
 
 ```bash
-dbt run --select elementary.edr.dbt_artifacts
+dbt run --select elementary --vars '{"enable_elementary_models": true}'
 ```
+
+For the `enable_elementary_models` pattern in `dbt_project.yml`, see [Can I disable / exclude the Elementary models?](/oss/general/faq#can-i-disable-exclude-the-elementary-models).
 
 <Info>
 Metadata artifacts only need to be uploaded when your project structure changes (new models, tests, sources, etc.). For most runs, you only need run results, which are much faster to upload.
