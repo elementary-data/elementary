@@ -1,7 +1,7 @@
 pytest
 pytest-parametrization>=2022.2.1
 pre-commit
-mypy
+mypy<1.16
 deepdiff
 # MyPy stubs
 types-requests
