@@ -2,9 +2,7 @@ import os
 from pathlib import Path
 from typing import Optional
 
-import google.auth  # type: ignore[import]
 from dateutil import tz
-from google.auth.exceptions import DefaultCredentialsError  # type: ignore[import]
 
 from elementary.exceptions.exceptions import InvalidArgumentsError
 from elementary.monitor.alerts.grouping_type import GroupingType
@@ -265,9 +263,13 @@ class Config:
         if self.google_service_account_path:
             return True
         try:
+            import google.auth  # type: ignore[import]
+
             google.auth.default()
             return True
-        except DefaultCredentialsError:
+        except ImportError:
+            return False
+        except google.auth.exceptions.DefaultCredentialsError:
             return False
 
     @property

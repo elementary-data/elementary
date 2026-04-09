@@ -5,19 +5,12 @@ import os.path
 import webbrowser
 from typing import Optional, Tuple
 
-from elementary.clients.azure.client import AzureClient
-from elementary.clients.gcs.client import GCSClient
-from elementary.clients.s3.client import S3Client
-from elementary.clients.slack.client import SlackClient
 from elementary.config.config import Config
 from elementary.monitor.api.invocations.invocations import InvocationsAPI
 from elementary.monitor.api.report.report import ReportAPI
 from elementary.monitor.api.report.schema import ReportDataSchema
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
-from elementary.monitor.data_monitoring.report.slack_report_summary_message_builder import (
-    SlackReportSummaryMessageBuilder,
-)
 from elementary.monitor.data_monitoring.schema import FiltersSchema
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.tracking.tracking_interface import Tracking
@@ -43,14 +36,62 @@ class DataMonitoringReport(DataMonitoring):
             config, tracking, force_update_dbt_package, disable_samples, selector_filter
         )
         self.report_api = ReportAPI(self.internal_dbt_runner)
-        self.s3_client = S3Client.create_client(self.config, tracking=self.tracking)
-        self.gcs_client = GCSClient.create_client(self.config, tracking=self.tracking)
-        self.azure_client = AzureClient.create_client(
-            self.config, tracking=self.tracking
-        )
-        self.slack_client = SlackClient.create_client(
-            self.config, tracking=self.tracking
-        )
+
+        self.s3_client = None
+        if self.config.has_s3:
+            try:
+                from elementary.clients.s3.client import S3Client
+
+                self.s3_client = S3Client.create_client(
+                    self.config, tracking=self.tracking
+                )
+            except ImportError:
+                logger.warning(
+                    "S3 dependencies are not installed. "
+                    "Install them with: pip install 'elementary-data[s3]'"
+                )
+
+        self.gcs_client = None
+        if self.config.gcs_bucket_name:
+            try:
+                from elementary.clients.gcs.client import GCSClient
+
+                self.gcs_client = GCSClient.create_client(
+                    self.config, tracking=self.tracking
+                )
+            except ImportError:
+                logger.warning(
+                    "GCS dependencies are not installed. "
+                    "Install them with: pip install 'elementary-data[gcs]'"
+                )
+
+        self.azure_client = None
+        if self.config.has_blob:
+            try:
+                from elementary.clients.azure.client import AzureClient
+
+                self.azure_client = AzureClient.create_client(
+                    self.config, tracking=self.tracking
+                )
+            except ImportError:
+                logger.warning(
+                    "Azure dependencies are not installed. "
+                    "Install them with: pip install 'elementary-data[azure]'"
+                )
+
+        self.slack_client = None
+        if self.config.has_slack:
+            try:
+                from elementary.clients.slack.client import SlackClient
+
+                self.slack_client = SlackClient.create_client(
+                    self.config, tracking=self.tracking
+                )
+            except ImportError:
+                logger.warning(
+                    "Slack dependencies are not installed. "
+                    "Install them with: pip install 'elementary-data[slack]'"
+                )
 
     def generate_report(
         self,
@@ -165,9 +206,9 @@ class DataMonitoringReport(DataMonitoring):
             report_data.tracking = dict(
                 posthog_api_key=self.tracking.POSTHOG_PROJECT_API_KEY,
                 report_generator_anonymous_user_id=self.tracking.anonymous_user_id,
-                anonymous_warehouse_id=self.warehouse_info.id
-                if self.warehouse_info
-                else None,
+                anonymous_warehouse_id=(
+                    self.warehouse_info.id if self.warehouse_info else None
+                ),
             )
 
     def send_report(
@@ -298,6 +339,10 @@ class DataMonitoringReport(DataMonitoring):
             dbt_invocation=invocation,
         )
         if self.slack_client:
+            from elementary.monitor.data_monitoring.report.slack_report_summary_message_builder import (
+                SlackReportSummaryMessageBuilder,
+            )
+
             send_succeeded = self.slack_client.send_message(
                 channel_name=self.config.slack_channel_name,
                 message=SlackReportSummaryMessageBuilder().get_slack_message(
