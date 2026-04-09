@@ -1,0 +1,56 @@
+---
+title: Data Tests Overview
+sidebarTitle: Overview and configuration
+---
+
+import DataTestsCards from '/snippets/cloud/features/data-tests/data-tests-cards.mdx';
+
+
+
+Data tests are useful for validating and enforcing explicit expectations on your data.
+
+Elementary enables data validation and result tracking by leveraging dbt tests and dbt packages such as dbt-utils, dbt-expectations, and Elementary.
+This rich ecosystem of tests covers various use cases, and is widely adopted as a standard for data validations.
+Any custom dbt generic or singular test you develop will also be included.  
+Additionally, users can create custom SQL tests in Elementary, and add tests in bulk from the UI.
+
+The combination of dbt tests, Elementary monitors, custom SQL tests and the rich dbt testing ecosystem provides the ability to achieve wide and comprehensive coverage.
+
+### Supported data tests
+
+<DataTestsCards />
+
+## Test configuration
+
+One of the design principals in Elementary is that users should manage configuration in code.
+This enables to maintain the same workflow for building the pipeline and configuring coverage, it makes observability and governance part of the development cycle, 
+and provides control in review process and version management.
+
+However, adding many tests in code is tedious, and configuration in code isn't usable for everyone. 
+
+In Elementary, we designed a flow to incorporate the good of both worlds:
+
+- **Configuration in code or in UI** - The UI test configuration flow opens pull requests to the code base through the [code repository](/cloud/integrations/code-repo/connect-code-repo) integration.
+- **The code is the single source of truth** - As configuration from UI goes to code, the code remains the place where configuration is managed and maintained.
+
+### Create new tests from the UI
+
+<iframe
+width="700"
+height="400"
+src="https://res.cloudinary.com/dvmtceykh/video/upload/v1739805266/create_test_bxfssr.mp4"
+frameborder="0"
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+allowfullscreen
+></iframe>
+
+### Edit existing tests from the UI
+Tests can be edited from the UI, and the changes will create a pull request in the code repository.
+The pull request will be reviewed and merged by the team, and the changes will be applied to the tests after dbt pipeline is run and Elementary is synced.
+Simply open the test side panel from the test results / incidents page, and navigate to the Configuration tab.
+Then Click "Edit test" and make the necessary changes.
+<img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1740598580/Test_overview_side_panel-_anomaly_kojxui.png" />
+<img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1740598586/wizard_flow_-_anomaly_v_fcjbji.png" />
+
+A pull request will be opened in the code repository, and a link to the PR will be provided in the UI.
+<img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1740598594/Test_overview_side_panel_-_V_picgcp.png" />

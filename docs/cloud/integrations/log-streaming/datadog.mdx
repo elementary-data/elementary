@@ -1,0 +1,145 @@
+---
+title: "Datadog"
+---
+
+Elementary's Datadog integration enables streaming audit logs and system logs directly to your Datadog account for centralized log management and monitoring.
+
+## Overview
+
+When enabled, Elementary automatically streams your workspace's [audit logs](/cloud/features/collaboration-and-communication/audit_logs/overview) ([user activity logs](/cloud/features/collaboration-and-communication/audit_logs/user-activity-logs) and [system logs](/cloud/features/collaboration-and-communication/audit_logs/system-logs)) to Datadog using the [Datadog Logs API](https://docs.datadoghq.com/api/latest/logs/#send-logs). This allows you to:
+
+- Centralize all logs in your Datadog dashboard
+- Set up custom alerts and monitors on log events
+- Correlate Elementary logs with other application logs
+- Perform advanced log analysis and search
+- Maintain long-term log retention in Datadog
+
+## Prerequisites
+
+Before configuring log streaming to Datadog, you'll need:
+
+1. **Datadog API Key** - Your Datadog API key for authentication
+   - You can find or create an API key in your Datadog account under [Organization Settings > API Keys](https://app.datadoghq.com/organization-settings/api-keys)
+
+2. **Datadog Site** (optional) - Your Datadog site region
+   - Default: `datadoghq.com` (US)
+   - EU: `datadoghq.eu`
+   - US3: `us3.datadoghq.com`
+   - US5: `us5.datadoghq.com`
+   - AP1: `ap1.datadoghq.com`
+
+## Configuring Log Streaming to Datadog
+
+1. Navigate to the [**Logs**](/cloud/features/collaboration-and-communication/audit_logs/overview) page:
+   - Click on your **account name** in the top-right corner of the UI
+   - Open the dropdown menu
+   - Select **Logs**
+
+2. In the **External Integrations** section, click the **Connect** button
+
+3. In the modal that opens, select **Datadog** as your log streaming destination
+
+4. Enter your Datadog configuration:
+   - **API Key**: Your Datadog API key
+   - **Site** (optional): Your Datadog site region (defaults to `datadoghq.com` if not specified)
+   - **Service Name** (optional): Custom service name for logs in Datadog (defaults to `elementary`)
+   - **Source** (optional): Custom source tag for logs (defaults to `elementary-cloud`)
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/dvmtceykh/image/upload/v1768276962/b3d70f5a-88c7-4c6d-a0e6-ff56d392b901.png"
+    />
+  </div>
+</Frame>
+
+6. Click **Connect** to enable log streaming
+
+7. After connecting, you will see the Datadog integration listed in the **External Integrations** section. You can edit or disable the integration at any time.
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/dvmtceykh/image/upload/v1767005465/Pasted_Graphic_2_gyg7dh.png"
+    />
+  </div>
+</Frame>
+
+<Note>
+The log streaming configuration applies to your entire workspace. All logs matching your selected log types will be streamed to Datadog in real-time.
+</Note>
+
+## Log Format in Datadog
+
+Logs are sent to Datadog with the following structure:
+
+- `timestamp`: ISO 8601 timestamp of the event
+- `log_type`: The type of log (`audit` for user activity logs, `system` for system logs)
+- `status`: Log level (`info` for successful actions, `error` for failed actions)
+- `service`: Service name (configurable, defaults to `elementary`)
+- `source`: Source tag (configurable, defaults to `elementary-cloud`)
+- `event_name`: The specific action that was performed (e.g., `user_login`, `create_test`)
+- `success`: Boolean indicating whether the action completed successfully
+- `user_email`: User email address (only present in audit logs)
+- `user_name`: User display name (only present in audit logs)
+- `env_id`: Environment identifier (empty for account-level actions)
+- `env_name`: Environment name (empty for account-level actions)
+- `event_content`: Additional context-specific information as a JSON object
+- `dd.tags`: Additional tags including:
+  - `log_type:<log_type>` (e.g., `audit`, `system`)
+  - `event_name:<event_name>` (e.g., `user_login`, `create_test`)
+  - `env_id:<environment_id>` (if applicable)
+
+## Viewing Logs in Datadog
+
+Once configured, logs will appear in your Datadog [Log Explorer](https://app.datadoghq.com/logs) within a few seconds of being generated.
+
+You can filter logs using:
+- `source:elementary-cloud` - All Elementary logs
+- `log_type:audit` - User activity logs only
+- `log_type:system` - System logs only
+- `event_name:<event_name>` - Specific action types
+- `env_id:<environment_id>` - Logs from a specific environment
+- `success:false` - Failed operations only
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/dvmtceykh/image/upload/v1767005465/image_28_w1pkgl.png"
+    />
+  </div>
+</Frame><Frame>
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/dvmtceykh/image/upload/v1767005466/image_27_ux2nv2.png"
+    />
+  </div>
+</Frame>
+
+## Troubleshooting
+
+### Logs not appearing in Datadog
+
+1. **Verify API Key**: Ensure your Datadog API key is valid and has the necessary permissions
+2. **Check Site Configuration**: Verify you've selected the correct Datadog site region
+3. **Review Log Types**: Confirm the log types you want to stream are enabled
+4. **Check Datadog Status**: Verify your Datadog account is active and not rate-limited
+
+### Rate Limiting
+
+Datadog has rate limits for log ingestion. If you're experiencing issues:
+- Check your Datadog account's rate limits in the [Usage & Billing](https://app.datadoghq.com/billing/usage) page
+- Consider filtering which log types you stream if you have high log volume
+- Contact Datadog support if you need to increase your rate limits
+
+## Disabling Log Streaming
+
+To disable log streaming to Datadog:
+
+1. Navigate to the [**Logs**](/cloud/features/collaboration-and-communication/audit_logs/overview) page
+2. In the **External Integrations** section, find your Datadog integration
+3. Click **Disable** or remove the Datadog configuration
+4. Confirm the action
+
+<Warning>
+Disabling log streaming will stop sending new logs to Datadog immediately. Historical logs already sent to Datadog will remain in your Datadog account according to your retention settings.
+</Warning>

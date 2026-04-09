@@ -1,0 +1,56 @@
+---
+title: User Activity Logs
+sidebarTitle: User Activity Logs
+---
+
+User activity logs track changes made by users across the system, including actions such as creating, editing, or deleting tests, monitors, metadata, and other configurations.
+
+## What's Included
+
+The user activity logs capture a wide range of user actions across your workspace, including:
+
+- **User login and logout events**
+- **Failed login attempts** (when applicable)
+- **Creation, modification, or deletion of configuration**, including:
+    - Adding, editing, or deleting tests
+    - Adding, editing, deleting, or archiving alert rules
+    - Acknowledging, resolving, or assigning incidents
+    - Adding, editing, or deleting metadata (owners, descriptions, tags, critical assets)
+    - Adding, editing, or deleting integrations
+    - Sending team member invites
+    - Changing user roles
+
+## Fields
+
+The exported CSV file for user activity logs includes the following fields:
+
+- **Timestamp** - The date and time when the event occurred (in UTC, ISO 8601 format)
+  - *Example:* `"2024-01-15T14:30:45.123456+00:00"`
+
+- **User Email** - The email address of the user who performed the action
+  - *Example:* `"john.doe@example.com"`
+
+- **User Name** - The display name of the user who performed the action
+  - *Example:* `"John Doe"`
+
+- **Event Name** - The specific action that was performed
+  - *Examples:* `"user_login"`, `"create_test"`, `"edit_alert_rule"`, `"assign_incident"`, `"create_alert_rule"`, `"edit_metadata"`, `"delete_test"`, `"invite_team_member"`, `"change_user_role"`
+  - *Example:* `"user_login"` or `"create_test"`
+
+- **Success** - Whether the action completed successfully
+  - *Values:* `"True"` or `"False"` (as strings in CSV)
+  - *Example:* `"True"` or `"False"`
+
+- **Event Content** - Additional context-specific information about the action (stored as a JSON string)
+  - The contents vary by action type. For example:
+    - For incident actions: `{"incident_id": "inc_123", "incident_summary": "Test failure detected"}`
+    - For test actions: `{"test_id": "test_456", "test_name": "assert_no_null_values"}`
+    - For alert rule actions: `{"alert_routing_rule_id": "rule_789", "alert_routing_rule": {...}}`
+    - For metadata actions: `{"asset_id": "asset_123", "metadata_type": "owner"}`
+  - *Example:* `{"incident_id": "inc_123", "incident_summary": "Test failure detected"}`
+
+- **Env ID** - The environment identifier where the action occurred. Empty for account-level actions like login/logout that aren't tied to a specific environment.
+  - *Example:* `"env_7890123456abcdef"`
+
+- **Env Name** - The name of the environment where the action occurred. Empty for account-level actions like login/logout that aren't tied to a specific environment.
+  - *Example:* `"Production"` or `"Staging"`

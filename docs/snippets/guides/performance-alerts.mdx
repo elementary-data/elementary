@@ -1,0 +1,94 @@
+Monitoring the performance of your dbt models is crucial for maintaining an efficient data pipeline. Elementary provides capabilities to set up alerts for long-running queries, helping you identify performance bottlenecks and optimize your data pipeline.
+
+There are two main approaches to creating alerts for long-running model queries:
+
+1. **Static Threshold Alerts**: Define specific time thresholds that, when exceeded, trigger an alert
+2. **Anomaly Detection Alerts**: Use Elementary's anomaly detection to identify unusual increases in query execution time
+
+## Static Threshold Alerts
+
+You can define tests that fail when model execution times exceed predefined thresholds. This approach is straightforward and ideal when you have clear performance requirements.
+
+### Implementation Steps
+
+1. Create a singular test SQL file in your dbt project (e.g., `tests/test_models_run_under_30m.sql`):
+
+```sql
+{{ config(
+    tags=["model_performance"],
+    meta={
+        "description": "This test will fail on any models running over 30 minutes within the last 24 hours"
+    }
+) }}
+
+select name, package_name, status, generated_at, execution_time
+from {{ ref('elementary', 'model_run_results') }}
+where CAST(generated_at AS timestamp) >= TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL -1 day) 
+  AND execution_time >= 30 * 60
+order by execution_time desc
+```
+
+In this example:
+- The test monitors model runs over the past 24 hours
+- It fails if any model takes longer than 30 minutes to run (1800 seconds)
+- The test is tagged with "model_performance" for easy identification
+- Results are ordered by execution time in descending order
+
+When this test fails, Elementary will generate an alert based on your alert configurations. The test results will also be visible in the Elementary UI, showing the 5 worst-performing model runs.
+
+## Anomaly Detection Alerts
+
+Instead of using fixed thresholds, you can leverage Elementary's anomaly detection to identify unusual increases in execution time. This approach is more dynamic and can adapt to your evolving data pipeline.
+
+### Implementation Steps
+
+1. Define a source on the `model_run_results` view in your `schema.yml` file (or another YAML file):
+
+```yaml
+sources:
+  - name: elementary_models
+    schema: "your_elementary_schema"   # Replace with your Elementary schema name
+    tables:
+      - name: model_run_results
+        columns:
+          - name: execution_time    
+            data_tests:
+              - elementary.column_anomalies:
+                  config:
+                    severity: warn
+                    tags: ["model_performance"]
+                  arguments:
+                    column_anomalies:
+                      - max
+                    dimensions: ["package_name", "name"]
+                    timestamp_column: generated_at
+                    anomaly_direction: spike
+                    ignore_small_changes:
+                      spike_failure_percent_threshold: 10
+```
+
+In this configuration:
+- Elementary monitors the `execution_time` column for anomalies
+- Dimensions are set to `package_name` and `name` to analyze each model individually
+- The test only detects spikes in execution time (`anomaly_direction: spike`)
+- Small changes under 10% are ignored (`spike_failure_percent_threshold: 10`)
+- The severity is set to "warn" but can be adjusted as needed
+
+This test will detect when a model's execution time increases significantly compared to its historical performance, triggering an alert when the increase exceeds the normal baseline.
+
+## Choosing the Right Approach
+
+Both methods have their strengths:
+
+- **Static Threshold**: Simple to implement and understand. Ideal when you have clear performance requirements (e.g., "models must run in under 30 minutes").
+
+- **Anomaly Detection**: More adaptive to your specific environment. Better at detecting relative changes in performance rather than absolute thresholds. Useful when normal execution times vary across different models.
+
+You can implement both approaches simultaneously for comprehensive performance monitoring.
+
+## Viewing Performance Alerts
+
+Performance alerts appear in your regular Elementary alert channels (Slack, email, etc.) based on your alert configuration.
+
+You can also view performance test results in the Elementary UI under the Tests tab, filtered by the "model_performance" tag that we added to both test types.
+

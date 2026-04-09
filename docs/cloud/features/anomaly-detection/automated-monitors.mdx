@@ -1,0 +1,58 @@
+---
+title: Automated Freshness & Volume Monitors
+sidebarTitle: "Introduction"
+---
+
+import AutomatedMonitorsIntro from '/snippets/cloud/features/anomaly-detection/automated-monitors-intro.mdx';
+import AutomatedMonitorsCards from '/snippets/cloud/features/anomaly-detection/automated-monitors-cards.mdx';
+
+<AutomatedMonitorsIntro />
+
+Once your environment is set up, we automatically collect metadata from your warehouse, which our ML models run on.
+The models are operational when the initial backfill is completed, there is no "loading / training period" - Elementary will collect enough historical data after setup to train the models.
+
+Monitors are automatically created on all of your sources, and additional ones can be [added, edited and removed manually](/cloud/features/anomaly-detection/monitors-configuration). Their results are displayed in the application in the same way as package tests.
+
+#### Benefits of automated monitors
+
+1. **Zero configuration** - Our machine learning models learn data behavior, eliminating the need for manual configuration.
+2. **Out-of-the-box coverage** - Rather than manually configuring a test for each model, Elementary automatically creates monitors for every source in your dbt project once you set up your environment.
+3. **Metadata only, minimal cost** - The monitors rely on data warehouse metadata, and don't consume compute resources. 
+
+
+### How it works?
+
+The monitors collect metadata, and the [anomaly detection model](/cloud/features/anomaly-detection/monitors-overview#how-anomaly-detection-works?) adjusts based on updates frequency, seasonality and trends. 
+
+As soon as you connect Elementary Cloud Platform to your data warehouse, a backfill process will begin to collect historical metadata. 
+Within an average of a few hours, your automated monitors will be operational.
+By default, Elementary collects at least 21 days of historical metadata.
+
+The automated monitors are created for all the sources in your dbt project.
+If you would like a different configuration of which tables to create the monitors on, or adding monitors for all models, you can reach out to us.
+
+You can fine tune the [configuration](/cloud/features/anomaly-detection/monitors-configuration) and [provide feedback](/cloud/features/anomaly-detection/monitors-feedback) to adjust the detection to your needs. 
+
+<Info>As views are stateless, automated volume and freshness monitors only apply on tables.</Info>
+
+## Automated Monitors
+
+<AutomatedMonitorsCards />
+
+## Alerts on Failures
+
+By default, automated monitors failures **don't create alerts**.
+
+To activate alerts on automated monitors, navigate to `Setup > Alert Rules`.
+- To alert on all automated monitors failures - Change the default rule (#1) alert categories to include automated monitors.
+- To alert on specific datasets - Change / Create alert rules for these specific datasets, and include automated monitors in their alert categories.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1725443568/alert_categories_ikzjqr.png"
+      alt="Alert categories in alert rules"
+      width="420"
+    />
+  </div>
+</Frame>

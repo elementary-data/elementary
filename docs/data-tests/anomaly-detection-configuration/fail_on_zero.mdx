@@ -3,6 +3,11 @@ title: "fail_on_zero"
 sidebarTitle: "fail_on_zero"
 ---
 
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+
+
+<AiGenerateTest />
+
 `fail_on_zero: true/false`
 
 Elementary anomaly detection tests will fail if there is a zero metric value within the detection period.
@@ -16,9 +21,10 @@ If undefined, default is false.
 ```yml test
 models:
   - name: this_is_a_model
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          fail_on_zero: true
+          arguments:
+            fail_on_zero: true
 ```
 
 ```yml model

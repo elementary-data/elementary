@@ -3,6 +3,11 @@ title: "exclude_final_results"
 sidebarTitle: "exclude_final_results"
 ---
 
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+
+
+<AiGenerateTest />
+
 `exclude_final_results: [SQL where expression on fields value / average]`
 
 Failures in dimension anomaly tests consist of outliers in row count of each dimension.
@@ -23,12 +28,13 @@ models:
     config:
       elementary:
         timestamp_column: updated_at
-    tests:
+    data_tests:
       - elementary.dimension_anomalies:
-          dimensions:
-            - device_os
-            - device_browser
-          exclude_final_results: 'value > 1000 or average > 10'
+          arguments:
+            dimensions:
+              - device_os
+              - device_browser
+            exclude_final_results: 'value > 1000 or average > 10'
 ```
 
 </RequestExample>

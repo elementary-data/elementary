@@ -1,0 +1,57 @@
+---
+title: "Data Catalog"
+---
+
+The Elementary Cloud catalog is a dynamic workspace for managing data assets. It combines your dbt models, sources, columns, tests, and metrics with metadata, test results, and ownership in one place.
+
+Teams use the catalog to document their assets, assign owners, monitor test and freshness status, and raise issues or questions. It’s designed for collaboration, so everyone, from data engineers to analysts and business users, can find the context they need and keep shared knowledge up to date.
+
+From each dataset, you can navigate directly to its lineage and test results, ensuring seamless exploration of data dependencies and quality insights.
+
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  className="w-full aspect-video"
+  src="https://res.cloudinary.com/dvmtceykh/video/upload/v1740567475/catalog_tnroqf.mp4"
+></video>
+
+The catalog provides a unified view of the assets in your dbt project:
+- Models and sources, with associated metadata
+- Test results for each asset
+- Source freshness information
+- Column-level documentation
+- Ownership and tagging
+- Upstream and downstream dependencies
+
+You can browse or search the catalog to find a specific asset or get an overview of the current state of your project.
+
+## Key Features
+
+### Easily Discoverable Data Assets
+Quickly and easily navigate the catalog using the side tree and its search bar. Easily find tables, views, BI dashboard and more.
+You can view the data assets by their location in the DWH or in the dbt project, and group them by tags, owners or path.
+
+<img width="300" src="https://res.cloudinary.com/dvmtceykh/image/upload/v1740577485/589e1160-bc0e-4ac5-9751-634568975b3e.png" alt="Catalog tree" />
+
+### Editing Metadata
+You can edit metadata directly in the catalog. This includes updating model and column descriptions, assigning owners, and applying tags.
+To make updates more efficient, the catalog supports bulk editing. For example, you can assign an owner to multiple models at once or apply a shared tag to a group of assets.
+All metadata edits are synced back into your dbt project as a pull request, so documentation stays version-controlled and part of your workflow.
+
+Need to display additional metadata fields from your dbt `meta` config? Reach out to our team to customize the catalog with fields that best fit your data workflows.
+
+### Marking Critical Assets
+You can mark assets as critical directly in the catalog to highlight their importance. Critical assets are prioritized in monitoring and surfaced in governance views to help teams focus on what matters most. Read more [here](/cloud/features/data-governance/critical_assets).
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1740054762/u2rcaavqxmaa2ctg09wz.png" />
+
+### Lineage & Dependency Export
+View upstream and downstream dependencies for each dataset, and export the full dependency list as a CSV for further analysis or documentation.
+<img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1740576976/ec20159d-7d83-4f88-8cc3-c0f9d539d9d2.png" alt="Lineage export" />
+
+### AI Agents for Discovery and Governance
+Elementary includes two agents that use the catalog to support your team:
+- The [Catalog agent](/cloud/ai-agents/catalog-agent) helps users find relevant models, columns, or metrics using natural language. This is especially helpful for new team members or business users who are less familiar with your dbt structure.
+- The [Governance agent](/cloud/ai-agents/governance-agent) identifies missing documentation, unowned assets, or inconsistent tags. It surfaces these issues automatically and can suggest actions to improve coverage.
+These agents run continuously and help keep the catalog useful and complete without requiring constant manual work.

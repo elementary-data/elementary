@@ -1,0 +1,82 @@
+---
+title: "Microsoft Entra ID"
+sidebarTitle: "Microsoft Entra ID"
+---
+
+## Enabling SAML
+
+In order to enable SAML using Microsoft Entra ID (Previously Azure AD SSO), we need the following steps to be taken:
+
+<Accordion title="Configure Microsoft Entra ID application">
+    - Go to the [Microsoft Entra portal](https://entra.microsoft.com/)
+    - On the left, choose Applications → Enterprise Applications
+
+    <img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384397/sso1.webp" />
+
+    - Click on “New Application”
+    
+    <img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384486/sso2.webp" />
+
+    - Click on “Create your own application”
+
+    <img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384522/sso3.webp" />
+
+    - Choose the last option in the side-window that opens and click “Create”
+
+    <img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384523/sso4.webp" />
+
+    - In the App window that opens, click on “Single Sign-On”
+
+    <img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384527/sso5.webp" />
+
+    - Choose SAML
+
+    <img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384529/sso6.webp" />
+
+    - Click on Edit on the “Basic SAML Configuration” section
+
+    <img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384532/sso7.webp" />
+
+    - Fill the following entries:
+        - Identifier (Entity ID) - `elementary`
+        - Reply URL - [`https://elementary-data.frontegg.com/auth/saml/callback`](https://elementary-data.frontegg.com/auth/saml/callback)
+    - Download the Federation Metadata XML.
+
+    <img height="100" src="https://res.cloudinary.com/do5hrgokq/image/upload/v1742384534/sso8.webp" />
+</Accordion>
+
+<Accordion title="Configure SSO in Elementary">
+    - Go to your account settings page in Elementary (Your avatar in the top right corner -> Account -> Settings)
+    - In the SSO section, click on "Configure connection"
+    <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1768831426/elementary_sso_settings_qqmkve.png" />
+    - Fill in the form with the following details:
+        - SAML Metadata: Choose "Upload file", upload the Federation Metadata XML you downloaded.
+        - Domains: Add the domains you want to allow access to Elementary.
+    - Click on "Save" to save the configuration.
+    <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1768831419/elementary_sso_form_u8njve.png" />
+    <Note>
+    Make sure to verify that login works in an incognito window or with another user before logging out.
+    If it does not, disable the SSO configuration immediately and contact the Elementary team.
+    </Note>
+</Accordion>
+
+## Provisioning
+
+Elementary supports user provisioning via SCIM to automate user management. If you want to enable automatic provisioning, follow these steps:
+<Accordion title="Configure Provisioning in Elementary">
+    - Go to your account settings page in Elementary (Your avatar in the top right corner -> Account -> Settings)
+    - In the Provisioning section, click on "Configure"
+    - Choose "Azure AD", and click "Create" to create a new URL and token for provisioning
+    - DO NOT close this dialog until you have configured SCIM in Azure AD
+</Accordion>
+
+<Accordion title="Configure SCIM in Azure AD">
+    - In the **Microsoft Entra portal**, go to **Enterprise Applications** and select the newly created SAML application.
+    - Navigate to **Provisioning** and click **Get Started**.
+    - Set the **Provisioning Mode** to **Automatic**.
+    - Configure the **Tenant URL** and **Secret Token** - _value from Elementary Provisioning section_
+    - Click **Test Connection** to validate the setup.
+    - Enable provisioning and save changes.
+</Accordion>
+
+This setup ensures that users are automatically created, updated, and deactivated in Elementary based on their status in Microsoft Entra ID. You can always reach out if you need any help.

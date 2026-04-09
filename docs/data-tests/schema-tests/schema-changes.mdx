@@ -19,7 +19,7 @@ version: 2
 
 models:
   - name: < model name >
-    tests:
+    data_tests:
       - elementary.schema_changes
 ```
 
@@ -28,10 +28,10 @@ version: 2
 
 models:
   - name: login_events
-    tests:
+    data_tests:
       - elementary.schema_changes:
-          tags: ["elementary"]
           config:
+            tags: ["elementary"]
             severity: warn
 ```
 

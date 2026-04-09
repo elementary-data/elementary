@@ -3,6 +3,11 @@ title: "ignore_small_changes"
 sidebarTitle: "ignore_small_changes"
 ---
 
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+
+
+<AiGenerateTest />
+
 ```
 ignore_small_changes:
   spike_failure_percent_threshold: [int]
@@ -28,11 +33,12 @@ If undefined, default is null for both spike and drop.
 ```yml test
 models:
   - name: this_is_a_model
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          ignore_small_changes:
-            spike_failure_percent_threshold: 2
-            drop_failure_percent_threshold: 50
+          arguments:
+            ignore_small_changes:
+              spike_failure_percent_threshold: 2
+              drop_failure_percent_threshold: 50
 ```
 
 ```yml model
@@ -50,7 +56,7 @@ sources:
     schema: raw
     tables:
       - name: source_table
-        meta:
+        config:
           elementary:
             ignore_small_changes:
               drop_failure_percent_threshold: 50

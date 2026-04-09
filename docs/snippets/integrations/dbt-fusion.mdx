@@ -1,0 +1,103 @@
+<Note>Note: dbt-fusion support in Elementary is still in beta, as is dbt-fusion itself. Please see below a [list of features that are not yet implemented](#missing-features-in-dbt-fusion).</Note>
+
+Elementary's dbt package integrates with dbt-fusion, starting with version 0.20.
+Fusion is a complete rewrite of the dbt engine, and provides many benefits, including enhanced performance and static analysis. 
+
+For more details about dbt-fusion capabilities please consult the [dbt-fusion docs](https://docs.getdbt.com/docs/fusion/about-fusion).
+
+## Upgrading to dbt-fusion
+
+As a part of the migration to dbt-fusion, it is required to remove deprecated syntax from various areas of the dbt project, and YAMLs in particular.
+Specifically for tests the following are important:
+
+1. Test arguments must be encapsulated under an `arguments` field.
+2. Configuration fields such as `meta`, `tags` or `severity` must be encapsulated under a `config` field.
+3. Recommended (but not a must) - change the `tests` field to `data_tests` to conform with the current dbt guidelines.
+
+Here's an example of an Elementary anomaly test with the old and new syntax:
+
+<CodeGroup>
+
+```yml Old syntax
+models:
+  - name: login_events
+    config:
+      elementary:
+        timestamp_column: "loaded_at"
+    tests:
+      - elementary.volume_anomalies:
+          where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
+          time_bucket:
+            period: day
+            count: 1
+          tags: ["elementary"]
+          severity: warn
+          meta:
+            owner: "@jessica.jones"
+
+  - name: users
+    tests:
+      - elementary.volume_anomalies:
+          tags: ["elementary"]
+```
+
+```yml New syntax
+models:
+  - name: login_events
+    config:
+      elementary:
+        timestamp_column: "loaded_at"
+    data_tests:
+      - elementary.volume_anomalies:
+          arguments:
+            where_expression: "event_type in ('event_1', 'event_2') and country_name != 'unwanted country'"
+            time_bucket:
+              period: day
+              count: 1
+          config:
+            tags: ["elementary"]
+            severity: warn
+            meta:
+              owner: "@jessica.jones"
+
+  - name: users
+    data_tests:
+      - elementary.volume_anomalies:
+          config:
+            tags: ["elementary"]
+```
+
+</CodeGroup>
+
+To facilitate the process of making these changes within your project, dbt introduced a tool called [dbt-autofix](https://github.com/dbt-labs/dbt-autofix) that 
+can be used to automatically migrate your project to the new syntax.
+
+Before running this tool, **please upgrade** to the most recent dbt-core version - as some of the syntax changes are not supported on older versions.
+
+For full information on upgrading from dbt-core to dbt-fusion, please check [dbt-fusion's official upgrade guide](https://docs.getdbt.com/docs/dbt-versions/core-upgrade/upgrading-to-fusion).
+
+## Supported Elementary capabilities
+
+Most of the main capabilities of the Elementary dbt package are supported in Fusion, including:
+1. Anomaly detection tests.
+2. Schema tests.
+3. Artifacts collection.
+
+However, the following capabilities are not supported right now for dbt Fusion:
+1. Python tests.
+2. JSON schema tests.
+3. The missing dbt-fusion features listed below.
+
+## Missing features in dbt-fusion
+
+In addition to the above, there are some features that are currently missing from dbt-fusion, and therefore are not yet available in the Elementary package.
+
+For each one of the issues below, we've included a link to the dbt-fusion github repository - **please upvote these features if they are important to you!**
+
+1. [Tests with error status are not being reported](https://github.com/dbt-labs/dbt-fusion/issues/686) - If a test fails "normally" (e.g. not_null fails on rows with null values), Elementary will report it as expected with a "fail" status. 
+However, if there is a compilation error / any error that comes before the actual test query ("error" status in dbt-core), it will currently be missing.
+2. [Source freshness results are not reported](https://github.com/dbt-labs/dbt-fusion/issues/720)
+3. [Exposure artifacts are not reported](https://github.com/dbt-labs/dbt-fusion/issues/859)
+4. [Group artifacts are not reported](https://github.com/dbt-labs/dbt-fusion/issues/25)
+5. [Compiled code is missing from dbt artifact tables](https://github.com/dbt-labs/dbt-fusion/issues/723)
+6. [Failed row count is missing from dbt artifact tables](https://github.com/dbt-labs/dbt-fusion/issues/724)

@@ -3,6 +3,11 @@ title: "detection_delay"
 sidebarTitle: "detection_delay"
 ---
 
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+
+
+<AiGenerateTest />
+
 ```
 detection_delay:
   period: < time period > # supported periods: hour, day, week, month
@@ -22,11 +27,12 @@ That's useful in cases which the latest data should be excluded from the test. F
 ```yml test
 models:
   - name: this_is_a_model
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          detection_delay:
-            period: day
-            count: 1
+          arguments:
+            detection_delay:
+              period: day
+              count: 1
 ```
 
 ```yml model

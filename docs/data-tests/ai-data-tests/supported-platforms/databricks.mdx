@@ -1,0 +1,35 @@
+---
+title: "Databricks AI Functions"
+---
+
+# Setting Up Databricks AI Functions
+
+Elementary unstructured data validation tests run on top of Databricks AI Functions for Databricks users.
+This guide provides details on the prerequisites to use Databricks AI Functions.
+
+## What are Databricks AI Functions?
+
+Databricks AI Functions are built-in SQL functions that allow you to apply AI capabilities directly to your data using SQL. These functions enable you to leverage large language models and other AI capabilities without complex setup or external dependencies, making them ideal for data validation tests.
+
+## Availability and Prerequisites
+
+To use Databricks AI Functions, your environment must meet the following requirements:
+
+### Runtime Requirements
+- **Recommended**: Databricks Runtime 15.3 or above for optimal performance
+
+### Environment Requirements
+- Your workspace must be in a supported Model Serving region.
+- For Pro SQL warehouses, AWS PrivateLink must be enabled.
+- Databricks SQL does support AI functions but Databricks SQL Classic does not support it. 
+
+### Models
+Databricks AI functions can run on foundation models hosted in Databricks, external foundation models (like OpenAI's models) and custom models. 
+Currently Elementary's unstructured data validations support only foundation models hosted in Databricks. Adding support for external and custom models is coming soon.
+> **Note**: While developing the tests we worked with `databricks-meta-llama-3-3-70b-instruct` so we recommend using this model as a default when running unstructured data validation tests in Databricks.
+
+
+## Region Considerations
+
+When using AI functions, be aware that some models are limited to specific regions (US and EU). Make sure your Databricks workspace is in a supported region for the Databricks AI functions.
+

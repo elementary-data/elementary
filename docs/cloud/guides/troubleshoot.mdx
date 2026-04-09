@@ -2,26 +2,26 @@
 title: "Troubleshooting"
 ---
 
-### I connected my data warehouse but I don't see any test results
+<Accordion title="I connected my data warehouse but I don't see any test results">
 
 If you already connected your data warehouse to Elementary but are not seeing anything in the Elementary UI, there could be several reasons.
 Try following these steps to troubleshoot:
 
-
 **1. Validate elementary dbt package is deployed, working, and using the latest version**
 
-- Refer to the [dbt package installation guide](/quickstart#install-the-dbt-package), and validate that your version in packages.yml is the one mentioned there. If not, upgrade and run `dbt deps`. Make sure to execute `dbt run --select elementary` for the package tables to be created.
+- Refer to the [dbt package installation guide](/cloud/quickstart#install-the-dbt-package), and validate that your version in packages.yml is the one mentioned there. If not, upgrade and run `dbt deps`. Make sure to execute `dbt run --select elementary` for the package tables to be created.
 
 **2. Check if the table `elementary_test_results` exists and has data**
-- If the table does not exist - refer to the [dbt package installation guide](/quickstart#install-the-dbt-package). Make sure to execute `dbt run --select elementary` for the package tables to be created.
+- If the table does not exist - refer to the [dbt package installation guide](/cloud/quickstart#install-the-dbt-package). Make sure to execute `dbt run --select elementary` for the package tables to be created.
 - If the table exists but has no data - Did you execute `dbt test` since deploying the package and creating the models?
 - If you have, make sure the table was created as an incremental table (not a regular table or view).
 - If not, there is a materialization configuration in your `dbt_project.yml` file that overrides the package config. Remove it, and run `dbt run --select elementary --full-refresh` to recreate the tables. After that run `dbt test` again and check if there is data.
 
 **4. Still no data in the table? Reach out to the Elementary team by starting an intercom chat from the Elementary UI.**
 
+</Accordion>
 
-### Column information cannot be retrieved
+<Accordion title="Column information cannot be retrieved">
 
 This error can happen because of a few reasons:
 
@@ -40,13 +40,24 @@ For more information on the permissions required by each data warehouse:
 
 [Postgres](/cloud/integrations/dwh/postgres#permissions-and-security)
 
+</Accordion>
 
-### How do I set up the table name of my Singular test?
+<Accordion title="How do I set up the table name of my Singular test?">
 
 Singular tests are sql queries that can reference more than one table, but are often intended to test a logic that is related to one table in particular.
 In order to have that table name appear in the UI in the test results, test execution and more screens, you can set it up by adding the following to the config block of your singular test file:
 ```
 {{ config(
-    override_primary_test_model_id="model_name"
+    override_primary_test_model_id="model_unique_id"
 ) }}
 ```
+
+Note: Use the `model_unique_id`, not the model name.
+The `model_unique_id` is the unique identifier of the model in dbt, and can be found by running the query:
+```
+SELECT unique_id
+FROM <elementary-schema-name>.dbt_models
+WHERE name=<model-name>
+```
+
+</Accordion>

@@ -3,6 +3,11 @@ title: "dimensions"
 sidebarTitle: "dimensions"
 ---
 
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+
+
+<AiGenerateTest />
+
 `dimensions: [list of SQL expressions]`
 
 The test will group the results by a given column / columns / valid select sql expression.
@@ -27,11 +32,12 @@ models:
     config:
       elementary:
         timestamp_column: updated_at
-    tests:
+    data_tests:
       - elementary.dimension_anomalies:
-          dimensions:
-            - device_os
-            - device_browser
+          arguments:
+            dimensions:
+              - device_os
+              - device_browser
 ```
 
 </RequestExample>

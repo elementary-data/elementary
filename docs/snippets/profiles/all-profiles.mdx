@@ -1,0 +1,318 @@
+<CodeGroup>
+
+```yml Snowflake
+## SNOWFLAKE ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: snowflake
+      account: [account id]
+      user: [username]
+      role: [user role]
+
+      ## Keypair auth (recommended) ##
+      private_key_path: [path/to/private.key]
+      # or private_key instead of private_key_path
+      private_key_passphrase: [passphrase for the private key, if key is encrypted]
+      
+      database: [database name]
+      warehouse: [warehouse name]
+      schema: [schema name]_elementary
+      threads: 4
+```
+
+```yml BigQuery
+## BIGQUERY ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: bigquery
+
+      ## Service account auth ##
+      method: service-account
+      keyfile: [full path to your keyfile]
+
+      project: [project id]
+      dataset: [dataset name] # elementary dataset, usually [dataset name]_elementary
+      threads: 4
+      location: [dataset location]
+      priority: interactive
+```
+
+```yml Redshift
+## REDSHIFT ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: redshift
+      host: [hostname, like hostname.region.redshift.amazonaws.com]
+
+      ## User/password auth ##
+      user: [username]
+      password: [password]
+
+      dbname: [database name]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      threads: 4
+      keepalives_idle: 240 # default 240 seconds
+      connect_timeout: 10 # default 10 seconds
+      # search_path: public # optional, not recommended
+      sslmode:
+        [
+          optional,
+          set the sslmode used to connect to the database (in case this parameter is set,
+          will look for ca in ~/.postgresql/root.crt),
+        ]
+      ra3_node: true # enables cross-database sources
+```
+
+```yml Databricks
+## DATABRICKS ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: databricks
+      host: [hostname, like <ID>.cloud.databricks.com]
+      http_path: [like /sql/1.0/endpoints/<ID>]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      token: [token]
+      threads: [number of threads like 8]
+```
+
+```yml Postgres
+## POSTGRES ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: postgres
+      host: [hostname]
+      user: [username]
+      password: [password]
+      port: [port]
+      dbname: [database name]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      threads: [1 or more]
+      keepalives_idle: 0 # default 0 seconds
+      connect_timeout: 10 # default 10 seconds
+      # search_path: public # optional, not recommended
+      # role: [optional, set the role dbt assumes when executing queries]
+      # sslmode: [optional, set the sslmode used to connect to the database]
+```
+
+```yml Athena
+## ATHENA ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: athena
+      work_group: [athena workgroup]
+      s3_staging_dir: [s3_staging_dir] # Location to store query results & metadata
+      s3_data_dir: [s3 data dir] # Location to store table data (if not specified, s3_staging_dir is used)
+      region_name: [aws region name] # AWS region, e.g. eu-west-1
+      database: [database name]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      threads: [number of threads like 8]
+```
+
+```yml Clickhouse
+## Clickhouse ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: clickhouse
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      host: [hostname]
+      port: [port]
+      user: [username]
+      password: [password]
+      threads: [number of threads like 8]
+```
+
+```yml Trino
+## Trino ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: trino
+      host: [hostname]
+      port: [port]
+      database: [database name]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      threads: [1 or more]
+      method: [authentication method] # ldap, oauth etc.
+      user: [username]
+      # password: [optional, used with ldap authentication ]
+      # session_properties: [optional, sets Trino session properties used in the connection]
+```
+
+```yml DuckDB
+## DUCKDB ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: duckdb
+      path: [path to your .duckdb file]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      threads: [1 or more]
+```
+
+```yml Dremio
+## DREMIO ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+## -- Dremio Cloud -- ##
+elementary:
+  outputs:
+    default:
+      type: dremio
+      cloud_host: api.dremio.cloud  # or api.eu.dremio.cloud for EU
+      cloud_project_id: [project ID]
+      user: [email address]
+      pat: [personal access token]
+      use_ssl: true
+      object_storage_source: [name]  # alias: datalake
+      object_storage_path: [path]    # alias: root_path
+      dremio_space: [name]           # alias: database
+      dremio_space_folder: [path]    # alias: schema, usually [schema]_elementary
+      threads: [1 or more]
+
+## -- Dremio Software -- ##
+elementary:
+  outputs:
+    default:
+      type: dremio
+      software_host: [hostname or IP address]
+      port: 9047
+      user: [username]
+      password: [password]  # or use pat: [personal access token]
+      use_ssl: [true or false]
+      object_storage_source: [name]  # alias: datalake
+      object_storage_path: [path]    # alias: root_path
+      dremio_space: [name]           # alias: database
+      dremio_space_folder: [path]    # alias: schema, usually [schema]_elementary
+      threads: [1 or more]
+```
+
+```yml Spark
+## SPARK ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: spark
+      method: [thrift, http, or odbc]
+      host: [hostname]
+      port: [port]
+      user: [username]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      threads: [1 or more]
+      # token: [optional, used with http method]
+```
+
+```yml Fabric
+## FABRIC ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: fabric
+      driver: ODBC Driver 18 for SQL Server
+      server: [hostname]
+      port: 1433
+      database: [database name]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      authentication: ActiveDirectoryServicePrincipal
+      tenant_id: [tenant_id]
+      client_id: [client_id]
+      client_secret: [client_secret]
+      threads: [1 or more]
+```
+
+```yml SQL Server
+## SQL SERVER ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: sqlserver
+      driver: ODBC Driver 18 for SQL Server
+      server: [hostname]
+      port: 1433
+      database: [database name]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      user: [username]
+      password: [password]
+      threads: [1 or more]
+      # encrypt: true # default true in dbt-sqlserver >= 1.2.0
+      # trust_cert: false
+```
+
+```yml Vertica
+## VERTICA ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: vertica
+      host: [hostname]
+      port: 5433
+      database: [database name]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      username: [username]
+      password: [password]
+      threads: [1 or more]
+      # connection_load_balance: true
+      # backup_server_node: [comma separated list of backup hostnames or IPs]
+```
+
+</CodeGroup>

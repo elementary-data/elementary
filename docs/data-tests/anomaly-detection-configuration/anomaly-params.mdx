@@ -3,6 +3,12 @@ title: Anomaly Tests configuration params
 sidebarTitle: "All configuration params"
 ---
 
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+
+
+
+<AiGenerateTest />
+
 <Tip>
   If your data set has a timestamp column that represents the creation time of a
   field, it is highly recommended configuring it as a `timestamp_column`.
@@ -28,6 +34,7 @@ sidebarTitle: "All configuration params"
    -- <a href="/data-tests/anomaly-detection-configuration/detection-period"><font color="#CD7D55">detection_period: int</font></a>
         &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-period"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
         &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-period"><font color="#CD7D55">count: int</font></a>
+   -- <a href="/data-tests/anomaly-detection-configuration/exclude_detection_period_from_training"><font color="#CD7D55">exclude_detection_period_from_training: [true | false]</font></a>
    -- <a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">time_bucket:</font></a>
         &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
         &nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">count: int</font></a>
@@ -48,7 +55,7 @@ sidebarTitle: "All configuration params"
    -- <a href="/data-tests/anomaly-detection-configuration/exclude_regexp"><font color="#CD7D55">exclude_regexp: regex</font></a>
 
   dimension_anomalies test:
-   -- <a href="/data-tests/anomaly-detection-configuration/exclude_final_results"><font color="#CD7D55">exclude_final_results: [SQL where expression on fields value / average]</font></a>
+   -- <a href="/data-tests/anomaly-detection-configuration/exclude-final-results"><font color="#CD7D55">exclude_final_results: [SQL where expression on fields value / average]</font></a>
 
   event_freshness_anomalies:
    -- <a href="/data-tests/anomaly-detection-configuration/event_timestamp_column"><font color="#CD7D55">event_timestamp_column: column name</font></a>
@@ -60,7 +67,7 @@ sidebarTitle: "All configuration params"
 
 <CodeGroup>
 
-```yml properties.yml
+```yml Models
 version: 2
 
 models:
@@ -68,14 +75,14 @@ models:
     config:
       elementary:
         timestamp_column: < model timestamp column >
-    tests: < here you will add elementary monitors as tests >
+    data_tests: < here you will add elementary monitors as tests >
 
   - name: <your model with no timestamp>
     ## if no timestamp is configured, elementary will monitor without time filtering
-    tests: <here you will add elementary monitors as tests>
+    data_tests: <here you will add elementary monitors as tests>
 ```
 
-```yml Example
+```yml Models example
 version: 2
 
 models:
@@ -83,54 +90,60 @@ models:
     config:
       elementary:
         timestamp_column: updated_at
-    tests:
+    data_tests:
       - elementary.freshness_anomalies:
-          tags: ["elementary"]
+          config:
+            tags: ["elementary"]
       - elementary.all_columns_anomalies:
-          tags: ["elementary"]
+          config:
+            tags: ["elementary"]
 
   - name: users
     ## if no timestamp is configured, elementary will monitor without time filtering
-    tests:
+    data_tests:
       - elementary.volume_anomalies:
-          tags: ["elementary"]
+          config:
+            tags: ["elementary"]
 ```
 
-```yml sources_properties.yml
+```yml Sources
+version: 2
+
 sources:
   - name: < some name >
     database: < database >
     schema: < schema >
     tables:
       - name: < table_name >
-        ## sources don't have config, so elementary config is placed under 'meta'
-        meta:
+        config:
           elementary:
             timestamp_column: < source timestamp column >
-        tests: <here you will add elementary monitors as tests>
+        data_tests: <here you will add elementary monitors as tests>
 ```
 
-```yml Example
+```yml Sources example
+version: 2
+
 sources:
   - name: "my_non_dbt_table"
     database: "raw_events"
     schema: "product"
     tables:
       - name: "raw_product_login_events"
-        ## sources don't have config, so elementary config is placed under 'meta'
-        meta:
+        config:
           elementary:
             timestamp_column: "loaded_at"
-        tests:
+        data_tests:
           - elementary.volume_anomalies
           - elementary.all_columns_anomalies:
-              column_anomalies:
-                - null_count
-                - missing_count
-                - zero_count
+              arguments:
+                column_anomalies:
+                  - null_count
+                  - missing_count
+                  - zero_count
         columns:
           - name: user_id
-            tests:
+            data_tests:
               - elementary.column_anomalies
 ```
 

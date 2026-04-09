@@ -1,0 +1,21 @@
+---
+title: "Control On-Run-End Hooks"
+sidebarTitle: "Control on-run-end time"
+---
+
+import ReduceOnRunEndTime from '/snippets/guides/reduce-on-run-end-time.mdx';
+
+<ReduceOnRunEndTime />
+
+For more details on configuring Elementary for different environments, see the [Dev/Prod Configuration guide](/cloud/guides/dev-prod-configuration).
+
+## Next Steps
+
+After configuring your on-run-end hooks timing:
+
+1. **Set up metadata sync schedule**: If you disabled autoupload, create a process (manual or recurring job, e.g., daily) to sync metadata when your project changes
+2. **Configure sync scheduling**: Set up webhook-triggered syncs for real-time updates. See the [Sync Scheduling guide](/cloud/guides/sync-scheduling) for details
+3. **Monitor data completeness**: Verify that Elementary Cloud still receives the data needed for your monitoring use cases
+
+For more information about configuring Elementary for different environments, see the [Dev/Prod Configuration guide](/cloud/guides/dev-prod-configuration).
+

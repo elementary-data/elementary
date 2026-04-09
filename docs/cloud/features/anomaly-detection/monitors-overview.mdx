@@ -1,0 +1,35 @@
+---
+title: Anomaly Detection Monitors
+sidebarTitle: "Monitors overview"
+---
+
+import AutomatedMonitorsIntro from '/snippets/cloud/features/anomaly-detection/automated-monitors-intro.mdx';
+import AutomatedMonitorsCards from '/snippets/cloud/features/anomaly-detection/automated-monitors-cards.mdx';
+
+ML-powered anomaly detection monitors automatically identify outliers and unexpected patterns in your data.
+These are useful to detect issues such as incomplete data, delays, a drop in a specific dimension or a spike in null values.
+
+Elementary offers two types of monitors: 
+
+- **Automated Monitors** - Out-of-the-box monitors activated automatically, that query metadata only. 
+- **Opt-in Monitors** - Monitors that query raw data and require configuration.
+
+## [Automated monitors](/cloud/features/anomaly-detection/automated-monitors)
+
+<AutomatedMonitorsIntro />
+
+<AutomatedMonitorsCards />
+
+## Opt-in monitors
+
+_Coming soon_
+
+
+## Monitor test results
+
+Each monitor returns a test result, that is one of the following four results:
+
+- **Passed** - The test passed, no anomaly was detected.
+- **Warning** - An anomaly was detected, and the test is configured to `warn` severity.
+- **Fail** - An anomaly was detected, and the test is configured to `fail` severity.
+- **No data** - The monitor does not have enough data or an accurate model to monitor. Reach out to our support team to fix this.

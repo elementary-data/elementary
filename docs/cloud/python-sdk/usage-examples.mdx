@@ -1,0 +1,84 @@
+---
+title: "Python SDK Usage Examples"
+sidebarTitle: "Usage Examples"
+---
+
+This page provides conceptual examples of how the Elementary Python SDK can be used in different scenarios.
+
+## Reporting Assets
+
+### Tables and Views
+
+Report tables or views created by your Python pipeline. Include metadata like schema, database, and description to make them discoverable in the Elementary catalog.
+
+### Files and Unstructured Data
+
+Report files, blobs, or unstructured data stored in object storage (S3, GCS, Azure Blob, etc.). Include location, format, and other relevant metadata.
+
+### Vector Stores
+
+Report vector stores used in AI/ML pipelines. Include information about the store type (Pinecone, Weaviate, etc.), index names, and dimensions.
+
+## Reporting Test Results
+
+### Basic Test Results
+
+Report simple test outcomes - whether a test passed or failed, along with the test name and type.
+
+### Detailed Test Results
+
+Report comprehensive test information including:
+- Test name and type
+- Pass/fail status
+- Actual vs expected values
+- Column-level details
+- Failed row counts
+- Sample data from failed rows
+
+### Framework Integration
+
+Report test results from any framework:
+- Wrap Great Expectations validations
+- Report pytest outcomes
+- Capture results from custom test frameworks
+- Integrate with DQX or other data quality tools
+
+## Complete Pipeline Example
+
+A typical Python pipeline using the SDK would:
+
+1. **Start tracking** - Begin a pipeline run with metadata (name, environment)
+2. **Report input assets** - Document what data sources the pipeline consumes
+3. **Execute transformations** - Run your existing Python code
+4. **Report output assets** - Document what the pipeline produces
+5. **Run and report tests** - Execute data quality checks and report results
+6. **End tracking** - Complete the run with success/failure status and timing
+
+This creates a complete observability record in Elementary, unified with your dbt and cloud tests.
+
+## Integration with Orchestrators
+
+The SDK can be integrated with any orchestrator:
+
+- **Airflow** - Wrap your Python tasks to report execution and test results
+- **Prefect** - Use the SDK in Prefect flows and tasks
+- **Dagster** - Report assets and tests from Dagster ops
+- **Custom orchestrators** - Works with any Python-based orchestration system
+
+## ML Pipeline Example
+
+For ML pipelines, you can:
+
+- Report training data assets
+- Report model artifacts
+- Report test/validation datasets
+- Report model performance metrics as test results
+- Track model training runs
+- Connect models to their training data and downstream consumers
+
+This provides full observability for ML workflows alongside your data engineering pipelines.
+
+## Next Steps
+
+- Review the [Setup Guide](/cloud/python-sdk/setup-guide) for installation and configuration
+- Learn about the [SDK Overview](/cloud/python-sdk/overview)
