@@ -109,12 +109,12 @@ If your repository is connected to multiple Elementary environments, add `env-id
 - uses: elementary-data/elementary-ci@v1
   with:
     elementary-api-key: ${{ secrets.ELEMENTARY_API_KEY }}
-    elementary-env-id: "your-environment-id"
+    elementary-env-id: "169e9308-9a70-4200-b810-ad486cb42f3a"
 ```
 
-You can find your environment ID in the Elementary Cloud URL when viewing the environment.
+The environment ID is the UUID in your Elementary Cloud URL. For example, in `https://app.elementary-data.com/169e9308-9a70-4200-b810-ad486cb42f3a/report/dashboard`, the environment ID is `169e9308-9a70-4200-b810-ad486cb42f3a`.
 
-If you don't specify an `env-id` and the repository is connected to only one environment, it will be selected automatically. If connected to multiple, the review will return an error listing the available environments.
+If you don't specify an `env-id` and the repository is connected to only one environment, it will be selected automatically. If connected to multiple, the review will return an error listing the available environment IDs.
 
 </Accordion>
 
