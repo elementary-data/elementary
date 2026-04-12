@@ -19,33 +19,36 @@ Elementary closes that gap by bringing live data quality context directly into t
 
 ## What you get on every PR
 
-- **Test history:** pass/fail counts for each changed model over the last 7 days, so reviewers know if they're touching something that's already fragile
-- **Active incidents:** any open data quality issues on those models right now, before the change lands on top of them
-- **Downstream blast radius:** exactly which models, pipelines, and dashboards depend on what's changing, two levels deep
-- **Health summary:** a plain-language signal on whether it's safe to merge, powered by Claude
+- **Change analysis:** Elementary cross-references the diff against what it knows about each model's columns, types, and behavior, flagging logical concerns like NULL risks, type mismatches, or join changes that could alter row counts
+- **Performance & cost:** SQL anti-pattern detection (SELECT *, cross joins, missing filters on large tables) with volume context so reviewers can assess real cost impact
+- **Downstream blast radius:** exactly which models, pipelines, and dashboards depend on what's changing, including column-level impact for renamed or removed columns
+- **Tests & incidents:** pass/fail history for each changed model, active data quality incidents, and coverage gaps on new columns
+- **Risk summary:** a plain-language assessment of whether it's safe to merge, with prioritized recommendations
+
+The comment is concise by default. If everything looks clean, the review is a few lines. It only expands when there are actual issues to flag.
 
 The comment updates automatically on every new push, so the review always reflects the latest state. No noise, no duplicate comments.
 
 ## How it works
 
-The review is powered by [Claude](https://www.anthropic.com) connected to the [Elementary MCP server](/cloud/mcp/intro). When a PR is opened or updated:
+When a PR is opened or updated:
 
-1. A CI job detects which models changed using `git diff`
-2. Claude queries Elementary for live data quality context on those exact models
-3. A structured Markdown summary is posted as a comment on the PR or MR
+1. A CI job sends the repository name and branch to Elementary's API
+2. Elementary fetches the diff, runs static SQL analysis, and queries live data quality context for the changed models
+3. A structured Markdown comment is posted as a comment on the PR or MR
 
-No custom scripts. No webhook setup. No infrastructure to manage. Two secrets and one file.
+No custom scripts. No webhook setup. No infrastructure to manage. One secret and one file.
 
 ## Setup
 
 ### Prerequisites
 
-- An Elementary Cloud account with the [MCP server enabled](/cloud/mcp/setup-guide)
-- An [Anthropic API key](https://console.anthropic.com)
+- An Elementary Cloud account with a [code repository connected](/cloud/integrations/code-repo/connect-code-repo)
+- An [Elementary API key](/cloud/integrations/api-key)
 
 ### GitHub Actions
 
-**Step 1 — Add the workflow file**
+**Step 1 -- Add the workflow file**
 
 Create `.github/workflows/elementary-review.yml` in your dbt repository:
 
@@ -65,6 +68,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+      issues: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -72,20 +76,18 @@ jobs:
 
       - uses: elementary-data/elementary-ci@v1
         with:
-          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
           elementary-api-key: ${{ secrets.ELEMENTARY_API_KEY }}
 ```
 
-**Step 2 — Add two repository secrets**
+**Step 2 -- Add a repository secret**
 
 Go to **Settings > Secrets and variables > Actions** and add:
 
 | Secret | Description |
 |---|---|
-| `ANTHROPIC_API_KEY` | Your Anthropic API key |
 | `ELEMENTARY_API_KEY` | Your Elementary Cloud API key |
 
-That's it. The review only runs on PRs that touch model files — other PRs are ignored entirely.
+That's it. The review only runs on PRs that touch model files. Other PRs are ignored entirely.
 
 <Warning>
 This works for pull requests opened from branches within the same repository. GitHub does not pass repository secrets to `pull_request` workflows triggered by forks or Dependabot.
@@ -95,38 +97,42 @@ This works for pull requests opened from branches within the same repository. Gi
 
 | Input | Default | Description |
 |---|---|---|
-| `models-path` | `models/` | Path to your dbt models directory |
-| `diff-filter` | `ACMR` | File changes to include: A=Added, C=Copied, M=Modified, R=Renamed |
-| `claude-model` | `claude-haiku-4-5-latest` | Claude model to use. Switch to `claude-sonnet-4-latest` for deeper analysis on complex changes |
-| `base-ref` | PR base branch | Branch to diff against |
-| `mcp-config-path` | _(auto-generated)_ | Path to a custom MCP config file. Only needed for self-hosted Elementary setups |
+| `elementary-api-url` | Elementary Cloud | Override the API URL. Only needed for self-hosted Elementary setups |
+
+</Accordion>
+
+<Accordion title="Optional: specify environment">
+
+If your repository is connected to multiple Elementary environments, add `env-id` to the request to specify which one to use:
 
 ```yaml
 - uses: elementary-data/elementary-ci@v1
   with:
-    anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     elementary-api-key: ${{ secrets.ELEMENTARY_API_KEY }}
-    models-path: "dbt/models/"
-    claude-model: "claude-sonnet-4-latest"
+    elementary-env-id: "169e9308-9a70-4200-b810-ad486cb42f3a"
 ```
+
+The environment ID is the UUID in your Elementary Cloud URL. For example, in `https://app.elementary-data.com/169e9308-9a70-4200-b810-ad486cb42f3a/report/dashboard`, the environment ID is `169e9308-9a70-4200-b810-ad486cb42f3a`.
+
+If you don't specify an `env-id` and the repository is connected to only one environment, it will be selected automatically. If connected to multiple, the review will return an error listing the available environment IDs.
+
 </Accordion>
 
 ### GitLab CI
 
-**Step 1 — Add the include to your `.gitlab-ci.yml`**
+**Step 1 -- Add the include to your `.gitlab-ci.yml`**
 
 ```yaml
 include:
   - remote: 'https://raw.githubusercontent.com/elementary-data/elementary-ci/v1/templates/mr-review.yml'
 ```
 
-**Step 2 — Add two CI/CD variables**
+**Step 2 -- Add CI/CD variables**
 
 Go to **Settings > CI/CD > Variables** and add:
 
 | Variable | Masked | Description |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | Yes | Your Anthropic API key |
 | `ELEMENTARY_API_KEY` | Yes | Your Elementary Cloud API key |
 | `GITLAB_API_TOKEN` | Yes | Optional. Project Access Token with `api` scope. Set this if you cannot enable CI/CD job token API access in project settings. |
 
@@ -143,20 +149,16 @@ The review only runs on MRs that touch model files. Other MRs are ignored entire
 
 **No comment appears after the job runs**
 
-Make sure both `contents: read` and `pull-requests: write` are set under `permissions` in the workflow. An explicit `permissions` block sets any unlisted scope to `none`, so omitting `contents: read` causes the checkout step to fail before Elementary runs.
+Make sure `contents: read`, `pull-requests: write`, and `issues: write` are set under `permissions` in the workflow. An explicit `permissions` block sets any unlisted scope to `none`, so omitting a required scope causes the step to fail silently.
 
-**`git diff` returns no changed models**
+**The review says the repository is not connected**
 
-Make sure `fetch-depth: 0` is set on the checkout step. Without full git history the runner cannot compare branches and the diff will be empty.
+Make sure you have a code repository integration set up in Elementary Cloud. Go to **Settings > Environments** and verify your repository is connected.
 
-**The comment says the MCP server is unreachable**
+**The review says the repository is connected to multiple environments**
 
-Verify `ELEMENTARY_API_KEY` is correctly set and the MCP server is enabled for your account. See the [MCP setup guide](/cloud/mcp/setup-guide).
+Add `elementary-env-id` to your workflow to specify which environment to use. The error message will list the available environment IDs.
 
 <Warning>
 If a model has never been synced through Elementary, the comment will note that no history is available yet. Results populate automatically after the next Elementary sync.
 </Warning>
-
-## Using a different AI provider?
-
-The review currently uses Claude via the Anthropic API. If your team uses a different provider and you'd like to see it supported, reach out at [support@elementary-data.com](mailto:support@elementary-data.com) or on the [Community Slack](https://elementary-data.com/community).
