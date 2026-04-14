@@ -157,6 +157,7 @@
               "cloud/features/roles-and-permissions",
               "cloud/features/multi-env",
               "cloud/features/ci",
+              "cloud/features/table-usage",
               {
                 "group": "Audit Logs",
                 "pages": [
@@ -700,6 +701,10 @@
     {
       "source": "/features/data-observability-dashboard",
       "destination": "/cloud/features/collaboration-and-communication/data-observability-dashboard"
+    },
+    {
+      "source": "/cloud/features/collaboration-and-communication/table-usage",
+      "destination": "/cloud/features/table-usage"
     }
   ]
 }
