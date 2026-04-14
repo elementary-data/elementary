@@ -3,31 +3,24 @@ title: "GitHub & GitLab Data Quality Code Review"
 sidebarTitle: "Code Review"
 ---
 
-Every time a developer changes a dbt model, there's a question no one can easily answer before merging: _is this safe to ship?_
+Elementary posts a structured data quality comment on every pull request that touches your dbt models, giving reviewers live context on test history, incidents, downstream impact, and merge risk — without leaving the PR.
 
-Your dbt tests tell you if the code compiles. They don't tell you if the model you just refactored has been failing tests for the past week, whether it feeds a dashboard your CEO looks at every morning, or whether there's already an open incident on it that your data team is investigating.
+<Frame caption="Elementary data quality review comment on a pull request">
+  <img
+    src="/pics/cloud/code_review_comment.png"
+    alt="Elementary data quality review comment on a pull request"
+  />
+</Frame>
 
-Elementary's code review automatically answers all of that. The moment a pull request touches your dbt models, a structured comment appears with everything your team needs to make a confident merge decision, without leaving the PR.
+## What the review includes
 
-![Elementary code review comment](/pics/cloud/code_review_comment.png)
-
-## Why it matters
-
-Data quality issues are exponentially cheaper to catch before merge than after. But today, most teams have no visibility into data health at review time. Reviewers check the SQL, not the data. By the time a broken model hits production, it's already in dashboards, downstream models, and stakeholder reports.
-
-Elementary closes that gap by bringing live data quality context directly into the code review workflow.
-
-## What you get on every PR
-
-- **Change analysis:** Elementary cross-references the diff against what it knows about each model's columns, types, and behavior, flagging logical concerns like NULL risks, type mismatches, or join changes that could alter row counts
-- **Performance & cost:** SQL anti-pattern detection (SELECT *, cross joins, missing filters on large tables) with volume context so reviewers can assess real cost impact
-- **Downstream blast radius:** exactly which models, pipelines, and dashboards depend on what's changing, including column-level impact for renamed or removed columns
+- **Change analysis:** flags NULL risks, type mismatches, and join changes that could alter row counts
+- **Performance & cost:** SQL anti-pattern detection (SELECT *, cross joins, missing filters on large tables) with volume context
+- **Downstream blast radius:** which models, pipelines, and dashboards depend on what's changing, including column-level impact for renamed or removed columns
 - **Tests & incidents:** pass/fail history for each changed model, active data quality incidents, and coverage gaps on new columns
 - **Risk summary:** a plain-language assessment of whether it's safe to merge, with prioritized recommendations
 
-The comment is concise by default. If everything looks clean, the review is a few lines. It only expands when there are actual issues to flag.
-
-The comment updates automatically on every new push, so the review always reflects the latest state. No noise, no duplicate comments.
+The comment is concise when everything looks clean. It expands only when there are actual issues to flag, and updates automatically on every new push.
 
 ## How it works
 
@@ -35,115 +28,119 @@ When a PR is opened or updated:
 
 1. A CI job sends the repository name and branch to Elementary's API
 2. Elementary fetches the diff, runs static SQL analysis, and queries live data quality context for the changed models
-3. A structured Markdown comment is posted as a comment on the PR or MR
-
-No custom scripts. No webhook setup. No infrastructure to manage. One secret and one file.
+3. A structured Markdown comment is posted on the PR or MR
 
 ## Setup
 
 ### Prerequisites
 
 - An Elementary Cloud account with a [code repository connected](/cloud/integrations/code-repo/connect-code-repo)
-- An [Elementary API key](/cloud/integrations/api-key)
+- An [Elementary API key](/cloud/integrations/code-repo/connect-code-repo)
 
 ### GitHub Actions
 
-**Step 1 -- Add the workflow file**
+<Steps>
+  <Step title="Add the workflow file">
+    Create `.github/workflows/elementary-review.yml` in your dbt repository:
 
-Create `.github/workflows/elementary-review.yml` in your dbt repository:
+    ```yaml
+    name: Elementary Data Quality Review
 
-```yaml
-name: Elementary Data Quality Review
+    on:
+      pull_request:
+        paths:
+          - "models/**/*.sql"
+          - "models/**/*.yml"
+          - "dbt_project.yml"
 
-on:
-  pull_request:
-    paths:
-      - "models/**/*.sql"
-      - "models/**/*.yml"
-      - "dbt_project.yml"
+    jobs:
+      elementary-review:
+        runs-on: ubuntu-latest
+        permissions:
+          contents: read
+          pull-requests: write
+          issues: write
+        steps:
+          - uses: actions/checkout@v4
+            with:
+              fetch-depth: 0
 
-jobs:
-  elementary-review:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-      issues: write
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+          - uses: elementary-data/elementary-ci@v1
+            with:
+              elementary-api-key: ${{ secrets.ELEMENTARY_API_KEY }}
+    ```
+  </Step>
+  <Step title="Add a repository secret">
+    Go to **Settings > Secrets and variables > Actions** in your GitHub repository and add:
 
-      - uses: elementary-data/elementary-ci@v1
-        with:
-          elementary-api-key: ${{ secrets.ELEMENTARY_API_KEY }}
-```
+    | Secret | Description |
+    |---|---|
+    | `ELEMENTARY_API_KEY` | Your Elementary Cloud API key |
 
-**Step 2 -- Add a repository secret**
+    The review only runs on PRs that touch model files. Other PRs are ignored.
 
-Go to **Settings > Secrets and variables > Actions** and add:
+    <Warning>
+      This works for pull requests opened from branches within the same repository. GitHub does not pass repository secrets to `pull_request` workflows triggered by forks or Dependabot.
+    </Warning>
+  </Step>
+</Steps>
 
-| Secret | Description |
-|---|---|
-| `ELEMENTARY_API_KEY` | Your Elementary Cloud API key |
+<AccordionGroup>
+  <Accordion title="Optional: customize the action">
 
-That's it. The review only runs on PRs that touch model files. Other PRs are ignored entirely.
+  | Input | Default | Description |
+  |---|---|---|
+  | `elementary-api-url` | Elementary Cloud | Override the API URL. Only needed for self-hosted Elementary setups |
 
-<Warning>
-This works for pull requests opened from branches within the same repository. GitHub does not pass repository secrets to `pull_request` workflows triggered by forks or Dependabot.
-</Warning>
+  </Accordion>
+  <Accordion title="Optional: specify environment">
 
-<Accordion title="Optional: customize the action">
+  If your repository is connected to multiple Elementary environments, add `env-id` to specify which one to use:
 
-| Input | Default | Description |
-|---|---|---|
-| `elementary-api-url` | Elementary Cloud | Override the API URL. Only needed for self-hosted Elementary setups |
+  ```yaml
+  - uses: elementary-data/elementary-ci@v1
+    with:
+      elementary-api-key: ${{ secrets.ELEMENTARY_API_KEY }}
+      elementary-env-id: "169e9308-9a70-4200-b810-ad486cb42f3a"
+  ```
 
-</Accordion>
+  The environment ID is the UUID in your Elementary Cloud URL. For example, in `https://app.elementary-data.com/169e9308-9a70-4200-b810-ad486cb42f3a/report/dashboard`, the environment ID is `169e9308-9a70-4200-b810-ad486cb42f3a`.
 
-<Accordion title="Optional: specify environment">
+  If you don't specify an `env-id` and the repository is connected to only one environment, it will be selected automatically. If connected to multiple, the review will return an error listing the available environment IDs.
 
-If your repository is connected to multiple Elementary environments, add `env-id` to the request to specify which one to use:
-
-```yaml
-- uses: elementary-data/elementary-ci@v1
-  with:
-    elementary-api-key: ${{ secrets.ELEMENTARY_API_KEY }}
-    elementary-env-id: "169e9308-9a70-4200-b810-ad486cb42f3a"
-```
-
-The environment ID is the UUID in your Elementary Cloud URL. For example, in `https://app.elementary-data.com/169e9308-9a70-4200-b810-ad486cb42f3a/report/dashboard`, the environment ID is `169e9308-9a70-4200-b810-ad486cb42f3a`.
-
-If you don't specify an `env-id` and the repository is connected to only one environment, it will be selected automatically. If connected to multiple, the review will return an error listing the available environment IDs.
-
-</Accordion>
+  </Accordion>
+</AccordionGroup>
 
 ### GitLab CI
 
-**Step 1 -- Add the include to your `.gitlab-ci.yml`**
+<Steps>
+  <Step title="Add the include to your .gitlab-ci.yml">
+    ```yaml
+    include:
+      - remote: 'https://raw.githubusercontent.com/elementary-data/elementary-ci/v1/templates/mr-review.yml'
+    ```
+  </Step>
+  <Step title="Add CI/CD variables">
+    Go to **Settings > CI/CD > Variables** and add:
 
-```yaml
-include:
-  - remote: 'https://raw.githubusercontent.com/elementary-data/elementary-ci/v1/templates/mr-review.yml'
-```
+    | Variable | Masked | Description |
+    |---|---|---|
+    | `ELEMENTARY_API_KEY` | Yes | Your Elementary Cloud API key |
+    | `GITLAB_API_TOKEN` | Yes | Optional. Project Access Token with `api` scope. Set this if you cannot enable CI/CD job token API access in project settings. |
 
-**Step 2 -- Add CI/CD variables**
+    To post the MR comment, the template uses one of two authentication methods:
 
-Go to **Settings > CI/CD > Variables** and add:
+    - **`CI_JOB_TOKEN` (default):** GitLab's built-in job token, available automatically in every pipeline. Requires a project admin to enable **Settings > CI/CD > Token Access > Allow CI/CD job tokens to access this project's API**.
+    - **`GITLAB_API_TOKEN` (alternative):** If this variable is set, it takes priority over `CI_JOB_TOKEN`. Use a Project Access Token with `api` scope. This works without any admin settings change and is the easier option if you don't have project admin access.
+  </Step>
+</Steps>
 
-| Variable | Masked | Description |
-|---|---|---|
-| `ELEMENTARY_API_KEY` | Yes | Your Elementary Cloud API key |
-| `GITLAB_API_TOKEN` | Yes | Optional. Project Access Token with `api` scope. Set this if you cannot enable CI/CD job token API access in project settings. |
-
-To post the MR comment, the template uses one of two authentication methods:
-
-- **`CI_JOB_TOKEN` (default):** GitLab's built-in job token, available automatically in every pipeline. Requires a project admin to enable **Settings > CI/CD > Token Access > Allow CI/CD job tokens to access this project's API**.
-- **`GITLAB_API_TOKEN` (alternative):** If this variable is set, it takes priority over `CI_JOB_TOKEN`. Use a Project Access Token with `api` scope. This works without any admin settings change and is the easier option if you don't have project admin access.
-
-The review only runs on MRs that touch model files. Other MRs are ignored entirely.
-
-![Elementary code review comment on GitLab](/pics/cloud/code_review_comment_gitlab.png)
+<Frame caption="Elementary data quality review comment on a GitLab merge request">
+  <img
+    src="/pics/cloud/code_review_comment_gitlab.png"
+    alt="Elementary data quality review comment on a GitLab merge request"
+  />
+</Frame>
 
 ## Troubleshooting
 
@@ -153,11 +150,11 @@ Make sure `contents: read`, `pull-requests: write`, and `issues: write` are set 
 
 **The review says the repository is not connected**
 
-Make sure you have a code repository integration set up in Elementary Cloud. Go to **Settings > Environments** and verify your repository is connected.
+Go to **Settings > Environments** in Elementary Cloud and verify your repository is connected.
 
 **The review says the repository is connected to multiple environments**
 
-Add `elementary-env-id` to your workflow to specify which environment to use. The error message will list the available environment IDs.
+Add `elementary-env-id` to your workflow. The error message lists the available environment IDs.
 
 <Warning>
 If a model has never been synced through Elementary, the comment will note that no history is available yet. Results populate automatically after the next Elementary sync.
