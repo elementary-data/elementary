@@ -1,0 +1,39 @@
+---
+title: "Snowflake Semantic Views"
+sidebarTitle: "Semantic layer"
+icon: "layer-group"
+---
+
+Elementary discovers and catalogs your Snowflake Semantic Views as first-class assets, connecting them to your lineage graph and exposing their metrics, dimensions, and facts alongside your dbt models and sources.
+
+<Frame caption="Snowflake Semantic Views in the Elementary lineage graph">
+  <img
+    src="/pics/semantic-layer-lineage.png"
+    alt="Snowflake Semantic Views in the Elementary lineage graph"
+  />
+</Frame>
+
+## What Elementary surfaces
+
+For each Snowflake Semantic View, Elementary exposes:
+
+- **Metrics, dimensions, and facts** — listed in a dedicated semantic elements table on the asset detail page.
+- **Asset-level lineage** — the semantic view is connected to the physical tables it depends on, so you can trace data issues upstream and assess downstream impact.
+- **Column-level lineage** — individual metrics, dimensions, and facts are traced back to the specific columns in the underlying physical tables.
+
+Semantic views appear in the **catalog tree** under their Snowflake database and schema, with a distinct teal color and Snowflake icon in the lineage graph so they are easy to identify at a glance.
+
+## How it works
+
+Once Elementary is connected to your Snowflake environment, semantic views are discovered automatically on each sync. No manual configuration is required.
+
+Elementary reads semantic view definitions directly from Snowflake's account usage, extracting the structure of each view and resolving lineage to the physical tables it depends on.
+
+<Note>
+Semantic layer support is currently available for **Snowflake only**. Support for additional platforms (dbt Semantic Layer, Cube, etc.) is planned.
+</Note>
+
+## Prerequisites
+
+- Snowflake connection configured in your Elementary environment. See [Snowflake setup](/cloud/integrations/dwh/snowflake).
+- `ACCOUNT_USAGE` privilege granted to the Elementary Snowflake user.

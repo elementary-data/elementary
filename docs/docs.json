@@ -82,7 +82,8 @@
               "cloud/features/data-lineage/lineage",
               "cloud/features/data-lineage/column-level-lineage",
               "cloud/features/data-lineage/exposures-lineage",
-              "cloud/features/anomaly-detection/monitor-dwh-assets"
+              "cloud/features/anomaly-detection/monitor-dwh-assets",
+              "cloud/features/data-lineage/semantic-layer"
             ]
           },
           {
