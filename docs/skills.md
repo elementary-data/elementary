@@ -23,7 +23,7 @@ Also update the integration page setup template — screenshots are only needed 
 - **No storytelling.** Avoid preamble like "In today's data landscape..." or "As your team grows...". Get to the point.
 - **Concise sentences.** One idea per sentence. If you're using "and" to join two actions, consider splitting into two bullets.
 - **Active voice.** "Elementary sends an alert" not "An alert is sent by Elementary."
-- **Consistent terminology.** Use the exact product terms: *monitors*, *incidents*, *[alert rules](https://docs.elementary-data.com/cloud/features/alerts-and-incidents/alert-rules)*, *environments*, *Ella*, *Elementary Cloud Platform*.
+- **Consistent terminology.** Use the exact product terms: *monitors*, *incidents*, *[alert rules](https://docs.elementary-data.com/cloud/features/alerts-and-incidents/alert-rules)*, *environments*, *Elementary Cloud Platform*.
 - **Steps use numbered lists.** Configuration and setup always uses numbered steps. Concept explanations use prose or bullets.
 - **Headers are sentence case.** `## Enabling Slack alerts` not `## Enabling Slack Alerts`.
 - **No internal content.** Do not reference or expose internal commands, macros, file paths, or tooling that users don't have access to.
