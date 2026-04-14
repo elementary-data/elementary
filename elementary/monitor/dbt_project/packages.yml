@@ -2,7 +2,7 @@ packages:
   - package: dbt-labs/dbt_utils
     version: [">=0.8.0", "<0.9.0"]
   - package: elementary-data/elementary
-    version: 0.23.1
+    version: 0.23.2
 
   #  NOTE - for unreleased CLI versions we often need to update the package version to a commit hash (please leave this
   #  commented, so it will be easy to access)
@@ -10,4 +10,4 @@ packages:
   #   revision: 9f32d47faa00f77595d535619cdbc265d7f603c2
   #  When releasing a new version of the package, if the current version is using a commit hash, update the version to the new version.
   # - package: elementary-data/elementary
-  #   version: 0.23.1
+  #   version: 0.23.2
