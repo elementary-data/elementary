@@ -40,7 +40,6 @@ Also update the integration page setup template — screenshots are only needed 
 ---
 title: "Feature Name"
 sidebarTitle: "Short name" # only if title is long
-icon: "icon-name"          # Lucide/FontAwesome icon slug
 ---
 
 One sentence: what this feature does and why it matters.
