@@ -45,6 +45,7 @@ class PendingAlertSchema(BaseModel):
     sent_at: Optional[datetime] = None
 
     class Config:
+        smart_union = True
         # Make sure that serializing Enum return values
         use_enum_values = True
 
