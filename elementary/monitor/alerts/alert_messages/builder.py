@@ -33,7 +33,7 @@ from elementary.messages.blocks import (
     TextStyle,
 )
 from elementary.messages.message_body import Color, MessageBlock, MessageBody
-from elementary.monitor.alerts.alert import OrchestratorInfo
+from elementary.monitor.alerts.alert import AlertModel, OrchestratorInfo
 from elementary.monitor.alerts.alert_messages.alert_fields import AlertField
 from elementary.monitor.alerts.alerts_groups.alerts_group import AlertsGroup
 from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
@@ -51,12 +51,7 @@ from elementary.monitor.data_monitoring.alerts.integrations.utils.report_link im
 )
 from elementary.utils.pydantic_shim import BaseModel
 
-AlertType = Union[
-    TestAlertModel,
-    ModelAlertModel,
-    SourceFreshnessAlertModel,
-    BaseAlertsGroup,
-]
+AlertType = Union[AlertModel, BaseAlertsGroup]
 
 
 class MessageBuilderConfig(BaseModel):
@@ -172,7 +167,7 @@ class AlertMessageBuilder:
 
     def _get_run_alert_subtitle_links(
         self,
-        alert: Union[TestAlertModel, SourceFreshnessAlertModel, ModelAlertModel],
+        alert: AlertModel,
     ) -> List[ReportLinkData]:
         report_link = alert.get_report_link()
         if report_link:
@@ -181,7 +176,7 @@ class AlertMessageBuilder:
 
     def _get_run_alert_subtitle_blocks(
         self,
-        alert: Union[TestAlertModel, SourceFreshnessAlertModel, ModelAlertModel],
+        alert: AlertModel,
     ) -> List[MessageBlock]:
         asset_type: Literal["test", "snapshot", "model", "source"]
         asset_name: str
@@ -194,6 +189,8 @@ class AlertMessageBuilder:
         elif isinstance(alert, ModelAlertModel):
             asset_type = "snapshot" if alert.materialization == "snapshot" else "model"
             asset_name = alert.alias
+        else:
+            raise ValueError(f"Unknown alert type: {type(alert)}")
         links = self._get_run_alert_subtitle_links(alert)
         orchestrator_info = alert.orchestrator_info
         return [
@@ -472,11 +469,7 @@ class AlertMessageBuilder:
 
     def _get_alert_list_line(
         self,
-        alert: Union[
-            TestAlertModel,
-            ModelAlertModel,
-            SourceFreshnessAlertModel,
-        ],
+        alert: AlertModel,
     ) -> LineBlock:
         inlines: List[InlineBlock] = [
             TextBlock(text=alert.summary, style=TextStyle.BOLD),
@@ -507,13 +500,7 @@ class AlertMessageBuilder:
         self,
         title: str,
         bullet_icon: Icon,
-        alerts: Sequence[
-            Union[
-                TestAlertModel,
-                ModelAlertModel,
-                SourceFreshnessAlertModel,
-            ]
-        ],
+        alerts: Sequence[AlertModel],
     ) -> List[MessageBlock]:
         blocks: List[MessageBlock] = []
         if not alerts:
@@ -526,10 +513,10 @@ class AlertMessageBuilder:
 
     def _get_sub_alert_groups_blocks(
         self,
-        test_errors: List[Union[TestAlertModel, SourceFreshnessAlertModel]],
-        test_warnings: List[Union[TestAlertModel, SourceFreshnessAlertModel]],
-        test_failures: List[Union[TestAlertModel, SourceFreshnessAlertModel]],
-        model_errors: List[ModelAlertModel],
+        test_errors: Sequence[AlertModel],
+        test_warnings: Sequence[AlertModel],
+        test_failures: Sequence[AlertModel],
+        model_errors: Sequence[AlertModel],
     ) -> List[MessageBlock]:
         blocks: List[MessageBlock] = []
         model_errors_alert_list_blocks = self._get_alert_list_blocks(

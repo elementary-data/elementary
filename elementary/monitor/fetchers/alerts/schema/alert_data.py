@@ -34,6 +34,7 @@ class BaseAlertDataSchema(BaseModel):
     owners: Optional[List[str]] = None
     model_meta: Optional[Dict] = None
     status: str
+    resource_type: Optional[ResourceType] = None
     # Orchestrator fields
     job_id: Optional[str] = None
     job_name: Optional[str] = None

@@ -1,8 +1,9 @@
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Optional, Union
+from typing import Optional
 
 from elementary.monitor.fetchers.alerts.schema.alert_data import (
+    BaseAlertDataSchema,
     ModelAlertDataSchema,
     SourceFreshnessAlertDataSchema,
     TestAlertDataSchema,
@@ -40,13 +41,10 @@ class PendingAlertSchema(BaseModel):
     created_at: datetime
     updated_at: datetime
     status: AlertStatus
-    data: Union[
-        TestAlertDataSchema, ModelAlertDataSchema, SourceFreshnessAlertDataSchema
-    ]
+    data: BaseAlertDataSchema
     sent_at: Optional[datetime] = None
 
     class Config:
-        smart_union = True
         # Make sure that serializing Enum return values
         use_enum_values = True
 
