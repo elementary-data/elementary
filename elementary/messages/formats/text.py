@@ -90,7 +90,12 @@ class TextFormatter:
 
     def format_table_block(self, block: TableBlock) -> str:
         if self._table_style == TableStyle.TABULATE:
-            return tabulate(block.rows, headers=block.headers, tablefmt="simple")
+            return tabulate(
+                block.rows,
+                headers=block.headers,
+                tablefmt="simple",
+                disable_numparse=True,
+            )
         elif self._table_style == TableStyle.JSON:
             dicts = [
                 {header: cell for header, cell in zip(block.headers, row)}

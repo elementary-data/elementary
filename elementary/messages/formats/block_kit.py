@@ -273,7 +273,9 @@ class BlockKitBuilder:
             new_headers = [
                 self._format_table_cell(cell, column_count) for cell in block.headers
             ]
-            table_text = tabulate(new_rows, headers=new_headers, tablefmt="simple")
+            table_text = tabulate(
+                new_rows, headers=new_headers, tablefmt="simple", disable_numparse=True
+            )
         self._add_block(self._format_markdown_section(f"```{table_text}```"))
 
     def _add_actions_block(self, block: ActionsBlock) -> None:
