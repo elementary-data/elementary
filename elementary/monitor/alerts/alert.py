@@ -99,8 +99,12 @@ class AlertModel:
         raise NotImplementedError
 
     @property
-    def concise_name(self):
-        return "Alert"
+    def concise_name(self) -> str:
+        raise NotImplementedError
+
+    @property
+    def asset_type(self) -> str:
+        raise NotImplementedError
 
     @property
     def summary(self) -> str:

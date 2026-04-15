@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Any, Dict, List, Literal, Optional, Sequence, Tuple, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 from elementary.messages.block_builders import (
     BoldTextBlock,
@@ -99,7 +99,7 @@ class AlertMessageBuilder:
 
     def _get_run_alert_subtitle_block(
         self,
-        type: Literal["test", "snapshot", "model", "source"],
+        type: str,
         name: str,
         status: Optional[str] = None,
         detected_at_str: Optional[str] = None,
@@ -178,25 +178,12 @@ class AlertMessageBuilder:
         self,
         alert: AlertModel,
     ) -> List[MessageBlock]:
-        asset_type: Literal["test", "snapshot", "model", "source"]
-        asset_name: str
-        if isinstance(alert, TestAlertModel):
-            asset_type = "test"
-            asset_name = alert.concise_name
-        elif isinstance(alert, SourceFreshnessAlertModel):
-            asset_type = "source"
-            asset_name = f"{alert.source_name}.{alert.identifier}"
-        elif isinstance(alert, ModelAlertModel):
-            asset_type = "snapshot" if alert.materialization == "snapshot" else "model"
-            asset_name = alert.alias
-        else:
-            raise ValueError(f"Unknown alert type: {type(alert)}")
         links = self._get_run_alert_subtitle_links(alert)
         orchestrator_info = alert.orchestrator_info
         return [
             self._get_run_alert_subtitle_block(
-                type=asset_type,
-                name=asset_name,
+                type=alert.asset_type,
+                name=alert.concise_name,
                 status=alert.status,
                 detected_at_str=alert.detected_at_str,
                 suppression_interval=alert.suppression_interval,
