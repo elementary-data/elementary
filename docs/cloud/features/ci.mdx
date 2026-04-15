@@ -75,8 +75,8 @@ When a PR is opened or updated:
 
     | Secret | Required | Description |
     |---|---|---|
-    | `ELEMENTARY_API_KEY` | Yes | Your Elementary Cloud API key |
-    | `ELEMENTARY_ENV_ID` | No | Your Elementary environment ID. Only needed when the repository is connected to multiple environments. |
+    | `elementary_api_key` | Yes | Your Elementary Cloud API key |
+    | `elementary_env_id` | No | Your Elementary environment ID. Only needed when the repository is connected to multiple environments. |
 
     The review only runs on PRs that touch model files. Other PRs are ignored.
 
@@ -86,15 +86,7 @@ When a PR is opened or updated:
   </Step>
 </Steps>
 
-<AccordionGroup>
-  <Accordion title="Optional: customize the action">
-
-  | Input | Default | Description |
-  |---|---|---|
-  | `elementary-api-url` | Elementary Cloud | Override the API URL. Only needed for self-hosted Elementary setups |
-
-  </Accordion>
-  <Accordion title="Optional: specify environment">
+<Accordion title="Optional: specify environment">
 
   If your repository is connected to multiple Elementary environments, add `env-id` to specify which one to use:
 
@@ -110,7 +102,6 @@ When a PR is opened or updated:
   If you don't specify an `env-id` and the repository is connected to only one environment, it will be selected automatically. If connected to multiple, the review will return an error listing the available environment IDs.
 
   </Accordion>
-</AccordionGroup>
 
 ### GitLab CI
 
@@ -126,9 +117,9 @@ When a PR is opened or updated:
 
     | Variable | Masked | Required | Description |
     |---|---|---|---|
-    | `ELEMENTARY_API_KEY` | Yes | Yes | Your Elementary Cloud API key |
-    | `ELEMENTARY_ENV_ID` | Yes | No | Your Elementary environment ID. Only needed when the repository is connected to multiple environments. |
-    | `GITLAB_API_TOKEN` | Yes | No | Project Access Token with `api` scope. Only needed if you cannot enable CI/CD job token access (see below). |
+    | `elementary_api_key` | Yes | Yes | Your Elementary Cloud API key |
+    | `elementary_env_id` | Yes | No | Your Elementary environment ID. Only needed when the repository is connected to multiple environments. |
+    | `gitlab_api_token` | Yes | No | Project Access Token with `api` scope. Only needed if you cannot enable CI/CD job token access (see below). |
 
     To post the MR comment, the template uses one of two authentication methods:
 
