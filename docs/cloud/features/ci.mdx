@@ -73,9 +73,10 @@ When a PR is opened or updated:
   <Step title="Add a repository secret">
     Go to **Settings > Secrets and variables > Actions** in your GitHub repository and add:
 
-    | Secret | Description |
-    |---|---|
-    | `ELEMENTARY_API_KEY` | Your Elementary Cloud API key |
+    | Secret | Required | Description |
+    |---|---|---|
+    | `ELEMENTARY_API_KEY` | Yes | Your Elementary Cloud API key |
+    | `ELEMENTARY_ENV_ID` | No | Your Elementary environment ID. Only needed when the repository is connected to multiple environments. |
 
     The review only runs on PRs that touch model files. Other PRs are ignored.
 
@@ -123,10 +124,11 @@ When a PR is opened or updated:
   <Step title="Add CI/CD variables">
     Go to **Settings > CI/CD > Variables** and add:
 
-    | Variable | Masked | Description |
-    |---|---|---|
-    | `ELEMENTARY_API_KEY` | Yes | Your Elementary Cloud API key |
-    | `GITLAB_API_TOKEN` | Yes | Optional. Project Access Token with `api` scope. Set this if you cannot enable CI/CD job token API access in project settings. |
+    | Variable | Masked | Required | Description |
+    |---|---|---|---|
+    | `ELEMENTARY_API_KEY` | Yes | Yes | Your Elementary Cloud API key |
+    | `ELEMENTARY_ENV_ID` | Yes | No | Your Elementary environment ID. Only needed when the repository is connected to multiple environments. |
+    | `GITLAB_API_TOKEN` | Yes | No | Project Access Token with `api` scope. Only needed if you cannot enable CI/CD job token access (see below). |
 
     To post the MR comment, the template uses one of two authentication methods:
 
