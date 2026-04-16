@@ -167,6 +167,10 @@ class TestAlertModel(AlertModel):
         )
 
     @property
+    def asset_type(self) -> str:
+        return "test"
+
+    @property
     def concise_name(self) -> str:
         if self.test_sub_type_display_name.lower() not in (
             "generic",

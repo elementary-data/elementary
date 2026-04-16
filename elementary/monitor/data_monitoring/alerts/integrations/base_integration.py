@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Union
 
+from elementary.monitor.alerts.alert import AlertModel
 from elementary.monitor.alerts.alerts_groups import GroupedByTableAlerts
 from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
 from elementary.monitor.alerts.model_alert import ModelAlertModel
@@ -21,13 +22,7 @@ class BaseIntegration(ABC):
 
     def _get_alert_template(
         self,
-        alert: Union[
-            TestAlertModel,
-            ModelAlertModel,
-            SourceFreshnessAlertModel,
-            GroupedByTableAlerts,
-            BaseAlertsGroup,
-        ],
+        alert: Union[AlertModel, GroupedByTableAlerts, BaseAlertsGroup],
         *args,
         **kwargs,
     ):
@@ -83,12 +78,7 @@ class BaseIntegration(ABC):
     @abstractmethod
     def _get_fallback_template(
         self,
-        alert: Union[
-            TestAlertModel,
-            ModelAlertModel,
-            SourceFreshnessAlertModel,
-            GroupedByTableAlerts,
-        ],
+        alert: Union[AlertModel, GroupedByTableAlerts],
         *args,
         **kwargs,
     ):
@@ -97,13 +87,7 @@ class BaseIntegration(ABC):
     @abstractmethod
     def send_alert(
         self,
-        alert: Union[
-            TestAlertModel,
-            ModelAlertModel,
-            SourceFreshnessAlertModel,
-            GroupedByTableAlerts,
-            BaseAlertsGroup,
-        ],
+        alert: Union[AlertModel, GroupedByTableAlerts, BaseAlertsGroup],
         *args,
         **kwargs,
     ) -> bool:

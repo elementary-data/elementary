@@ -101,12 +101,12 @@ class ModelAlertModel(AlertModel):
         )
 
     @property
+    def asset_type(self) -> str:
+        return "snapshot" if self.materialization == "snapshot" else "model"
+
+    @property
     def concise_name(self) -> str:
-        if self.materialization == "snapshot":
-            dbt_type = "snapshot"
-        else:
-            dbt_type = "model"
-        return f"dbt {dbt_type} alert - {self.alias}"
+        return self.alias
 
     @property
     def summary(self) -> str:

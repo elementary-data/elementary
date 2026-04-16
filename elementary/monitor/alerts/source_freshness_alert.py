@@ -156,8 +156,12 @@ class SourceFreshnessAlertModel(AlertModel):
         )
 
     @property
+    def asset_type(self) -> str:
+        return "source"
+
+    @property
     def concise_name(self) -> str:
-        return f"source freshness alert - {self.source_name}.{self.identifier}"
+        return f"{self.source_name}.{self.identifier}"
 
     @property
     def error_message(self) -> str:

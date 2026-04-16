@@ -1,20 +1,19 @@
-from typing import List, Optional, Union
+from typing import List, Optional, Sequence
 
+from elementary.monitor.alerts.alert import AlertModel
 from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
 from elementary.monitor.alerts.model_alert import ModelAlertModel
-from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
-from elementary.monitor.alerts.test_alert import TestAlertModel
 
 
 class AlertsGroup(BaseAlertsGroup):
-    test_errors: List[Union[TestAlertModel, SourceFreshnessAlertModel]]
-    test_warnings: List[Union[TestAlertModel, SourceFreshnessAlertModel]]
-    test_failures: List[Union[TestAlertModel, SourceFreshnessAlertModel]]
+    test_errors: List[AlertModel]
+    test_warnings: List[AlertModel]
+    test_failures: List[AlertModel]
     model_errors: List[ModelAlertModel]
 
     def __init__(
         self,
-        alerts: List[Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel]],
+        alerts: Sequence[AlertModel],
         env: Optional[str] = None,
     ) -> None:
         super().__init__(alerts, env=env)
