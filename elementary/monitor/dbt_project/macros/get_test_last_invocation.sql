@@ -20,21 +20,25 @@
         )
 
         {% if invocations_relation %}
-            select 
-                test_invocation.invocation_id, 
+            select
+                test_invocation.invocation_id,
                 test_invocation.detected_at,
                 invocations.command,
                 invocations.selected,
-                invocations.full_refresh
+                invocations.full_refresh,
+                invocations.job_run_id,
+                invocations.job_run_url
             from test_invocation left join {{ ref('elementary', 'dbt_invocations') }} as invocations
             on test_invocation.invocation_id = invocations.invocation_id
         {% else %}
-            select 
+            select
                 invocation_id,
                 detected_at,
                 NULL as command,
                 NULL as selected,
-                NULL as full_refresh
+                NULL as full_refresh,
+                NULL as job_run_id,
+                NULL as job_run_url
             from test_invocation
         {% endif %}
     {% endset %}

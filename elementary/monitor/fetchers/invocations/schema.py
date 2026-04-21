@@ -14,6 +14,8 @@ class DbtInvocationSchema(BaseModel):
     job_url: Optional[str] = None
     job_name: Optional[str] = None
     job_id: Optional[str] = None
+    job_run_id: Optional[str] = None
+    job_run_url: Optional[str] = None
     orchestrator: Optional[str] = None
 
     @validator("detected_at", pre=True)
