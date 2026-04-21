@@ -1,6 +1,5 @@
 {% macro get_models_latest_invocations_data() %}
   {% set invocations_relation = ref("dbt_invocations", package="elementary") %}
-  {% set column_exists = elementary.column_exists_in_relation(invocations_relation, 'job_url') %}
 
   {% set query %}
     with ordered_run_results as (
@@ -22,11 +21,11 @@
       invocations.command,
       invocations.selected,
       invocations.full_refresh,
-      {% if column_exists %}
-        invocations.job_url,
-      {% endif %}
+      invocations.job_url,
       invocations.job_name,
       invocations.job_id,
+      invocations.job_run_id,
+      invocations.job_run_url,
       invocations.orchestrator
     from {{ invocations_relation }} invocations
     join latest_models_invocations on invocations.invocation_id = latest_models_invocations.invocation_id
