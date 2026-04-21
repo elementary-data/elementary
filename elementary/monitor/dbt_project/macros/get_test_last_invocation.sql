@@ -20,14 +20,16 @@
         )
 
         {% if invocations_relation %}
+            {% set job_run_id_exists = elementary.column_exists_in_relation(invocations_relation, 'job_run_id') %}
+            {% set job_run_url_exists = elementary.column_exists_in_relation(invocations_relation, 'job_run_url') %}
             select
                 test_invocation.invocation_id,
                 test_invocation.detected_at,
                 invocations.command,
                 invocations.selected,
                 invocations.full_refresh,
-                invocations.job_run_id,
-                invocations.job_run_url
+                {% if job_run_id_exists %}invocations.job_run_id{% else %}NULL as job_run_id{% endif %},
+                {% if job_run_url_exists %}invocations.job_run_url{% else %}NULL as job_run_url{% endif %}
             from test_invocation left join {{ ref('elementary', 'dbt_invocations') }} as invocations
             on test_invocation.invocation_id = invocations.invocation_id
         {% else %}
