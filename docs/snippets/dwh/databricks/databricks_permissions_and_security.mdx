@@ -7,13 +7,12 @@ Elementary cloud requires the following permissions:
 - **Elementary schema read-only access** - This is required by Elementary to read dbt metadata & test results collected by the Elementary dbt package as a part of your pipeline runs.
 This permission does not give access to your data.
 
-- **Information schema metadata access** - Elementary needs access to the `system.information_schema.tables` and `system.information_schema.columns` system tables, to get metadata
-about existing tables and columns in your data warehouse. This is used to power features such as column-level lineage and automated volume & freshness monitors.
+- **System metadata access** - Elementary needs access to the `system.information_schema.tables`, `system.information_schema.columns`, `system.query.history` and `system.access.table_lineage` system tables.
+This access is used to get metadata about existing tables and columns, and to power features such as column-level lineage and automated volume & freshness monitors.
 
-- **Read access needed for some metadata operations (optional)** - In order to enable Elementary's automated volume & freshness monitors, Elementary needs access to query history, as well 
-as Databricks APIs to obtain table statistics. 
-These operations require granting SELECT access on your tables. This is a Databricks limitation - Elementary **never** reads any data from your tables, only metadata. However, there isn't 
-today any table-level metadata-only permission available in Databricks, so SELECT is required.
+- **Billing metadata access** - Elementary needs access to the `system.billing.usage` and `system.billing.list_prices`. This allows Elementary to monitor the warehouse cost and alert on it.
+
+- **Storage read-only access** - See details below.
 
 
 #### Grants SQL template
@@ -25,13 +24,114 @@ Please use the following SQL statements to grant the permissions specified above
 GRANT USE CATALOG ON CATALOG <catalog> TO `<service_principal_app_id>`;
 GRANT USE SCHEMA, SELECT ON SCHEMA <elementary_schema> TO `<service_principal_app_id>`;
 
--- Grant access to information schema tables
+-- Grant access to system tables
 GRANT USE CATALOG ON CATALOG system TO `<service_principal_app_id>`;
+
 GRANT USE SCHEMA ON SCHEMA system.information_schema TO `<service_principal_app_id>`;
+GRANT USE SCHEMA ON SCHEMA system.query TO `<service_principal_app_id>`;
+GRANT USE SCHEMA ON SCHEMA system.access TO `<service_principal_app_id>`;
 GRANT SELECT ON TABLE system.information_schema.tables TO `<service_principal_app_id>`;
 GRANT SELECT ON TABLE system.information_schema.columns TO `<service_principal_app_id>`;
+GRANT SELECT ON TABLE system.query.history TO `<service_principal_app_id>`;
+GRANT SELECT ON TABLE system.access.table_lineage TO `<service_principal_app_id>`;
 
--- Grant select on tables for history & statistics access
--- (Optional, required for automated volume & freshness tests - see explanation above. You can also limit to specific schemas used by dbt instead of granting on the full catalog)
+-- Grant access to billing metadata
+GRANT USE SCHEMA ON SCHEMA system.billing TO `<service_principal_app_id>`;
+GRANT SELECT ON TABLE system.billing.usage TO `<service_principal_app_id>`;
+GRANT SELECT ON TABLE system.billing.list_prices TO `<service_principal_app_id>`;
+```
+
+### Storage Access
+
+Elementary requires access to the table history in order to enable automated monitors such as volume and freshness monitors.
+You can configure this in one of the following ways:
+
+#### Option 1: Fetch history using `DESCRIBE HISTORY`
+
+Elementary can fetch the table history by running `DESCRIBE HISTORY` queries on your Databricks warehouse.
+In the Elementary UI, choose **None** under **Storage access method**.
+
+This require granting SELECT access on your tables. This is a Databricks limitation - Elementary **never** reads any data from your tables, only metadata. However, there isn't 
+today any table-level metadata-only permission available in Databricks, so SELECT is required.
+
+To grant the access, use the following SQL statements:
+
+```sql
 GRANT USE CATALOG, USE SCHEMA, SELECT ON catalog <catalog> to `<service_principal_app_id>`;
 ```
+
+
+#### Option 2: Credentials vending
+
+Elementary can access the storage using temporary credentials issued by Databricks through [credential vending](https://docs.databricks.com/aws/en/external-access/credential-vending).
+In the Elementary UI, choose **Credentials vending** under **Storage access method**.
+
+This requires granting `EXTERNAL USE SCHEMA` on the relevant schemas.
+
+When using this option, Elementary does not read the table data itself. It only reads the Delta transaction log, which contains metadata about the transactions.
+
+#### Option 3: Direct storage access
+
+Elementary can access the storage directly using credentials that you configure.
+In the Elementary UI, choose **Direct storage access** under **Storage access method**.
+
+When using this option, Elementary does not read the table data itself. It only reads the Delta transaction log, which contains metadata about the transactions.
+
+For S3-backed Databricks storage, you can configure access in one of the following ways:
+
+__AWS Role authentication__
+
+<img
+  src="/pics/cloud/integrations/databricks/storage-direct-access-role.png"
+  alt="Databricks direct storage access using AWS role ARN"
+/>
+
+This is the recommended approach, as it provides better security and follows AWS best practices.
+After choosing **Direct storage access**, select **AWS role ARN** under **Select S3 authentication method**.
+
+1. Create an IAM role that Elementary can assume.
+2. Select "Another AWS account" as the trusted entity.
+3. Enter Elementary's AWS account ID: `743289191656`.
+4. Optionally enable an external ID.
+5. Attach a policy that grants read access to the Delta log files.
+
+Use a policy similar to the following:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "VisualEditor0",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::databricks-metastore-bucket",
+        "arn:aws:s3:::databricks-metastore-bucket/*_delta_log*"
+      ]
+    }
+  ]
+}
+```
+
+This policy is scoped to the bucket itself and objects matching `*_delta_log*`, so it does not grant access to other objects in the bucket.
+
+Provide the role ARN in the Elementary UI, and the external ID as well if you configured one.
+
+__AWS access keys__
+
+<img
+  src="/pics/cloud/integrations/databricks/storage-direct-access-keys.png"
+  alt="Databricks direct storage access using AWS access keys"
+/>
+
+If needed, you can instead provide direct AWS credentials.
+After choosing **Direct storage access**, select **Secret access key** under **Select S3 authentication method**.
+
+1. Create an IAM user that Elementary will use for storage access.
+2. Enable programmatic access.
+3. Attach the same read-only S3 policy shown above.
+4. Provide the AWS access key ID and secret access key in the Elementary UI.
