@@ -24,6 +24,10 @@ class APIDbtCommandResult(DbtCommandResult):
 
 
 class APIDbtRunner(CommandLineDbtRunner):
+    def __init__(self, *args, **kwargs):
+        self._manifest = None
+        super().__init__(*args, **kwargs)
+
     def _inner_run_command(
         self,
         dbt_command_args: List[str],
@@ -45,9 +49,11 @@ class APIDbtRunner(CommandLineDbtRunner):
                 dbt_logs.append(event_dump)
 
         with env_vars_context(self.env_vars):
-            dbt = dbtRunner(callbacks=[collect_dbt_command_logs])
+            dbt = dbtRunner(manifest=self._manifest, callbacks=[collect_dbt_command_logs])
             with with_chdir(self.project_dir):
                 res: dbtRunnerResult = dbt.invoke(dbt_command_args)
+        if self._manifest is None and res.success:
+            self._manifest = dbt.manifest
         output = "\n".join(dbt_logs) or None
         # Surface the exception text so that transient-error detection in
         # _inner_run_command_with_retries can match against it.  The dbt
