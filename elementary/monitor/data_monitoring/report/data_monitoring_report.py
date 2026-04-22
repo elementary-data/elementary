@@ -61,6 +61,7 @@ class DataMonitoringReport(DataMonitoring):
         should_open_browser: bool = True,
         exclude_elementary_models: bool = False,
         project_name: Optional[str] = None,
+        threads: int = 1,
     ) -> Tuple[bool, str]:
         html_path = self._get_report_file_path(file_path)
         output_data = self.get_report_data(
@@ -69,6 +70,7 @@ class DataMonitoringReport(DataMonitoring):
             disable_passed_test_metrics=disable_passed_test_metrics,
             exclude_elementary_models=exclude_elementary_models,
             project_name=project_name,
+            threads=threads,
         )
         template_html_path = os.path.join(os.path.dirname(__file__), "index.html")
 
@@ -110,6 +112,7 @@ class DataMonitoringReport(DataMonitoring):
         disable_passed_test_metrics: bool = False,
         exclude_elementary_models: bool = False,
         project_name: Optional[str] = None,
+        threads: int = 1,
     ):
         report_api = ReportAPI(self.internal_dbt_runner)
         report_data, error = report_api.get_report_data(
@@ -122,6 +125,7 @@ class DataMonitoringReport(DataMonitoring):
             filter=self.selector_filter.to_selector_filter_schema(),
             env=self.config.env,
             warehouse_type=self.warehouse_info.type if self.warehouse_info else None,
+            threads=threads,
         )
         self._add_report_tracking(report_data, error)
         if error:
@@ -182,6 +186,7 @@ class DataMonitoringReport(DataMonitoring):
         remote_file_path: Optional[str] = None,
         disable_html_attachment: bool = False,
         include_description: bool = False,
+        threads: int = 1,
     ):
         # Generate the report
         generated_report_successfully, local_html_path = self.generate_report(
@@ -192,6 +197,7 @@ class DataMonitoringReport(DataMonitoring):
             should_open_browser=should_open_browser,
             exclude_elementary_models=exclude_elementary_models,
             project_name=project_name,
+            threads=threads,
         )
 
         if not generated_report_successfully:

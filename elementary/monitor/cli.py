@@ -449,6 +449,13 @@ def monitor(
     default=True,
     help="Whether to open the report in the browser.",
 )
+@click.option(
+    "--threads",
+    type=int,
+    default=1,
+    help="Number of threads for fetching report data in parallel. "
+    "When set to >1, independent dbt operations run concurrently using subprocess-based runners.",
+)
 @click.pass_context
 def report(
     ctx,
@@ -464,6 +471,7 @@ def report(
     file_path,
     disable_passed_test_metrics,
     open_browser,
+    threads,
     exclude_elementary_models,
     disable_samples,
     project_name,
@@ -511,6 +519,7 @@ def report(
             exclude_elementary_models=exclude_elementary_models,
             should_open_browser=open_browser,
             project_name=project_name,
+            threads=threads,
         )
         anonymous_tracking.track_cli_end(
             Command.REPORT, data_monitoring.properties(), ctx.command.name
@@ -660,6 +669,13 @@ def report(
     default=None,
     help="Include additional information at the test results summary message.\nCurrently only --include descriptions is supported.",
 )
+@click.option(
+    "--threads",
+    type=int,
+    default=1,
+    help="Number of threads for fetching report data in parallel. "
+    "When set to >1, independent dbt operations run concurrently using subprocess-based runners.",
+)
 @click.pass_context
 def send_report(
     ctx,
@@ -701,6 +717,7 @@ def send_report(
     select,
     disable,
     include,
+    threads,
     target_path,
     quiet_logs,
     ssl_ca_bundle,
@@ -784,6 +801,7 @@ def send_report(
             remote_file_path=bucket_file_path,
             disable_html_attachment=(disable == "html_attachment"),
             include_description=(include == "description"),
+            threads=threads,
         )
 
         anonymous_tracking.track_cli_end(
