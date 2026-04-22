@@ -451,7 +451,7 @@ def monitor(
 )
 @click.option(
     "--threads",
-    type=int,
+    type=click.IntRange(min=1),
     default=1,
     help="Number of threads for fetching report data in parallel. "
     "When set to >1, independent dbt operations run concurrently using subprocess-based runners.",
@@ -671,7 +671,7 @@ def report(
 )
 @click.option(
     "--threads",
-    type=int,
+    type=click.IntRange(min=1),
     default=1,
     help="Number of threads for fetching report data in parallel. "
     "When set to >1, independent dbt operations run concurrently using subprocess-based runners.",
