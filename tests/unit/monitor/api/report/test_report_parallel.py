@@ -104,12 +104,16 @@ class TestGetReportDataParallel:
             mock_pool = MagicMock()
             mock_pool_cls.return_value.__enter__ = MagicMock(return_value=mock_pool)
             mock_pool_cls.return_value.__exit__ = MagicMock(return_value=False)
-            mock_pool.submit.return_value.result.return_value = {}
+            mock_pool.submit.return_value.result.return_value = MagicMock(
+                invocation_id="inv-1"
+            )
             mock_assemble.return_value = (MagicMock(), None)
 
-            api._get_report_data_parallel(threads=4)
+            _, err = api._get_report_data_parallel(threads=4)
 
             mock_pool_cls.assert_called_with(max_workers=4)
+            assert err is None
+            mock_assemble.assert_called_once()
 
     def test_error_propagation(self, mock_dbt_runner):
         api = ReportAPI(mock_dbt_runner)
@@ -117,5 +121,5 @@ class TestGetReportDataParallel:
         with patch.object(
             api, "_create_subprocess_runner", side_effect=error
         ):
-            result, err = api._get_report_data_parallel(threads=4)
+            _, err = api._get_report_data_parallel(threads=4)
             assert err is error
