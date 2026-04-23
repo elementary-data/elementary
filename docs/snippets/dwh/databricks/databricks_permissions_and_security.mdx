@@ -46,31 +46,7 @@ GRANT SELECT ON TABLE system.billing.list_prices TO `<service_principal_app_id>`
 Elementary requires access to the table history in order to enable automated monitors such as volume and freshness monitors.
 You can configure this in one of the following ways:
 
-#### Option 1: Fetch history using `DESCRIBE HISTORY`
-
-Elementary can fetch the table history by running `DESCRIBE HISTORY` queries on your Databricks warehouse.
-In the Elementary UI, choose **None** under **Storage access method**.
-
-This require granting SELECT access on your tables. This is a Databricks limitation - Elementary **never** reads any data from your tables, only metadata. However, there isn't 
-today any table-level metadata-only permission available in Databricks, so SELECT is required.
-
-To grant the access, use the following SQL statements:
-
-```sql
-GRANT USE CATALOG, USE SCHEMA, SELECT ON catalog <catalog> to `<service_principal_app_id>`;
-```
-
-
-#### Option 2: Credentials vending
-
-Elementary can access the storage using temporary credentials issued by Databricks through [credential vending](https://docs.databricks.com/aws/en/external-access/credential-vending).
-In the Elementary UI, choose **Credentials vending** under **Storage access method**.
-
-This requires granting `EXTERNAL USE SCHEMA` on the relevant schemas.
-
-When using this option, Elementary does not read the table data itself. It only reads the Delta transaction log, which contains metadata about the transactions.
-
-#### Option 3: Direct storage access
+#### Option 1: Direct storage access
 
 Elementary can access the storage directly using credentials that you configure.
 In the Elementary UI, choose **Direct storage access** under **Storage access method**.
@@ -135,3 +111,32 @@ After choosing **Direct storage access**, select **Secret access key** under **S
 2. Enable programmatic access.
 3. Attach the same read-only S3 policy shown above.
 4. Provide the AWS access key ID and secret access key in the Elementary UI.
+
+
+#### Option 2: Credentials vending
+
+Elementary can access the storage using temporary credentials issued by Databricks through [credential vending](https://docs.databricks.com/aws/en/external-access/credential-vending).
+In the Elementary UI, choose **Credentials vending** under **Storage access method**.
+
+This requires granting `EXTERNAL USE SCHEMA` on the relevant schemas.
+
+When using this option, Elementary does not read the table data itself. It only reads the Delta transaction log, which contains metadata about the transactions.
+
+
+#### Option 3: Fetch history using `DESCRIBE HISTORY` - **Legacy**
+
+Elementary can fetch the table history by running `DESCRIBE HISTORY` queries on your Databricks warehouse.
+In the Elementary UI, choose **None** under **Storage access method**.
+
+This require granting SELECT access on your tables. This is a Databricks limitation - Elementary **never** reads any data from your tables, only metadata. However, there isn't 
+today any table-level metadata-only permission available in Databricks, so SELECT is required.
+
+To grant the access, use the following SQL statements:
+
+```sql
+GRANT USE CATALOG, USE SCHEMA, SELECT ON catalog <catalog> to `<service_principal_app_id>`;
+```
+
+<Warning>
+This option is the least recommended, as it reuqires SELECT access and causes higher compute cost.
+</Warning>
