@@ -1,21 +1,41 @@
 import CloudServiceAccount from '/snippets/dwh/bigquery/cloud_service_account.mdx';
+import CloudWIF from '/snippets/dwh/bigquery/cloud_wif.mdx';
 import PermissionsAndSecurity from '/snippets/cloud/integrations/permissions-and-security.mdx';
 import IpAllowlist from '/snippets/cloud/integrations/ip-allowlist.mdx';
 
 This guide contains the necessary steps to connect a BigQuery environment to your Elementary account.
 
-<CloudServiceAccount />
+## Choose an authentication method
+
+Elementary supports two authentication methods for BigQuery. Pick the one that fits your security model:
+
+- **Service account** — create a service account, download its JSON key, and upload the key to Elementary. Simplest to set up.
+- **Workload Identity Federation (WIF)** — Elementary authenticates from its AWS role through a federated identity. No long-lived credentials are stored in Elementary.
+
+Select a tab below and follow the steps for your chosen method.
+
+<Tabs>
+  <Tab title="Service account">
+    <CloudServiceAccount />
+  </Tab>
+  <Tab title="Workload Identity Federation">
+    <CloudWIF />
+  </Tab>
+</Tabs>
 
 <PermissionsAndSecurity />
 
 ### Fill the connection form
 
-Provide the following fields:
+Use the **Authentication method** toggle at the top of the form to select either **Service account** or **Workload Identity Federation**, matching the method you set up above. The credentials upload field changes based on your selection:
 
-- **Service account file**: The service account file you generated for Elementary. For more information, refer to [Create BigQuery service account](./bigquery#create-bigquery-service-account).
+- **Service account file** (Service account method): the service account JSON key file you downloaded.
+- **WIF credential file** (Workload Identity Federation method): the external account JSON configuration file you downloaded from the identity pool.
+
+Then provide the remaining fields:
+
 - **Project**: The name of your BigQuery project.
 - **Elementary dataset**: The name of your Elementary dataset. Usually `[dataset name]_elementary`.
 - **Location**: Use this field to configure the location of BigQuery datasets as per [the BigQuery documentation](https://cloud.google.com/bigquery/docs/locations).
-- **Workload Identity Federation**: Support for Workload Identity Federation with BigQuery service accounts is coming soon
 
 <IpAllowlist />
