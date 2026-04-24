@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "elementary-data"
-version = "0.23.2"
+version = "0.23.3"
 description = "Data monitoring and lineage"
 authors = ["Elementary"]
 keywords = ["data", "lineage", "data lineage", "data warehouse", "DWH", "observability", "data monitoring", "data observability", "Snowflake", "BigQuery", "Redshift", "data reliability", "analytics engineering"]
@@ -19,8 +19,8 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Topic :: Software Development :: Libraries",
 ]
+packages = [{include = "elementary"}, { include = "elementary.pth", from = "." }]
 
-packages = [{include = "elementary"}]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.14"
