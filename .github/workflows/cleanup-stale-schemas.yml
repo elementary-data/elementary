@@ -20,6 +20,9 @@ env:
 jobs:
   cleanup:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -30,6 +33,13 @@ jobs:
           - databricks_catalog
           - athena
     steps:
+      - name: Configure AWS credentials
+        if: matrix.warehouse-type == 'athena'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: eu-west-1
+
       - name: Checkout dbt package
         uses: actions/checkout@v6
         with:
