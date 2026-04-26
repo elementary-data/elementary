@@ -3,11 +3,12 @@ import re
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Sequence, Union
 
-from slack_sdk.models.blocks import SectionBlock
-
 from elementary.clients.slack.client import SlackClient, SlackWebClient
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
-from elementary.clients.slack.slack_message_builder import MessageColor
+from elementary.clients.slack.slack_message_builder import (
+    _SECTION_TEXT_MAX_LENGTH,
+    MessageColor,
+)
 from elementary.config.config import Config
 from elementary.monitor.alerts.alert import AlertModel
 from elementary.monitor.alerts.alerts_groups import AlertsGroup, GroupedByTableAlerts
@@ -233,7 +234,7 @@ class SlackIntegration(BaseIntegration):
             result.append(self.message_builder.create_context_block(["*Test query*"]))
 
             msg = f"```{alert.test_results_query}```"
-            if len(msg) > SectionBlock.text_max_length:
+            if len(msg) > _SECTION_TEXT_MAX_LENGTH:
                 msg = (
                     f"_The test query was too long, here's a query to get it._\n"
                     f"```SELECT test_results_query FROM {alert.elementary_database_and_schema}.elementary_test_results WHERE test_execution_id = '{alert.id}'```"
