@@ -14,17 +14,45 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+permissions: {}
+
 jobs:
-  validate-packages-yml:
+  validate-release-ref:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      release-ref: ${{ steps.validate.outputs.release-ref }}
+      release-tag: ${{ steps.validate.outputs.release-tag }}
+    steps:
+      - name: Validate release tag
+        id: validate
+        env:
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid release tag '$RELEASE_TAG'. Expected format: vX.Y.Z"
+            exit 1
+          fi
+
+          echo "release-ref=refs/tags/$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          echo "release-tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+
+  validate-packages-yml:
+    needs: validate-release-ref
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout Elementary
-        uses: actions/checkout@v6
+        # actions/checkout v6, checked 2026-04-26.
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
-          ref: ${{ inputs.tag || github.ref }}
+          ref: ${{ needs.validate-release-ref.outputs.release-ref }}
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        # actions/setup-python v6, checked 2026-04-26.
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.10"
 
@@ -66,16 +94,24 @@ jobs:
           EOF
 
   publish-to-pypi:
-    needs: validate-packages-yml
+    needs:
+      - validate-release-ref
+      - validate-packages-yml
     runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Checkout Elementary
-        uses: actions/checkout@v6
+        # actions/checkout v6, checked 2026-04-26.
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
-          ref: ${{ inputs.tag || github.ref }}
+          ref: ${{ needs.validate-release-ref.outputs.release-ref }}
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        # actions/setup-python v6, checked 2026-04-26.
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.10"
 
@@ -86,38 +122,44 @@ jobs:
         run: python -m build --sdist --wheel --outdir dist .
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v6
+        # actions/upload-artifact v6, checked 2026-04-26.
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: build
           path: dist
 
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: ${{ secrets.PYPI_USER }}
-          password: ${{ secrets.PYPI_PASS }}
+        # pypa/gh-action-pypi-publish release/v1, checked 2026-04-26.
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b
 
   build-and-push-docker-image:
-    needs: validate-packages-yml
+    needs:
+      - validate-release-ref
+      - validate-packages-yml
     runs-on: ubuntu-latest
+    environment: release
     permissions:
       contents: read
       packages: write
 
     steps:
       - name: Checkout Elementary
-        uses: actions/checkout@v6
+        # actions/checkout v6, checked 2026-04-26.
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
-          ref: ${{ inputs.tag || github.ref }}
+          ref: ${{ needs.validate-release-ref.outputs.release-ref }}
 
       - name: Set up QEMU for multi-platform support
-        uses: docker/setup-qemu-action@v4
+        # docker/setup-qemu-action v4, checked 2026-04-26.
+        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a
 
       - name: Set up Docker Buildx for multi-platform support
-        uses: docker/setup-buildx-action@v4
+        # docker/setup-buildx-action v4, checked 2026-04-26.
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
 
       - name: Log in to the container registry
-        uses: docker/login-action@v4
+        # docker/login-action v4, checked 2026-04-26.
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -125,15 +167,17 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v6
+        # docker/metadata-action v6, checked 2026-04-26.
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=semver,pattern={{version}},value=${{ inputs.tag || '' }}
+            type=semver,pattern={{version}},value=${{ needs.validate-release-ref.outputs.release-tag }}
             type=ref,event=tag
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v7
+        # docker/build-push-action v7, checked 2026-04-26.
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f
         with:
           context: .
           push: true
@@ -142,14 +186,21 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
 
   merge-to-docs:
-    needs: validate-packages-yml
+    needs:
+      - validate-release-ref
+      - validate-packages-yml
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v6
+      # actions/checkout v6, checked 2026-04-26.
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
         with:
-          ref: ${{ inputs.tag || github.ref }}
+          ref: ${{ needs.validate-release-ref.outputs.release-ref }}
       - name: PR master to docs
-        uses: repo-sync/pull-request@v2
+        # repo-sync/pull-request v2.12.1, checked 2026-04-26.
+        uses: repo-sync/pull-request@7e79a9f5dc3ad0ce53138f01df2fad14a04831c5
         with:
           source_branch: master
           destination_branch: docs
