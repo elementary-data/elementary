@@ -123,7 +123,7 @@ This requires granting `EXTERNAL USE SCHEMA` on the relevant schemas.
 When using this option, Elementary does not read the table data itself. It only reads the Delta transaction log, which contains metadata about the transactions.
 
 
-#### Option 3: Fetch history using `DESCRIBE HISTORY` - **Legacy**
+#### Option 3: Fetch history using `DESCRIBE HISTORY` - **DEPRECATED**
 
 Elementary can fetch the table history by running `DESCRIBE HISTORY` queries on your Databricks warehouse.
 In the Elementary UI, choose **None** under **Storage access method**.
@@ -138,5 +138,5 @@ GRANT USE CATALOG, USE SCHEMA, SELECT ON catalog <catalog> to `<service_principa
 ```
 
 <Warning>
-This option is the least recommended, as it reuqires SELECT access and causes higher compute cost.
+This option is deprecated, and will soon be removed.
 </Warning>
