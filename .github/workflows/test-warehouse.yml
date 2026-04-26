@@ -70,6 +70,9 @@ jobs:
     defaults:
       run:
         working-directory: elementary
+    permissions:
+      contents: read
+      id-token: write
     concurrency:
       # Serialises runs for the same warehouse × dbt-version × branch.
       # The schema name is derived from a hash of this group (see "Write dbt profiles").
@@ -81,6 +84,12 @@ jobs:
         with:
           path: elementary
           ref: ${{ inputs.elementary-ref }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: eu-west-1
 
       - name: Checkout dbt package
         uses: actions/checkout@v6
@@ -382,8 +391,6 @@ jobs:
       - name: Run send report
         env:
           SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AZURE_CONNECTION_STRING: ${{ secrets.AZURE_CONNECTION_STRING }}
         run: >
           edr monitor send-report
@@ -394,8 +401,6 @@ jobs:
           --slack-token "$SLACK_TOKEN"
           --slack-channel-name data-ops
           --bucket-file-path "ci_reports/report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
-          --aws-access-key-id "$AWS_ACCESS_KEY_ID"
-          --aws-secret-access-key "$AWS_SECRET_ACCESS_KEY"
           --s3-bucket-name elementary-ci-artifacts
           --azure-connection-string "$AZURE_CONNECTION_STRING"
           --azure-container-name reports
