@@ -150,7 +150,7 @@ jobs:
             edr monitor
             -t snowflake
             --slack-token "${{ secrets.CI_SLACK_TOKEN }}"
-            --slack-channel-name data-ops
+            --slack-channel-name oss-ci-tests
             &&
             edr monitor report
             -t snowflake
