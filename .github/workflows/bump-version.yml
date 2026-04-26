@@ -20,9 +20,13 @@ on:
         type: string
         required: false
 
+permissions: {}
+
 jobs:
   validate-version:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       validated-cli-version: ${{ steps.validate-cli-input.outputs.cli-validation }}
       default-dbt-package-version: ${{ steps.validate-cli-input.outputs.cli-validation }}
@@ -30,18 +34,32 @@ jobs:
     steps:
       - name: validate cli version input
         id: validate-cli-input
-        run: echo "cli-validation=$(echo ${{ inputs.cli-version }} | sed -n '/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/p')" >> $GITHUB_OUTPUT
+        env:
+          CLI_VERSION: ${{ inputs.cli-version }}
+        run: |
+          if [[ "$CLI_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "cli-validation=$CLI_VERSION" >> "$GITHUB_OUTPUT"
+          fi
       - name: validate dbt package version
         if: ${{ inputs.dbt-package-version }}
         id: validate-dbt-package-input
-        run: echo "dbt-package-validation=$(echo ${{ inputs.dbt-package-version }} | sed -n '/^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/p')" >> $GITHUB_OUTPUT
-      - name: echo versions
+        env:
+          DBT_PACKAGE_VERSION: ${{ inputs.dbt-package-version }}
         run: |
-          echo "cli version: ${{ steps.validate-cli-input.outputs.cli-validation }}"
-          echo "dbt package version: ${{ steps.validate-dbt-package-input.outputs.dbt-package-validation }}"
+          if [[ "$DBT_PACKAGE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "dbt-package-validation=$DBT_PACKAGE_VERSION" >> "$GITHUB_OUTPUT"
+          fi
+      - name: echo versions
+        env:
+          CLI_VERSION: ${{ steps.validate-cli-input.outputs.cli-validation }}
+          DBT_PACKAGE_VERSION: ${{ steps.validate-dbt-package-input.outputs.dbt-package-validation }}
+        run: |
+          echo "cli version: $CLI_VERSION"
+          echo "dbt package version: $DBT_PACKAGE_VERSION"
       - name: fail on invalid input
-        if: ${{ steps.validate-cli-input.outputs.cli-validation == '' }}
-        uses: actions/github-script@v8
+        if: ${{ steps.validate-cli-input.outputs.cli-validation == '' || (inputs.dbt-package-version != '' && steps.validate-dbt-package-input.outputs.dbt-package-validation == '') }}
+        # actions/github-script v8, checked 2026-04-26.
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
         with:
           script: |
             core.setFailed("Invalid version inputs")
@@ -49,43 +67,57 @@ jobs:
   bump-version:
     needs: validate-version
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      CLI_VERSION: ${{ needs.validate-version.outputs.validated-cli-version }}
+      DBT_PACKAGE_VERSION: ${{ needs.validate-version.outputs.validated-dbt-package-version || needs.validate-version.outputs.default-dbt-package-version }}
+      RELEASE_BRANCH: release/v${{ needs.validate-version.outputs.validated-cli-version }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        # actions/checkout v6, checked 2026-04-26.
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Create release branch
-        run: git checkout -b release/v${{ inputs.cli-version }}
+        run: git checkout -b "$RELEASE_BRANCH"
       - name: Initial config
         run: |
           git config user.name "GitHub Actions"
           git config user.email noreply@github.com
       - name: Bump version
         run: |
-          sed -i 's/^version = "[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*"/version = "${{ inputs.cli-version }}"/' ./pyproject.toml
+          sed -i "s/^version = \"[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\"/version = \"$CLI_VERSION\"/" ./pyproject.toml
       - name: Bump version for package (using input)
         if: ${{ needs.validate-version.outputs.validated-dbt-package-version != ''}}
         run: |
-          sed -i 's/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: ${{ needs.validate-version.outputs.validated-dbt-package-version }}/' ./elementary/monitor/dbt_project/packages.yml
-          sed -i 's/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: ${{ needs.validate-version.outputs.validated-dbt-package-version }}/' ./docs/_snippets/quickstart-package-install.mdx
+          sed -i "s/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: $DBT_PACKAGE_VERSION/" ./elementary/monitor/dbt_project/packages.yml
+          sed -i "s/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: $DBT_PACKAGE_VERSION/" ./docs/_snippets/quickstart-package-install.mdx
       - name: Bump version for package (using default)
         if: ${{ needs.validate-version.outputs.validated-dbt-package-version == ''}}
         run: |
-          sed -i 's/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: ${{ needs.validate-version.outputs.default-dbt-package-version }}/' ./elementary/monitor/dbt_project/packages.yml
-          sed -i 's/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: ${{ needs.validate-version.outputs.default-dbt-package-version }}/' ./docs/_snippets/quickstart-package-install.mdx
+          sed -i "s/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: $DBT_PACKAGE_VERSION/" ./elementary/monitor/dbt_project/packages.yml
+          sed -i "s/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: $DBT_PACKAGE_VERSION/" ./docs/_snippets/quickstart-package-install.mdx
       - name: Commit changes
-        run: git commit -am "release v${{ inputs.cli-version }}"
+        run: git commit -am "release v$CLI_VERSION"
       - name: Push code
-        run: git push origin release/v${{ inputs.cli-version }}
+        run: git push origin "$RELEASE_BRANCH"
 
   create-pr:
-    needs: bump-version
+    needs:
+      - validate-version
+      - bump-version
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v6
+      # actions/checkout v6, checked 2026-04-26.
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: create pull request
-        uses: repo-sync/pull-request@v2
+        # repo-sync/pull-request v2.12.1, checked 2026-04-26.
+        uses: repo-sync/pull-request@7e79a9f5dc3ad0ce53138f01df2fad14a04831c5
         with:
-          source_branch: "release/v${{ inputs.cli-version }}"
+          source_branch: "release/v${{ needs.validate-version.outputs.validated-cli-version }}"
           destination_branch: "master"
-          pr_title: "release/v${{ inputs.cli-version }}"
+          pr_title: "release/v${{ needs.validate-version.outputs.validated-cli-version }}"
           pr_body: "Open automatically using bump version workflow"
           github_token: ${{ secrets.GITHUB_TOKEN }}
