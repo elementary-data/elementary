@@ -379,11 +379,6 @@ jobs:
           name: ${{ steps.set_report_artifact_name.outputs.artifact_name }}
           path: elementary/edr_target/elementary_report.html
 
-      - name: Write GCS keyfile
-        env:
-          GCS_KEYFILE: ${{ secrets.GCS_KEYFILE }}
-        run: echo "$GCS_KEYFILE" | base64 -d > /tmp/gcs_keyfile.json
-
       - name: Run send report
         env:
           SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
@@ -402,8 +397,6 @@ jobs:
           --aws-access-key-id "$AWS_ACCESS_KEY_ID"
           --aws-secret-access-key "$AWS_SECRET_ACCESS_KEY"
           --s3-bucket-name elementary-ci-artifacts
-          # --google-service-account-path /tmp/gcs_keyfile.json
-          # --gcs-bucket-name elementary_ci_artifacts
           --azure-connection-string "$AZURE_CONNECTION_STRING"
           --azure-container-name reports
           --update-bucket-website true
