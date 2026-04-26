@@ -10,7 +10,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Update label
-        uses: andymckay/labeler@master
+        # actions/github-script v8, checked 2026-04-26.
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
         with:
-          add-labels: "Triage 👀"
-          remove-labels: "Awaiting Response"
+          script: |
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number,
+              labels: ["Triage 👀"],
+            });
+
+            await github.rest.issues.removeLabel({
+              owner,
+              repo,
+              issue_number,
+              name: "Awaiting Response",
+            });
