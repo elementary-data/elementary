@@ -45,6 +45,12 @@ jobs:
           echo "dbt bumped: ${{ steps.bump-tag.outputs.dbt-bumped }}"
 
   validate-upgrade-cli:
+    permissions:
+      contents: read
+      # Required so the called test-warehouse.yml can mint an OIDC token to
+      # assume the AWS role; per GitHub, id-token: write must be granted by
+      # the calling workflow.
+      id-token: write
     strategy:
       fail-fast: false
       matrix:

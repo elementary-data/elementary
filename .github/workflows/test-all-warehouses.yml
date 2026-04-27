@@ -86,13 +86,17 @@ jobs:
 
   test:
     needs: [check-fork-status, approve-fork]
+    permissions:
+      contents: read
+      # Required so the called test-warehouse.yml can mint an OIDC token to
+      # assume the AWS role; per GitHub, id-token: write must be granted by
+      # the calling workflow.
+      id-token: write
     if: |
       ! cancelled() &&
       needs.check-fork-status.result == 'success' &&
       needs.check-fork-status.outputs.should_skip != 'true' &&
       (needs.check-fork-status.outputs.is_fork != 'true' || needs.approve-fork.result == 'success')
-    permissions:
-      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -127,3 +131,4 @@ jobs:
       CI_WAREHOUSE_SECRETS: ${{ secrets.CI_WAREHOUSE_SECRETS }}
       CI_SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
       CI_SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
+      AWS_OIDC_ROLE_ARN: ${{ secrets.AWS_OIDC_ROLE_ARN }}

@@ -149,8 +149,7 @@ elementary_tests:
       region_name: {{ athena_region | toyaml }}
       database: awsdatacatalog
       schema: {{ schema_name }}
-      aws_access_key_id: {{ athena_aws_access_key_id | toyaml }}
-      aws_secret_access_key: {{ athena_aws_secret_access_key | toyaml }}
+      work_group: oss_tests
       threads: 4
 
 # The internal CLI dbt_project uses profile "elementary", so we alias the

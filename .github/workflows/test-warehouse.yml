@@ -64,6 +64,8 @@ on:
         required: true
       CI_SLACK_TOKEN:
         required: true
+      AWS_OIDC_ROLE_ARN:
+        required: true
 
 permissions: {}
 
@@ -80,6 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
     defaults:
       run:
         working-directory: elementary
@@ -94,6 +97,12 @@ jobs:
         with:
           path: elementary
           ref: ${{ inputs.elementary-ref }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: eu-west-1
 
       - name: Checkout dbt package
         uses: actions/checkout@v6
@@ -443,12 +452,9 @@ jobs:
           --slack-file-name "report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
           --slack-token "$SLACK_TOKEN"
           --slack-channel-name oss-ci-tests
-          # TODO: Implement OIDC for s3 testing
-          # --bucket-file-path "ci_reports/report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
-          # --aws-access-key-id "$AWS_ACCESS_KEY_ID"
-          # --aws-secret-access-key "$AWS_SECRET_ACCESS_KEY"
-          # --s3-bucket-name elementary-ci-artifacts
-          # --update-bucket-website true
+          --bucket-file-path "ci_reports/report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
+          --s3-bucket-name elementary-ci-artifacts
+          --update-bucket-website true
 
       - name: Set artifact name
         id: set_artifact_name
