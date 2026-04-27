@@ -22,12 +22,40 @@ Before configuring log streaming to GCS, you'll need:
    - The bucket must exist and be accessible
    - You'll need the bucket path (e.g., `gs://my-logs-bucket`)
 
-2. **Google Cloud Service Account** - A service account with permissions to write to the bucket
-   - Required role: `Storage Object User` (roles/storage.objectUser)
-   - You'll need to generate a service account JSON key file
-   - The service account key file must be uploaded in Elementary
-   - **Workload Identity Federation**: Support for Workload Identity Federation with BigQuery service accounts is coming soon
+2. **Authentication** - Either a Google Cloud service account or a Workload Identity Federation setup, with the **Storage Object User** (`roles/storage.objectUser`) role granted on the bucket. See [Authentication methods](#authentication-methods) below for both options.
 
+## Authentication methods
+
+Elementary supports two authentication methods for GCS. Pick the one that fits your security model:
+
+- **Service account** — create a service account, download its JSON key, and upload the key to Elementary. Simplest to set up.
+- **Workload Identity Federation (WIF)** — Elementary authenticates from its AWS role through a federated identity. No long-lived credentials are stored in Elementary.
+
+Select a tab below and follow the steps for your chosen method.
+
+<Tabs>
+  <Tab title="Service account">
+    1. Go to [Google Cloud Console > IAM & Admin > Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts) and create a service account (or select an existing one).
+
+    2. Grant the service account the **Storage Object User** (`roles/storage.objectUser`) role on your GCS bucket.
+
+    3. Generate a JSON key for the service account:
+       1. Select your service account.
+       2. Click the three dots menu and select 'Manage keys'.
+       3. Click 'ADD KEY' and select 'Create new key'.
+       4. Choose 'JSON' format and click 'CREATE'. The JSON file downloads automatically.
+
+    4. You will upload this JSON key to Elementary in the connection form below, in the **Service account file** field.
+  </Tab>
+  <Tab title="Workload Identity Federation">
+    The WIF setup is identical to the one documented for BigQuery — the only GCS-specific change is the permission you grant to the pool principal. Follow the Workload Identity Federation steps on the [BigQuery connection page](/cloud/integrations/dwh/bigquery) (select the **Workload Identity Federation** tab), with the following change:
+
+    - In the step where you grant IAM roles to the principalSet, **do not** grant the BigQuery roles. Instead, grant the **Storage Object User** (`roles/storage.objectUser`) role on your GCS bucket. You can do this from the bucket's 'Permissions' tab: 'GRANT ACCESS' → paste the same principalSet → assign `Storage Object User`.
+    - You can skip the dataset-level grant step entirely — it is BigQuery-specific.
+
+    Once you have the downloaded WIF credential configuration file, upload it to Elementary in the connection form below, in the **WIF credential file** field.
+  </Tab>
+</Tabs>
 
 ## Configuring Log Streaming to GCS
 
@@ -42,14 +70,8 @@ Before configuring log streaming to GCS, you'll need:
 
 4. Enter your GCS configuration:
    - **Bucket Path**: The full GCS bucket path (e.g., `gs://my-logs-bucket`)
-   - **Service Account Key File**: Upload your Google Cloud service account JSON key file
-     - To generate a service account key file:
-       1. Go to [Google Cloud Console > IAM & Admin > Service Accounts](https://console.cloud.google.com/iam-admin/serviceaccounts)
-       2. Select your service account (or create a new one)
-       3. Click the three dots menu and select "Manage keys"
-       4. Click "ADD KEY" and select "Create new key"
-       5. Choose "JSON" format and click "CREATE"
-       6. The JSON file will be downloaded automatically
+   - **Authentication method**: Use the toggle to select **Service account** or **Workload Identity Federation**, matching the method you set up in [Authentication methods](#authentication-methods) above.
+   - **Service account file** (Service account method) or **WIF credential file** (Workload Identity Federation method): Upload the JSON file you prepared.
 
 5. Click **Save** to enable log streaming
 
