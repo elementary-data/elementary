@@ -61,7 +61,9 @@ on:
       CI_WAREHOUSE_SECRETS:
         required: true
       CI_SLACK_WEBHOOK:
-        required: false
+        required: true
+      CI_SLACK_TOKEN:
+        required: true
 
 permissions: {}
 
@@ -429,6 +431,24 @@ jobs:
         with:
           name: ${{ steps.set_report_artifact_name.outputs.artifact_name }}
           path: elementary/edr_target/elementary_report.html
+
+      - name: Run send report
+        env:
+          SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
+        run: >
+          edr monitor send-report
+          -t "${{ inputs.warehouse-type }}"
+          --project-dir "${{ env.E2E_DBT_PROJECT_DIR }}"
+          --project-profile-target "${{ inputs.warehouse-type }}"
+          --slack-file-name "report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
+          --slack-token "$SLACK_TOKEN"
+          --slack-channel-name oss-ci-tests
+          # TODO: Implement OIDC for s3 testing
+          # --bucket-file-path "ci_reports/report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
+          # --aws-access-key-id "$AWS_ACCESS_KEY_ID"
+          # --aws-secret-access-key "$AWS_SECRET_ACCESS_KEY"
+          # --s3-bucket-name elementary-ci-artifacts
+          # --update-bucket-website true
 
       - name: Set artifact name
         id: set_artifact_name

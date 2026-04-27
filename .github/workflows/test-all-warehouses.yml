@@ -126,3 +126,4 @@ jobs:
       # Changes to these from a fork PR should be considered as malicious and NOT ALLOWED TO RUN.
       CI_WAREHOUSE_SECRETS: ${{ secrets.CI_WAREHOUSE_SECRETS }}
       CI_SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
+      CI_SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
