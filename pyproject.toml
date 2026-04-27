@@ -36,6 +36,8 @@ google-cloud-storage = ">=2.4,<3.2"
 alive-progress = "<=2.3.1"
 slack-sdk = ">=3.20.1,<4.0.0"
 
+lxml = ">=6.1.0"
+
 pydantic = "<3.0"
 networkx = ">=2.3,<3"
 packaging = ">=20.9"
@@ -57,9 +59,7 @@ dbt-clickhouse = {version = ">=1.8,<2.0.0", optional = true}
 dbt-duckdb = {version = ">=1.8,<2.0.0", optional = true}
 dbt-dremio = {version = ">=1.8,<2.0.0", optional = true}
 dbt-fabric = {version = ">=1.8,<2.0.0", optional = true}
-dbt-fabricspark = {version = ">=1.8,<2.0.0", optional = true}
 dbt-sqlserver = {version = ">=1.8,<2.0.0", optional = true}
-dbt-vertica = {version = ">=1.8,<2.0.0", optional = true}
 [tool.poetry.extras]
 snowflake = ["dbt-snowflake"]
 bigquery = ["dbt-bigquery"]
@@ -73,12 +73,11 @@ trino = ["dbt-trino"]
 duckdb = ["dbt-duckdb"]
 dremio = ["dbt-dremio"]
 fabric = ["dbt-fabric"]
-fabricspark = ["dbt-fabricspark"]
 sqlserver = ["dbt-sqlserver"]
-vertica = ["dbt-vertica"]
-# dbt-fabricspark is excluded due to broken upstream dependencies (azure-cli pre-release pins).
-# dbt-vertica is excluded because it pins dbt-core==1.8.5, forcing the entire resolution to dbt 1.8.
-# Both are still available as individual extras (e.g. pip install elementary-data[vertica]).
+# dbt-fabricspark and dbt-vertica are removed from the lockfile resolution because they pin
+# outdated transitive dependencies (dbt-core==1.8.5, azure-cli pre-release) that block
+# security patches for deepdiff, protobuf, and pyopenssl. Users who need these adapters
+# can still install them directly (e.g. pip install dbt-fabricspark dbt-vertica).
 all = ["dbt-snowflake", "dbt-bigquery", "dbt-redshift", "dbt-postgres", "dbt-databricks", "dbt-spark", "dbt-athena-community", "dbt-trino", "dbt-clickhouse", "dbt-duckdb", "dbt-dremio", "dbt-fabric", "dbt-sqlserver"]
 
 [build-system]
