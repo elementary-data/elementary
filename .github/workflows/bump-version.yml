@@ -58,8 +58,7 @@ jobs:
           echo "dbt package version: $DBT_PACKAGE_VERSION"
       - name: fail on invalid input
         if: ${{ steps.validate-cli-input.outputs.cli-validation == '' || (inputs.dbt-package-version != '' && steps.validate-dbt-package-input.outputs.dbt-package-validation == '') }}
-        # actions/github-script v8, checked 2026-04-26.
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
+        uses: actions/github-script@v8
         with:
           script: |
             core.setFailed("Invalid version inputs")
@@ -75,8 +74,7 @@ jobs:
       RELEASE_BRANCH: release/v${{ needs.validate-version.outputs.validated-cli-version }}
     steps:
       - name: Checkout code
-        # actions/checkout v6, checked 2026-04-26.
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        uses: actions/checkout@v6
       - name: Create release branch
         run: git checkout -b "$RELEASE_BRANCH"
       - name: Initial config
@@ -110,8 +108,7 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      # actions/checkout v6, checked 2026-04-26.
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - uses: actions/checkout@v6
       - name: create pull request
         # repo-sync/pull-request v2.12.1, checked 2026-04-26.
         uses: repo-sync/pull-request@7e79a9f5dc3ad0ce53138f01df2fad14a04831c5

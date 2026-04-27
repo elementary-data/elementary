@@ -11,8 +11,7 @@ jobs:
       issues: write
     steps:
       - name: Update label
-        # actions/github-script v8, checked 2026-04-26.
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
+        uses: actions/github-script@v8
         with:
           script: |
             const { owner, repo } = context.repo;
