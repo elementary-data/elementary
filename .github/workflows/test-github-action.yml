@@ -20,6 +20,8 @@ on:
         default: false
         description: Whether to generate new data
 
+permissions: {}
+
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   ELEMENTARY_DBT_PACKAGE_PATH: ${{ github.workspace }}/dbt-data-reliability
@@ -28,6 +30,8 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: elementary
