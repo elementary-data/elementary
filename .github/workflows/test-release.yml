@@ -65,6 +65,7 @@ jobs:
       CI_WAREHOUSE_SECRETS: ${{ secrets.CI_WAREHOUSE_SECRETS }}
       CI_SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
       CI_SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
+      AWS_OIDC_ROLE_ARN: ${{ secrets.AWS_OIDC_ROLE_ARN }}
 
   recommendation:
     runs-on: ubuntu-latest
