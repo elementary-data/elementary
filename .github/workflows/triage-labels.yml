@@ -1,13 +1,14 @@
 name: Update Triage Label
 on: issue_comment
 
-permissions:
-  issues: write
+permissions: {}
 
 jobs:
   triage_label:
     if: contains(github.event.issue.labels.*.name, 'Awaiting Response')
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - name: Update label
         # actions/github-script v8, checked 2026-04-26.

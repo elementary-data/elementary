@@ -23,12 +23,14 @@ jobs:
 
       - name: Close Pylon Ticket
         if: steps.extract_ticket_id.outputs.pylon_ticket_id != ''
+        env:
+          PYLON_TICKET_ID: ${{ steps.extract_ticket_id.outputs.pylon_ticket_id }}
+          PYLON_API_KEY: ${{ secrets.PYLON_API_KEY }}
         run: |
-          pylon_ticket_id=${{ steps.extract_ticket_id.outputs.pylon_ticket_id }}
-          echo "Closing Pylon Ticket ID: $pylon_ticket_id"
+          echo "Closing Pylon Ticket ID: $PYLON_TICKET_ID"
           curl --request PATCH \
-            --url "https://api.usepylon.com/issues/$pylon_ticket_id" \
-            --header "Authorization: ${{ secrets.PYLON_API_KEY }}" \
+            --url "https://api.usepylon.com/issues/$PYLON_TICKET_ID" \
+            --header "Authorization: $PYLON_API_KEY" \
             --header 'Content-Type: application/json' \
             --data '{
               "state": "closed"
