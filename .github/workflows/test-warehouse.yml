@@ -57,9 +57,22 @@ on:
         type: boolean
         required: false
         default: false
+    secrets:
+      CI_WAREHOUSE_SECRETS:
+        required: true
+      CI_SLACK_WEBHOOK:
+        required: true
+      CI_SLACK_TOKEN:
+        required: true
+      AWS_OIDC_ROLE_ARN:
+        required: true
+
+permissions: {}
 
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+  DBT_VERSION: ${{ inputs.dbt-version || '' }}
+  WAREHOUSE_TYPE: ${{ inputs.warehouse-type }}
   ELEMENTARY_DBT_PACKAGE_PATH: ${{ github.workspace }}/dbt-data-reliability
   CLI_INTERNAL_DBT_PKG_DIR: ${{ github.workspace }}/elementary/elementary/monitor/dbt_project
   E2E_DBT_PROJECT_DIR: ${{ github.workspace }}/elementary/tests/e2e_dbt_project
@@ -67,12 +80,12 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: elementary
     permissions:
       contents: read
       id-token: write
+    defaults:
+      run:
+        working-directory: elementary
     concurrency:
       # Serialises runs for the same warehouse × dbt-version × branch.
       # The schema name is derived from a hash of this group (see "Write dbt profiles").
@@ -98,6 +111,21 @@ jobs:
           path: dbt-data-reliability
           ref: ${{ inputs.dbt-data-reliability-ref }}
 
+      - name: Validate workflow inputs
+        run: |
+          case "$WAREHOUSE_TYPE" in
+            postgres|snowflake|bigquery|redshift|databricks_catalog|spark|athena|clickhouse|duckdb|trino|dremio|fabric|sqlserver|vertica) ;;
+            *)
+              echo "Unsupported warehouse type: $WAREHOUSE_TYPE" >&2
+              exit 1
+              ;;
+          esac
+
+          if [ -n "$DBT_VERSION" ] && ! [[ "$DBT_VERSION" =~ ^[0-9]+(\.[0-9]+){1,2}([a-zA-Z0-9._+-]+)?$ ]]; then
+            echo "Unsupported dbt version: $DBT_VERSION" >&2
+            exit 1
+          fi
+
       # ── Seed cache: compute key & restore volumes BEFORE starting services ──
       # This ensures Docker volumes are populated before containers initialize.
       - name: Compute seed cache key
@@ -113,7 +141,7 @@ jobs:
                   dbt_project.yml \
                   docker-compose.yml \
                   ${{ github.workspace }}/elementary/tests/profiles/profiles.yml.j2
-              echo "dbt_version=${{ inputs.dbt-version || '' }}"
+              echo "dbt_version=$DBT_VERSION"
             } | sha256sum | head -c 16
           )
           echo "seed-hash=$SEED_HASH" >> "$GITHUB_OUTPUT"
@@ -129,7 +157,7 @@ jobs:
       - name: Restore cached seed data into Docker volumes
         if: steps.seed-cache.outputs.cache-hit == 'true' && inputs.warehouse-type != 'duckdb'
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        run: bash ci/restore_seed_cache.sh "${{ inputs.warehouse-type }}"
+        run: bash ci/restore_seed_cache.sh "$WAREHOUSE_TYPE"
 
       - name: Restore cached DuckDB seed
         if: steps.seed-cache.outputs.cache-hit == 'true' && inputs.warehouse-type == 'duckdb'
@@ -202,10 +230,24 @@ jobs:
 
       - name: Install dbt
         if: inputs.warehouse-type != 'vertica'
-        run: >
-          pip install
-          "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
-          "dbt-${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || (inputs.warehouse-type == 'athena' && 'athena-community') || (inputs.warehouse-type == 'dremio' && 'dremio') || inputs.warehouse-type }}${{ (inputs.warehouse-type == 'spark' && '[PyHive]') || '' }}${{ inputs.dbt-version && format('~={0}', inputs.dbt-version) }}"
+        run: |
+          DBT_CORE_SPEC="dbt-core"
+          DBT_ADAPTER="$WAREHOUSE_TYPE"
+          DBT_ADAPTER_EXTRA=""
+          DBT_ADAPTER_VERSION_SPEC=""
+
+          case "$WAREHOUSE_TYPE" in
+            databricks_catalog) DBT_ADAPTER="databricks" ;;
+            athena) DBT_ADAPTER="athena-community" ;;
+            spark) DBT_ADAPTER_EXTRA="[PyHive]" ;;
+          esac
+
+          if [ -n "$DBT_VERSION" ]; then
+            DBT_CORE_SPEC="dbt-core==$DBT_VERSION"
+            DBT_ADAPTER_VERSION_SPEC="~=$DBT_VERSION"
+          fi
+
+          pip install "$DBT_CORE_SPEC" "dbt-${DBT_ADAPTER}${DBT_ADAPTER_EXTRA}${DBT_ADAPTER_VERSION_SPEC}"
 
       # dbt-vertica pins dbt-core~=1.8 which lacks the 'arguments' attribute
       # used by newer dbt-core.  Install dbt-vertica without deps first, then
@@ -216,7 +258,11 @@ jobs:
         run: |
           pip install --no-deps dbt-vertica
           pip install vertica-python
-          pip install "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
+          if [ -n "$DBT_VERSION" ]; then
+            pip install "dbt-core==$DBT_VERSION"
+          else
+            pip install dbt-core
+          fi
 
       - name: Install Elementary
         run: |
@@ -224,10 +270,14 @@ jobs:
           # For Vertica, dbt-vertica is already installed with --no-deps above;
           # using ".[vertica]" would re-resolve dbt-vertica's deps and downgrade
           # dbt-core to ~=1.8.  Install elementary without the adapter extra.
-          if [ "${{ inputs.warehouse-type }}" = "vertica" ]; then
+          if [ "$WAREHOUSE_TYPE" = "vertica" ]; then
             pip install "."
           else
-            pip install ".[${{ (inputs.warehouse-type == 'databricks_catalog' && 'databricks') || inputs.warehouse-type }}]"
+            EXTRA="$WAREHOUSE_TYPE"
+            if [ "$WAREHOUSE_TYPE" = "databricks_catalog" ]; then
+              EXTRA="databricks"
+            fi
+            pip install ".[$EXTRA]"
           fi
 
       - name: Write dbt profiles
@@ -238,17 +288,17 @@ jobs:
           # name is safe (the concurrency group prevents parallel collisions).
           # This enables caching the seeded database state between runs.
           IS_DOCKER=false
-          case "${{ inputs.warehouse-type }}" in
+          case "$WAREHOUSE_TYPE" in
             postgres|clickhouse|trino|dremio|duckdb|spark|sqlserver|vertica) IS_DOCKER=true ;;
           esac
 
           if [ "$IS_DOCKER" = "true" ]; then
             SCHEMA_NAME="elementary_tests"
-            echo "Schema name: $SCHEMA_NAME (fixed for Docker adapter '${{ inputs.warehouse-type }}')"
+            echo "Schema name: $SCHEMA_NAME (fixed for Docker adapter '$WAREHOUSE_TYPE')"
           else
             # Cloud adapters: unique schema per run to avoid collisions.
             # Schema name = py_<YYMMDD_HHMMSS>_<branch≤19>_<8-char hash>
-            CONCURRENCY_GROUP="tests_${{ inputs.warehouse-type }}_dbt_${{ inputs.dbt-version }}_${BRANCH_NAME}"
+            CONCURRENCY_GROUP="tests_${WAREHOUSE_TYPE}_dbt_${DBT_VERSION}_${BRANCH_NAME}"
             SHORT_HASH=$(echo -n "$CONCURRENCY_GROUP" | sha256sum | head -c 8)
             SAFE_BRANCH=$(echo "${BRANCH_NAME}" | awk '{print tolower($0)}' | sed "s/[^a-z0-9]/_/g; s/__*/_/g" | head -c 19)
             DATE_STAMP=$(date -u +%y%m%d_%H%M%S)
@@ -264,10 +314,10 @@ jobs:
             --schema-name "$SCHEMA_NAME"
 
       - name: Run Python package unit tests
-        run: pytest -vv tests/unit --warehouse-type ${{ inputs.warehouse-type }}
+        run: pytest -vv tests/unit --warehouse-type "$WAREHOUSE_TYPE"
 
       - name: Run Python package integration tests
-        run: pytest -vv tests/integration --warehouse-type ${{ inputs.warehouse-type }}
+        run: pytest -vv tests/integration --warehouse-type "$WAREHOUSE_TYPE"
 
       - name: Install dbt package
         run: |
@@ -293,17 +343,17 @@ jobs:
       - name: Seed e2e dbt project (external)
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         if: steps.seed-cache.outputs.cache-hit != 'true' && (inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark')
-        run: python load_seeds_external.py "${{ inputs.warehouse-type }}" "$SCHEMA_NAME" data
+        run: python load_seeds_external.py "$WAREHOUSE_TYPE" "$SCHEMA_NAME" data
 
       - name: Seed e2e dbt project
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         if: steps.seed-cache.outputs.cache-hit != 'true' && inputs.warehouse-type != 'dremio' && inputs.warehouse-type != 'spark'
-        run: dbt seed -f --target "${{ inputs.warehouse-type }}"
+        run: dbt seed -f --target "$WAREHOUSE_TYPE"
 
       - name: Save seed cache from Docker volumes
         if: steps.seed-cache.outputs.cache-hit != 'true' && (inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse')
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        run: bash ci/save_seed_cache.sh "${{ inputs.warehouse-type }}"
+        run: bash ci/save_seed_cache.sh "$WAREHOUSE_TYPE"
 
       - name: Save DuckDB seed cache
         if: steps.seed-cache.outputs.cache-hit != 'true' && inputs.warehouse-type == 'duckdb'
@@ -317,10 +367,10 @@ jobs:
         run: |
           # Dremio needs single-threaded execution to avoid Nessie catalog race conditions
           EXTRA_ARGS=()
-          if [ "${{ inputs.warehouse-type }}" = "dremio" ]; then
+          if [ "$WAREHOUSE_TYPE" = "dremio" ]; then
             EXTRA_ARGS+=(--threads 1)
           fi
-          dbt run --target "${{ inputs.warehouse-type }}" "${EXTRA_ARGS[@]}" || true
+          dbt run --target "$WAREHOUSE_TYPE" "${EXTRA_ARGS[@]}" || true
 
           # Validate run_results.json: only error_model should be non-success
           jq -e '
@@ -344,10 +394,10 @@ jobs:
         run: |
           # Dremio needs single-threaded execution to avoid Nessie catalog race conditions
           EXTRA_ARGS=()
-          if [ "${{ inputs.warehouse-type }}" = "dremio" ]; then
+          if [ "$WAREHOUSE_TYPE" = "dremio" ]; then
             EXTRA_ARGS+=(--threads 1 --exclude tag:ephemeral_model)
           fi
-          dbt test --target "${{ inputs.warehouse-type }}" "${EXTRA_ARGS[@]}"
+          dbt test --target "$WAREHOUSE_TYPE" "${EXTRA_ARGS[@]}"
 
       - name: Run help
         run: edr --help
@@ -355,31 +405,34 @@ jobs:
       - name: Run monitor
         env:
           SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
-        run: >
-          edr monitor
-          -t "${{ inputs.warehouse-type }}"
-          --group-by table
-          --project-dir "${{ env.E2E_DBT_PROJECT_DIR }}"
-          --project-profile-target "${{ inputs.warehouse-type }}"
-          --slack-webhook "$SLACK_WEBHOOK"
+        run: |
+          MONITOR_ARGS=(
+            -t "$WAREHOUSE_TYPE"
+            --slack-webhook "$SLACK_WEBHOOK"
+            --group-by table
+            --project-dir "${{ env.E2E_DBT_PROJECT_DIR }}"
+            --project-profile-target "$WAREHOUSE_TYPE"
+          )
+
+          edr monitor "${MONITOR_ARGS[@]}"
 
       - name: Validate alerts statuses were updated
         working-directory: ${{ env.CLI_INTERNAL_DBT_PKG_DIR }}
         run: |
           dbt deps
-          dbt run-operation validate_alert_statuses_are_updated -t "${{ inputs.warehouse-type }}"
+          dbt run-operation validate_alert_statuses_are_updated -t "$WAREHOUSE_TYPE"
 
       - name: Run report
         run: >
           edr monitor report
-          -t "${{ inputs.warehouse-type }}"
+          -t "$WAREHOUSE_TYPE"
           --project-dir "${{ env.E2E_DBT_PROJECT_DIR }}"
-          --project-profile-target "${{ inputs.warehouse-type }}"
+          --project-profile-target "$WAREHOUSE_TYPE"
 
       - name: Set report artifact name
         id: set_report_artifact_name
         run: |
-          ARTIFACT_NAME=$(echo "report_${{ inputs.warehouse-type }}_${BRANCH_NAME}_dbt_${{ inputs.dbt-version || '' }}.html" | awk '{print tolower($0)}' | sed 's#[":/\\<>|*?-]#_#g')
+          ARTIFACT_NAME=$(echo "report_${WAREHOUSE_TYPE}_${BRANCH_NAME}_dbt_${DBT_VERSION}.html" | awk '{print tolower($0)}' | sed 's#[":/\\<>|*?-]#_#g')
           echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Upload report artifact
@@ -391,7 +444,6 @@ jobs:
       - name: Run send report
         env:
           SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
-          AZURE_CONNECTION_STRING: ${{ secrets.AZURE_CONNECTION_STRING }}
         run: >
           edr monitor send-report
           -t "${{ inputs.warehouse-type }}"
@@ -399,17 +451,15 @@ jobs:
           --project-profile-target "${{ inputs.warehouse-type }}"
           --slack-file-name "report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
           --slack-token "$SLACK_TOKEN"
-          --slack-channel-name data-ops
+          --slack-channel-name oss-ci-tests
           --bucket-file-path "ci_reports/report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
           --s3-bucket-name elementary-ci-artifacts
-          --azure-connection-string "$AZURE_CONNECTION_STRING"
-          --azure-container-name reports
           --update-bucket-website true
 
       - name: Set artifact name
         id: set_artifact_name
         run: |
-          ARTIFACT_NAME=$(echo "edr_${{ inputs.warehouse-type }}_${BRANCH_NAME}_dbt_${{ inputs.dbt-version || '' }}.log" | awk '{print tolower($0)}' | sed 's#[":/\\<>|*?-]#_#g')
+          ARTIFACT_NAME=$(echo "edr_${WAREHOUSE_TYPE}_${BRANCH_NAME}_dbt_${DBT_VERSION}.log" | awk '{print tolower($0)}' | sed 's#[":/\\<>|*?-]#_#g')
           echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Upload edr log
@@ -420,11 +470,11 @@ jobs:
           path: elementary/edr_target/edr.log
 
       - name: Run Python package e2e tests
-        run: pytest -vv tests/e2e --warehouse-type ${{ inputs.warehouse-type }}
+        run: pytest -vv tests/e2e --warehouse-type "$WAREHOUSE_TYPE"
 
       - name: Drop test schemas
         if: always()
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         continue-on-error: true
         run: |
-          dbt run-operation elementary_integration_tests.drop_test_schemas --target "${{ inputs.warehouse-type }}"
+          dbt run-operation elementary_integration_tests.drop_test_schemas --target "$WAREHOUSE_TYPE"
