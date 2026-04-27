@@ -392,6 +392,7 @@
               "data-tests/anomaly-detection-tests/dimension-anomalies",
               "data-tests/anomaly-detection-tests/all-columns-anomalies",
               "data-tests/anomaly-detection-tests/column-anomalies",
+              "data-tests/anomaly-detection-tests/column-value-anomalies",
               "data-tests/anomaly-detection-tests/Anomaly-troubleshooting-guide"
             ]
           },
