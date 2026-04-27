@@ -2,11 +2,13 @@ name: Remind docs and tests
 on:
   pull_request_target:
     branches: ["master"]
-permissions:
-  pull-requests: write
+permissions: {}
+
 jobs:
   run:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     if: github.event.action == 'opened'
     steps:
       - uses: actions/github-script@v7
