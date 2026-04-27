@@ -30,10 +30,13 @@ jobs:
 
       - name: Bump tag version
         id: bump-tag
+        env:
+          PY_TAG: ${{ steps.get-tag.outputs.py }}
+          DBT_TAG: ${{ steps.get-tag.outputs.dbt }}
         run: |
-          echo "py-bumped=$(echo ${{ steps.get-tag.outputs.py }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> $GITHUB_OUTPUT
-          echo "py-bumped-number=$(echo ${{ steps.get-tag.outputs.py }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=. | cut -c 2-)" >> $GITHUB_OUTPUT
-          echo "dbt-bumped=$(echo ${{ steps.get-tag.outputs.dbt }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> $GITHUB_OUTPUT
+          echo "py-bumped=$(echo "$PY_TAG" | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> "$GITHUB_OUTPUT"
+          echo "py-bumped-number=$(echo "$PY_TAG" | awk -F. '/[0-9]+\./{$NF++;print}' OFS=. | cut -c 2-)" >> "$GITHUB_OUTPUT"
+          echo "dbt-bumped=$(echo "$DBT_TAG" | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> "$GITHUB_OUTPUT"
 
       - name: Confirm release tag
         run: |
@@ -74,8 +77,10 @@ jobs:
       contents: read
     steps:
       - name: recommend unbreaking change upgrade
+        env:
+          PY_BUMPED_NUMBER: ${{ needs.get-latest-release-tags.outputs.py-bumped-number }}
         run: |
-          echo "Everything ran successfully, you can bump version to ${{ needs.get-latest-release-tags.outputs.py-bumped-number }}"
+          echo "Everything ran successfully, you can bump version to $PY_BUMPED_NUMBER"
       - name: recommend breaking change upgrade
         if: ${{ failure() }}
         uses: actions/github-script@v8

@@ -446,13 +446,13 @@ jobs:
           SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
         run: >
           edr monitor send-report
-          -t "${{ inputs.warehouse-type }}"
-          --project-dir "${{ env.E2E_DBT_PROJECT_DIR }}"
-          --project-profile-target "${{ inputs.warehouse-type }}"
-          --slack-file-name "report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
+          -t "$WAREHOUSE_TYPE"
+          --project-dir "$E2E_DBT_PROJECT_DIR"
+          --project-profile-target "$WAREHOUSE_TYPE"
+          --slack-file-name "report_${WAREHOUSE_TYPE}_${BRANCH_NAME}.html"
           --slack-token "$SLACK_TOKEN"
           --slack-channel-name oss-ci-tests
-          --bucket-file-path "ci_reports/report_${{ inputs.warehouse-type }}_${{ env.BRANCH_NAME }}.html"
+          --bucket-file-path "ci_reports/report_${WAREHOUSE_TYPE}_${BRANCH_NAME}.html"
           --s3-bucket-name elementary-ci-artifacts
           --update-bucket-website true
 
