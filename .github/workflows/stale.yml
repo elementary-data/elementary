@@ -3,12 +3,14 @@ on:
   schedule:
     - cron: "30 1 * * *"
 
+permissions: {}
+
 jobs:
   close-issues:
     runs-on: ubuntu-latest
     permissions:
       actions: write
-      contents: write # only for delete-branch option
+      # Add `contents: write` only if enabling `delete-branch: true`.
       issues: write
       pull-requests: write
     steps:

@@ -4,6 +4,8 @@ on:
   pull_request:
     types: [opened]
 
+permissions: {}
+
 jobs:
   assign:
     if: github.actor == 'devin-ai-integration[bot]'
