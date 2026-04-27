@@ -265,3 +265,65 @@ def dbt_runner_with_models_mock() -> Generator[MagicMock, None, None]:
     ) as mock_ls:
         mock_ls.return_value = ["node_name_1", "node_name_2"]
         yield mock_ls
+
+
+def test_parse_selector_with_graph_operators_downstream(
+    dbt_runner_with_models_mock, anonymous_tracking_mock
+):
+    config = MockConfig("mock_project_dir")
+
+    data_monitoring_filter = SelectorFilter(
+        tracking=anonymous_tracking_mock,
+        config=config,
+        selector="model:customers+",
+    )
+
+    assert data_monitoring_filter.get_filter().node_names == [
+        "node_name_1",
+        "node_name_2",
+    ]
+    assert data_monitoring_filter.get_filter().selector == "model:customers+"
+
+
+def test_parse_selector_with_graph_operators_upstream(
+    dbt_runner_with_models_mock, anonymous_tracking_mock
+):
+    config = MockConfig("mock_project_dir")
+
+    data_monitoring_filter = SelectorFilter(
+        tracking=anonymous_tracking_mock,
+        config=config,
+        selector="model:+customers",
+    )
+
+    assert data_monitoring_filter.get_filter().node_names == [
+        "node_name_1",
+        "node_name_2",
+    ]
+    assert data_monitoring_filter.get_filter().selector == "model:+customers"
+
+
+def test_parse_selector_with_graph_operators_both(
+    dbt_runner_with_models_mock, anonymous_tracking_mock
+):
+    config = MockConfig("mock_project_dir")
+
+    data_monitoring_filter = SelectorFilter(
+        tracking=anonymous_tracking_mock,
+        config=config,
+        selector="model:+customers+",
+    )
+
+    assert data_monitoring_filter.get_filter().node_names == [
+        "node_name_1",
+        "node_name_2",
+    ]
+    assert data_monitoring_filter.get_filter().selector == "model:+customers+"
+
+
+def test_has_graph_operators():
+    assert SelectorFilter._has_graph_operators("customers+") is True
+    assert SelectorFilter._has_graph_operators("+customers") is True
+    assert SelectorFilter._has_graph_operators("+customers+") is True
+    assert SelectorFilter._has_graph_operators("customers") is False
+    assert SelectorFilter._has_graph_operators("my_model") is False
