@@ -4,7 +4,7 @@ import ssl
 import time
 from dataclasses import dataclass
 from http import HTTPStatus
-from typing import Any, Dict, Iterator, List, Optional, Tuple
+from typing import Any, Dict, Iterator, List, Optional, Tuple, cast
 
 from ratelimit import limits, sleep_and_retry
 from slack_sdk import WebClient
@@ -183,7 +183,7 @@ class SlackWebMessagingIntegration(
             exclude_archived=True,
             limit=1000,
         )
-        channels = response.get("channels", [])
+        channels = response.get("channels", cast(List[dict], []))
         next_cursor = response.get("response_metadata", {}).get("next_cursor")
         return channels, next_cursor
 
