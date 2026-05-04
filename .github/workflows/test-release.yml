@@ -8,6 +8,8 @@ on:
         required: false
         default: false
 
+permissions: {}
+
 jobs:
   get-latest-release-tags:
     runs-on: ubuntu-latest
@@ -28,10 +30,13 @@ jobs:
 
       - name: Bump tag version
         id: bump-tag
+        env:
+          PY_TAG: ${{ steps.get-tag.outputs.py }}
+          DBT_TAG: ${{ steps.get-tag.outputs.dbt }}
         run: |
-          echo "py-bumped=$(echo ${{ steps.get-tag.outputs.py }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> $GITHUB_OUTPUT
-          echo "py-bumped-number=$(echo ${{ steps.get-tag.outputs.py }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=. | cut -c 2-)" >> $GITHUB_OUTPUT
-          echo "dbt-bumped=$(echo ${{ steps.get-tag.outputs.dbt }} | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> $GITHUB_OUTPUT
+          echo "py-bumped=$(echo "$PY_TAG" | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> "$GITHUB_OUTPUT"
+          echo "py-bumped-number=$(echo "$PY_TAG" | awk -F. '/[0-9]+\./{$NF++;print}' OFS=. | cut -c 2-)" >> "$GITHUB_OUTPUT"
+          echo "dbt-bumped=$(echo "$DBT_TAG" | awk -F. '/[0-9]+\./{$NF++;print}' OFS=.)" >> "$GITHUB_OUTPUT"
 
       - name: Confirm release tag
         run: |
@@ -43,6 +48,12 @@ jobs:
           echo "dbt bumped: ${{ steps.bump-tag.outputs.dbt-bumped }}"
 
   validate-upgrade-cli:
+    permissions:
+      contents: read
+      # Required so the called test-warehouse.yml can mint an OIDC token to
+      # assume the AWS role; per GitHub, id-token: write must be granted by
+      # the calling workflow.
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -53,18 +64,26 @@ jobs:
     with:
       warehouse-type: ${{ matrix.warehouse-type }}
       dbt-data-reliability-ref: ${{ needs.get-latest-release-tags.outputs.dbt }}
-    secrets: inherit
+    secrets:
+      CI_WAREHOUSE_SECRETS: ${{ secrets.CI_WAREHOUSE_SECRETS }}
+      CI_SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
+      CI_SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
+      AWS_OIDC_ROLE_ARN: ${{ secrets.AWS_OIDC_ROLE_ARN }}
 
   recommendation:
     runs-on: ubuntu-latest
     needs: [get-latest-release-tags, validate-upgrade-cli]
+    permissions:
+      contents: read
     steps:
       - name: recommend unbreaking change upgrade
+        env:
+          PY_BUMPED_NUMBER: ${{ needs.get-latest-release-tags.outputs.py-bumped-number }}
         run: |
-          echo "Everything ran successfully, you can bump version to ${{ needs.get-latest-release-tags.outputs.py-bumped-number }}"
+          echo "Everything ran successfully, you can bump version to $PY_BUMPED_NUMBER"
       - name: recommend breaking change upgrade
         if: ${{ failure() }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v8
         with:
           script: |
             core.setFailed("Upgrade validation failed. Make sure you do anything to keep backwards compatibility - If not possible, update minor.")
@@ -76,4 +95,3 @@ jobs:
     with:
       cli-version: ${{ needs.get-latest-release-tags.outputs.py-bumped-number }}
       dbt-package-version: ${{ needs.get-latest-release-tags.outputs.dbt }}
-    secrets: inherit

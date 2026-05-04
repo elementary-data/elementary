@@ -9,6 +9,7 @@ from elementary.clients.slack.client import SlackClient, SlackWebClient
 from elementary.clients.slack.schema import SlackBlocksType, SlackMessageSchema
 from elementary.clients.slack.slack_message_builder import MessageColor
 from elementary.config.config import Config
+from elementary.monitor.alerts.alert import AlertModel
 from elementary.monitor.alerts.alerts_groups import AlertsGroup, GroupedByTableAlerts
 from elementary.monitor.alerts.alerts_groups.base_alerts_group import BaseAlertsGroup
 from elementary.monitor.alerts.model_alert import ModelAlertModel
@@ -94,13 +95,7 @@ class SlackIntegration(BaseIntegration):
 
     def _get_alert_template(
         self,
-        alert: Union[
-            TestAlertModel,
-            ModelAlertModel,
-            SourceFreshnessAlertModel,
-            GroupedByTableAlerts,
-            BaseAlertsGroup,
-        ],
+        alert: Union[AlertModel, GroupedByTableAlerts, BaseAlertsGroup],
         *args,
         **kwargs,
     ) -> SlackMessageSchema:
@@ -875,14 +870,7 @@ class SlackIntegration(BaseIntegration):
     def _add_compact_sub_group_details_block(
         self,
         details_blocks: list,
-        alerts: Sequence[
-            Union[
-                TestAlertModel,
-                ModelAlertModel,
-                SourceFreshnessAlertModel,
-                GroupedByTableAlerts,
-            ],
-        ],
+        alerts: Sequence[Union[AlertModel, GroupedByTableAlerts]],
         sub_title: str,
         bullet_icon: str,
     ) -> None:
@@ -941,14 +929,7 @@ class SlackIntegration(BaseIntegration):
     def _add_sub_group_details_block(
         self,
         details_blocks: list,
-        alerts: Sequence[
-            Union[
-                TestAlertModel,
-                ModelAlertModel,
-                SourceFreshnessAlertModel,
-                GroupedByTableAlerts,
-            ],
-        ],
+        alerts: Sequence[Union[AlertModel, GroupedByTableAlerts]],
         sub_title: str,
         bullet_icon: str,
     ) -> None:
@@ -1036,13 +1017,7 @@ class SlackIntegration(BaseIntegration):
 
     def _get_fallback_template(
         self,
-        alert: Union[
-            TestAlertModel,
-            ModelAlertModel,
-            SourceFreshnessAlertModel,
-            GroupedByTableAlerts,
-            BaseAlertsGroup,
-        ],
+        alert: Union[AlertModel, GroupedByTableAlerts, BaseAlertsGroup],
         *args,
         **kwargs,
     ) -> SlackMessageSchema:
@@ -1079,13 +1054,7 @@ class SlackIntegration(BaseIntegration):
 
     def _fix_owners_and_subscribers(
         self,
-        alert: Union[
-            TestAlertModel,
-            ModelAlertModel,
-            SourceFreshnessAlertModel,
-            GroupedByTableAlerts,
-            BaseAlertsGroup,
-        ],
+        alert: Union[AlertModel, GroupedByTableAlerts, BaseAlertsGroup],
     ):
         if isinstance(alert, BaseAlertsGroup):
             for inner_alert in alert.alerts:
@@ -1099,13 +1068,7 @@ class SlackIntegration(BaseIntegration):
 
     def send_alert(
         self,
-        alert: Union[
-            TestAlertModel,
-            ModelAlertModel,
-            SourceFreshnessAlertModel,
-            GroupedByTableAlerts,
-            BaseAlertsGroup,
-        ],
+        alert: Union[AlertModel, GroupedByTableAlerts, BaseAlertsGroup],
         *args,
         **kwargs,
     ) -> bool:
@@ -1164,13 +1127,7 @@ class SlackIntegration(BaseIntegration):
 
     def _get_integration_params(
         self,
-        alert: Union[
-            TestAlertModel,
-            ModelAlertModel,
-            SourceFreshnessAlertModel,
-            GroupedByTableAlerts,
-            BaseAlertsGroup,
-        ],
+        alert: Union[AlertModel, GroupedByTableAlerts, BaseAlertsGroup],
         *args,
         **kwargs,
     ) -> Dict[str, Any]:

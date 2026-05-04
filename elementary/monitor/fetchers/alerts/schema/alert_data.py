@@ -34,6 +34,7 @@ class BaseAlertDataSchema(BaseModel):
     owners: Optional[List[str]] = None
     model_meta: Optional[Dict] = None
     status: str
+    resource_type: Optional[ResourceType] = None
     # Orchestrator fields
     job_id: Optional[str] = None
     job_name: Optional[str] = None
@@ -249,7 +250,7 @@ class ModelAlertDataSchema(BaseAlertDataSchema):
     alias: str
     path: str
     original_path: str
-    materialization: str
+    materialization: Optional[str] = None
     full_refresh: bool
     message: Optional[str] = None
     resource_type: ResourceType = Field(ResourceType.MODEL, const=True)  # type: ignore  # noqa

@@ -1,7 +1,5 @@
 name: Test elementary GitHub action
 on:
-  schedule:
-    - cron: "0 0 * * *"
   workflow_dispatch:
     inputs:
       elementary-ref:
@@ -22,6 +20,8 @@ on:
         default: false
         description: Whether to generate new data
 
+permissions: {}
+
 env:
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   ELEMENTARY_DBT_PACKAGE_PATH: ${{ github.workspace }}/dbt-data-reliability
@@ -30,6 +30,8 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: elementary
@@ -38,20 +40,20 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: Checkout Elementary
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: elementary
           ref: ${{ inputs.elementary-ref }}
 
       - name: Checkout dbt package
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: elementary-data/dbt-data-reliability
           path: dbt-data-reliability
           ref: ${{ inputs.dbt-data-reliability-ref }}
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.10"
 
@@ -152,21 +154,21 @@ jobs:
             edr monitor
             -t snowflake
             --slack-token "${{ secrets.CI_SLACK_TOKEN }}"
-            --slack-channel-name data-ops
+            --slack-channel-name oss-ci-tests
             &&
             edr monitor report
             -t snowflake
             --file-path "report.html"
 
       - name: Upload report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: report.html
           path: edr_target/report.html
 
       - name: Upload log
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: edr.log
           path: edr_target/edr.log

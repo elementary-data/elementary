@@ -2,15 +2,29 @@ name: Remind docs and tests
 on:
   pull_request_target:
     branches: ["master"]
+permissions: {}
+
 jobs:
   run:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    if: github.event.action == 'opened'
     steps:
-      - uses: wow-actions/auto-comment@v1
+      - uses: actions/github-script@v7
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          pullRequestOpened: |
-            👋 @{{ author }}
-            Thank you for raising your pull request.
-            Please make sure to add tests and document all user-facing changes.
-            You can do this by editing the `docs` files in this pull request.
+          script: |
+            const author = context.payload.pull_request.user.login;
+            const message = [
+              `👋 @${author}`,
+              'Thank you for raising your pull request.',
+              'Please make sure to add tests and document all user-facing changes.',
+              'You can do this by editing the `docs` files in this pull request.',
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: message,
+            });

@@ -22,6 +22,7 @@ from elementary.messages.messaging_integrations.base_messaging_integration impor
 from elementary.messages.messaging_integrations.exceptions import (
     MessagingIntegrationError,
 )
+from elementary.monitor.alerts.alert import AlertModel
 from elementary.monitor.alerts.alert_messages.builder import (
     AlertMessageBuilder,
     MessageBuilderConfig,
@@ -385,13 +386,7 @@ class DataMonitoringAlerts(DataMonitoring):
             self.execution_properties["sent_alert_count"] = self.sent_alert_count
             return
 
-        sent_successfully_alerts: List[
-            Union[
-                TestAlertModel,
-                ModelAlertModel,
-                SourceFreshnessAlertModel,
-            ]
-        ] = []
+        sent_successfully_alerts: List[AlertModel] = []
 
         with alive_bar(len(alerts), title="Sending alerts") as bar:
             for alert in alerts:

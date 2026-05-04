@@ -12,6 +12,8 @@ on:
         type: string
         required: true
 
+permissions: {}
+
 jobs:
   print_inputs:
     timeout-minutes: 2
@@ -19,10 +21,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: print
+        env:
+          RUN_ID: ${{ inputs.run_id }}
+          WORKFLOW_NAME: ${{ inputs.workflow_name }}
+          RESULT: ${{ inputs.result }}
         run: |
-          echo "${{ inputs.run_id }}"
-          echo "${{ inputs.workflow_name }}"
-          echo "${{ inputs.result }}"
+          echo "$RUN_ID"
+          echo "$WORKFLOW_NAME"
+          echo "$RESULT"
 
   notify:
     name: Notify Slack Failure
@@ -31,21 +37,32 @@ jobs:
     if: ${{ inputs.result == 'failure' }}
     steps:
       - name: Slack Notification
-        uses: tokorom/action-slack-incoming-webhook@main
         env:
-          INCOMING_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        with:
-          text: Scheduled Run Failed - ${{ inputs.workflow_name }}
-          attachments: |
-            [
-                {
-                "color": "danger",
-                "fields": 
-                [
-                    {
-                    "title": "URL:",
-                    "value": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.run_id }}"
-                    }
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          WORKFLOW_NAME: ${{ inputs.workflow_name }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.run_id }}
+        run: |
+          payload="$(
+            jq -n \
+              --arg text "Scheduled Run Failed - $WORKFLOW_NAME" \
+              --arg run_url "$RUN_URL" \
+              '{
+                text: $text,
+                attachments: [
+                  {
+                    color: "danger",
+                    fields: [
+                      {
+                        title: "URL:",
+                        value: $run_url
+                      }
+                    ]
+                  }
                 ]
-                }
-            ]
+              }'
+          )"
+
+          curl --fail --show-error --silent \
+            --header "Content-Type: application/json" \
+            --data "$payload" \
+            "$SLACK_WEBHOOK_URL"

@@ -1,18 +1,14 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Dict, List, Optional, Sequence, Union
+from typing import Dict, List, Optional, Sequence
 
-from elementary.monitor.alerts.model_alert import ModelAlertModel
-from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
-from elementary.monitor.alerts.test_alert import TestAlertModel
+from elementary.monitor.alerts.alert import AlertModel
 
 
 class BaseAlertsGroup(ABC):
     def __init__(
         self,
-        alerts: Sequence[
-            Union[TestAlertModel, ModelAlertModel, SourceFreshnessAlertModel]
-        ],
+        alerts: Sequence[AlertModel],
         env: Optional[str] = None,
     ) -> None:
         self.alerts = alerts

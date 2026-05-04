@@ -12,6 +12,8 @@ on:
         default: "24"
         description: Drop schemas older than this many hours
 
+permissions: {}
+
 env:
   # Re-use the dbt-data-reliability integration-test project so we get the
   # cleanup macro (drop_stale_ci_schemas) without duplicating it.
@@ -20,6 +22,9 @@ env:
 jobs:
   cleanup:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -30,10 +35,20 @@ jobs:
           - databricks_catalog
           - athena
     steps:
+      - name: Configure AWS credentials
+        if: matrix.warehouse-type == 'athena'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: eu-west-1
+
       - name: Checkout dbt package
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: elementary-data/dbt-data-reliability
+          # Pinned to dbt-data-reliability master HEAD at update time (2026-04-27).
+          # Refresh intentionally when updating cleanup macro behavior.
+          ref: ea58f5331e334d3a6774cc90f91f299b9929dada
           path: dbt-data-reliability
 
       - name: Setup Python

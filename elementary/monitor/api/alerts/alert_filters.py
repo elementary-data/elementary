@@ -29,7 +29,7 @@ def _get_alert_node_name(alert: PendingAlertSchema) -> Optional[str]:
     alert_node_name = None
     alert_type = AlertTypes(alert.type)
     if alert_type is AlertTypes.TEST:
-        alert_node_name = alert.data.test_name  # type: ignore[union-attr]
+        alert_node_name = alert.data.test_name  # type: ignore[attr-defined]
     elif alert_type is AlertTypes.MODEL or alert_type is AlertTypes.SOURCE_FRESHNESS:
         alert_node_name = alert.data.model_unique_id
     else:

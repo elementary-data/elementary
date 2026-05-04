@@ -1,16 +1,32 @@
 name: Update Triage Label
 on: issue_comment
 
-permissions:
-  issues: write
+permissions: {}
 
 jobs:
   triage_label:
     if: contains(github.event.issue.labels.*.name, 'Awaiting Response')
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - name: Update label
-        uses: andymckay/labeler@master
+        uses: actions/github-script@v8
         with:
-          add-labels: "Triage 👀"
-          remove-labels: "Awaiting Response"
+          script: |
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number,
+              labels: ["Triage 👀"],
+            });
+
+            await github.rest.issues.removeLabel({
+              owner,
+              repo,
+              issue_number,
+              name: "Awaiting Response",
+            });

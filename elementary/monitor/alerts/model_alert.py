@@ -18,9 +18,9 @@ class ModelAlertModel(AlertModel):
         alias: str,
         path: str,
         original_path: str,
-        materialization: str,
         full_refresh: bool,
         alert_class_id: str,
+        materialization: Optional[str] = None,
         message: Optional[str] = None,
         model_unique_id: Optional[str] = None,
         detected_at: Optional[datetime] = None,
@@ -101,16 +101,18 @@ class ModelAlertModel(AlertModel):
         )
 
     @property
+    def asset_type(self) -> str:
+        return "snapshot" if self.materialization == "snapshot" else "model"
+
+    @property
     def concise_name(self) -> str:
-        if self.materialization == "snapshot":
-            dbt_type = "snapshot"
-        else:
-            dbt_type = "model"
-        return f"dbt {dbt_type} alert - {self.alias}"
+        return self.alias
 
     @property
     def summary(self) -> str:
-        return f'dbt failed to build {self.materialization} "{self.alias}"'
+        if self.materialization:
+            return f'dbt failed to build {self.materialization} "{self.alias}"'
+        return f'dbt failed to build "{self.alias}"'
 
     def get_report_link(self) -> Optional[ReportLinkData]:
         return get_model_runs_link(self.report_url, self.model_unique_id)
