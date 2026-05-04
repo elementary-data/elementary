@@ -174,17 +174,18 @@ class SlackWebMessagingIntegration(
         )
 
     def _list_conversations(
-        self, cursor: Optional[str] = None
+        self, cursor: Optional[str] = None, only_public: bool = False
     ) -> Tuple[List[dict], Optional[str]]:
+        types = "public_channel,private_channel" if only_public else "public_channel"
         response = self.client.conversations_list(
             cursor=cursor,
-            types="public_channel,private_channel",
+            types=types,
             exclude_archived=True,
             limit=1000,
         )
         channels = response.get("channels", [])
-        cursor = response.get("response_metadata", {}).get("next_cursor")
-        return channels, cursor
+        next_cursor = response.get("response_metadata", {}).get("next_cursor")
+        return channels, next_cursor
 
     @sleep_and_retry
     @limits(calls=20, period=ONE_MINUTE)
@@ -198,7 +199,7 @@ class SlackWebMessagingIntegration(
             raise MessagingIntegrationError("Channel iteration timed out")
 
         call_start = time.time()
-        channels, cursor = self._list_conversations(cursor)
+        channels, cursor = self._list_conversations(cursor, only_public)
         call_duration = time.time() - call_start
 
         yield from channels
@@ -267,9 +268,11 @@ class SlackWebMessagingIntegration(
 
             except SlackApiError as err:
                 if err.response.status_code == HTTPStatus.TOO_MANY_REQUESTS:
-                    channels_response.retry_after = int(
-                        err.response.headers["Retry-After"]
-                    )
+                    retry_after = err.response.headers.get("Retry-After")
+                    if isinstance(retry_after, str) and retry_after.isdigit():
+                        channels_response.retry_after = int(retry_after)
+                    else:
+                        channels_response.retry_after = 60
                     break
                 raise
 
