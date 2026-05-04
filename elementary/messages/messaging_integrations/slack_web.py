@@ -184,7 +184,9 @@ class SlackWebMessagingIntegration(
             limit=1000,
         )
         channels = response.get("channels", cast(List[dict], []))
-        next_cursor = response.get("response_metadata", {}).get("next_cursor")
+        next_cursor = response.get(
+            "response_metadata", cast(dict, {}).get("next_cursor")
+        )
         return channels, next_cursor
 
     @sleep_and_retry
