@@ -32,17 +32,17 @@ def _yaml_inline(value: Any) -> str:
     """Render *value* for inline YAML.
 
     * Dicts (e.g. bigquery keyfile) → compact ``{key: val, …}``
-    * Strings (incl. multi-line PEM private keys) → double-quoted scalar with
-      escaped newlines so the rendered profiles.yml stays parseable inline
-      and values like ``"true"``/``"null"``/``"123"`` aren't type-coerced.
+    * Multi-line strings (e.g. PEM private keys) → double-quoted scalar with
+      escaped newlines so the rendered profiles.yml stays parseable inline.
     * Undefined (docker-only, no secrets) → empty string ``''``
-    * Everything else → pass through as-is
+    * Everything else (incl. single-line strings) → pass through as-is so
+      adapter-side type coercion still works (e.g. ``port: 5439`` stays an int).
     """
     if isinstance(value, Undefined):
         return "''"
     if isinstance(value, dict):
         return yaml.dump(value, default_flow_style=True).strip()
-    if isinstance(value, str):
+    if isinstance(value, str) and "\n" in value:
         return yaml.dump(value, default_flow_style=True, default_style='"').strip()
     return value
 
