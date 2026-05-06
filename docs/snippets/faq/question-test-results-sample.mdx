@@ -1,22 +1,28 @@
-<Accordion title="Can I see more result samples in the report?">
+<Accordion title="Can I control the test result samples?">
 
-Yes you can!
+Yes! Elementary saves samples of failed test rows and stores them in the table `test_result_rows`, then displays them in the *Results* tab of the report.
 
-Elementary saves samples of failed test rows and stores them in the table `test_result_rows`, then displays them in the *Results* tab of the report.
+By default, Elementary saves **5 rows per test**, but you have several options to control this:
 
-By default, Elementary saves 5 rows per test, but you can change this number by setting the variable `test_sample_row_count` to the number of rows you want to save. For example, to save 10 rows per test, add the following to your `dbt_project.yml` file:
+- **Change the sample size** globally or per-test using `test_sample_row_count`
+- **Disable samples** for specific tests using `disable_test_samples` in the test meta
+- **Protect PII** by automatically disabling samples for tables tagged with sensitive data tags
+- **Elementary Cloud users** can also request environment-level controls from the Elementary team
+
+For example, to save 10 rows per test, add the following to your `dbt_project.yml` file:
 
 ```yaml
 vars:
   test_sample_row_count: 10
 ```
 
-Or use the `--vars` flag when you run `dbt test`:
+To disable samples entirely, set it to `0`:
 
-```shell
-dbt test --vars '{"test_sample_row_count": 10}'
+```yaml
+vars:
+  test_sample_row_count: 0
 ```
 
-***NOTE***: The larger the number of rows you save, the more data you will store in your database. This can affect the performance and cost, depending on your database.
+For the full list of controls including per-test overrides, PII protection, and Cloud options, see [Test Result Samples](/data-tests/test-result-samples).
 
 </Accordion>

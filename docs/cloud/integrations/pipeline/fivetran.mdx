@@ -1,0 +1,72 @@
+---
+title: "Fivetran"
+---
+
+Elementary connects to Fivetran via webhook to automatically create incidents when connector syncs fail.
+When a `sync_end` event is received, Elementary evaluates the sync status and opens or updates an incident accordingly.
+
+<Warning>
+  **Connector filtering is not yet supported.** Incidents will be created for all connectors in the destination group. Filtering by specific connectors will be added in a future release.
+</Warning>
+
+<Warning>
+  **Alerts are not yet supported for Fivetran incidents.** Incident notifications via Slack, PagerDuty, and other alert channels will be available soon.
+</Warning>
+
+## How it works
+
+1. Register an Elementary webhook with Fivetran for a specific destination group.
+2. Fivetran sends a `sync_end` event to Elementary each time a connector sync completes.
+3. Elementary evaluates the sync outcome and creates or updates an incident when a sync fails.
+4. The incident appears in Elementary's Incidents view, where you can investigate, comment, and resolve it.
+
+## Setup
+
+### Step 1 – Generate webhook credentials
+
+1. In Elementary, go to **Settings → Environments** and select the environment you want to connect.
+2. Under **Integrations**, click **Connect Fivetran**.
+3. Click **Generate Webhook Credentials**.
+4. Copy the **Webhook URL** and **Secret** — you will need them in the next step.
+
+### Step 2 – Register the webhook in Fivetran
+
+Fivetran requires the webhook to be registered via their REST API. Use the following steps:
+
+1. In Fivetran, open the destination you want to monitor.
+2. On the **Overview** tab, copy the **Destination Group ID**.
+3. Call the [Fivetran Webhooks API](https://fivetran.com/docs/rest-api/api-reference/webhooks/create-group-webhook) to register a `sync_end` webhook for that group:
+
+```bash
+curl --request POST \
+  --url https://api.fivetran.com/v1/webhooks/group/{group_id} \
+  --header 'Authorization: Bearer <your-fivetran-api-key>' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "url": "<Webhook URL from Elementary>",
+    "events": ["sync_end"],
+    "active": true,
+    "secret": "<Secret from Elementary>"
+  }'
+```
+
+Replace `{group_id}` with your Destination Group ID, and fill in the Webhook URL and Secret copied from Elementary.
+
+### Step 3 – Verify the connection
+
+After registering the webhook, trigger a sync in Fivetran. Once the sync completes, Fivetran will send a `sync_end` event to Elementary. Elementary processes these events asynchronously, so it may take a short time before the resulting incident appears.
+
+To confirm the webhook is wired up correctly, check the **Incidents** view in Elementary after a failed sync — a new incident should appear for the affected connector.
+
+## Where to see Fivetran incidents
+
+Fivetran sync failures appear in the **Incidents** view in Elementary. Each incident includes:
+
+- Connector name and ID
+- Sync status and failure reason (when available)
+- Event timestamp
+- Destination group ID
+
+<Note>
+  At this time, Fivetran incidents cannot be filtered by connector — all connectors in the registered destination group are monitored.
+</Note>

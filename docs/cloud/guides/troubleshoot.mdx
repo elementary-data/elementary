@@ -21,6 +21,29 @@ Try following these steps to troubleshoot:
 
 </Accordion>
 
+<Accordion title="Parallel dbt jobs error when writing to Elementary metadata artifact tables">
+
+When multiple dbt jobs run in parallel, they can contend on the same Elementary metadata artifact tables.
+
+**Disable automatic metadata artifact uploads** in `dbt_project.yml`:
+
+```yaml dbt_project.yml
+vars:
+  disable_dbt_artifacts_autoupload: true
+```
+
+**Add a separate scheduled job** (daily or hourly) to upload the artifacts:
+
+```bash
+dbt run --select elementary --vars '{"enable_elementary_models": true}'
+```
+
+For the `enable_elementary_models` pattern in `dbt_project.yml`, see [Can I disable / exclude the Elementary models?](/oss/general/faq#can-i-disable-exclude-the-elementary-models). For more context, see [on-run-end hooks](/data-tests/dbt/on-run-end_hooks), [Reduce on-run-end time](/data-tests/dbt/reduce-on-run-end-time), and [Dev / prod configuration](/cloud/guides/dev-prod-configuration).
+
+Let us know if you run into anything — start a chat from the Elementary UI or reach us on [Slack](https://elementary-data.com/community).
+
+</Accordion>
+
 <Accordion title="Column information cannot be retrieved">
 
 This error can happen because of a few reasons:

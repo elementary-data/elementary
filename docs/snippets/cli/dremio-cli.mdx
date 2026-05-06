@@ -1,0 +1,64 @@
+### Dremio connection profile
+
+After installing Elementary's dbt package upon running `dbt deps`,
+you can generate Elementary's profile for usage with `edr` by running the following command within your project:
+
+```shell
+dbt run-operation elementary.generate_elementary_cli_profile
+```
+
+The command will print to the terminal a partially filled template of the profile that's needed for `edr` to work.
+
+
+<Tabs>
+  <Tab title="Dremio Cloud">
+```yml
+## DREMIO CLOUD ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: dremio
+      cloud_host: api.dremio.cloud  # or api.eu.dremio.cloud for EU
+      cloud_project_id: [project ID]
+      user: [email address]
+      pat: [personal access token]
+      use_ssl: true
+      object_storage_source: [name]  # alias: datalake
+      object_storage_path: [path]    # alias: root_path
+      dremio_space: [name]           # alias: database
+      dremio_space_folder: [path]    # alias: schema, usually [schema]_elementary
+      threads: [1 or more]
+```
+  </Tab>
+  <Tab title="Dremio Software">
+```yml
+## DREMIO SOFTWARE ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: dremio
+      software_host: [hostname or IP address]
+      port: 9047
+      user: [username]
+      password: [password]  # or use pat: [personal access token]
+      use_ssl: [true or false]
+      object_storage_source: [name]  # alias: datalake
+      object_storage_path: [path]    # alias: root_path
+      dremio_space: [name]           # alias: database
+      dremio_space_folder: [path]    # alias: schema, usually [schema]_elementary
+      threads: [1 or more]
+```
+  </Tab>
+</Tabs>
+
+We support the same format and connection methods as dbt. Please refer to
+dbt's documentation of [Dremio profile](https://docs.getdbt.com/docs/core/connect-data-platform/dremio-setup) for
+further details.

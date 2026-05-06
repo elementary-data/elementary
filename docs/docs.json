@@ -77,13 +77,13 @@
             ]
           },
           {
-            "group": "End-to-End Lineage",
+            "group": "Data Lineage",
             "pages": [
               "cloud/features/data-lineage/lineage",
               "cloud/features/data-lineage/column-level-lineage",
               "cloud/features/data-lineage/exposures-lineage",
-              "cloud/features/multi-env",
-              "cloud/features/anomaly-detection/monitor-dwh-assets"
+              "cloud/features/anomaly-detection/monitor-dwh-assets",
+              "cloud/features/data-lineage/semantic-layer"
             ]
           },
           {
@@ -101,7 +101,8 @@
                 ]
               },
               "cloud/features/alerts-and-incidents/incidents",
-              "cloud/features/alerts-and-incidents/incident-management"
+              "cloud/features/alerts-and-incidents/incident-management",
+              "cloud/features/alerts-and-incidents/incident-digest"
             ]
           },
           {
@@ -155,7 +156,9 @@
                 ]
               },
               "cloud/features/roles-and-permissions",
+              "cloud/features/multi-env",
               "cloud/features/ci",
+              "cloud/features/table-usage",
               {
                 "group": "Audit Logs",
                 "pages": [
@@ -202,7 +205,12 @@
                   "cloud/integrations/dwh/athena",
                   "cloud/integrations/dwh/dremio",
                   "cloud/integrations/dwh/clickhouse",
-                  "cloud/integrations/dwh/trino"
+                  "cloud/integrations/dwh/trino",
+                  "cloud/integrations/dwh/duckdb",
+                  "cloud/integrations/dwh/spark",
+                  "cloud/integrations/dwh/fabric",
+                  "cloud/integrations/dwh/sqlserver",
+                  "cloud/integrations/dwh/vertica"
                 ]
               },
               {
@@ -212,7 +220,8 @@
                   "cloud/integrations/transformation-and-orchestration/dbt-cloud",
                   "cloud/integrations/transformation-and-orchestration/dbt-fusion",
                   "cloud/integrations/transformation-and-orchestration/airflow",
-                  "cloud/integrations/transformation-and-orchestration/orchestration-tools"
+                  "cloud/integrations/transformation-and-orchestration/orchestration-tools",
+                  "cloud/integrations/pipeline/fivetran"
                 ]
               },
               {
@@ -227,6 +236,7 @@
                   "cloud/integrations/bi/thoughtspot",
                   "cloud/integrations/bi/mode",
                   "cloud/integrations/bi/hex",
+                  "cloud/integrations/bi/lightdash",
                   "cloud/integrations/bi/explo"
                 ]
               },
@@ -265,6 +275,7 @@
                 "group": "Log Streaming",
                 "pages": [
                   "cloud/integrations/log-streaming/datadog",
+                  "cloud/integrations/log-streaming/splunk",
                   "cloud/integrations/log-streaming/gcs"
                 ]
               },
@@ -311,27 +322,6 @@
         ]
       },
       {
-        "tab": "Python SDK",
-        "groups": [
-          {
-            "group": "Getting Started",
-            "pages": [
-              "python-sdk/introduction",
-              "python-sdk/installation",
-              "python-sdk/quickstart"
-            ]
-          },
-          {
-            "group": "API Reference",
-            "pages": [
-              "python-sdk/api-reference/overview",
-              "python-sdk/api-reference/test-decorators",
-              "python-sdk/api-reference/table-assets"
-            ]
-          }
-        ]
-      },
-      {
         "tab": "dbt Package and Tests",
         "groups": [
           {
@@ -339,6 +329,7 @@
             "pages": [
               "data-tests/dbt/dbt-package",
               "data-tests/dbt/quickstart-package",
+              "data-tests/dbt/upgrade-package",
               "data-tests/dbt/dbt-artifacts",
               {
                 "group": "on-run-end hooks",
@@ -347,7 +338,8 @@
                   "data-tests/dbt/reduce-on-run-end-time"
                 ]
               },
-              "data-tests/dbt/package-models"
+              "data-tests/dbt/package-models",
+              "data-tests/test-result-samples"
             ]
           },
           {
@@ -432,7 +424,11 @@
           {
             "group": "Other Tests",
             "pages": [
-              "data-tests/python-tests"
+              "data-tests/python-tests",
+              "data-tests/execution-sla",
+              "data-tests/data-freshness-sla",
+              "data-tests/volume-threshold",
+              "data-tests/with-context-tests"
             ]
           },
           {
@@ -455,6 +451,27 @@
         ]
       },
       {
+        "tab": "Python SDK",
+        "groups": [
+          {
+            "group": "Python SDK",
+            "pages": [
+              "python-sdk/introduction",
+              "python-sdk/installation",
+              "python-sdk/quickstart",
+              {
+                "group": "API Reference",
+                "pages": [
+                  "python-sdk/api-reference/overview",
+                  "python-sdk/api-reference/test-decorators",
+                  "python-sdk/api-reference/table-assets"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
         "tab": "Elementary OSS",
         "groups": [
           {
@@ -471,8 +488,10 @@
               "oss/quickstart/quickstart-cli",
               "oss/quickstart/quickstart-tests",
               "oss/quickstart/quickstart-report",
+              "oss/quickstart/stay-updated",
               "oss/quickstart/quickstart-alerts",
-              "oss/quickstart/quickstart-prod"
+              "oss/quickstart/quickstart-prod",
+              "oss/quickstart/quickstart-support"
             ]
           },
           {
@@ -622,15 +641,15 @@
     "primary": {
       "type": "button",
       "label": "Join the Community",
-      "href": "https://join.slack.com/t/elementary-community/shared_invite/zt-38gg3xy5u-exKL8vkQpoFkng0MAzt1Pg"
+      "href": "https://join.slack.com/t/elementary-community/shared_invite/zt-3s3uv8znb-7eBuG~ApwOa637dpVFo9Yg"
     }
   },
   "banner": {
-    "content": "[Introducing Elementary 2.0 - The Data and AI Control Plane. Join the webinar on Jan 21st.](https://www.elementary-data.com/webinar/introducing-elementary-2-0)",
+    "content": "[Monitor Python pipelines alongside dbt. Explore the Python SDK.](https://www.elementary-data.com/post/data-quality-in-python-pipelines)",
     "dismissible": false
   },
   "search": {
-    "prompt": "Ask me anything..."
+    "prompt": "Search..."
   },
   "footer": {
     "socials": {
@@ -646,38 +665,47 @@
       "apiKey": "phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg"
     }
   },
+  "js": ["kapa-widget.js"],
   "redirects": [
     {
+      "source": "/cloud/features/collaboration-and-communication/user-activity-logs",
+      "destination": "/cloud/features/collaboration-and-communication/audit_logs/user-activity-logs"
+    },
+    {
       "source": "/features/lineage",
-      "destination": "/features/data-lineage/lineage"
+      "destination": "/cloud/features/data-lineage/lineage"
     },
     {
       "source": "/features/exposures-lineage",
-      "destination": "/features/data-lineage/exposures-lineage"
+      "destination": "/cloud/features/data-lineage/exposures-lineage"
     },
     {
       "source": "/features/column-level-lineage",
-      "destination": "/features/data-lineage/column-level-lineage"
+      "destination": "/cloud/features/data-lineage/column-level-lineage"
     },
     {
       "source": "/features/automated-monitors",
-      "destination": "/features/anomaly-detection/automated-monitors"
+      "destination": "/cloud/features/anomaly-detection/automated-monitors"
     },
     {
       "source": "/features/data-tests",
-      "destination": "/features/data-tests/dbt-tests"
+      "destination": "/cloud/features/data-tests/dbt-tests"
     },
     {
       "source": "/features/elementary-alerts",
-      "destination": "/features/alerts-and-incidents/alerts-and-incidents-overview"
+      "destination": "/cloud/features/alerts-and-incidents/alerts-and-incidents-overview"
     },
     {
       "source": "/features/catalog",
-      "destination": "/features/collaboration-and-communication/catalog"
+      "destination": "/cloud/features/collaboration-and-communication/catalog"
     },
     {
       "source": "/features/data-observability-dashboard",
-      "destination": "/features/collaboration-and-communication/data-observability-dashboard"
+      "destination": "/cloud/features/collaboration-and-communication/data-observability-dashboard"
+    },
+    {
+      "source": "/cloud/features/collaboration-and-communication/table-usage",
+      "destination": "/cloud/features/table-usage"
     }
   ]
 }

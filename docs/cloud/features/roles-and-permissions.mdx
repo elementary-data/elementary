@@ -27,7 +27,7 @@ A user's effective permissions are the sum (union) of all roles and permissions 
 
 Roles in Elementary can be divided into two categories: built-in (Admin, editor, viewer) and custom. 
 
-![image.png](https://res.cloudinary.com/do5hrgokq/image/upload/v1765452217/image_27_wb0szr.png)
+![image.png](https://res.cloudinary.com/do5hrgokq/image/upload/v1768402091/image_38_grzlqn.png)
 
 ### **Built-in Roles**
 
@@ -63,25 +63,33 @@ Each role may include permissions at one, two, or all three levels:
     - **Feature access** — Select which pages (Catalog, Lineage, Alerts, etc.) and features (View/create PRs, AI Agents etc.) are visible.
     - **Permission type** — Set it to **read-only,** **edit** or **No permissions**
 3. **Resources filters - Assets & Tests (optional)**
-    
+
     Use metadata filters to restrict the role to specific datasets or tests.
-    
+
     - **Filters** — e.g., `Asset tag = #marketing`, `Test Owner = @data-team`.
     - **Permission type** — Choose read-only or edit access (e.g., create tests, update metadata, modify configurations) for each filter group.
+    - **"Resources are by default"** — This controls access to resources that **don't match any filter**.
+      - Set to **Hidden** if you want users to only see the filtered resources (most common for scoped roles).
+      - Set to **Read-only** if you want unfiltered resources to still be visible (just not editable).
 
-**Custom role example: Marketing analysts**
+    <Warning>
+    If you add filters but leave "Resources are by default" set to **Read-only**, users will still see all resources outside the filter. To truly restrict visibility, set this to **Hidden**.
+    </Warning>
+
+**Custom role example: Finance Prod Editor**
+
+**Description** - Can edit finance assets, cannot see PII assets
 
 - Account level - No permissions to view/edit account configuration
 - Environment level -
-    - For 'Prod' environment
-        - Access to pages - Catalog, lineage, data health
-        - Permissions type - read only
-    - Other environments - No access
+    - For 'Prod' environment - Can edit
+    - Other environments - Hidden (No access)
 - Assets/tests level -
-    - `Asset tag = #marketing`  - Can edit
-    - `Asset tag = #Sales` - Read only
+    - `Asset tag = #finance OR Asset tag = #finance-data-product` - Can edit
+    - `Asset tag = #PII` - Hidden (No access)
+    - All other assets → **Hidden** (set via "Resources are by default: Hidden")
 
-![image.png](https://res.cloudinary.com/do5hrgokq/image/upload/v1765210540/roles2_r1pbqj.png)
+![image.png](https://res.cloudinary.com/do5hrgokq/image/upload/v1768402089/image_39_puhpqm.png)
 
 ## Getting started: How to set up roles and permissions
 
@@ -150,4 +158,8 @@ A: No — permissions are enforced efficiently at request time. There is no perc
 **Q: Can I export or audit roles and permissions?**
 
 A: Yes — Elementary provides **Roles Audit Logs** that record all role changes and assignments. You can export to CSV or share with compliance teams.
+
+**Q: I created a role with a resource filter, but the user can still see all assets — why?**
+
+A: Check the **"Resources are by default"** setting in your role's Resource permissions. If it's set to **Read-only**, any resource that doesn't match your filter is still visible with read access. To hide everything outside your filter, change this to **Hidden**.
 

@@ -1,0 +1,31 @@
+---
+title: "Lightdash"
+---
+
+After you connect Lightdash, Elementary will automatically and continuously extend the column-level-lineage to the dashboard and chart level.
+This will provide you end-to-end data lineage to understand your downstream dependencies, called exposures.
+
+### Create a Personal Access Token
+
+Elementary needs a Personal Access Token (PAT) to access the Lightdash API on your behalf.
+
+1. In Lightdash, go to **Settings > Personal Access Tokens**.
+2. Click **Generate Token**.
+3. Give the token a descriptive name (e.g. "Elementary integration").
+4. Copy and save the generated token securely — you will need it when connecting Lightdash to Elementary.
+
+For more details, refer to the [official Lightdash documentation](https://docs.lightdash.com/references/workspace/personal-tokens).
+
+<Note>
+  The token inherits the permissions of the user who created it. Make sure the user has access to all the projects you want Elementary to sync.
+</Note>
+
+### Connecting Lightdash to Elementary
+
+Navigate to the **Account settings > Environments** and choose the environment to which you would like to connect Lightdash.
+Choose the Lightdash BI connection and provide the following details to validate and complete the integration.
+
+- **Connection Name:** A descriptive name for this Lightdash connection (e.g. "My Lightdash").
+- **API Token:** The Personal Access Token you generated in the previous step.
+- **Host URL** *(optional)*: Leave empty to use the default Lightdash Cloud URL (`https://app.lightdash.cloud`). Set this only if you are using a self-hosted Lightdash instance (e.g. `https://lightdash.mycompany.com`).
+- **Project UUIDs** *(optional)*: Leave empty to sync all projects in your Lightdash organization. Add specific project UUIDs to sync only those projects. You can find a project's UUID in the URL when viewing it in Lightdash (e.g. `https://app.lightdash.cloud/projects/<project-uuid>/...`).

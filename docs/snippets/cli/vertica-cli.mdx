@@ -1,0 +1,35 @@
+### Vertica connection profile
+
+After installing Elementary's dbt package upon running `dbt deps`,
+you can generate Elementary's profile for usage with `edr` by running the following command within your project:
+
+```shell
+dbt run-operation elementary.generate_elementary_cli_profile
+```
+
+The command will print to the terminal a partially filled template of the profile that's needed for `edr` to work.
+
+```yml Vertica
+## VERTICA ##
+## By default, edr expects the profile name 'elementary'.      ##
+## Configure the database and schema of elementary models.     ##
+## Check where 'elementary_test_results' is to find it.        ##
+
+elementary:
+  outputs:
+    default:
+      type: vertica
+      host: [hostname]
+      port: 5433
+      database: [database name]
+      schema: [schema name] # elementary schema, usually [schema name]_elementary
+      username: [username]
+      password: [password]
+      threads: [1 or more]
+      # connection_load_balance: true
+      # backup_server_node: [comma separated list of backup hostnames or IPs]
+```
+
+We support the same format and connection methods as dbt. Please refer to
+dbt's documentation of [Vertica profile](https://docs.getdbt.com/reference/warehouse-setups/vertica-setup) for
+further details.

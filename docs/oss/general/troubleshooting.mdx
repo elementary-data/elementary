@@ -210,18 +210,26 @@ If you want the Elementary UI to show data for a longer period of time, use the 
 
 
 
-<Accordion title="Error when trying to run parallel dbt jobs">
+<Accordion title="Parallel dbt jobs error when writing to Elementary metadata artifact tables">
 
-When writing to the `dbt_artifacts` tables in the Elementary schema, data is deleted and reinserted. Running parallel jobs through an orchestrator can lead to errors, as multiple jobs may attempt to modify the same tables simultaneously. 
-To prevent this, you should:
-1. [Disable the on-run-end hooks](/oss/general/faq#can-i-disable-the-on-run-end-hooks-or-results-uploading)
-2. [Exclude the Elementary models](/oss/general/faq#can-i-disable-exclude-the-elementary-models)
+When multiple dbt jobs run in parallel, they can contend on the same Elementary metadata artifact tables.
 
-For scheduled updates to `dbt_artifacts` (e.g., a daily job), run:
+**Disable automatic metadata artifact uploads** in `dbt_project.yml`:
 
+```yaml dbt_project.yml
+vars:
+  disable_dbt_artifacts_autoupload: true
 ```
+
+**Add a separate scheduled job** (daily or hourly) to upload the artifacts:
+
+```bash
 dbt run --select elementary --vars '{"enable_elementary_models": true}'
 ```
+
+For the `enable_elementary_models` pattern in `dbt_project.yml`, see [Can I disable / exclude the Elementary models?](/oss/general/faq#can-i-disable-exclude-the-elementary-models). For more context, see [on-run-end hooks](/data-tests/dbt/on-run-end_hooks) and [Reduce on-run-end time](/oss/guides/reduce-on-run-end-time).
+
+Let us know if you run into anything — we’re responsive on [#community-support](https://elementary-community.slack.com/archives/C02CTC89LAX).
 
 </Accordion>
 

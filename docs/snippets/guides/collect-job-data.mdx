@@ -19,23 +19,25 @@ The goal is to provide context that is useful to triage and resolve data issues,
 
 #### Environment variables
 
-Elementary collects jobs metadata in run time from `env_vars`.
-Orchestration tools usually have default environment variables, so this might happen automatically. The list of supported orchestrators and default env vars is in the following section.
+Elementary reads metadata at run time from environment variables. **Which fields fill in automatically depends on the orchestrator**—see the table in [Which orchestrators are supported?](#which-orchestrators-are-supported). For anything not supplied by the orchestrator, set the matching env vars in your orchestration tool, or pass [dbt vars](#dbt-vars).
 
-These are the env vars that are collected:
-`ORCHESTRATOR`, `JOB_NAME`, `JOB_ID`, `JOB_URL`, `JOB_RUN_ID`, `JOB_RUN_URL`
+These env vars are read when present:
 
-To configure `env_var` for your orchestrator, refer to your orchestrator's docs.
+`ORCHESTRATOR`, `JOB_NAME` or `DBT_JOB_NAME` (both map to `job_name`), `JOB_ID`, `JOB_URL`, `JOB_RUN_ID`, `JOB_RUN_URL`
+
+To configure env vars for your orchestrator, use your orchestrator’s documentation. For **dbt Cloud** and the `job_name` column specifically, follow [Setting job name on dbt Cloud](#setting-job-name-on-dbt-cloud).
 
 #### dbt vars
 
-Elementary also supports passing job metadata as dbt vars. If `env_var` and `var` exist, the `var` will be prioritized.
+Elementary also supports passing job metadata as dbt vars. If both an env var and a `var` exist for the same field, **the var wins**.
 
 To pass job data to Elementary using `var`, use the `--vars` flag in your invocations:
 
 ```shell
 dbt run --vars '{"orchestrator": "airflow", "job_name": "dbt_marketing_night_load"}'
 ```
+
+<Note>If you already pass `--vars`, merge every key into **one** JSON object. Wrong: two `--vars` flags. Right: `dbt run --vars '{"job_name": "my_job", "other_key": "value"}'`.</Note>
 
 #### Variables supported format
 
@@ -56,6 +58,50 @@ The following default environment variables are supported out of the box:
 | dbt cloud      | orchestrator<br/>job_id: `DBT_CLOUD_JOB_ID`<br/>job_run_id: `DBT_CLOUD_RUN_ID`<br/>job_url: generated from `DBT_ACCOUNT_ID`, `DBT_CLOUD_PROJECT_ID`, `DBT_CLOUD_JOB_ID`<br/>job_run_url: generated from `ACCOUNT_ID`, `DBT_CLOUD_PROJECT_ID`, `DBT_CLOUD_RUN_ID` |
 | Github actions | orchestrator<br/>job_run_id: `GITHUB_RUN_ID`<br/>job_url: generated from `GITHUB_SERVER_URL`, `GITHUB_REPOSITORY`, `GITHUB_RUN_ID`                                                                                                                               |
 | Airflow        | orchestrator                                                                                                                                                                                                                                                     |
+
+<Warning>
+**dbt Cloud does not populate `job_name` for you.** The dbt Cloud row above lists what is wired automatically—it does **not** include job display name. If `JOB_NAME`, `DBT_JOB_NAME`, and the dbt `job_name` var are all unset, **`job_name` in `dbt_invocations` stays empty** (for example, filters like `WHERE job_name IS NOT NULL` return no rows). Use the next section to set it explicitly.
+</Warning>
+
+## Setting job name on dbt Cloud
+
+Use one of the following. After you save, **only new runs** write `job_name`; past invocations are not updated.
+
+<Steps>
+  <Step title="Open where env vars are configured">
+    In dbt Cloud, open the **deployment** or **job** that executes your dbt commands—the screen where you add **environment variables** for that run. Exact labels vary (for example **Environment variables**, **Deployment environment**, or **Job** → **Settings**).
+  </Step>
+  <Step title="Set the job name">
+    Add **either**:
+
+    - **`JOB_NAME`** — set the value to the label you want in `dbt_invocations.job_name` (often the same as the job name in dbt Cloud), **or**
+    - **`DBT_JOB_NAME`** — same behavior as `JOB_NAME`; use whichever naming convention you prefer.
+
+    Save your changes.
+  </Step>
+  <Step title="Run and check">
+    Trigger a **new** job run. Confirm with something like:
+
+    ```sql
+    SELECT job_name, job_id, job_run_id
+    FROM <your_elementary_schema>.dbt_invocations
+    ORDER BY generated_at DESC
+    LIMIT 5;
+    ```
+
+    You should see **`job_name`** populated on rows from runs **after** you added the variable.
+  </Step>
+</Steps>
+
+### Alternative: `job_name` via dbt `--vars`
+
+On the job’s dbt command, include `job_name` in `--vars`:
+
+```shell
+dbt build --vars '{"job_name": "nightly_sales"}'
+```
+
+Combine with any other vars in the **same** JSON object. Remember: the dbt **`job_name`** var overrides **`JOB_NAME`** / **`DBT_JOB_NAME`** if both are set.
 
 ## What if I use dbt Cloud + orchestrator?
 

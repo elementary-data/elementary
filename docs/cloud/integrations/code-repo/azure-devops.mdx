@@ -7,12 +7,20 @@ Elementary can integrate with Azure DevOps to connect to the code repository whe
 
 ## Connecting Through the Azure DevOps App
 
-1. Navigate to **Settings > Code repository** in Elementary Cloud.  
+1. Navigate to **Environments** in Elementary Cloud, open your environment, then go to **Code repository**.  
 2. Click on **Connect** and select **Azure DevOps**.  
 3. Enter your Azure DevOps organization URL \
 (e.g., `https://dev.azure.com/your-organization`).  
 4. Click **Save**.  
 5. Connect through OAuth to authenticate between Azure DevOps and Elementary Cloud. During this process, a temporary token is issued, which can be used to make API calls. Along with the temporary token, a refresh token is also provided. The refresh token is used when Azure DevOps indicates that the temporary token has expired. For Microsoft services, OAuth is managed by Microsoft Entra ID (formerly known as Active Directory).
+
+## Updating tokens when they expire
+
+When your Azure DevOps token expires, update the connection with new tokens:
+
+1. Go to **Environments**, open your environment, and go to **Code repository**.
+2. Click **Edit** on the code repository connection.
+3. Paste the new generated tokens (from Azure DevOps) and save.
 
 ---
 

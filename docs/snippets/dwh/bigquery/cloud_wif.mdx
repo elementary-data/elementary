@@ -1,0 +1,58 @@
+### Create a Workload Identity pool and provider:
+
+1. In the Cloud Console, go to: IAM & Admin > Workload Identity Federation. Click 'CREATE POOL' (or select an existing pool), give it a name (e.g. `elementary-identity-pool`), and continue.
+
+2. On the pool, click 'ADD A PROVIDER' and choose 'AWS'. Set the provider name to `Elementary AWS` and the AWS account ID to `743289191656` (Elementary's AWS account), then continue.
+
+<img
+  src="/pics/bigquery-wif/add_aws_provider.png"
+  alt="Add AWS provider"
+/>
+
+3. In the provider's attribute conditions, add the following condition. This is the Elementary role for GCP — only Elementary can authenticate through this provider. Then save the provider:
+
+   ```
+   attribute.aws_role == "arn:aws:sts::743289191656:assumed-role/elementary-gcp-wif-role-prod-elementary-cloud"
+   ```
+
+<img
+  src="/pics/bigquery-wif/attribute_condition.png"
+  alt="Attribute condition"
+/>
+
+### Grant BigQuery permissions to the identity pool principal:
+
+4. Go to IAM & Admin > IAM and click 'GRANT ACCESS'. In 'New principals', paste the following principalSet. Replace `PROJECT_NUMBER` with your GCP project number and `POOL_NAME` with the pool you created above:
+
+   ```
+   principalSet://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_NAME/attribute.aws_role/arn:aws:sts::743289191656:assumed-role/elementary-gcp-wif-role-prod-elementary-cloud
+   ```
+
+5. Assign the following project-level roles to the principalSet and save. You will grant `BigQuery Data Viewer` at the dataset level in the next step:
+   - **BigQuery Job User**
+   - **BigQuery Metadata Viewer**
+   - **BigQuery Resource Viewer**
+
+### Grant principal access to specific datasets:
+
+6. In the [BigQuery console](https://console.cloud.google.com/bigquery), find your Elementary dataset in the 'Explorer' tab. Click the three dots next to it > Share > ADD PRINCIPAL. Paste the same principalSet from step 4, select `BigQuery Data Viewer`, and save. If your dbt dataset is in a different project, also grant it `BigQuery Metadata Viewer` and `BigQuery Resource Viewer`.
+
+### Download the credential configuration file:
+
+7. Back in IAM & Admin > Workload Identity Federation, select your pool and click 'GRANT ACCESS' at the top.
+
+8. Choose 'Grant access using federated identities (Recommended)' and click 'DOWNLOAD CONFIG'.
+
+<img
+  src="/pics/bigquery-wif/grant_access_federated_identities.png"
+  alt="Grant access using federated identities"
+/>
+
+9. In the 'Configure your application' panel, select the provider you created (e.g. `Elementary AWS`) from the Provider dropdown, then click 'DOWNLOAD CONFIG' to download the JSON configuration file.
+
+<img
+  src="/pics/bigquery-wif/configure_application_download_config.png"
+  alt="Select provider and download config"
+/>
+
+10. Upload this JSON file to Elementary Cloud in the connection form below.

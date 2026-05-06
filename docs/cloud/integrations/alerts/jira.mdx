@@ -27,9 +27,56 @@ After the ticket is created, a link to the Jira issue appears on the incident pa
 
 <Note> If you connected the app before December 2025, you’ll need to re-authenticate the Jira app to change the **Reporter** or **Assignee** fields. You can do this by clicking the re-authentication link in the ticket form, or by going to your environment page and re-authenticating the app for the relevant environment.</Note>
 
-<Tip> Elementary will not update the ticket in Jira when the incident is resolved or changed</Tip>
+<Tip>Without a Jira webhook, Elementary does not automatically update the linked Jira issue when you resolve or change an incident. Use the webhook setup below for two-way status sync.</Tip>
 
 <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1768125455/incident-jira_idelv3.png" />
 
 <img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1739794590/jira_ticket_l6wknb.png" />
+
+## Configure a Jira webhook for two-way sync
+
+When a webhook is configured, Jira and Elementary stay aligned in real time: for example, closing the Jira issue can close the linked Elementary incident, and resolving the incident can update the Jira issue accordingly. Follow these steps in your Jira instance (Jira admin access required).
+
+### Step 1: Open Jira webhook settings
+
+1. Log in to Jira as an **Admin**.
+2. Click the **Settings** (gear) icon in the top right.
+3. Under Jira admin settings, select **System**.
+4. In the left sidebar, scroll to the bottom and click **WebHooks**.
+5. Click **Create a WebHook** (top right).
+
+### Step 2: Fill in the webhook details
+
+| Field | What to enter |
+| ----- | ------------- |
+| **Name** | A clear label (for example, `Elementary Sync`). |
+| **Status** | **Enabled**. |
+| **URL** | Paste the unique webhook URL shown in the Elementary product (environment / Jira integration UI). |
+| **Secret** | Generate the secret in Elementary, copy it, and paste it into the **Secret** field in Jira so payloads can be verified. |
+
+### Step 3: Select events
+
+1. In the **Events** section, open the **Issue** category.
+2. Enable **updated** only.
+3. Leave all other event checkboxes unchecked.
+
+Issue updates are enough for Elementary to receive the changes needed to keep tickets and incidents in sync.
+
+### Step 4: Scope to your project (recommended)
+
+Limit traffic to the projects you care about using a JQL filter:
+
+1. Find the **JQL filter** field on the webhook form.
+2. Enter:
+
+```text
+project = "YOUR_PROJECT_KEY"
+```
+
+Replace `YOUR_PROJECT_KEY` with your Jira project key (for example, `PROJ`).
+
+### Step 5: Save and verify
+
+1. Click **Create** at the bottom of the page.
+2. After Jira delivers its first event, the webhook status in the Elementary dashboard turns **green**, which indicates a successful connection.
 
