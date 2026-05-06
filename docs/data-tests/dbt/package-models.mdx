@@ -29,7 +29,7 @@ New data is loaded to this model on an on-run-end hook named `elementary.upload_
 - `compile_completed_at` (string) - End time of resource compile action.
 - `rows_affected` (int) - Number of rows affected by the execution.
 - `full_refresh` (boolean) - Whether this was a full refresh execution.
-- `compiled_code` (string) - The compiled code (SQL / Python) executed against the database.
+- `compiled_code` (string) - The compiled code (SQL / Python) executed against the database. For microbatch incremental models, this column requires [extra setup](/cloud/guides/microbatch-compiled-code).
 - `failures` (int) - Number of failures in this run.
 - `query_id` (string) - Query ID in the data warehouse, if returned by the adapter (currently only supported in Snowflake, is null for any other adapter).
 - `thread_id` (string) - Id of the thread of this resource run.

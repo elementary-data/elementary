@@ -1,0 +1,51 @@
+Elementary can capture and store the compiled SQL of [dbt microbatch incremental models](https://docs.getdbt.com/docs/build/incremental-microbatch) in `dbt_run_results.compiled_code`. By default dbt does not surface compiled code for the microbatch strategy, so this column is empty for microbatch models until you enable the setup below.
+
+## How it works
+
+Elementary provides an override macro for dbt's `get_incremental_microbatch_sql` that captures the compiled SQL of each batch as it runs. The captured code is cached during the invocation and later written to `dbt_run_results.compiled_code`, so microbatch models populate this column the same way other incremental strategies do.
+
+## Enabling microbatch compiled code capture
+
+<Steps>
+  <Step title="Override the microbatch strategy macro in your project">
+    Add a macro that delegates to Elementary's implementation. Place it under your project's `macros/` directory:
+
+    ```sql filename="macros/get_incremental_microbatch_sql.sql"
+    {% macro get_incremental_microbatch_sql(arg_dict) %}
+      {{ return(elementary.get_incremental_microbatch_sql(arg_dict)) }}
+    {% endmacro %}
+    ```
+  </Step>
+
+  <Step title="Enable the dbt behavior flag">
+    Add the `require_batched_execution_for_custom_microbatch_strategy` flag to your `dbt_project.yml`:
+
+    ```yaml filename="dbt_project.yml"
+    flags:
+      require_batched_execution_for_custom_microbatch_strategy: True
+    ```
+
+    This flag tells dbt to use your project-level override of the microbatch strategy with batched execution.
+  </Step>
+
+  <Step title="Run your microbatch models">
+    On the next `dbt run` or `dbt build`, Elementary captures the compiled SQL of each microbatch model and writes it to `dbt_run_results.compiled_code`.
+  </Step>
+</Steps>
+
+## Unsupported configurations
+
+<Warning>
+The override flow is currently not supported on the following adapters:
+
+- Spark
+- BigQuery
+- Athena
+- ClickHouse
+- Dremio
+- Vertica
+
+It is also not supported on dbt Fusion.
+
+On unsupported adapters and on Fusion, microbatch models continue to run normally but `dbt_run_results.compiled_code` remains empty for them.
+</Warning>

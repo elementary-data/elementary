@@ -187,6 +187,7 @@
               "cloud/guides/reduce-on-run-end-time",
               "cloud/guides/collect-job-data",
               "cloud/guides/collect-source-freshness",
+              "cloud/guides/microbatch-compiled-code",
               "cloud/guides/troubleshoot"
             ]
           },
@@ -521,7 +522,8 @@
               "oss/guides/collect-job-data",
               "oss/guides/collect-dbt-source-freshness",
               "oss/guides/reduce-on-run-end-time",
-              "oss/guides/performance-alerts"
+              "oss/guides/performance-alerts",
+              "oss/guides/microbatch-compiled-code"
             ]
           },
           {
