@@ -89,11 +89,65 @@
           }
         },
         {
-          "type": "section",
-          "text": {
-            "type": "mrkdwn",
-            "text": "```column1    column2\n---------  ---------\nvalue1     value2```"
-          }
+          "type": "table",
+          "rows": [
+            [
+              {
+                "type": "rich_text",
+                "elements": [
+                  {
+                    "type": "rich_text_section",
+                    "elements": [
+                      {
+                        "type": "text",
+                        "text": "column1",
+                        "style": {
+                          "bold": true
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "rich_text",
+                "elements": [
+                  {
+                    "type": "rich_text_section",
+                    "elements": [
+                      {
+                        "type": "text",
+                        "text": "column2",
+                        "style": {
+                          "bold": true
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "type": "raw_text",
+                "text": "value1"
+              },
+              {
+                "type": "raw_text",
+                "text": "value2"
+              }
+            ]
+          ],
+          "column_settings": [
+            {
+              "align": "left",
+              "is_wrapped": false
+            },
+            {
+              "align": "left",
+              "is_wrapped": false
+            }
+          ]
         }
       ],
       "color": "#ffcc00"
