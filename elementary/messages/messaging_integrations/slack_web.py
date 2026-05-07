@@ -165,6 +165,7 @@ class SlackWebMessagingIntegration(
             channel_id = self.resolve_channel(channel_name, only_public=True).id
             self._join_channel(channel_id=channel_id)
             logger.info(f"Joined channel {channel_name}")
+            return
         elif err_type == "channel_not_found":
             raise MessagingIntegrationError(
                 f"Channel {channel_name} was not found by the Elementary app. Please add the app to the channel."
@@ -244,6 +245,7 @@ class SlackWebMessagingIntegration(
     def get_channels(
         self,
         cursor: str | None = None,
+        only_public: bool = False,
         timeout_seconds: int = 15,
     ) -> ChannelsResponse:
         channels_response = ChannelsResponse(channels=[], retry_after=None, cursor=None)
@@ -252,7 +254,9 @@ class SlackWebMessagingIntegration(
         time_elapsed: float = 0
         while time_elapsed < timeout_seconds:
             try:
-                channels, cursor = self._list_conversations(cursor)
+                channels, cursor = self._list_conversations(
+                    cursor, only_public=only_public
+                )
                 time_elapsed = time.time() - start_time
                 logger.debug(
                     f"Got a batch of {len(channels)} channels! time elapsed: {time_elapsed} seconds"
@@ -274,7 +278,8 @@ class SlackWebMessagingIntegration(
                     if isinstance(retry_after, str) and retry_after.isdigit():
                         channels_response.retry_after = int(retry_after)
                     else:
-                        channels_response.retry_after = 60
+                        # should never happen - as the header should always be valid. just a safety net.
+                        channels_response.retry_after = 5
                     break
                 raise
 
