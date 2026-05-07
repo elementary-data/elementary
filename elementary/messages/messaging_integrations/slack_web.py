@@ -177,7 +177,7 @@ class SlackWebMessagingIntegration(
     def _list_conversations(
         self, cursor: Optional[str] = None, only_public: bool = False
     ) -> Tuple[List[dict], Optional[str]]:
-        types = "public_channel,private_channel" if only_public else "public_channel"
+        types = "public_channel" if only_public else "public_channel,private_channel"
         response = self.client.conversations_list(
             cursor=cursor,
             types=types,
