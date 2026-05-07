@@ -1,11 +1,64 @@
 {
   "blocks": [
     {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "```Column 0\n----------\nLorem ip\nLorem ip\nLorem ip\nLorem ip\nLorem ip```"
-      }
+      "type": "table",
+      "rows": [
+        [
+          {
+            "type": "rich_text",
+            "elements": [
+              {
+                "type": "rich_text_section",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "Column 0",
+                    "style": {
+                      "bold": true
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          }
+        ]
+      ],
+      "column_settings": [
+        {
+          "align": "left",
+          "is_wrapped": false
+        }
+      ]
     }
   ],
   "attachments": [

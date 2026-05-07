@@ -1,11 +1,146 @@
 {
   "blocks": [
     {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "```Column 0    Column 1    Column 2\n----------  ----------  ----------\nLorem ip    Lorem ip    Lorem ip\nLorem ip    Lorem ip    Lorem ip\nLorem ip    Lorem ip    Lorem ip\nLorem ip    Lorem ip    Lorem ip\nLorem ip    Lorem ip    Lorem ip```"
-      }
+      "type": "table",
+      "rows": [
+        [
+          {
+            "type": "rich_text",
+            "elements": [
+              {
+                "type": "rich_text_section",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "Column 0",
+                    "style": {
+                      "bold": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "rich_text",
+            "elements": [
+              {
+                "type": "rich_text_section",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "Column 1",
+                    "style": {
+                      "bold": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "rich_text",
+            "elements": [
+              {
+                "type": "rich_text_section",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "Column 2",
+                    "style": {
+                      "bold": true
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          },
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          },
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          },
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          },
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          },
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          },
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          },
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          },
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          },
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          },
+          {
+            "type": "raw_text",
+            "text": "Lorem ip"
+          }
+        ]
+      ],
+      "column_settings": [
+        {
+          "align": "left",
+          "is_wrapped": false
+        },
+        {
+          "align": "left",
+          "is_wrapped": false
+        },
+        {
+          "align": "left",
+          "is_wrapped": false
+        }
+      ]
     }
   ],
   "attachments": [
