@@ -39,10 +39,12 @@ class TestBlockKit(BaseTestFormat[FormattedBlockKitMessage]):
         assert_expected_json(result.dict(), expected_file_path)
 
     def test_table_block_none_and_empty_cells_produce_non_empty_text(self):
-        table = TableBlock.from_dicts([
-            {"col_a": None, "col_b": "value"},
-            {"col_a": "",   "col_b": "other"},
-        ])
+        table = TableBlock.from_dicts(
+            [
+                {"col_a": None, "col_b": "value"},
+                {"col_a": "", "col_b": "other"},
+            ]
+        )
         result = format_block_kit(MessageBody(blocks=[table]))
         table_block = result.blocks[0]
         assert table_block["type"] == "table"
