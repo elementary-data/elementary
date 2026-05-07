@@ -265,7 +265,8 @@ class BlockKitBuilder:
         }
 
     def _make_data_cell(self, value: Any) -> dict:
-        return {"type": "raw_text", "text": str(value) if value is not None else ""}
+        text = str(value) if value is not None else "NULL"
+        return {"type": "raw_text", "text": text or " "}
 
     def _add_table_block(self, block: TableBlock) -> None:
         column_count = len(block.headers)
