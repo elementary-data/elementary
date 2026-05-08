@@ -1,11 +1,64 @@
 {
   "blocks": [
     {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "```Column 0\n----------------------------------------\nLorem ipsum dolor sit amet, consectetu..\nLorem ipsum dolor sit amet, consectetu..\nLorem ipsum dolor sit amet, consectetu..\nLorem ipsum dolor sit amet, consectetu..\nLorem ipsum dolor sit amet, consectetu..```"
-      }
+      "type": "table",
+      "rows": [
+        [
+          {
+            "type": "rich_text",
+            "elements": [
+              {
+                "type": "rich_text_section",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "Column 0",
+                    "style": {
+                      "bold": true
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c"
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c"
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c"
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c"
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, c"
+          }
+        ]
+      ],
+      "column_settings": [
+        {
+          "align": "left",
+          "is_wrapped": false
+        }
+      ]
     }
   ],
   "attachments": [

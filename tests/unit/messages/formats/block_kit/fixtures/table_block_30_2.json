@@ -1,11 +1,105 @@
 {
   "blocks": [
     {
-      "type": "section",
-      "text": {
-        "type": "mrkdwn",
-        "text": "```Column 0                Column 1\n----------------------  ----------------------\nLorem ipsum dolor si..  Lorem ipsum dolor si..\nLorem ipsum dolor si..  Lorem ipsum dolor si..\nLorem ipsum dolor si..  Lorem ipsum dolor si..\nLorem ipsum dolor si..  Lorem ipsum dolor si..\nLorem ipsum dolor si..  Lorem ipsum dolor si..```"
-      }
+      "type": "table",
+      "rows": [
+        [
+          {
+            "type": "rich_text",
+            "elements": [
+              {
+                "type": "rich_text_section",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "Column 0",
+                    "style": {
+                      "bold": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "rich_text",
+            "elements": [
+              {
+                "type": "rich_text_section",
+                "elements": [
+                  {
+                    "type": "text",
+                    "text": "Column 1",
+                    "style": {
+                      "bold": true
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ipsum dolor sit amet, co"
+          },
+          {
+            "type": "raw_text",
+            "text": "Lorem ipsum dolor sit amet, co"
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ipsum dolor sit amet, co"
+          },
+          {
+            "type": "raw_text",
+            "text": "Lorem ipsum dolor sit amet, co"
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ipsum dolor sit amet, co"
+          },
+          {
+            "type": "raw_text",
+            "text": "Lorem ipsum dolor sit amet, co"
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ipsum dolor sit amet, co"
+          },
+          {
+            "type": "raw_text",
+            "text": "Lorem ipsum dolor sit amet, co"
+          }
+        ],
+        [
+          {
+            "type": "raw_text",
+            "text": "Lorem ipsum dolor sit amet, co"
+          },
+          {
+            "type": "raw_text",
+            "text": "Lorem ipsum dolor sit amet, co"
+          }
+        ]
+      ],
+      "column_settings": [
+        {
+          "align": "left",
+          "is_wrapped": false
+        },
+        {
+          "align": "left",
+          "is_wrapped": false
+        }
+      ]
     }
   ],
   "attachments": [
