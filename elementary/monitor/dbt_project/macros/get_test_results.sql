@@ -7,7 +7,7 @@
     Called by both default__ and fabric__ dispatches to avoid duplicating the
     Jinja processing loop.
 #}
-{%- macro _process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status) -%}
+{%- macro _process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status, disable_samples = false) -%}
     {% set test_results = [] %}
     {% set tests = elementary.agate_to_dicts(test_results_agate) %}
 
@@ -26,7 +26,7 @@
             {% set test_params = fromjson(test.test_params) %}
             {% set status = test.status | lower %}
 
-            {%- if (test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status in elementary_tests_allowlist_status) -%}
+            {%- if not disable_samples and ((test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status in elementary_tests_allowlist_status)) -%}
                 {% set test_rows_sample = elementary_cli.get_test_rows_sample(test.result_rows, test_result_rows_agate.get(test.id)) %}
             {%- endif -%}
         {% else %}
@@ -120,7 +120,7 @@
         {% do elementary.fully_drop_relation(ordered_test_results_relation) %}
     {% endif %}
 
-    {% do return(elementary_cli._process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status)) %}
+    {% do return(elementary_cli._process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status, disable_samples)) %}
 {%- endmacro -%}
 
 {%- macro fabric__get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false, disable_samples = false) -%}
@@ -179,7 +179,7 @@
     {% do elementary.fully_drop_relation(base_relation) %}
     {% do elementary.fully_drop_relation(ordered_relation) %}
 
-    {% do return(elementary_cli._process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status)) %}
+    {% do return(elementary_cli._process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status, disable_samples)) %}
 {%- endmacro -%}
 
 {%- macro clickhouse__get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false, disable_samples = false) -%}
@@ -319,5 +319,5 @@
         {% do elementary.fully_drop_relation(ordered_test_results_relation) %}
     {% endif %}
 
-    {% do return(elementary_cli._process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status)) %}
+    {% do return(elementary_cli._process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status, disable_samples)) %}
 {%- endmacro -%}
