@@ -44,7 +44,7 @@
     {% set elementary_tests_allowlist_status = ['fail', 'warn'] if disable_passed_test_metrics else ['fail', 'warn', 'pass']  %}
     {% set select_test_results %}
         with test_results as (
-            {{ elementary_cli.current_tests_run_results_query(days_back=days_back) }}
+            {{ elementary_cli.current_tests_run_results_query(days_back=days_back, disable_samples=disable_samples) }}
         ),
 
         ordered_test_results as (
@@ -136,7 +136,7 @@
 
     {# Step 1 – materialise the base test-results query into a temp table #}
     {% set base_query %}
-        {{ elementary_cli.current_tests_run_results_query(days_back=days_back) }}
+        {{ elementary_cli.current_tests_run_results_query(days_back=days_back, disable_samples=disable_samples) }}
     {% endset %}
 
     {% set elementary_database, elementary_schema = elementary.get_package_database_and_schema() %}
@@ -270,7 +270,7 @@
         {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('etr.detected_at'), elementary.edr_current_timestamp(), 'day') }} AS days_diff,
         ROW_NUMBER() OVER (PARTITION BY elementary_unique_id ORDER BY etr.detected_at DESC) AS invocations_rank_index,
         etr.failures,
-        etr.result_rows
+        {% if disable_samples %}''{% else %}etr.result_rows{% endif %} AS result_rows
     FROM {{ ref('elementary', 'elementary_test_results') }} etr
     JOIN {{ ref('elementary', 'dbt_tests') }} dt ON etr.test_unique_id = dt.unique_id
     LEFT JOIN (

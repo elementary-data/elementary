@@ -1,4 +1,4 @@
-{% macro current_tests_run_results_query(days_back = none, invocation_id = none) %}
+{% macro current_tests_run_results_query(days_back = none, invocation_id = none, disable_samples = false) %}
     with elementary_test_results as (
         select * from {{ ref('elementary', 'elementary_test_results') }}
         {% if days_back %}
@@ -79,7 +79,7 @@
         dbt_tests.short_name,
         elementary_test_results.test_alias,
         elementary_test_results.failures,
-        elementary_test_results.result_rows,
+        {% if disable_samples %}null{% else %}elementary_test_results.result_rows{% endif %} as result_rows,
         dbt_tests.original_path,
         dbt_tests.meta,
         dbt_tests.description as test_description,
