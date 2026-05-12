@@ -86,6 +86,7 @@ class ReportAPI(APIClient):
                 days_back=days_back,
                 invocations_per_test=test_runs_amount,
                 disable_passed_test_metrics=disable_passed_test_metrics,
+                disable_samples=disable_samples,
             )
             source_freshnesses_api = SourceFreshnessesAPI(
                 dbt_runner=self.dbt_runner,
