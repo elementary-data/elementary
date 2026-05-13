@@ -1,5 +1,5 @@
-{%- macro get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false, disable_samples = false) -%}
-    {{ return(adapter.dispatch('get_test_results', 'elementary_cli')(days_back, invocations_per_test, disable_passed_test_metrics, disable_samples)) }}
+{%- macro get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false, skip_test_result_rows = false) -%}
+    {{ return(adapter.dispatch('get_test_results', 'elementary_cli')(days_back, invocations_per_test, disable_passed_test_metrics, skip_test_result_rows)) }}
 {%- endmacro -%}
 
 {#
@@ -7,7 +7,7 @@
     Called by both default__ and fabric__ dispatches to avoid duplicating the
     Jinja processing loop.
 #}
-{%- macro _process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status, disable_samples = false) -%}
+{%- macro _process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status, skip_test_result_rows = false) -%}
     {% set test_results = [] %}
     {% set tests = elementary.agate_to_dicts(test_results_agate) %}
 
@@ -26,7 +26,7 @@
             {% set test_params = fromjson(test.test_params) %}
             {% set status = test.status | lower %}
 
-            {%- if not disable_samples and ((test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status in elementary_tests_allowlist_status)) -%}
+            {%- if not skip_test_result_rows and ((test_type == 'dbt_test' and status in ['fail', 'warn']) or (test_type != 'dbt_test' and status in elementary_tests_allowlist_status)) -%}
                 {% set test_rows_sample = elementary_cli.get_test_rows_sample(test.result_rows, test_result_rows_agate.get(test.id)) %}
             {%- endif -%}
         {% else %}
@@ -40,11 +40,11 @@
     {% do return(test_results) %}
 {%- endmacro -%}
 
-{%- macro default__get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false, disable_samples = false) -%}
+{%- macro default__get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false, skip_test_result_rows = false) -%}
     {% set elementary_tests_allowlist_status = ['fail', 'warn'] if disable_passed_test_metrics else ['fail', 'warn', 'pass']  %}
     {% set select_test_results %}
         with test_results as (
-            {{ elementary_cli.current_tests_run_results_query(days_back=days_back, disable_samples=disable_samples) }}
+            {{ elementary_cli.current_tests_run_results_query(days_back=days_back, skip_test_result_rows=skip_test_result_rows) }}
         ),
 
         ordered_test_results as (
@@ -111,7 +111,7 @@
     {% endset %}
 
     {% set test_results_agate = elementary.run_query(test_results_agate_sql) %}
-    {% if not disable_samples %}
+    {% if not skip_test_result_rows %}
         {% set test_result_rows_agate = elementary_cli.get_result_rows_agate(days_back, valid_ids_query) %}
     {% else %}
         {% set test_result_rows_agate = {} %}
@@ -120,10 +120,10 @@
         {% do elementary.fully_drop_relation(ordered_test_results_relation) %}
     {% endif %}
 
-    {% do return(elementary_cli._process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status, disable_samples)) %}
+    {% do return(elementary_cli._process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status, skip_test_result_rows)) %}
 {%- endmacro -%}
 
-{%- macro fabric__get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false, disable_samples = false) -%}
+{%- macro fabric__get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false, skip_test_result_rows = false) -%}
     {#
         T-SQL does not allow nested CTEs (WITH inside WITH).
         current_tests_run_results_query already starts with WITH, so we
@@ -136,7 +136,7 @@
 
     {# Step 1 – materialise the base test-results query into a temp table #}
     {% set base_query %}
-        {{ elementary_cli.current_tests_run_results_query(days_back=days_back, disable_samples=disable_samples) }}
+        {{ elementary_cli.current_tests_run_results_query(days_back=days_back, skip_test_result_rows=skip_test_result_rows) }}
     {% endset %}
 
     {% set elementary_database, elementary_schema = elementary.get_package_database_and_schema() %}
@@ -169,7 +169,7 @@
     {% endset %}
 
     {% set test_results_agate = elementary.run_query(test_results_agate_sql) %}
-    {% if not disable_samples %}
+    {% if not skip_test_result_rows %}
         {% set test_result_rows_agate = elementary_cli.get_result_rows_agate(days_back, valid_ids_query) %}
     {% else %}
         {% set test_result_rows_agate = {} %}
@@ -179,10 +179,10 @@
     {% do elementary.fully_drop_relation(base_relation) %}
     {% do elementary.fully_drop_relation(ordered_relation) %}
 
-    {% do return(elementary_cli._process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status, disable_samples)) %}
+    {% do return(elementary_cli._process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status, skip_test_result_rows)) %}
 {%- endmacro -%}
 
-{%- macro clickhouse__get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false, disable_samples = false) -%}
+{%- macro clickhouse__get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false, skip_test_result_rows = false) -%}
     {% do elementary.run_query('drop table if exists ordered_test_results') %}
     {% set create_table_query %}
     CREATE TABLE ordered_test_results (
@@ -270,7 +270,7 @@
         {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('etr.detected_at'), elementary.edr_current_timestamp(), 'day') }} AS days_diff,
         ROW_NUMBER() OVER (PARTITION BY elementary_unique_id ORDER BY etr.detected_at DESC) AS invocations_rank_index,
         etr.failures,
-        {% if disable_samples %}''{% else %}etr.result_rows{% endif %} AS result_rows
+        {% if skip_test_result_rows %}''{% else %}etr.result_rows{% endif %} AS result_rows
     FROM {{ ref('elementary', 'elementary_test_results') }} etr
     JOIN {{ ref('elementary', 'dbt_tests') }} dt ON etr.test_unique_id = dt.unique_id
     LEFT JOIN (
@@ -310,7 +310,7 @@
     {% endset %}
 
     {% set test_results_agate = elementary.run_query(test_results_agate_sql) %}
-    {% if not disable_samples %}
+    {% if not skip_test_result_rows %}
         {% set test_result_rows_agate = elementary_cli.get_result_rows_agate(days_back, valid_ids_query) %}
     {% else %}
         {% set test_result_rows_agate = {} %}
@@ -319,5 +319,5 @@
         {% do elementary.fully_drop_relation(ordered_test_results_relation) %}
     {% endif %}
 
-    {% do return(elementary_cli._process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status, disable_samples)) %}
+    {% do return(elementary_cli._process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status, skip_test_result_rows)) %}
 {%- endmacro -%}

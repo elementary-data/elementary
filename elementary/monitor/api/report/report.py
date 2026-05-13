@@ -76,6 +76,7 @@ class ReportAPI(APIClient):
         exclude_elementary_models: bool = False,
         project_name: Optional[str] = None,
         disable_samples: bool = False,
+        skip_test_result_rows: bool = False,
         filter: SelectorFilterSchema = SelectorFilterSchema(),
         env: Optional[str] = None,
         warehouse_type: Optional[str] = None,
@@ -86,7 +87,7 @@ class ReportAPI(APIClient):
                 days_back=days_back,
                 invocations_per_test=test_runs_amount,
                 disable_passed_test_metrics=disable_passed_test_metrics,
-                disable_samples=disable_samples,
+                skip_test_result_rows=skip_test_result_rows,
             )
             source_freshnesses_api = SourceFreshnessesAPI(
                 dbt_runner=self.dbt_runner,
