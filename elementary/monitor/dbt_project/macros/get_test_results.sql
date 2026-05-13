@@ -183,6 +183,7 @@
 {%- endmacro -%}
 
 {%- macro clickhouse__get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false, skip_test_result_rows = false) -%}
+    {% set elementary_tests_allowlist_status = ['fail', 'warn'] if disable_passed_test_metrics else ['fail', 'warn', 'pass']  %}
     {% do elementary.run_query('drop table if exists ordered_test_results') %}
     {% set create_table_query %}
     CREATE TABLE ordered_test_results (
