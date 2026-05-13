@@ -8,8 +8,8 @@ from elementary.monitor.api.report.report import ReportAPI
 @pytest.fixture
 def mock_dbt_runner():
     runner = MagicMock()
-    runner.project_dir = "/tmp/project"
-    runner.profiles_dir = "/tmp/profiles"
+    runner.project_dir = "mock/project"
+    runner.profiles_dir = "mock/profiles"
     runner.target = "dev"
     runner.raise_on_failure = True
     runner.env_vars = {"KEY": "value"}
@@ -27,8 +27,8 @@ class TestCreateSubprocessRunner:
         ) as mock_cls:
             api._create_subprocess_runner()
             mock_cls.assert_called_once_with(
-                project_dir="/tmp/project",
-                profiles_dir="/tmp/profiles",
+                project_dir="mock/project",
+                profiles_dir="mock/profiles",
                 target="dev",
                 raise_on_failure=True,
                 env_vars={"KEY": "value"},
@@ -37,15 +37,6 @@ class TestCreateSubprocessRunner:
                 allow_macros_without_package_prefix=False,
                 run_deps_if_needed=False,
             )
-
-    def test_deps_not_run(self, mock_dbt_runner):
-        api = ReportAPI(mock_dbt_runner)
-        with patch(
-            "elementary.monitor.api.report.report.SubprocessDbtRunner"
-        ) as mock_cls:
-            api._create_subprocess_runner()
-            call_kwargs = mock_cls.call_args[1]
-            assert call_kwargs["run_deps_if_needed"] is False
 
 
 class TestGetReportDataRouting:

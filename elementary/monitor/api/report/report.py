@@ -1,5 +1,6 @@
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
+from functools import partial
 from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 from elementary.clients.api.api_client import APIClient
@@ -9,10 +10,12 @@ from elementary.monitor.api.groups.groups import GroupsAPI
 from elementary.monitor.api.groups.schema import GroupsSchema
 from elementary.monitor.api.invocations.invocations import InvocationsAPI
 from elementary.monitor.api.lineage.lineage import LineageAPI
+from elementary.monitor.api.lineage.schema import LineageSchema
 from elementary.monitor.api.models.models import ModelsAPI
 from elementary.monitor.api.models.schema import (
     ModelCoverageSchema,
     ModelRunsSchema,
+    ModelRunsWithTotalsSchema,
     NormalizedExposureSchema,
     NormalizedModelSchema,
     NormalizedSeedSchema,
@@ -39,6 +42,7 @@ from elementary.monitor.api.tests.schema import (
 from elementary.monitor.api.tests.tests import TestsAPI
 from elementary.monitor.api.totals_schema import TotalsSchema
 from elementary.monitor.data_monitoring.schema import SelectorFilterSchema
+from elementary.monitor.fetchers.invocations.schema import DbtInvocationSchema
 from elementary.monitor.fetchers.tests.schema import NormalizedTestSchema
 from elementary.utils.log import get_logger
 from elementary.utils.time import get_now_utc_iso_format
@@ -223,10 +227,12 @@ class ReportAPI(APIClient):
                 invocations_data=invocations_api.get_models_latest_invocations_data(),
             )
         except Exception as error:
+            logger.exception("Failed to fetch report data (sequential)")
             return ReportDataSchema(), error
 
     def _get_report_data_parallel(
         self,
+        threads: int,
         days_back: int = 7,
         test_runs_amount: int = 720,
         disable_passed_test_metrics: bool = False,
@@ -236,7 +242,6 @@ class ReportAPI(APIClient):
         filter: SelectorFilterSchema = SelectorFilterSchema(),
         env: Optional[str] = None,
         warehouse_type: Optional[str] = None,
-        threads: int = 4,
     ) -> Tuple[ReportDataSchema, Optional[Exception]]:
         try:
             parallel_runner = self._create_subprocess_runner()
@@ -275,14 +280,19 @@ class ReportAPI(APIClient):
                 f_sources = pool.submit(_new_models_api().get_sources)
                 f_singular_tests = pool.submit(_new_tests_api().get_singular_tests)
                 f_models_runs = pool.submit(
-                    _new_models_api().get_models_runs,
-                    days_back,
-                    exclude_elementary_models,
+                    partial(
+                        _new_models_api().get_models_runs,
+                        days_back=days_back,
+                        exclude_elementary_models=exclude_elementary_models,
+                    )
                 )
                 f_coverages = pool.submit(_new_models_api().get_test_coverages)
                 f_tests = pool.submit(_new_tests_api().get_tests)
                 f_test_invocation = pool.submit(
-                    _new_invocations_api().get_test_invocation_from_filter, filter
+                    partial(
+                        _new_invocations_api().get_test_invocation_from_filter,
+                        selector_filter=filter,
+                    )
                 )
                 f_freshness_results = pool.submit(
                     _new_freshness_api().get_source_freshness_results
@@ -323,21 +333,26 @@ class ReportAPI(APIClient):
 
             with ThreadPoolExecutor(max_workers=threads) as pool:
                 f_exposures = pool.submit(
-                    _new_models_api().get_exposures,
-                    upstream_node_ids=lineage_node_ids,
+                    partial(
+                        _new_models_api().get_exposures,
+                        upstream_node_ids=lineage_node_ids,
+                    )
                 )
                 f_test_results = pool.submit(
-                    _new_tests_api().get_test_results,
-                    test_invocation.invocation_id,
-                    disable_samples,
+                    partial(
+                        _new_tests_api().get_test_results,
+                        invocation_id=test_invocation.invocation_id,
+                        disable_samples=disable_samples,
+                    )
                 )
 
             exposures = f_exposures.result()
             test_results = f_test_results.result()
             lineage_node_ids.extend(exposures.keys())
 
-            # Phase 3: lineage depends on all node IDs
-            lineage = LineageAPI(dbt_runner=parallel_runner).get_lineage(
+            # Phase 3: lineage depends on all node IDs. Sequential call → use
+            # the in-process runner to avoid subprocess spawn overhead.
+            lineage = LineageAPI(dbt_runner=self.dbt_runner).get_lineage(
                 lineage_node_ids, exclude_elementary_models
             )
 
@@ -362,37 +377,38 @@ class ReportAPI(APIClient):
                 test_runs=test_runs,
                 source_freshness_runs=source_freshness_runs,
                 lineage=lineage,
-                filters_api=FiltersAPI(dbt_runner=parallel_runner),
+                filters_api=FiltersAPI(dbt_runner=self.dbt_runner),
                 models_latest_invocation=models_latest_invocation,
                 invocations_data=invocations_data,
             )
         except Exception as error:
+            logger.exception("Failed to fetch report data (parallel)")
             return ReportDataSchema(), error
 
     def _assemble_report_data(
         self,
-        days_back,
-        project_name,
-        env,
-        warehouse_type,
-        seeds,
-        snapshots,
-        models,
-        sources,
-        exposures,
-        singular_tests,
-        models_runs,
-        coverages,
-        tests,
-        test_invocation,
-        test_results,
-        source_freshness_results,
-        test_runs,
-        source_freshness_runs,
-        lineage,
-        filters_api,
-        models_latest_invocation,
-        invocations_data,
+        days_back: int,
+        project_name: Optional[str],
+        env: Optional[str],
+        warehouse_type: Optional[str],
+        seeds: Dict[str, NormalizedSeedSchema],
+        snapshots: Dict[str, NormalizedSnapshotSchema],
+        models: Dict[str, NormalizedModelSchema],
+        sources: Dict[str, NormalizedSourceSchema],
+        exposures: Dict[str, NormalizedExposureSchema],
+        singular_tests: List[NormalizedTestSchema],
+        models_runs: ModelRunsWithTotalsSchema,
+        coverages: Dict[str, ModelCoverageSchema],
+        tests: Dict[str, TestSchema],
+        test_invocation: DbtInvocationSchema,
+        test_results: Dict[str, List[TestResultSchema]],
+        source_freshness_results: Dict[str, List[SourceFreshnessResultSchema]],
+        test_runs: Dict[str, List[TestRunSchema]],
+        source_freshness_runs: Dict[str, List[SourceFreshnessRunSchema]],
+        lineage: LineageSchema,
+        filters_api: FiltersAPI,
+        models_latest_invocation: Dict[str, str],
+        invocations_data: List[DbtInvocationSchema],
     ) -> Tuple[ReportDataSchema, Optional[Exception]]:
         groups = self._get_groups(
             models.values(),
