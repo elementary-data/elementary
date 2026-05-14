@@ -46,6 +46,7 @@ class TestsAPI(APIClient):
         days_back: int = 7,
         invocations_per_test: int = 720,
         disable_passed_test_metrics: bool = False,
+        skip_test_result_rows: bool = False,
     ):
         super().__init__(dbt_runner)
         self.tests_fetcher = TestsFetcher(dbt_runner=self.dbt_runner)
@@ -53,6 +54,7 @@ class TestsAPI(APIClient):
             days_back=days_back,
             invocations_per_test=invocations_per_test,
             disable_passed_test_metrics=disable_passed_test_metrics,
+            skip_test_result_rows=skip_test_result_rows,
         )
 
     def _get_test_results_db_rows(
@@ -60,11 +62,13 @@ class TestsAPI(APIClient):
         days_back: Optional[int] = 7,
         invocations_per_test: int = 720,
         disable_passed_test_metrics: bool = False,
+        skip_test_result_rows: bool = False,
     ) -> List[TestResultDBRowSchema]:
         return self.tests_fetcher.get_all_test_results_db_rows(
             days_back=days_back,
             invocations_per_test=invocations_per_test,
             disable_passed_test_metrics=disable_passed_test_metrics,
+            skip_test_result_rows=skip_test_result_rows,
         )
 
     def get_test_results_summary(
