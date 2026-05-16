@@ -38,13 +38,10 @@ def _get_alert_node_name(alert: PendingAlertSchema) -> Optional[str]:
 
 
 def _safe_parse_status(raw_status: Optional[str]) -> Optional[Status]:
+    """Parse a raw alert status into a Status enum, or None if it isn't recognized."""
     try:
         return Status(raw_status)
     except ValueError:
-        logger.warning(
-            "Skipping alert with unrecognized status %r (not in Status enum).",
-            raw_status,
-        )
         return None
 
 
