@@ -1,0 +1,122 @@
+---
+title: Data contract test
+sidebarTitle: Data contract
+---
+
+Data contract tests validate that a table's schema matches an expected baseline — column names, data types, and nullability. They run as [cloud tests](/cloud/features/data-tests/data-tests-overview) in Elementary Cloud, using warehouse metadata only (no queries on table data).
+
+Use them to enforce schema stability on production tables and sources, catch breaking upstream changes early, and control how strictly new columns are treated.
+
+<Frame caption="Data contract test configuration in the add-test wizard">
+  <img
+    src="/pics/data-contract-test-configuration.png"
+    alt="Data contract test configuration in the add-test wizard"
+  />
+</Frame>
+
+## How it works
+
+On each run, Elementary compares the table's current schema in your data warehouse to the test's **baseline**. A baseline is a list of columns, each with a name, data type, and nullable flag.
+
+The test detects four types of schema changes:
+
+| Change | Description |
+| --- | --- |
+| Column added | A column exists in the warehouse but not in the baseline |
+| Column removed | A column in the baseline no longer exists in the warehouse |
+| Type changed | A column's data type differs from the baseline |
+| Nullability changed | A column's nullable flag differs from the baseline |
+
+When changes are found, each one is evaluated against the test's **enforcement level**. The test fails only if at least one change meets that level. Results show every detected change, including downstream dependency impact per column (tables, BI assets, and whether critical downstream assets are affected).
+
+<Info>
+Data contract tests use warehouse metadata collected during Elementary sync. They do not scan table rows.
+</Info>
+
+## Cloud test behavior
+
+Like other cloud tests (automated freshness and volume monitors, anomaly detection monitors), data contract tests:
+
+- Are created and configured in the Elementary UI — no pull request or dbt run is required to add them
+- Run on Elementary's schedule as part of cloud test execution
+- Appear alongside dbt tests and other monitors in test results, incidents, and coverage views
+
+Unlike most other cloud tests, data contract tests **can run on views, ephemeral models, and materialized views**, not only tables and sources. Other cloud tests require table or source materialization because they rely on table statistics; data contract tests only read column metadata.
+
+<Warning>
+The selected table must exist in your warehouse metadata. If Elementary cannot find the table in synced metadata, the test cannot be created.
+</Warning>
+
+## Baseline modes
+
+When you create a test, choose how the baseline is defined:
+
+### Complete
+
+Elementary snapshots the table's full current schema from warehouse metadata and uses it as the baseline. This is the default and works well when the current schema is the contract you want to lock in.
+
+### Manual
+
+You define the expected columns yourself — name, data type, and nullable flag for each. Use this when the contract is known upfront and may differ from the current warehouse schema, or when you only care about a subset of columns.
+
+In manual mode, at least one column with both a name and data type is required before you can submit the test.
+
+## Enforcement levels
+
+Enforcement level controls which schema changes cause the test to fail:
+
+| Level | Fails when |
+| --- | --- |
+| **All changes** | Any deviation from the baseline, including new columns |
+| **Breaking changes only** | Column removals, type changes, or nullability changes. New columns are tolerated |
+| **Downstream impact only** | A changed column has downstream column-level lineage dependencies |
+| **Critical downstream impact only** | A changed column has downstream dependencies on assets marked as critical |
+
+<Note>
+For downstream-based levels, a change with no downstream dependencies does not fail the test, even if the schema changed.
+</Note>
+
+## Edit configuration
+
+After creation, open the test from test results or an incident and go to the **Configuration** tab.
+
+You can update:
+
+- **Baseline columns** — edit expected columns manually, or click **Capture current schema** to replace the baseline with the table's current warehouse schema
+- **Enforcement level** — change how strictly changes are treated
+
+Save changes in the UI. Elementary re-runs the test with the updated configuration.
+
+<Tip>
+Use **Capture current schema** after an intentional schema change to accept the new schema as the new contract without recreating the test.
+</Tip>
+
+## Test results
+
+When a run detects schema changes, the execution details list each change with:
+
+- Change type (added, removed, type changed, nullability changed)
+- Current and previous type or nullability where relevant
+- Downstream impact: number of downstream table and BI assets, downstream columns, and whether any critical downstream assets are affected
+
+A passing run with tolerated changes (for example, new columns under **Breaking changes only**) may still list detected changes in the results while reporting success.
+
+## Alerts
+
+Data contract test failures map to the **Data contract** alert category in [alert rules](/cloud/features/alerts-and-incidents/alert-rules). Include this category in a rule's test-type filters to receive alerts on data contract failures.
+
+By default, the catch-all alert rule may not include every cloud test category. Review your alert rules if you want data contract failures to notify your team.
+
+## Comparison with dbt schema tests
+
+Elementary also offers dbt-based schema validation tests such as [`elementary.schema_changes`](/data-tests/schema-tests/schema-changes) and [`schema_changes_from_baseline`](/data-tests/schema-tests/schema-changes-from-baseline). These run in your dbt pipeline and are managed in code.
+
+| | Data contract (cloud test) | dbt schema tests |
+| --- | --- | --- |
+| Where it runs | Elementary Cloud | dbt pipeline |
+| Configuration | UI (no PR required) | YAML in your dbt project |
+| Works on views | Yes | Depends on test and materialization |
+| Baseline updates | Capture current schema in UI | Code / macros |
+| Downstream impact in results | Yes | No |
+
+Choose data contract tests when you want UI-managed schema enforcement without changing dbt code. Choose dbt schema tests when schema validation should live in version-controlled project code and run with every dbt job.
