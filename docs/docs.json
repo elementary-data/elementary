@@ -707,10 +707,6 @@
     {
       "source": "/cloud/mcp/intro",
       "destination": "/cloud/mcp/overview"
-    },
-    {
-      "source": "/cloud/ai-agents/overview",
-      "destination": "/cloud/ai-agents/overview"
     }
   ]
 }
