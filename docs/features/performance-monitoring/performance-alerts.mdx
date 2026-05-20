@@ -1,0 +1,119 @@
+---
+title: Pipeline Performance Alerts
+sidebarTitle: "Performance alerts"
+---
+
+<Snippet file="cloud/cloud-feature-tag.mdx" />
+
+Elementary Cloud automatically monitors the execution duration of your dbt models, seeds, and snapshots — detecting unexpected slowdowns before they affect your data consumers.
+
+The `pipeline_task_performance` monitor runs after each dbt job execution and compares the observed duration against a learned baseline or a fixed SLA threshold.
+
+## Monitoring modes
+
+### Anomaly detection (default)
+
+The default mode uses a z-score seasonal model to learn normal execution duration for each dbt node. No configuration is required — Elementary automatically builds a baseline from your pipeline history.
+
+The model accounts for time-of-day and day-of-week seasonality. For example, a model that normally runs longer on Monday morning will not be flagged during that window.
+
+### Static SLA
+
+Static SLA mode lets you define a fixed duration threshold. The monitor fails whenever the observed execution time exceeds that threshold, regardless of historical behavior.
+
+Use static SLA when you have a contractual or operational hard limit (e.g., "this model must complete within 10 minutes").
+
+## Creating a monitor
+
+### Add Test wizard
+
+1. Open the node in Elementary Cloud.
+2. Click **Add Test** → select **Pipeline Task Performance**.
+3. Choose the mode: **Anomaly detection** or **Static SLA**.
+4. Configure parameters (see [Config reference](#config-reference) below).
+5. Save.
+
+### API
+
+```http
+POST /{env_id}/tests
+```
+
+```json
+{
+  "node_id": "<dbt_node_id>",
+  "test_type": "pipeline_task_performance",
+  "params": {
+    "mode": "anomaly",
+    "sensitivity": "medium"
+  }
+}
+```
+
+For static SLA:
+
+```json
+{
+  "node_id": "<dbt_node_id>",
+  "test_type": "pipeline_task_performance",
+  "params": {
+    "mode": "static",
+    "fixed_threshold": 600
+  }
+}
+```
+
+## Config reference
+
+### Anomaly detection mode
+
+| Parameter | Description | Default |
+|---|---|---|
+| `mode` | `"anomaly"` | `"anomaly"` |
+| `sensitivity` | Detection sensitivity: `"low"`, `"medium"`, `"high"` | `"medium"` |
+| `training_period` | Number of days used to build the baseline | `14` |
+| `anomaly_direction` | `"spike"` (duration longer than expected), `"drop"`, or `"both"` | `"spike"` |
+| `excluded_time_ranges` | List of time ranges to exclude from training and detection | `[]` |
+
+### Static SLA mode
+
+| Parameter | Description | Default |
+|---|---|---|
+| `mode` | `"static"` | — |
+| `fixed_threshold` | Maximum allowed execution duration in seconds | Required |
+
+## Alerts and incidents
+
+Failures from `pipeline_task_performance` raise alerts in the **`pipeline_performance`** alert category.
+
+Alerts are routed through [alert rules](/features/alerts-and-incidents/alert-rules) and delivered to all configured integrations:
+- [Slack](/cloud/integrations/alerts/slack)
+- [Microsoft Teams](/cloud/integrations/alerts/ms-teams)
+- [PagerDuty](/cloud/integrations/alerts/pagerduty)
+- [OpsGenie](/cloud/integrations/alerts/opsgenie)
+- Email
+
+Incidents are created and managed through the standard [incidents workflow](/features/alerts-and-incidents/incidents).
+
+### Activating alerts
+
+By default, `pipeline_task_performance` alerts are not active. To enable them:
+
+1. Go to **Setup → Alert Rules**.
+2. Edit the default rule (or create a new one) and add **Pipeline performance** to the alert categories.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="https://res.cloudinary.com/diuctyblm/image/upload/v1725443568/alert_categories_ikzjqr.png"
+      alt="Alert categories in alert rules"
+      width="420"
+    />
+  </div>
+</Frame>
+
+## Related
+
+- [Pipeline task performance monitor](/features/anomaly-detection/automated-pipeline-task-performance) — full monitor reference under Automated Monitors
+- [Performance monitoring dashboard](/features/performance-monitoring/performance-monitoring) — view execution trends in the UI
+- [Manual performance monitoring (dbt-package)](/data-tests/performance-monitoring) — manual dbt-test alternative using `model_run_results`

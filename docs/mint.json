@@ -97,7 +97,8 @@
           "pages": [
             "features/anomaly-detection/automated-monitors",
             "features/anomaly-detection/automated-freshness",
-            "features/anomaly-detection/automated-volume"
+            "features/anomaly-detection/automated-volume",
+            "features/anomaly-detection/automated-pipeline-task-performance"
           ]
         },
         "features/anomaly-detection/metrics",
@@ -147,7 +148,8 @@
     {
       "group": "Performance & Cost",
       "pages": [
-        "features/performance-monitoring/performance-monitoring"
+        "features/performance-monitoring/performance-monitoring",
+        "features/performance-monitoring/performance-alerts"
       ]
     },
     {
@@ -354,7 +356,8 @@
     {
       "group": "Other Tests",
       "pages": [
-        "data-tests/python-tests"
+        "data-tests/python-tests",
+        "data-tests/performance-monitoring"
       ]
     },
     {
@@ -482,6 +485,10 @@
     }
   },
   "redirects": [
+    {
+      "source": "/cloud/features/performance-monitoring/performance-alerts",
+      "destination": "/features/performance-monitoring/performance-alerts"
+    },
     {
       "source": "/features/lineage",
       "destination": "/features/data-lineage/lineage"

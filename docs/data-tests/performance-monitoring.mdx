@@ -1,0 +1,104 @@
+---
+title: Performance Monitoring (dbt-package)
+sidebarTitle: "Performance monitoring"
+---
+
+<Info>
+**For Elementary Cloud users:** the recommended approach for pipeline performance monitoring is the automated [`pipeline_task_performance`](/features/anomaly-detection/automated-pipeline-task-performance) monitor — see [Performance Alerts](/features/performance-monitoring/performance-alerts). This page documents the manual dbt-test alternative using the Elementary dbt package.
+</Info>
+
+## Overview
+
+Elementary's dbt package exposes the `model_run_results` view, which contains run results for every dbt model enriched with model metadata. You can write dbt singular tests against this view to assert performance SLAs directly in your dbt project.
+
+This approach requires no additional infrastructure — it runs as part of your existing dbt test invocations.
+
+## `model_run_results` schema
+
+`model_run_results` is a view that joins `dbt_run_results` with `dbt_models`. Key columns:
+
+| Column | Type | Description |
+|---|---|---|
+| `unique_id` | string | dbt node unique ID |
+| `alias` | string | Model alias (table name) |
+| `schema_name` | string | Schema the model is materialized in |
+| `execution_time` | float | Execution duration in seconds |
+| `status` | string | Run status (`success`, `error`, etc.) |
+| `invocation_id` | string | dbt invocation ID |
+| `generated_at` | timestamp | When the run result was recorded |
+
+Full schema is documented in [Elementary package models](/dbt/package-models#model_run_results).
+
+## Writing a performance SLA test
+
+Create a singular test that queries `model_run_results` and returns rows where execution time exceeds your threshold. A dbt singular test fails when any rows are returned.
+
+```sql tests/assert_model_performance_sla.sql
+-- Fail if any model exceeded its execution time SLA in the last run
+with latest_run as (
+    select max(generated_at) as latest_ts
+    from {{ ref('model_run_results') }}
+),
+
+violations as (
+    select
+        r.unique_id,
+        r.alias,
+        r.execution_time,
+        r.generated_at
+    from {{ ref('model_run_results') }} r
+    cross join latest_run lr
+    where r.generated_at >= lr.latest_ts
+      and r.status = 'success'
+      and r.execution_time > 600  -- 10 minute SLA
+)
+
+select * from violations
+```
+
+Adjust the threshold (`600`) per model by parameterising the test or writing per-model singular tests.
+
+## Per-model SLA tests
+
+To enforce different thresholds per model, write a separate singular test for each:
+
+```sql tests/assert_orders_model_sla.sql
+with latest_run as (
+    select max(generated_at) as latest_ts
+    from {{ ref('model_run_results') }}
+)
+
+select
+    r.unique_id,
+    r.execution_time
+from {{ ref('model_run_results') }} r
+cross join latest_run lr
+where r.generated_at >= lr.latest_ts
+  and r.alias = 'orders'
+  and r.execution_time > 300  -- 5 minute SLA for orders model
+```
+
+## Alerts
+
+Failures from these singular tests appear in Elementary's alert pipeline alongside other dbt test failures. Use [alert rules](/features/alerts-and-incidents/alert-rules) and tags/owners to route them to the right channel.
+
+Add a tag to the test to make routing easier:
+
+```yaml tests/schema.yml
+version: 2
+
+singular_tests:
+  - name: assert_orders_model_sla
+    tags:
+      - performance_sla
+    config:
+      severity: warn
+```
+
+## Limitations
+
+- Runs only as part of `dbt test` invocations — not evaluated in real time after each model run.
+- Requires manual threshold configuration per model.
+- No anomaly detection or baseline learning — purely static thresholds.
+
+For automated, baseline-aware performance monitoring without manual configuration, use the [pipeline_task_performance automated monitor](/features/performance-monitoring/performance-alerts) in Elementary Cloud.
