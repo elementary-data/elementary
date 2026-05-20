@@ -4,33 +4,35 @@ sidebarTitle: "Overview"
 badge: "Elementary Cloud"
 ---
 
-Elementary runs two types of tests on your data: **Cloud tests** and **dbt tests**.
+Cloud tests run in Elementary Cloud, outside your dbt pipeline. They don't require configuration in your dbt project — Elementary activates them automatically once your data warehouse is connected.
 
-**Cloud tests** run in Elementary Cloud, outside your dbt pipeline. They don't require any configuration in your dbt project — Elementary runs them automatically once your data warehouse is connected. Cloud tests cover freshness, volume, and data contract validation.
+There are three Cloud tests:
 
-**dbt tests** run inside your dbt pipeline, as part of your `dbt test` jobs. They're defined in your dbt project — either as native dbt tests, Elementary package tests, or custom SQL tests created via the Elementary UI. Results are picked up and displayed in Elementary after each run.
-
-## Cloud tests
-
-| Test | What it monitors |
+| Test | What it detects |
 |---|---|
-| [Cloud freshness test](/cloud/features/anomaly-detection/automated-freshness) | Detects when a table hasn't been updated within its expected window |
-| [Cloud volume test](/cloud/features/anomaly-detection/automated-volume) | Detects unexpected drops or spikes in row count |
-| [Data contract test](/cloud/features/data-tests/data-contract-test) | Validates that a table meets a defined structural and quality contract |
+| [Cloud freshness test](/cloud/features/anomaly-detection/automated-freshness) | Tables that haven't been updated within their expected window |
+| [Cloud volume test](/cloud/features/anomaly-detection/automated-volume) | Unexpected drops or spikes in row count |
+| [Data contract test](/cloud/features/data-tests/data-contract-test) | Schema mismatches against a defined contract — column names, types, nullability |
 
-Cloud tests query warehouse metadata — not the data itself — so they add no compute cost and run continuously without pipeline dependencies.
+Cloud tests query warehouse metadata only — not the data itself — so they add no compute cost and run continuously without pipeline dependencies.
 
-## dbt tests
+## Configuration
 
-| Test | What it monitors |
-|---|---|
-| [dbt tests](/cloud/features/data-tests/dbt-tests) | Native dbt tests, dbt-utils, dbt-expectations, and Elementary anomaly detection tests |
-| [Custom SQL tests](/cloud/features/data-tests/custom-sql-tests) | Singular dbt tests written as SQL queries, created via the Elementary UI |
+Cloud tests are activated automatically on your sources, but you can add, edit, or remove them at any time — from the UI or via the [Elementary AI Agent](/cloud/ai-agents/test-recommendation-agent).
 
-dbt test results are uploaded to Elementary as part of your `on-run-end` hooks and displayed alongside Cloud test results.
+Each test can be configured to match how your data actually behaves:
+- Adjust sensitivity and thresholds to reduce noise
+- Set a custom training period so the model learns from the right history
+- Use SLA-based mode for freshness when you need a fixed update window
+
+See [configuration options](/cloud/features/anomaly-detection/monitors-configuration) and [feedback](/cloud/features/anomaly-detection/monitors-feedback) for details.
+
+## Metrics
+
+You can also collect and monitor custom metrics on your data using the [`elementary.collect_metrics`](/cloud/features/anomaly-detection/metrics) dbt test. Metrics are synced to Elementary Cloud and can have anomaly detection applied automatically.
 
 ## Test coverage
 
 Use the [test coverage screen](/cloud/features/data-tests/test-coverage-screen) to see which assets have coverage, identify gaps, and add tests directly from the UI.
 
-<Note>The Elementary AI Agent can analyze your coverage and recommend Cloud tests and dbt tests for assets that need them. See [Test Recommendation agent](/cloud/ai-agents/test-recommendation-agent).</Note>
+<Note>For dbt tests and custom SQL tests, see the [dbt Package and Tests](/data-tests/introduction) tab.</Note>

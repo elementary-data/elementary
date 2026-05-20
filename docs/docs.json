@@ -55,8 +55,7 @@
               "cloud/features/anomaly-detection/automated-freshness",
               "cloud/features/anomaly-detection/automated-volume",
               "cloud/features/data-tests/data-contract-test",
-              "cloud/features/data-tests/dbt-tests",
-              "cloud/features/data-tests/custom-sql-tests",
+              "cloud/features/anomaly-detection/metrics",
               "cloud/features/data-tests/test-coverage-screen",
               {
                 "group": "Configuration and feedback",
@@ -64,8 +63,14 @@
                   "cloud/features/anomaly-detection/monitors-configuration",
                   "cloud/features/anomaly-detection/monitors-feedback"
                 ]
-              },
-              "cloud/features/anomaly-detection/metrics"
+              }
+            ]
+          },
+          {
+            "group": "dbt Tests",
+            "pages": [
+              "cloud/features/data-tests/dbt-tests",
+              "cloud/features/data-tests/custom-sql-tests"
             ]
           },
           {
@@ -93,7 +98,6 @@
                 ]
               },
               "cloud/features/alerts-and-incidents/incidents",
-              "cloud/features/alerts-and-incidents/incident-management",
               "cloud/features/alerts-and-incidents/incident-digest"
             ]
           },
@@ -109,7 +113,6 @@
             "pages": [
               "cloud/best-practices/governance-for-observability",
               "cloud/features/data-governance/critical_assets",
-              "cloud/features/data-governance/manage-metadata",
               "cloud/features/data-governance/ai-descriptions"
             ]
           },
@@ -707,6 +710,14 @@
     {
       "source": "/cloud/mcp/intro",
       "destination": "/cloud/mcp/overview"
+    },
+    {
+      "source": "/cloud/features/data-governance/manage-metadata",
+      "destination": "/cloud/features/collaboration-and-communication/catalog"
+    },
+    {
+      "source": "/cloud/features/alerts-and-incidents/incident-management",
+      "destination": "/cloud/features/alerts-and-incidents/incidents"
     }
   ]
 }

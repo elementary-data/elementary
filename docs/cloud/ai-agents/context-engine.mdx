@@ -6,23 +6,21 @@ icon: "brain-circuit"
 
 The Context Engine is the knowledge layer that powers the Elementary AI Agent and the MCP Server.
 
-It integrates everything Elementary knows about your stack — from connected external systems and from Elementary's own monitoring — and connects it all through lineage. The result is a unified, always-current picture of your entire data stack: what exists, how it's connected, how it's performing, and whether it's healthy.
+It connects lineage across your entire stack — from your data warehouse and dbt models through to BI dashboards and code — and layers in everything Elementary knows about how your data is actually performing. The result is a unified, always-current picture of your stack: what exists, how it's connected, how it's running, and its health status.
 
 ## What it holds
 
-The Context Engine combines two types of information:
-
 **From your connected integrations:**
-- **Data warehouse** — table metadata, schema definitions, query history
+- **Data warehouse** — table metadata, schema definitions, query history, usage stats
 - **dbt** — model definitions, test configurations, run results, documentation
 - **BI tools** — dashboards, reports, and their upstream dependencies
 - **Code repository** — recent commits, pull requests, change history
 - **Orchestration** — job runs, execution history
 
 **From Elementary's own monitoring:**
-- **Test results** — pass/fail history, anomaly detection results, coverage gaps
+- **Test results** — pass/fail history across dbt, Python, and Cloud tests, coverage gaps
+- **Test performance** — execution times and cost per test run
 - **Model performance** — execution times, cost, trends over time
-- **Usage stats** — which tables are queried, by whom, and how often
 - **Health scores** — data quality dimensions across all assets
 
 Lineage connects these layers. A table in your warehouse maps to a dbt model, which feeds a dashboard, which is owned by a team. When something breaks, the Context Engine already knows the blast radius.
@@ -38,10 +36,6 @@ Because the Context Engine holds a complete, connected view of your stack, the E
 - Enrich metadata with descriptions that reflect how assets are actually used
 
 The MCP Server exposes this same context to external AI tools — Claude, Cursor, or any MCP-compatible client — so they can query your stack with full awareness.
-
-## How it stays current
-
-The Context Engine updates continuously as your integrations sync. It doesn't require manual input or batch jobs. As dbt runs, tests execute, and warehouse metadata changes, the context updates automatically.
 
 <Note>The more integrations you connect, the more complete the context. Lineage between dbt and BI tools, for example, only works when both are connected.</Note>
 
