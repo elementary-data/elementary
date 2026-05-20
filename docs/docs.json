@@ -24,14 +24,14 @@
               "cloud/quickstart",
               "cloud/features",
               "cloud/features/integrations",
-              "cloud/general/security-and-privacy",
-              "cloud/ai-agents/overview",
-              "cloud/mcp/intro"
+              "cloud/general/security-and-privacy"
             ]
           },
           {
-            "group": "Ella: AI Agents",
+            "group": "Elementary AI Agent",
             "pages": [
+              "cloud/ai-agents/overview",
+              "cloud/ai-agents/context-engine",
               "cloud/ai-agents/governance-agent",
               "cloud/ai-agents/triage-resolution-agent",
               "cloud/ai-agents/test-recommendation-agent",
@@ -40,41 +40,32 @@
             ]
           },
           {
-            "group": "Anomaly Detection Monitors",
+            "group": "MCP Server",
             "pages": [
-              "cloud/features/anomaly-detection/monitors-overview",
+              "cloud/mcp/overview",
+              "cloud/mcp/setup-guide",
+              "cloud/mcp/mcp-tools",
+              "cloud/mcp/recommended-rules"
+            ]
+          },
+          {
+            "group": "Cloud Tests",
+            "pages": [
+              "cloud/features/data-tests/cloud-tests-overview",
+              "cloud/features/anomaly-detection/automated-freshness",
+              "cloud/features/anomaly-detection/automated-volume",
+              "cloud/features/data-tests/data-contract-test",
+              "cloud/features/data-tests/dbt-tests",
+              "cloud/features/data-tests/custom-sql-tests",
+              "cloud/features/data-tests/test-coverage-screen",
               {
-                "group": "Automated monitors",
-                "pages": [
-                  "cloud/features/anomaly-detection/automated-monitors",
-                  "cloud/features/anomaly-detection/automated-freshness",
-                  "cloud/features/anomaly-detection/automated-volume"
-                ]
-              },
-              {
-                "group": "Configuration and Feedback",
+                "group": "Configuration and feedback",
                 "pages": [
                   "cloud/features/anomaly-detection/monitors-configuration",
                   "cloud/features/anomaly-detection/monitors-feedback"
                 ]
               },
               "cloud/features/anomaly-detection/metrics"
-            ]
-          },
-          {
-            "group": "Data Testing",
-            "pages": [
-              {
-                "group": "Data Tests",
-                "pages": [
-                  "cloud/features/data-tests/data-tests-overview",
-                  "cloud/features/data-tests/dbt-tests",
-                  "cloud/features/data-tests/custom-sql-tests",
-                  "cloud/features/data-tests/schema-validation-test",
-                  "cloud/features/data-tests/data-contract-test"
-                ]
-              },
-              "cloud/features/data-tests/test-coverage-screen"
             ]
           },
           {
@@ -123,7 +114,7 @@
             ]
           },
           {
-            "group": "Collaboration & Communication",
+            "group": "Data Catalog & Observability",
             "pages": [
               "cloud/features/collaboration-and-communication/data-observability-dashboard",
               {
@@ -138,16 +129,7 @@
             ]
           },
           {
-            "group": "MCP Server",
-            "pages": [
-              "cloud/mcp/overview",
-              "cloud/mcp/setup-guide",
-              "cloud/mcp/mcp-tools",
-              "cloud/mcp/recommended-rules"
-            ]
-          },
-          {
-            "group": "Additional features",
+            "group": "Config & Administration",
             "pages": [
               {
                 "group": "Config-as-Code",
@@ -709,6 +691,26 @@
     {
       "source": "/cloud/features/collaboration-and-communication/table-usage",
       "destination": "/cloud/features/table-usage"
+    },
+    {
+      "source": "/cloud/features/anomaly-detection/monitors-overview",
+      "destination": "/cloud/features/data-tests/cloud-tests-overview"
+    },
+    {
+      "source": "/cloud/features/anomaly-detection/automated-monitors",
+      "destination": "/cloud/features/data-tests/cloud-tests-overview"
+    },
+    {
+      "source": "/cloud/features/data-tests/data-tests-overview",
+      "destination": "/cloud/features/data-tests/cloud-tests-overview"
+    },
+    {
+      "source": "/cloud/mcp/intro",
+      "destination": "/cloud/mcp/overview"
+    },
+    {
+      "source": "/cloud/ai-agents/overview",
+      "destination": "/cloud/ai-agents/overview"
     }
   ]
 }

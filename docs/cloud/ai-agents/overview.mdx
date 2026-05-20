@@ -1,31 +1,49 @@
 ---
-title: "Ella: Elementary's AI Agents"
-sidebarTitle: "Ella: AI agents"
+title: "Elementary AI Agent"
+sidebarTitle: "Overview"
 icon: "sparkles"
+badge: "Elementary Cloud"
 ---
 
-**Ella is the intelligence layer that eliminates manual workflows and accelerates how data teams work.**
+The Elementary AI Agent automates the workflows that slow data teams down most: finding coverage gaps, triaging incidents, fixing broken pipelines, enriching metadata, and optimizing query performance.
 
-She detects coverage gaps, recommends and generates tests, traces root causes, fixes issues, optimizes queries, and surfaces missing metadata—making your data AI-ready and compliant by default.
+It's a single agent backed by the [Context Engine](/cloud/ai-agents/context-engine) — a continuously updated knowledge layer built from every integration you connect. Because it has full context across your stack, it can act on incidents, recommend tests, and surface insights without requiring you to pull together the picture manually.
 
-Ella runs on self-hosted models through Amazon Bedrock. No sensitive data is stored or shared, and all features are opt-in by default. Every action flows through a pull request, keeping your team fully in control.
+Every action the agent takes goes through a pull request or requires explicit confirmation. Your team stays in control of what gets merged.
 
-Her behavior is guided by clear, reviewable AI policies that align with your governance standards. Ella’s agents handle the busywork so your team can stay focused on what moves the business forward.
+## Specialized agents
 
+The Elementary AI Agent orchestrates a set of specialized agents, each focused on a specific workflow:
 
 <CardGroup cols={3}>
-  <Card title="Governance" icon="tags" href="/cloud/ai-agents/governance-agent" >
+  <Card title="Governance" icon="tags" href="/cloud/ai-agents/governance-agent">
+    Enriches metadata and enforces documentation standards across your data assets.
   </Card>
- <Card title="Triage & Resolution" icon="toolbox" href="/cloud/ai-agents/triage-resolution-agent" >
+  <Card title="Triage & Resolution" icon="toolbox" href="/cloud/ai-agents/triage-resolution-agent">
+    Investigates incidents, traces root causes, and opens pull requests with proposed fixes.
   </Card>
-  <Card title="Test Recommendation" icon="vial-circle-check" href="/cloud/ai-agents/test-recommendation-agent" >
+  <Card title="Test Recommendation" icon="vial-circle-check" href="/cloud/ai-agents/test-recommendation-agent">
+    Identifies coverage gaps and recommends or generates tests for the right assets.
   </Card>
-   <Card title="Catalog" icon="book-open" href="/cloud/ai-agents/catalog-agent" >
+  <Card title="Catalog" icon="book-open" href="/cloud/ai-agents/catalog-agent">
+    Surfaces data assets, their relationships, and usage context in natural language.
   </Card>
-   <Card title="Performance & Cost" icon="comments-dollar" href="/cloud/ai-agents/performance-cost-agent" >
-  </Card>
-   <Card title="AI Privacy Policy" icon="user-lock" href="/cloud/general/ai-privacy-policy" >
+  <Card title="Performance & Cost" icon="comments-dollar" href="/cloud/ai-agents/performance-cost-agent">
+    Detects expensive or redundant queries and suggests optimizations.
   </Card>
 </CardGroup>
 
-<Tip>Want to learn more? [**Our experts will be happy to chat.**](https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs?uuid=64e4c20d-0ff3-4454-9387-c93b47afcee6)</Tip>
+## How it works
+
+The agent runs on self-hosted models through Amazon Bedrock. No data leaves your environment, and all AI features are opt-in by default. Agent behavior is governed by AI policies you define — reviewable, adjustable, and aligned to your governance standards.
+
+<CardGroup cols={2}>
+  <Card title="Context Engine" icon="brain-circuit" href="/cloud/ai-agents/context-engine">
+    Understand what the agent knows and how it knows it.
+  </Card>
+  <Card title="AI Privacy Policy" icon="user-lock" href="/cloud/general/ai-privacy-policy">
+    How AI features are secured and what data is accessed.
+  </Card>
+</CardGroup>
+
+<Tip>Want to learn more? [Our experts will be happy to chat.](https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs?uuid=64e4c20d-0ff3-4454-9387-c93b47afcee6)</Tip>
