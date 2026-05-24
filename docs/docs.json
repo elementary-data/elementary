@@ -45,7 +45,8 @@
               "cloud/mcp/overview",
               "cloud/mcp/setup-guide",
               "cloud/mcp/mcp-tools",
-              "cloud/mcp/recommended-rules"
+              "cloud/mcp/recommended-rules",
+              "cloud/features/ci"
             ]
           },
           {
@@ -143,7 +144,6 @@
                 ]
               },
               "cloud/features/roles-and-permissions",
-              "cloud/features/ci",
               "cloud/guides/troubleshoot",
               {
                 "group": "Audit Logs",
