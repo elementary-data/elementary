@@ -109,15 +109,17 @@
             ]
           },
           {
-            "group": "Data Governance",
+            "group": "Data Catalog & Governance",
             "pages": [
-              "cloud/best-practices/governance-for-observability",
+              "cloud/features/collaboration-and-communication/catalog",
+              "cloud/features/collaboration-and-communication/saved-views",
               "cloud/features/data-governance/critical_assets",
-              "cloud/features/data-governance/ai-descriptions"
+              "cloud/features/data-governance/ai-descriptions",
+              "cloud/best-practices/governance-for-observability"
             ]
           },
           {
-            "group": "Data Catalog & Observability",
+            "group": "Data Observability",
             "pages": [
               "cloud/features/collaboration-and-communication/data-observability-dashboard",
               {
@@ -126,9 +128,7 @@
                   "cloud/features/collaboration-and-communication/data-quality-dimensions",
                   "cloud/features/collaboration-and-communication/data-health"
                 ]
-              },
-              "cloud/features/collaboration-and-communication/catalog",
-              "cloud/features/collaboration-and-communication/saved-views"
+              }
             ]
           },
           {
