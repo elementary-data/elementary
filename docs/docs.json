@@ -158,7 +158,6 @@
             ]
           },
           {
-          {
             "group": "Integrations",
             "pages": [
               "cloud/integrations/elementary-integrations",
@@ -309,7 +308,6 @@
                 "icon": "check",
                 "pages": [
                   "cloud/best-practices/introduction",
-                  "cloud/best-practices/governance-for-observability",
                   "cloud/best-practices/detection-and-coverage",
                   "cloud/best-practices/triage-and-response"
                 ]
