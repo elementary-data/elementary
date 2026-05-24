@@ -753,6 +753,10 @@
     {
       "source": "/cloud/features/alerts-and-incidents/incident-management",
       "destination": "/cloud/features/alerts-and-incidents/incidents"
+    },
+    {
+      "source": "/cloud/manage-team",
+      "destination": "/cloud/features/roles-and-permissions"
     }
   ]
 }
