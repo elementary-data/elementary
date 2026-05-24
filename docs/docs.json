@@ -24,14 +24,7 @@
               "cloud/quickstart",
               "cloud/features",
               "cloud/features/integrations",
-              "cloud/general/security-and-privacy",
-              {
-                "group": "Onboarding guides",
-                "pages": [
-                  "cloud/guides/set-up-elementary",
-                  "cloud/guides/start-using-elementary"
-                ]
-              }
+              "cloud/general/security-and-privacy"
             ]
           },
           {
@@ -319,6 +312,13 @@
               },
               "cloud/resources/pricing",
               "cloud/resources/community"
+            ]
+          },
+          {
+            "group": "Onboarding guides",
+            "pages": [
+              "cloud/guides/set-up-elementary",
+              "cloud/guides/start-using-elementary"
             ]
           }
         ]
