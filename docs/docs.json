@@ -186,28 +186,28 @@
                 ]
               },
               {
-                "group": "dbt",
-                "pages": [
-                  "cloud/integrations/transformation-and-orchestration/dbt-core",
-                  "cloud/integrations/transformation-and-orchestration/dbt-cloud",
-                  "cloud/integrations/transformation-and-orchestration/dbt-fusion",
-                  "cloud/features/multi-env",
-                  {
-                    "group": "Setup guides",
-                    "pages": [
-                      "cloud/guides/sync-scheduling",
-                      "cloud/guides/dev-prod-configuration",
-                      "cloud/guides/collect-job-data",
-                      "cloud/guides/collect-source-freshness",
-                      "cloud/guides/reduce-on-run-end-time",
-                      "cloud/guides/microbatch-compiled-code"
-                    ]
-                  }
-                ]
-              },
-              {
                 "group": "Transformation",
                 "pages": [
+                  {
+                    "group": "dbt",
+                    "pages": [
+                      "cloud/integrations/transformation-and-orchestration/dbt-core",
+                      "cloud/integrations/transformation-and-orchestration/dbt-cloud",
+                      "cloud/integrations/transformation-and-orchestration/dbt-fusion",
+                      "cloud/features/multi-env",
+                      {
+                        "group": "Setup guides",
+                        "pages": [
+                          "cloud/guides/sync-scheduling",
+                          "cloud/guides/dev-prod-configuration",
+                          "cloud/guides/collect-job-data",
+                          "cloud/guides/collect-source-freshness",
+                          "cloud/guides/reduce-on-run-end-time",
+                          "cloud/guides/microbatch-compiled-code"
+                        ]
+                      }
+                    ]
+                  },
                   "cloud/python-sdk/overview",
                   "cloud/python-sdk/setup-guide",
                   "cloud/python-sdk/usage-examples"
