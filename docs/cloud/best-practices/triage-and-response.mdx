@@ -66,7 +66,7 @@ Elementary users usually distribute alerts by:
 
 There are several ways to notify data consumers and stakeholders about ongoing problems.
 While some customers prefer to do it personally after triaging the incidents, others prefer saving this time and going with automated notifications.
-For models intended for public consumption (by BI dashboards, ML models etc) we recommend setting up [subscribers](https://docs.elementary-data.com/oss/guides/alerts/alerts-configuration#subscribers). Those subscribers will be tagged in Slack on every alert that is sent on those tables. Unlike owners, there can be many subscribers to an alert.
+For models intended for public consumption (by BI dashboards, ML models etc) we recommend setting up [subscribers](/cloud/features/alerts-and-incidents/owners-and-subscribers#subscribers). Those subscribers will be tagged in Slack on every alert that is sent on those tables. Unlike owners, there can be many subscribers to an alert.
 Tagging subscribers is of course optional, and simply adding them to the relevant channels can also suffice.
 Coming soon:
 As part of the data health scores release, we will be supporting a new type of alerts, that notifies a drop in the health score of an asset. This type of alert is intended for data consumers, who don’t need the details and just want a high-level notification in case the data asset shouldn’t be used. We will also support sending daily digests on all assets’ health scores.

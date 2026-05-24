@@ -79,24 +79,16 @@
               "cloud/features/data-lineage/lineage",
               "cloud/features/data-lineage/column-level-lineage",
               "cloud/features/data-lineage/exposures-lineage",
-              "cloud/features/anomaly-detection/monitor-dwh-assets",
-              "cloud/features/data-lineage/semantic-layer"
+              "cloud/features/anomaly-detection/monitor-dwh-assets"
             ]
           },
           {
             "group": "Alerts and Incidents",
             "pages": [
               "cloud/features/alerts-and-incidents/alerts-and-incidents-overview",
-              {
-                "group": "Setup & configure alerts",
-                "pages": [
-                  "cloud/features/alerts-and-incidents/alert-configuration",
-                  "cloud/features/alerts-and-incidents/alert-rules",
-                  "cloud/guides/alerts-configuration",
-                  "cloud/features/alerts-and-incidents/alert-destinations",
-                  "cloud/features/alerts-and-incidents/owners-and-subscribers"
-                ]
-              },
+              "cloud/features/alerts-and-incidents/alert-rules",
+              "cloud/features/alerts-and-incidents/alert-destinations",
+              "cloud/features/alerts-and-incidents/owners-and-subscribers",
               "cloud/features/alerts-and-incidents/incidents",
               "cloud/features/alerts-and-incidents/incident-digest"
             ]
@@ -276,6 +268,12 @@
                 "group": "Iceberg catalog",
                 "pages": [
                   "cloud/integrations/metadata-layer/glue"
+                ]
+              },
+              {
+                "group": "Semantic Layer",
+                "pages": [
+                  "cloud/integrations/semantic-layer/snowflake"
                 ]
               },
               {
@@ -655,6 +653,18 @@
   },
   "js": ["kapa-widget.js"],
   "redirects": [
+    {
+      "source": "/cloud/features/alerts-and-incidents/alert-configuration",
+      "destination": "/cloud/features/alerts-and-incidents/alerts-and-incidents-overview"
+    },
+    {
+      "source": "/cloud/features/data-lineage/semantic-layer",
+      "destination": "/cloud/integrations/semantic-layer/snowflake"
+    },
+    {
+      "source": "/cloud/guides/alerts-configuration",
+      "destination": "/cloud/features/alerts-and-incidents/owners-and-subscribers"
+    },
     {
       "source": "/cloud/features/collaboration-and-communication/user-activity-logs",
       "destination": "/cloud/features/collaboration-and-communication/audit_logs/user-activity-logs"
