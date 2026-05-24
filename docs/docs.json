@@ -310,15 +310,15 @@
                   "cloud/best-practices/triage-and-response"
                 ]
               },
+              {
+                "group": "Onboarding guides",
+                "pages": [
+                  "cloud/guides/set-up-elementary",
+                  "cloud/guides/start-using-elementary"
+                ]
+              },
               "cloud/resources/pricing",
               "cloud/resources/community"
-            ]
-          },
-          {
-            "group": "Onboarding guides",
-            "pages": [
-              "cloud/guides/set-up-elementary",
-              "cloud/guides/start-using-elementary"
             ]
           }
         ]
