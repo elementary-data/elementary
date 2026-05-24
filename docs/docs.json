@@ -24,7 +24,9 @@
               "cloud/quickstart",
               "cloud/features",
               "cloud/features/integrations",
-              "cloud/general/security-and-privacy"
+              "cloud/general/security-and-privacy",
+              "cloud/guides/set-up-elementary",
+              "cloud/guides/start-using-elementary"
             ]
           },
           {
