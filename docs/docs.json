@@ -51,7 +51,6 @@
           {
             "group": "Data Tests",
             "pages": [
-              "cloud/features/data-tests/test-coverage-screen",
               {
                 "group": "Cloud Tests",
                 "pages": [
@@ -69,7 +68,8 @@
                   "cloud/features/data-tests/dbt-tests",
                   "cloud/features/data-tests/custom-sql-tests"
                 ]
-              }
+              },
+              "cloud/features/data-tests/test-coverage-screen"
             ]
           },
           {
