@@ -24,7 +24,12 @@
               "cloud/quickstart",
               "cloud/features",
               "cloud/features/integrations",
-              "cloud/general/security-and-privacy"
+              "cloud/general/security-and-privacy",
+              "cloud/guides/set-up-elementary",
+              "cloud/guides/start-using-elementary",
+              "cloud/onboarding/quickstart-dbt-package",
+              "cloud/onboarding/connect-data-warehouse",
+              "cloud/manage-team"
             ]
           },
           {
@@ -144,6 +149,7 @@
               },
               "cloud/features/roles-and-permissions",
               "cloud/features/ci",
+              "cloud/guides/troubleshoot",
               {
                 "group": "Audit Logs",
                 "pages": [
@@ -155,27 +161,6 @@
             ]
           },
           {
-            "group": "Guides",
-            "pages": [
-              {
-                "group": "Onboarding guides",
-                "pages": [
-                  "cloud/guides/set-up-elementary",
-                  "cloud/guides/start-using-elementary",
-                  "cloud/onboarding/quickstart-dbt-package",
-                  "cloud/onboarding/connect-data-warehouse",
-                  "cloud/manage-team"
-                ]
-              },
-              "cloud/guides/sync-scheduling",
-              "cloud/guides/dev-prod-configuration",
-              "cloud/guides/reduce-on-run-end-time",
-              "cloud/guides/collect-job-data",
-              "cloud/guides/collect-source-freshness",
-              "cloud/guides/microbatch-compiled-code",
-              "cloud/guides/troubleshoot"
-            ]
-          },
           {
             "group": "Integrations",
             "pages": [
@@ -200,12 +185,36 @@
                 ]
               },
               {
-                "group": "Transformation & Orchestration",
+                "group": "dbt",
                 "pages": [
                   "cloud/integrations/transformation-and-orchestration/dbt-core",
                   "cloud/integrations/transformation-and-orchestration/dbt-cloud",
                   "cloud/integrations/transformation-and-orchestration/dbt-fusion",
                   "cloud/features/multi-env",
+                  {
+                    "group": "Setup guides",
+                    "pages": [
+                      "cloud/guides/sync-scheduling",
+                      "cloud/guides/dev-prod-configuration",
+                      "cloud/guides/collect-job-data",
+                      "cloud/guides/collect-source-freshness",
+                      "cloud/guides/reduce-on-run-end-time",
+                      "cloud/guides/microbatch-compiled-code"
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "Transformation",
+                "pages": [
+                  "cloud/python-sdk/overview",
+                  "cloud/python-sdk/setup-guide",
+                  "cloud/python-sdk/usage-examples"
+                ]
+              },
+              {
+                "group": "Orchestration",
+                "pages": [
                   "cloud/integrations/transformation-and-orchestration/airflow",
                   "cloud/integrations/transformation-and-orchestration/orchestration-tools",
                   "cloud/integrations/pipeline/fivetran"
