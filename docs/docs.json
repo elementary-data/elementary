@@ -113,13 +113,14 @@
             "pages": [
               "cloud/features/collaboration-and-communication/catalog",
               "cloud/features/collaboration-and-communication/saved-views",
+              "cloud/features/table-usage",
               "cloud/features/data-governance/critical_assets",
               "cloud/features/data-governance/ai-descriptions",
               "cloud/best-practices/governance-for-observability"
             ]
           },
           {
-            "group": "Data Observability",
+            "group": "Data Health",
             "pages": [
               "cloud/features/collaboration-and-communication/data-observability-dashboard",
               {
@@ -142,9 +143,7 @@
                 ]
               },
               "cloud/features/roles-and-permissions",
-              "cloud/features/multi-env",
               "cloud/features/ci",
-              "cloud/features/table-usage",
               {
                 "group": "Audit Logs",
                 "pages": [
@@ -206,6 +205,7 @@
                   "cloud/integrations/transformation-and-orchestration/dbt-core",
                   "cloud/integrations/transformation-and-orchestration/dbt-cloud",
                   "cloud/integrations/transformation-and-orchestration/dbt-fusion",
+                  "cloud/features/multi-env",
                   "cloud/integrations/transformation-and-orchestration/airflow",
                   "cloud/integrations/transformation-and-orchestration/orchestration-tools",
                   "cloud/integrations/pipeline/fivetran"
