@@ -25,8 +25,13 @@
               "cloud/features",
               "cloud/features/integrations",
               "cloud/general/security-and-privacy",
-              "cloud/guides/set-up-elementary",
-              "cloud/guides/start-using-elementary"
+              {
+                "group": "Onboarding guides",
+                "pages": [
+                  "cloud/guides/set-up-elementary",
+                  "cloud/guides/start-using-elementary"
+                ]
+              }
             ]
           },
           {
