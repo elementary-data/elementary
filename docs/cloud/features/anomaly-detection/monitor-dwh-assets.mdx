@@ -1,12 +1,12 @@
 ---
 title: Monitor DWH Assets
 sidebarTitle: "Monitor DWH assets"
-badge: "Context Engine"
+badge: "Elementary Cloud"
 ---
 
-By default, Elementary monitors assets that are defined as models and sources in your dbt projects. This approach ensures that we focus on assets that are actively used in production, as defined in your dbt codebase.
+Elementary monitors all assets in your data stack — not just dbt models and sources. You can sync any schema directly from your data warehouse to extend observability to tables and views that exist outside your dbt project: tables created by ETL tools, direct SQL scripts, or other pipelines.
 
-However, you can now extend monitoring to additional data warehouse assets that are not part of your dbt project. This enables comprehensive observability across your entire data warehouse, including tables and views that exist outside of your dbt transformations.
+Synced DWH assets appear in the [lineage graph](/cloud/features/data-lineage/lineage) alongside your dbt models and sources, and support the same freshness and volume Cloud tests.
 
 <Warning>
 This feature is currently in **beta** and is only supported for **BigQuery**, **Snowflake**, and **Databricks**. Self-serve schema syncing will be available soon. Until then, to sync additional assets to Elementary, please contact support.

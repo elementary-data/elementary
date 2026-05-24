@@ -1,8 +1,12 @@
 ---
 title: "Cloud Tests"
-sidebarTitle: "Overview"
+sidebarTitle: "Cloud tests"
 badge: "Elementary Cloud"
 ---
+
+import AllAnomaliesConfiguration from '/snippets/cloud/features/anomaly-detection/all-anomalies-configuration.mdx';
+import VolumeConfiguration from '/snippets/cloud/features/anomaly-detection/volume-configuration.mdx';
+import FreshnessConfiguration from '/snippets/cloud/features/anomaly-detection/freshness-configuration.mdx';
 
 Cloud tests run in Elementary Cloud, outside your dbt pipeline. They don't require configuration in your dbt project — Elementary activates them automatically once your data warehouse is connected.
 
@@ -14,25 +18,94 @@ There are three Cloud tests:
 | [Cloud volume test](/cloud/features/anomaly-detection/automated-volume) | Unexpected drops or spikes in row count |
 | [Data contract test](/cloud/features/data-tests/data-contract-test) | Schema mismatches against a defined contract — column names, types, nullability |
 
-Cloud tests query warehouse metadata only — not the data itself — so they add no compute cost and run continuously without pipeline dependencies.
+Cloud tests use warehouse metadata only — not the data itself — so they add no compute cost and run continuously without pipeline dependencies.
 
-## Configuration
+## Adding cloud tests
 
-Cloud tests are activated automatically on your sources, but you can add, edit, or remove them at any time — from the UI or via the [Elementary AI Agent](/cloud/ai-agents/test-recommendation-agent).
+Cloud freshness and volume tests are activated automatically on all your sources. You can add additional tests from the UI or via the [Test Recommendation Agent](/cloud/ai-agents/test-recommendation-agent):
 
-Each test can be configured to match how your data actually behaves:
-- Adjust sensitivity and thresholds to reduce noise
-- Set a custom training period so the model learns from the right history
-- Use SLA-based mode for freshness when you need a fixed update window
+1. Navigate to the **Test Configuration** page, or select assets in the Catalog
+2. Click **Add Test** and choose a **Table Test**
+3. Select one or more tables to test
+4. Filter on **Elementary Cloud** and choose your test — freshness, volume, or data contract
+5. Configure the test parameters and add metadata if needed
+6. Submit — no PR required
 
-See [configuration options](/cloud/features/anomaly-detection/monitors-configuration) and [feedback](/cloud/features/anomaly-detection/monitors-feedback) for details.
+## Editing cloud tests
+
+Open any test result and use **Anomaly settings** to tune the detection. For freshness and volume tests, you can:
+
+- Adjust **sensitivity** (Low / Medium / High) to reduce noise or increase detection precision
+- Switch between **automatic** (ML-based) and **manual** (SLA threshold) modes for freshness
+- Change the **detection period** — the window in which the monitor looks for anomalies
+- Set **anomaly direction** — fail on drops, spikes, or both
+
+### Simulate configuration
+
+After changing any setting, use **Simulate Configuration** to preview how the change would have affected recent results before saving.
+
+<iframe
+width="700"
+height="400"
+src="https://res.cloudinary.com/dvmtceykh/video/upload/v1740599803/edit_volume_anomalies_gz7vc4.mp4"
+frameborder="0"
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+allowfullscreen
+alt="Anomaly settings simulator"
+></iframe>
+
+### Exclude time ranges
+
+Training periods sometimes include one-time anomalies — a manual script run, a known incident — that skew the model and cause `NO_DATA` results. You can exclude specific time ranges so the model learns from clean data only.
+
+1. Click **Exclude** in the top-right of the chart, or go to the **Test Configurations** tab
+2. Mark the section of the chart you want to exclude
+3. Confirm — the excluded range appears under **Excluded time ranges** and can be edited or removed
+
+After excluding, use **Simulate Configuration** to verify the impact.
+
+## Removing cloud tests
+
+- From the **Test Configuration** page: select one or more tests and use the delete option at the bottom
+- From a test result: click `...` → **Delete test**
+
+<iframe
+width="600"
+height="400"
+src="https://res.cloudinary.com/dvmtceykh/video/upload/v1740599911/delete_test_zrbk94.mp4"
+frameborder="0"
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+allowfullscreen
+alt="Delete test"
+></iframe>
+
+## Supported settings
+
+#### All cloud tests
+
+<AllAnomaliesConfiguration />
+
+#### Volume test
+
+<VolumeConfiguration />
+
+#### Freshness test
+
+<FreshnessConfiguration />
+
+## Result feedback
+
+Use the **Result feedback** button on any test result to mark it as a true or false positive. Feedback improves the accuracy of the ML models over time.
+
+For false positives, select a reason:
+- **Insignificant change** — the anomaly isn't impactful enough to act on; consider relaxing sensitivity
+- **Expected outlier** — the value should be within the expected range; triggers model retraining
+- **Business anomaly** — expected due to an intentional change or event; excludes the result from training
+- **Not an interesting table** — stop monitoring this table; deletes the monitor
+- **Other** — add a comment to describe the case
 
 ## Metrics
 
-You can also collect and monitor custom metrics on your data using the [`elementary.collect_metrics`](/cloud/features/anomaly-detection/metrics) dbt test. Metrics are synced to Elementary Cloud and can have anomaly detection applied automatically.
-
-## Test coverage
-
-Use the [test coverage screen](/cloud/features/data-tests/test-coverage-screen) to see which assets have coverage, identify gaps, and add tests directly from the UI.
+Collect and monitor custom metrics using the [`elementary.collect_metrics`](/cloud/features/anomaly-detection/metrics) dbt test. Metrics are synced to Elementary Cloud and can have anomaly detection applied automatically.
 
 <Note>For dbt tests and custom SQL tests, see the [dbt Package and Tests](/data-tests/introduction) tab.</Note>

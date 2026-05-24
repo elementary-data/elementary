@@ -49,28 +49,27 @@
             ]
           },
           {
-            "group": "Cloud Tests",
+            "group": "Data Tests",
             "pages": [
-              "cloud/features/data-tests/cloud-tests-overview",
-              "cloud/features/anomaly-detection/automated-freshness",
-              "cloud/features/anomaly-detection/automated-volume",
-              "cloud/features/data-tests/data-contract-test",
-              "cloud/features/anomaly-detection/metrics",
               "cloud/features/data-tests/test-coverage-screen",
               {
-                "group": "Configuration and feedback",
+                "group": "Cloud Tests",
                 "pages": [
-                  "cloud/features/anomaly-detection/monitors-configuration",
-                  "cloud/features/anomaly-detection/monitors-feedback"
+                  "cloud/features/data-tests/cloud-tests-overview",
+                  "cloud/features/anomaly-detection/automated-freshness",
+                  "cloud/features/anomaly-detection/automated-volume",
+                  "cloud/features/data-tests/data-contract-test",
+                  "cloud/features/anomaly-detection/metrics",
+                  "cloud/features/anomaly-detection/monitor-dwh-assets"
+                ]
+              },
+              {
+                "group": "dbt Tests",
+                "pages": [
+                  "cloud/features/data-tests/dbt-tests",
+                  "cloud/features/data-tests/custom-sql-tests"
                 ]
               }
-            ]
-          },
-          {
-            "group": "dbt Tests",
-            "pages": [
-              "cloud/features/data-tests/dbt-tests",
-              "cloud/features/data-tests/custom-sql-tests"
             ]
           },
           {
@@ -78,8 +77,7 @@
             "pages": [
               "cloud/features/data-lineage/lineage",
               "cloud/features/data-lineage/column-level-lineage",
-              "cloud/features/data-lineage/exposures-lineage",
-              "cloud/features/anomaly-detection/monitor-dwh-assets"
+              "cloud/features/data-lineage/exposures-lineage"
             ]
           },
           {
@@ -656,6 +654,14 @@
     {
       "source": "/cloud/features/alerts-and-incidents/alert-configuration",
       "destination": "/cloud/features/alerts-and-incidents/alerts-and-incidents-overview"
+    },
+    {
+      "source": "/cloud/features/anomaly-detection/monitors-configuration",
+      "destination": "/cloud/features/data-tests/cloud-tests-overview"
+    },
+    {
+      "source": "/cloud/features/anomaly-detection/monitors-feedback",
+      "destination": "/cloud/features/data-tests/cloud-tests-overview"
     },
     {
       "source": "/cloud/features/data-lineage/semantic-layer",
