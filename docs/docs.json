@@ -300,7 +300,6 @@
           {
             "group": "Resources",
             "pages": [
-              "cloud/cloud-vs-oss",
               {
                 "group": "Best Practices Guide",
                 "icon": "check",
