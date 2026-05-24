@@ -67,6 +67,7 @@
                 "group": "dbt Tests",
                 "pages": [
                   "cloud/features/data-tests/dbt-tests",
+                  "cloud/features/data-tests/schema-validation-test",
                   "cloud/features/data-tests/custom-sql-tests"
                 ]
               },
