@@ -43,9 +43,14 @@
             "group": "MCP Server",
             "pages": [
               "cloud/mcp/overview",
-              "cloud/mcp/setup-guide",
+              {
+                "group": "Setup",
+                "pages": [
+                  "cloud/mcp/setup-guide",
+                  "cloud/mcp/recommended-rules"
+                ]
+              },
               "cloud/mcp/mcp-tools",
-              "cloud/mcp/recommended-rules",
               "cloud/features/ci"
             ]
           },
@@ -188,16 +193,16 @@
                       "cloud/integrations/transformation-and-orchestration/dbt-core",
                       "cloud/integrations/transformation-and-orchestration/dbt-cloud",
                       "cloud/integrations/transformation-and-orchestration/dbt-fusion",
-                      "cloud/features/multi-env",
                       {
-                        "group": "Setup guides",
+                        "group": "dbt setup guides",
                         "pages": [
                           "cloud/guides/sync-scheduling",
                           "cloud/guides/dev-prod-configuration",
                           "cloud/guides/collect-job-data",
                           "cloud/guides/collect-source-freshness",
                           "cloud/guides/reduce-on-run-end-time",
-                          "cloud/guides/microbatch-compiled-code"
+                          "cloud/guides/microbatch-compiled-code",
+                          "cloud/features/multi-env"
                         ]
                       }
                     ]
