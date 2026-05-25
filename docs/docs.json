@@ -766,6 +766,38 @@
     {
       "source": "/cloud/manage-team",
       "destination": "/cloud/features/roles-and-permissions"
+    },
+    {
+      "source": "/cloud/features/ai-agents",
+      "destination": "/cloud/ai-agents/overview"
+    },
+    {
+      "source": "/cloud/features/mcp-server",
+      "destination": "/cloud/mcp/overview"
+    },
+    {
+      "source": "/features/alerts-and-incidents/alert-rules",
+      "destination": "/cloud/features/alerts-and-incidents/alert-rules"
+    },
+    {
+      "source": "/features/alerts-and-incidents/alerts-and-incidents-overview",
+      "destination": "/cloud/features/alerts-and-incidents/alerts-and-incidents-overview"
+    },
+    {
+      "source": "/features/alerts-and-incidents/incidents",
+      "destination": "/cloud/features/alerts-and-incidents/incidents"
+    },
+    {
+      "source": "/features/anomaly-detection/automated-freshness",
+      "destination": "/cloud/features/anomaly-detection/automated-freshness"
+    },
+    {
+      "source": "/features/anomaly-detection/automated-volume",
+      "destination": "/cloud/features/anomaly-detection/automated-volume"
+    },
+    {
+      "source": "/features/data-governance/critical_assets",
+      "destination": "/cloud/features/data-governance/critical_assets"
     }
   ]
 }
