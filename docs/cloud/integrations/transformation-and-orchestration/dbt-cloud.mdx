@@ -3,16 +3,32 @@ title: "dbt cloud"
 badge: "Context Engine"
 ---
 
-Elementary integrates with dbt cloud for the supported data warehouses.
+Elementary integrates with dbt Cloud for the supported data warehouses.
 
-Users need to [deploy the dbt package](/cloud/onboarding/quickstart-dbt-package) in the monitored project, and it will collect results and artifacts in run time using on-run-end hooks.
-Results are saved to a dedicated schema, and Elementary syncs the results through the DWH connection.
+[Install the Elementary dbt package](/data-tests/dbt/quickstart-package) in your monitored project. It collects results and artifacts at runtime using on-run-end hooks, saving them to a dedicated schema. Elementary syncs through the DWH connection.
 
 ## Jobs information
 
-Elementary automatically collects jobs data from dbt cloud, including `job run url` and `job id`. These are presented in the lineage node info tab. 
-To collect additional jobs info such as `job name`, check out [this guide](/cloud/guides/collect-job-data).
+Elementary automatically collects jobs data from dbt Cloud, including `job run url` and `job id`. These are presented in the lineage node info tab.
+To collect additional job info such as `job name`, see the [collect job data guide](/cloud/guides/collect-job-data).
 
 ## Syncs schedule
 
 For near-real-time results, it is recommended to change the sync configuration from the default hourly syncs to [webhook triggered syncs](/cloud/guides/sync-scheduling).
+
+## Setup guides
+
+<CardGroup cols={2}>
+  <Card title="Sync scheduling" href="/cloud/guides/sync-scheduling">
+    Configure webhook-triggered syncs for near-real-time results.
+  </Card>
+  <Card title="Collect job data" href="/cloud/guides/collect-job-data">
+    Collect additional job metadata like job name from dbt Cloud.
+  </Card>
+  <Card title="Dev / prod configuration" href="/cloud/guides/dev-prod-configuration">
+    Set up separate environments for development and production.
+  </Card>
+  <Card title="Multiple environments" href="/cloud/features/multi-env">
+    Connect and manage multiple dbt environments in Elementary.
+  </Card>
+</CardGroup>
