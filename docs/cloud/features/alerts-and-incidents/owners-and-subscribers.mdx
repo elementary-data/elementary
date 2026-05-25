@@ -1,24 +1,208 @@
 ---
-title: "Owners and subscribers"
+title: "Alert configuration in code"
+sidebarTitle: "Config in code"
+badge: "Elementary Cloud"
 ---
 
 import Owner from '/snippets/alerts/owner.mdx';
 import Subscribers from '/snippets/alerts/subscribers.mdx';
+import Description from '/snippets/alerts/description.mdx';
+import Tags from '/snippets/alerts/tags.mdx';
 
+<Note>
+  Most alert settings can be managed directly in the Elementary Cloud UI — no code changes needed. Code configuration is useful when you want settings version-controlled or need to apply them in bulk across many assets.
+</Note>
 
+You can enrich and route alerts by adding properties to your models, sources, and tests in `.yml` files.
 
-We highly recommend configuring owners and subscribers for your models and/or tests.
-An owner is the person responsible for the model, and subscribers are the people who are interested in getting the alerts on the model or test.
-Owners and subscribers will be mentioned (tagged) in the Slack alerts. Also their name will appear in the alerts and the UI.
+Elementary prioritizes configuration in the following order:
 
-configuring owners and subscribers:
+**For models / sources:**
+1. Model config block
+2. Model properties
+3. Model path configuration under `models` key in `dbt_project.yml`
 
-### Owners
-Owners can be easily added or edited in the Catalog screen. [Learn more about managing your assets' metadata.](/cloud/features/data-governance/manage-metadata)
+**For tests:**
+1. Test properties
+2. Tests path configuration under `tests` key in `dbt_project.yml`
+3. Parent model configuration
 
-#### Configuting owners in code:
+## Owners
+
+An owner is the person responsible for the model or test. Owners are tagged in alerts and shown throughout the UI.
+
+Owners can also be added or edited directly in the [Catalog](/cloud/features/collaboration-and-communication/catalog).
+
 <Owner />
 
-### Subscribers
+## Subscribers
+
+Subscribers are additional users who should be notified on alerts for a model or test, beyond the owner.
 
 <Subscribers />
+
+## Description
+
+<Description />
+
+## Tags
+
+<Tags />
+
+## Alert distribution
+
+### Custom channel
+
+Route alerts for a specific model or test to a dedicated Slack channel. You must always configure a default fallback channel in your integration settings.
+
+<CodeGroup>
+
+```yml model
+models:
+  - name: my_model_name
+    config:
+      meta:
+        channel: data_ops
+```
+
+```yml test
+data_tests:
+  - not_null:
+    config:
+      meta:
+        channel: data_ops
+```
+
+```yml dbt_project.yml
+models:
+  path:
+    subfolder:
+      +meta:
+        channel: data_ops
+
+data_tests:
+  path:
+    subfolder:
+      +meta:
+        channel: data_ops
+```
+
+</CodeGroup>
+
+### Suppression interval
+
+Prevent repeated alerts for the same ongoing issue. Set a snooze period in hours — Elementary won't send new alerts on the same issue within that window.
+
+<CodeGroup>
+
+```yml model
+models:
+  - name: my_model_name
+    config:
+      meta:
+        alert_suppression_interval: 24
+```
+
+```yml test
+data_tests:
+  - not_null:
+    config:
+      meta:
+        alert_suppression_interval: 12
+```
+
+```yml dbt_project.yml
+models:
+  path:
+    subfolder:
+      +meta:
+        alert_suppression_interval: 24
+
+data_tests:
+  path:
+    subfolder:
+      +meta:
+        alert_suppression_interval: 48
+```
+
+</CodeGroup>
+
+### Group alerts by table
+
+By default, Elementary sends one alert per failure. You can instead group all failures for a table into a single notification. Grouped alerts include a union of owners, tags, and subscribers but contain less detail per issue.
+
+<CodeGroup>
+
+```yml model
+models:
+  - name: my_model_name
+    config:
+      meta:
+        slack_group_alerts_by: table
+```
+
+```yml test
+data_tests:
+  - not_null:
+    config:
+      meta:
+        slack_group_alerts_by: table
+```
+
+```yml dbt_project.yml
+models:
+  path:
+    subfolder:
+      +meta:
+        slack_group_alerts_by: table
+
+data_tests:
+  path:
+    subfolder:
+      +meta:
+        slack_group_alerts_by: table
+```
+
+</CodeGroup>
+
+### Alert fields
+
+<Warning>Currently supported for test alerts only.</Warning>
+
+Control which fields appear in the alert. All fields are included by default.
+
+Supported fields: `table`, `column`, `description`, `owners`, `tags`, `subscribers`, `result_message`, `test_parameters`, `test_query`, `test_results_sample`
+
+<CodeGroup>
+
+```yml model
+models:
+  - name: my_model_name
+    config:
+      meta:
+        alert_fields: ["description", "owners", "tags", "subscribers"]
+```
+
+```yml test
+data_tests:
+  - not_null:
+    config:
+      meta:
+        alert_fields: ["description", "owners", "tags", "subscribers"]
+```
+
+```yml dbt_project.yml
+models:
+  path:
+    subfolder:
+      +meta:
+        alert_fields: ["description", "owners", "tags", "subscribers"]
+
+data_tests:
+  path:
+    subfolder:
+      +meta:
+        alert_fields: ["description", "owners", "tags", "subscribers"]
+```
+
+</CodeGroup>

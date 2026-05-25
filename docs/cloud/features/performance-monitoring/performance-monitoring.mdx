@@ -1,14 +1,20 @@
 ---
 title: Performance Monitoring
 sidebarTitle: Performance monitoring
+badge: "Context Engine"
 ---
 
 Monitoring the performance of your data pipeline is critical for maintaining data quality, reliability, and operational efficiency.
 Proactively monitoring performance issues enables to detect bottlenecks and opportunities for optimization, prevent data delays, and avoid unnecessary costs.
 
-Elementary monitors and logs the execution times of:
-- dbt models
-- dbt tests
+There are two ways to identify and act on performance issues in Elementary:
+
+- **Performance pages** — explore execution times, trends, and fail rates for models and tests across your pipeline
+- **[Performance & Cost Agent](/cloud/ai-agents/performance-cost-agent)** — analyzes patterns across your pipeline, surfaces inefficiencies, suggests query improvements, and flags redundant tests that are slowing things down
+
+Use the pages to monitor and spot outliers. Use the agent to investigate and get actionable recommendations.
+
+Elementary monitors and logs the execution times of your dbt models and tests.
 
 ## Models performance
 
@@ -37,3 +43,7 @@ On the table you can see the median execution time and fail rate per test.
 You can sort the table by this time column, and detect tests that are compute heavy.
 
 It is also useful to use the navigation bar to filter the results, and see run times per tag/owner/folder.
+
+## Optimize with the AI Agent
+
+Once you've identified slow or expensive models and tests, use the [Performance & Cost Agent](/cloud/ai-agents/performance-cost-agent) to go deeper. It analyzes query patterns, surfaces inefficiencies, suggests improved SQL, and identifies redundant tests that slow down your pipeline — so you can act on what the performance data is showing.

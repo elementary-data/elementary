@@ -1,84 +1,112 @@
 
-### Detection & Coverage
+### Elementary AI Agent
 
-Elementary integrates powerful anomaly detection and dbt tests into a unified detection strategy.
-Effective detection of data issues requires a comprehensive approach,
-including both pipeline and data monitoring, validation tests,
-anomaly detection for unexpected behavior, and a single interface to manage it all at scale.
+Elementary's AI agents run continuously on your data platform — triaging incidents, recommending tests, classifying assets, and surfacing performance issues. They're powered by the Context Engine, which maps your entire stack from ingestion through transformations to BI.
 
 <CardGroup cols={2}>
-  <Card title="Anomaly Detection" href="/cloud/features/anomaly-detection/monitors-overview">
-    ML-powered monitors automatically detect data quality issues.
-    Out-of-the-box for volume and freshness, and opt-in for data quality metrics.
+  <Card title="AI Agent Overview" href="/cloud/ai-agents/overview">
+    What the agents do, how they work, and how to get started.
   </Card>
-  <Card title="Data Tests" href="/cloud/features/data-tests/data-tests-overview">
-    Validate data and track the results of dbt tests, dbt packages tests (dbt-utils, dbt-expectations, elementary) and custom SQL tests.  
+  <Card title="Context Engine" href="/cloud/ai-agents/context-engine">
+    The knowledge layer that powers all agents — lineage, metadata, test results, and execution history unified.
+  </Card>
+  <Card title="Triage & Resolution Agent" href="/cloud/ai-agents/triage-resolution-agent">
+    Investigates root cause, assesses blast radius, and suggests a fix — automatically when an incident opens.
+  </Card>
+  <Card title="Test Recommendation Agent" href="/cloud/ai-agents/test-recommendation-agent">
+    Analyzes your data and usage patterns to recommend the right tests for untested assets.
+  </Card>
+  <Card title="Governance Agent" href="/cloud/ai-agents/governance-agent">
+    Identifies undocumented assets, assigns owners, and generates descriptions — synced back to your dbt project.
+  </Card>
+  <Card title="Performance & Cost Agent" href="/cloud/ai-agents/performance-cost-agent">
+    Surfaces slow models, redundant tests, and expensive queries with specific optimization recommendations.
+  </Card>
+</CardGroup>
+
+### Data Tests
+
+<CardGroup cols={2}>
+  <Card title="Cloud Tests" href="/cloud/features/data-tests/cloud-tests-overview">
+    ML-powered freshness and volume anomaly detection that runs automatically — no configuration needed to get started.
+  </Card>
+  <Card title="dbt Tests" href="/cloud/features/data-tests/dbt-tests">
+    All dbt, dbt-utils, dbt-expectations, and Elementary package tests appear in Elementary automatically with no extra setup.
   </Card>
   <Card title="Schema Validation" href="/cloud/features/data-tests/schema-validation-test">
-    Validate there are no breaking changes in tables schema, JSON schema, and downstream exposures such as dashboards.  
+    Detect schema changes that break downstream consumers — tables, JSON fields, and BI dashboards.
   </Card>
-  <Card title="Runs & Performance" href="/cloud/features/performance-monitoring/performance-monitoring">
-    Track failures and runs of jobs, models, and tests overtime.
-    Pipeline failures and performance issues can cause data incidents, and create unneceserry costs.
-  </Card>
-  <Card title="Code & UI Configuration" href="/cloud/features/data-tests/data-tests-overview#test-configuration">
-    Configure Elementary in code, or via the UI for non-technical users or for adding tests in bulk.
-    The platform opens PRs to your repo, saving hours of tedious YAML edits.
-  </Card>
-  <Card title="Test Recommendations">
-    Coming soon!
+  <Card title="Test Coverage" href="/cloud/features/data-tests/test-coverage-screen">
+    Visual map of coverage gaps across your stack. Add tests from the UI or use the Test Recommendation Agent.
   </Card>
 </CardGroup>
 
-### Triage & Response
-
-Detecting issues is just the first step to achieve data reliability.
-Elementary offers tools to create an effective response plan, for faster recovery.
-This includes investigating the root cause and impact of issues, communicating issues to the relevant people, assigning owners to fix issues, keeping track of open incidents and more.
+### Data Lineage
 
 <CardGroup cols={2}>
-  <Card title="Data Lineage" href="/cloud/features/data-lineage/lineage">
-    Column-level lineage that spans through sources, models and BI tools, enriched with monitoring results. Enables granular root cause and impact analysis. 
+  <Card title="Lineage Graph" href="/cloud/features/data-lineage/lineage">
+    Full-stack lineage from ingestion sources through dbt models, Python pipelines, and BI tools — enriched with monitoring results.
   </Card>
-  <Card title="Snowflake Semantic Views" href="/cloud/features/data-lineage/semantic-layer">
-    Discover, catalog, and trace lineage through Snowflake Semantic Views — metrics, dimensions, and facts connected to your physical tables.
+  <Card title="Column-Level Lineage" href="/cloud/features/data-lineage/column-level-lineage">
+    Trace individual columns across transformations to pinpoint root cause and understand blast radius.
   </Card>
-  <Card title="Ownership" href="/cloud/best-practices/governance-for-observability">
-    Define clear ownership of data assets and enable owners to be informed and accountable for the health and status of their data.   
-  </Card>
-  <Card title="Actionable Alerts" href="/cloud/features/alerts-and-incidents/alerts-and-incidents-overview">
-    Distribute highly configurable alerts to different channels and integrations. 
-    Automatically tag owners, and enable setting status and assigns at the alert level.  
-  </Card>
-  <Card title="Automated Grouping" href="/cloud/features/alerts-and-incidents/incidents">
-    Different failures related to the same issue are grouped automatically to a single incident.
-    This accelerates triage and response, and reduces alerts fautigue.  
-  </Card>
-  <Card title="Incident Management" href="/cloud/features/alerts-and-incidents/incident-management">
-    Manage all open incidents in a single interface, with a clear view of status and assignees.
-    Track historical incidents and high-level incidents metrics. 
+  <Card title="Snowflake Semantic Views" href="/cloud/integrations/semantic-layer/snowflake">
+    Discover and trace lineage through Snowflake Semantic Views — metrics, dimensions, and facts connected to your physical tables.
   </Card>
 </CardGroup>
 
-### Collaboration & Communication
+### Alerts & Incidents
 
-The data team doesn’t live in a silo - you have many stakeholders.
-The only way to improve data trust is by bringing in more team members, users and stakeholders to the data health process.
-Elementary fosters collaboration by allowing you to easily share and communicate the status of issues,
-the overall health of the data platform and progress made to improve it with the broader organization.
+<CardGroup cols={2}>
+  <Card title="Alerts" href="/cloud/features/alerts-and-incidents/alerts-and-incidents-overview">
+    Highly configurable alerts routed to any channel — Slack, PagerDuty, email, Jira. Owners tagged automatically.
+  </Card>
+  <Card title="Alert Rules" href="/cloud/features/alerts-and-incidents/alert-rules">
+    Define routing logic to send the right alerts to the right people and channels.
+  </Card>
+  <Card title="Incidents" href="/cloud/features/alerts-and-incidents/incidents">
+    Related failures are grouped automatically into a single incident. Manage status and assignees in one place.
+  </Card>
+  <Card title="Config in Code" href="/cloud/features/alerts-and-incidents/owners-and-subscribers">
+    Configure owners, subscribers, suppression, and alert properties directly in your dbt project YML.
+  </Card>
+</CardGroup>
+
+### Performance & Cost
+
+<CardGroup cols={2}>
+  <Card title="Performance Monitoring" href="/cloud/features/performance-monitoring/performance-monitoring">
+    Track execution times, failure rates, and run trends for dbt models and tests over time.
+  </Card>
+  <Card title="Performance Alerts" href="/cloud/features/performance-monitoring/performance-alerts">
+    Get notified when models or tests breach duration thresholds or start failing unexpectedly.
+  </Card>
+</CardGroup>
+
+### Data Catalog & Governance
+
+<CardGroup cols={2}>
+  <Card title="Data Catalog" href="/cloud/features/collaboration-and-communication/catalog">
+    Search and explore datasets — descriptions, columns, compiled code, lineage, and health status in one place.
+  </Card>
+  <Card title="Critical Assets" href="/cloud/features/data-governance/critical_assets">
+    Mark and prioritize your most important tables for tighter monitoring and faster response.
+  </Card>
+  <Card title="AI Descriptions" href="/cloud/features/data-governance/ai-descriptions">
+    Auto-generate column and table descriptions using AI, reviewed and synced back to your dbt project.
+  </Card>
+  <Card title="Governance Best Practices" href="/cloud/best-practices/governance-for-observability">
+    Set up ownership, tagging, and accountability across your data assets.
+  </Card>
+</CardGroup>
+
+### Data Health
 
 <CardGroup cols={2}>
   <Card title="Overview Dashboard" href="/cloud/features/collaboration-and-communication/data-observability-dashboard">
-    Up to date dashboard with current status and trends of data issues. 
-    Share the dashboard with others, enable them to slice results and stay informed.
+    Live view of issue status and trends across your platform. Share with stakeholders or embed in your reporting.
   </Card>
-  <Card title="Assets Tags" href="/cloud/best-practices/governance-for-observability">
-    Enable effective collaboration and communication by grouping related data assets and tests by business domains, data products, priority, etc.   
-  </Card>
-  <Card title="Data Catalog" href="/cloud/features/collaboration-and-communication/catalog">
-    Search and explore your datasets information - descriptions, columns, column descriptions, compiled code, datasets health and more.
-  </Card>
-  <Card title="Data Health Score" href="/cloud/features/collaboration-and-communication/data-health">
-    See the Data Health scores of all your datasets by domain and share with stakeholders.
+  <Card title="Data Health Scores" href="/cloud/features/collaboration-and-communication/data-health">
+    Track health scores by domain, surface deterioration early, and share progress with your organization.
   </Card>
 </CardGroup>

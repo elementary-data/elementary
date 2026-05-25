@@ -1,28 +1,10 @@
 ---
-title: Incidents in Elementary
+title: Incidents
 sidebarTitle: Incidents
+badge: "Elementary Cloud"
 ---
 
-One of the challenges data teams face is tracking and understand and collaborate on the status of data issues.
-Tests fail daily, pipelines are executed frequently, alerts are sent to different channels.
-There is a need for a centralized place to track:
-- What data issues are open? Which issues were already resolved?
-- Who is on it, and what's the latest status?
-- Are multiple failures part of the same issue?
-- What actions and events happened since the incident started?
-- Did such issue happen before? Who resolved it and how?
-
-In Elementary, these are solved with `Incidents`.
-
-A comprehensive view of all incidents can be found in the [Incidents page](/cloud/features/alerts-and-incidents/incident-management).
-
-## How incidents work?
-
-Every failure or warning in Elementary will automatically open a new incident or be added as an event to an ongoing incident.
-Based on grouping rules, different failures are grouped to the same incident.
-
-An incident has a [status, assignee and severity](/cloud/features/alerts-and-incidents/incident-management#interacting-with-incidents).
-These can be set in the [Incidents page](/cloud/features/alerts-and-incidents/incident-management), or from an alert in integrations that support alert actions.
+Every failure or warning in Elementary automatically opens an incident or is added as an event to an ongoing one. Incidents give your team a single place to track what's broken, who's on it, and what's happened since the issue started.
 
 <Frame>
 <div className="dark:bg-white rounded-md p-1">
@@ -33,35 +15,47 @@ These can be set in the [Incidents page](/cloud/features/alerts-and-incidents/in
 </div>
 </Frame>
 
-## How incidents are resolved?
+## How incidents work
 
-Each incident starts at the first failure, and ends when the status is changed manually or automatically to `Resolved`.
-An incident is **automatically resolved** when the failing tests, monitors and / or models are successful again.
+Based on grouping rules, related failures are grouped into the same incident rather than creating separate noise.
 
-## Incident grouping rules
+**Grouping rules:**
+1. Additional failures of the same test or monitor on a table that already has an active incident.
+2. _Coming soon_ — Freshness and volume issues downstream of an open model failure.
+3. _Coming soon_ — Failures of the same test or monitor on downstream tables of an active incident.
 
-Different failures and warnings are grouped to the same incident by the following grouping rules:
+An incident closes automatically when the failing tests, monitors, or models are successful again — or when the status is manually set to `Resolved`.
 
-1. Additional failures of the same test / monitor on a table that has an active incident.
-2. _ _Coming soon_ _ Freshness and volume issues that are downstream of an open incident on a model failure.
-3. _ _Coming soon_ _ Failures of the same test / monitor that are on downstream tables of an active incident.
+## Managing incidents
+
+The Incidents page gives a full view of current and past incidents, with filters to slice by status, severity, model name, assignee, and timeframe.
+
+<iframe
+width="700"
+height="400"
+src="https://res.cloudinary.com/dvmtceykh/video/upload/v1727258471/incidents_new_vid_utv3sq.mp4"
+frameborder="0"
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+allowfullscreen
+alt="Elementary Incidents page"
+></iframe>
+
+Each incident has a **status**, **assignee**, and **severity** — set from the Incidents page or directly from an alert in integrations that support alert actions.
+
+- **Status** — `Open` by default. Can be changed to `Acknowledged`. Setting to `Resolved` closes the incident permanently.
+- **Assignee** — Assign to any team member. They'll be notified. Leave status as `Open` until they acknowledge.
+- **Severity** — Low, Normal, High, or Critical. Model errors default to Critical, test failures to High, warnings to Normal. Can be changed manually.
+
+<Note>Incident severity is used to prioritize response — it is not the same as dbt test severity.</Note>
 
 ## Incident deep dive
 
-Clicking on an incident will open the test overview side panel, showing the following information:
-1. Test owner, tags and subscribers (if the incident is a model failure, the model owner, tags and subscribers will be shown).
-2. The execution history of the test / model, including the following information on each execution:
-   - Execution time
-   - Result (pass / fail / warning, etc)
-   - If the test failed -
-        - a sample of the failed rows
-        - The Slack channel where the alert was sent
-   - For anomaly tests - the result chart
-   - Compiled query
-3. Configuration of the test / model - the Yaml or SQL code of the test / model. For cloud tests, the configuration is also editable.
+Clicking an incident opens the test overview side panel with:
 
-
-You can also see the list of upstream and downstream assets - if the test is a column test you can see the upstream and downstream columns, if it's a table test you can see the upstream and downstream tables.
+1. Owner, tags, and subscribers for the test or model
+2. Execution history — result, timing, failed row samples, alert destination, and anomaly chart per run
+3. Test or model configuration — the YAML or SQL. For Cloud tests, configuration is editable directly.
+4. Upstream and downstream lineage — columns for column tests, tables for table tests
 
 <Frame>
 <div className="dark:bg-white rounded-md p-1">
@@ -71,3 +65,7 @@ You can also see the list of upstream and downstream assets - if the test is a c
   />
 </div>
 </Frame>
+
+## Triage with the AI Agent
+
+From any incident, click **Investigate with AI** to trigger the [Triage & Resolution Agent](/cloud/ai-agents/triage-resolution-agent). It inspects code changes, execution history, and lineage to surface the root cause and propose a fix.

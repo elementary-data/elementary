@@ -1,5 +1,6 @@
 ---
 title: "Data Catalog"
+badge: "Context Engine"
 ---
 
 The Elementary Cloud catalog is a dynamic workspace for managing data assets. It combines your dbt models, sources, columns, tests, and metrics with metadata, test results, and ownership in one place.
@@ -36,9 +37,27 @@ You can view the data assets by their location in the DWH or in the dbt project,
 <img width="300" src="https://res.cloudinary.com/dvmtceykh/image/upload/v1740577485/589e1160-bc0e-4ac5-9751-634568975b3e.png" alt="Catalog tree" />
 
 ### Editing Metadata
-You can edit metadata directly in the catalog. This includes updating model and column descriptions, assigning owners, and applying tags.
-To make updates more efficient, the catalog supports bulk editing. For example, you can assign an owner to multiple models at once or apply a shared tag to a group of assets.
-All metadata edits are synced back into your dbt project as a pull request, so documentation stays version-controlled and part of your workflow.
+
+You can edit metadata directly in the catalog — model and column descriptions, owners, tags, and critical asset status — individually or in bulk. For example, assign an owner to multiple models at once or apply a shared tag to a group of assets. All edits are synced back to your dbt project as a pull request, so documentation stays version-controlled.
+
+You can also use the [Governance Agent](/cloud/ai-agents/governance-agent) to identify missing documentation, unowned assets, or inconsistent tags and generate suggested changes automatically.
+
+<Card title="Governance Agent" icon="tags" href="/cloud/ai-agents/governance-agent" horizontal="true">
+  Identify metadata gaps and generate descriptions, tags, and ownership assignments automatically.
+</Card>
+
+#### Supported metadata fields
+
+- **Tags** — categorize and organize assets
+- **Owners** — assign responsibility
+- **Descriptions** — document purpose and usage
+- **Critical assets** — mark high-priority assets
+
+#### Editing metadata for related assets
+
+From the Dependencies tab, you can apply metadata to all upstream and downstream assets of a selected asset in a single action.
+
+<img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1751562224/Upstream_Metadata_ubuvjb.gif"/>
 
 Need to display additional metadata fields from your dbt `meta` config? Reach out to our team to customize the catalog with fields that best fit your data workflows.
 

@@ -1,21 +1,12 @@
 ---
 title: End-to-End Data Lineage
 sidebarTitle: Lineage overview
+badge: "Context Engine"
 ---
 
-Elementary offers automated [Column-Level Lineage](/cloud/features/data-lineage/column-level-lineage) functionality, enriched with the latest test and monitors results.
-It is built with usability and performance in mind. 
-The column-level lineage is built from the metadata of your data warehouse, and integrations with [BI tools](/cloud/features/data-lineage/exposures-lineage#automated-lineage-to-the-bi) such as Looker and Tableau.
+Lineage is the foundation of the [Context Engine](/cloud/ai-agents/context-engine) — it's how Elementary maps your entire data stack, from ingestion sources through transformations to BI and downstream consumers. Every asset, test result, and health signal is connected through this graph, which is what allows the AI Agent and MCP to reason across your stack.
 
-Elementary updates your lineage view frequently, ensuring it is always current.
-This up-to-date lineage data is essential for supporting several critical workflows, including:
-
-- **Effective Data Issue Debugging**: Identify and trace data issues back to their sources.
-- **Incidents impact analysis**: You could explore which downstream assets are impacted by each data issue.
-- **Prioritize data issues**: Prioritize the triage and resolution of issues that are impacting your critical downstream assets.
-- **Public assets health**: By selecting an exposure and filtering on upstream nodes, you can see the status of all its upstream datasets.
-- **Change impact**: Analyze which exposures will be impacted by a planned change.
-- **Unused datasets**: Detect datasets that are not consumed downstrean, and could be removed to reduce costs.
+Elementary builds column-level lineage automatically from your data warehouse metadata and integrations with dbt, BI tools, Python pipelines, and other sources. The graph is updated frequently so it reflects your current state.
 
 <iframe
 width="700"
@@ -27,14 +18,31 @@ allowfullscreen
 alt="Elementary Lineage"
 ></iframe>
 
+## What's included in the lineage graph
+
+Elementary connects assets across your full stack:
+
+- **Ingestion sources** — tables from your data warehouse, including those loaded by tools like Fivetran, and [non-dbt assets synced directly from your warehouse](/cloud/features/anomaly-detection/monitor-dwh-assets)
+- **dbt models and sources** — resolved from your dbt project metadata
+- **Python SDK assets** — tables and datasets produced by Python pipelines instrumented with the [Elementary Python SDK](/cloud/python-sdk/overview)
+- **BI and downstream tools** — dashboards and exposures from Looker, Tableau, and other connected BI tools
+- **Semantic views** — [Snowflake Semantic Views](/cloud/integrations/semantic-layer/snowflake) connected to their underlying physical tables
+
+## What you can do with it
+
+- **Trace root causes** — follow failures upstream to find where an issue originated
+- **Assess impact** — see which downstream assets and dashboards are affected by a failure or change
+- **Prioritize triage** — surface issues affecting critical or high-traffic assets first
+- **Detect unused datasets** — identify assets with no downstream consumers to reduce cost
+- **Plan changes safely** — understand what breaks before you make a change
+
 ## Node info and test results
 
-To view additional information in the lineage view, use the `...` menu to the right of the column:
+Select any node in the graph to see:
 
-- **Test results**: Access the table's latest test results in the lineage view.
-- **Node info**: See details such as description, owner and tags. If collected, it will include the latest job info.
-
+- **Test results** — latest test results for that asset
+- **Node info** — description, owner, tags, and job info if collected
 
 ## Job info in lineage
 
-You can [configure Elementary to collect jobs information](/cloud/guides/collect-job-data) to present in the lineage _Node info_ tab. Job names can also be used to filter the lineage graph.
+You can [configure Elementary to collect job information](/cloud/guides/collect-job-data) to display in the lineage node info panel. Job names can also be used to filter the graph.

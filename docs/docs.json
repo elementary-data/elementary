@@ -24,14 +24,14 @@
               "cloud/quickstart",
               "cloud/features",
               "cloud/features/integrations",
-              "cloud/general/security-and-privacy",
-              "cloud/ai-agents/overview",
-              "cloud/mcp/intro"
+              "cloud/general/security-and-privacy"
             ]
           },
           {
-            "group": "Ella: AI Agents",
+            "group": "Elementary AI Agent",
             "pages": [
+              "cloud/ai-agents/overview",
+              "cloud/ai-agents/context-engine",
               "cloud/ai-agents/governance-agent",
               "cloud/ai-agents/triage-resolution-agent",
               "cloud/ai-agents/test-recommendation-agent",
@@ -40,38 +40,40 @@
             ]
           },
           {
-            "group": "Anomaly Detection Monitors",
+            "group": "MCP Server",
             "pages": [
-              "cloud/features/anomaly-detection/monitors-overview",
+              "cloud/mcp/overview",
               {
-                "group": "Automated monitors",
+                "group": "Setup",
                 "pages": [
-                  "cloud/features/anomaly-detection/automated-monitors",
-                  "cloud/features/anomaly-detection/automated-freshness",
-                  "cloud/features/anomaly-detection/automated-volume"
+                  "cloud/mcp/setup-guide",
+                  "cloud/mcp/recommended-rules"
                 ]
               },
-              {
-                "group": "Configuration and Feedback",
-                "pages": [
-                  "cloud/features/anomaly-detection/monitors-configuration",
-                  "cloud/features/anomaly-detection/monitors-feedback"
-                ]
-              },
-              "cloud/features/anomaly-detection/metrics"
+              "cloud/mcp/mcp-tools",
+              "cloud/features/ci"
             ]
           },
           {
-            "group": "Data Testing",
+            "group": "Data Tests",
             "pages": [
               {
-                "group": "Data Tests",
+                "group": "Cloud Tests",
                 "pages": [
-                  "cloud/features/data-tests/data-tests-overview",
+                  "cloud/features/data-tests/cloud-tests-overview",
+                  "cloud/features/anomaly-detection/automated-freshness",
+                  "cloud/features/anomaly-detection/automated-volume",
+                  "cloud/features/data-tests/data-contract-test",
+                  "cloud/features/anomaly-detection/metrics",
+                  "cloud/features/anomaly-detection/monitor-dwh-assets"
+                ]
+              },
+              {
+                "group": "dbt Tests",
+                "pages": [
                   "cloud/features/data-tests/dbt-tests",
-                  "cloud/features/data-tests/custom-sql-tests",
                   "cloud/features/data-tests/schema-validation-test",
-                  "cloud/features/data-tests/data-contract-test"
+                  "cloud/features/data-tests/custom-sql-tests"
                 ]
               },
               "cloud/features/data-tests/test-coverage-screen"
@@ -82,9 +84,7 @@
             "pages": [
               "cloud/features/data-lineage/lineage",
               "cloud/features/data-lineage/column-level-lineage",
-              "cloud/features/data-lineage/exposures-lineage",
-              "cloud/features/anomaly-detection/monitor-dwh-assets",
-              "cloud/features/data-lineage/semantic-layer"
+              "cloud/features/data-lineage/exposures-lineage"
             ]
           },
           {
@@ -92,18 +92,20 @@
             "pages": [
               "cloud/features/alerts-and-incidents/alerts-and-incidents-overview",
               {
-                "group": "Setup & configure alerts",
+                "group": "Alerts",
                 "pages": [
-                  "cloud/features/alerts-and-incidents/alert-configuration",
                   "cloud/features/alerts-and-incidents/alert-rules",
-                  "cloud/guides/alerts-configuration",
                   "cloud/features/alerts-and-incidents/alert-destinations",
                   "cloud/features/alerts-and-incidents/owners-and-subscribers"
                 ]
               },
-              "cloud/features/alerts-and-incidents/incidents",
-              "cloud/features/alerts-and-incidents/incident-management",
-              "cloud/features/alerts-and-incidents/incident-digest"
+              {
+                "group": "Incidents",
+                "pages": [
+                  "cloud/features/alerts-and-incidents/incidents",
+                  "cloud/features/alerts-and-incidents/incident-digest"
+                ]
+              }
             ]
           },
           {
@@ -114,16 +116,18 @@
             ]
           },
           {
-            "group": "Data Governance",
+            "group": "Data Catalog & Governance",
             "pages": [
-              "cloud/best-practices/governance-for-observability",
+              "cloud/features/collaboration-and-communication/catalog",
+              "cloud/features/collaboration-and-communication/saved-views",
+              "cloud/features/table-usage",
               "cloud/features/data-governance/critical_assets",
-              "cloud/features/data-governance/manage-metadata",
-              "cloud/features/data-governance/ai-descriptions"
+              "cloud/features/data-governance/ai-descriptions",
+              "cloud/best-practices/governance-for-observability"
             ]
           },
           {
-            "group": "Collaboration & Communication",
+            "group": "Data Health",
             "pages": [
               "cloud/features/collaboration-and-communication/data-observability-dashboard",
               {
@@ -132,22 +136,11 @@
                   "cloud/features/collaboration-and-communication/data-quality-dimensions",
                   "cloud/features/collaboration-and-communication/data-health"
                 ]
-              },
-              "cloud/features/collaboration-and-communication/catalog",
-              "cloud/features/collaboration-and-communication/saved-views"
+              }
             ]
           },
           {
-            "group": "MCP Server",
-            "pages": [
-              "cloud/mcp/overview",
-              "cloud/mcp/setup-guide",
-              "cloud/mcp/mcp-tools",
-              "cloud/mcp/recommended-rules"
-            ]
-          },
-          {
-            "group": "Additional features",
+            "group": "Config & Administration",
             "pages": [
               {
                 "group": "Config-as-Code",
@@ -157,9 +150,7 @@
                 ]
               },
               "cloud/features/roles-and-permissions",
-              "cloud/features/multi-env",
-              "cloud/features/ci",
-              "cloud/features/table-usage",
+              "cloud/guides/troubleshoot",
               {
                 "group": "Audit Logs",
                 "pages": [
@@ -168,28 +159,6 @@
                   "cloud/features/collaboration-and-communication/audit_logs/system-logs"
                 ]
               }
-            ]
-          },
-          {
-            "group": "Guides",
-            "pages": [
-              {
-                "group": "Onboarding guides",
-                "pages": [
-                  "cloud/guides/set-up-elementary",
-                  "cloud/guides/start-using-elementary",
-                  "cloud/onboarding/quickstart-dbt-package",
-                  "cloud/onboarding/connect-data-warehouse",
-                  "cloud/manage-team"
-                ]
-              },
-              "cloud/guides/sync-scheduling",
-              "cloud/guides/dev-prod-configuration",
-              "cloud/guides/reduce-on-run-end-time",
-              "cloud/guides/collect-job-data",
-              "cloud/guides/collect-source-freshness",
-              "cloud/guides/microbatch-compiled-code",
-              "cloud/guides/troubleshoot"
             ]
           },
           {
@@ -216,11 +185,41 @@
                 ]
               },
               {
-                "group": "Transformation & Orchestration",
+                "group": "Transformation",
                 "pages": [
-                  "cloud/integrations/transformation-and-orchestration/dbt-core",
-                  "cloud/integrations/transformation-and-orchestration/dbt-cloud",
-                  "cloud/integrations/transformation-and-orchestration/dbt-fusion",
+                  {
+                    "group": "dbt",
+                    "pages": [
+                      "cloud/integrations/transformation-and-orchestration/dbt-core",
+                      "cloud/integrations/transformation-and-orchestration/dbt-cloud",
+                      "cloud/integrations/transformation-and-orchestration/dbt-fusion",
+                      {
+                        "group": "dbt setup guides",
+                        "pages": [
+                          "cloud/guides/sync-scheduling",
+                          "cloud/guides/dev-prod-configuration",
+                          "cloud/guides/collect-job-data",
+                          "cloud/guides/collect-source-freshness",
+                          "cloud/guides/reduce-on-run-end-time",
+                          "cloud/guides/microbatch-compiled-code",
+                          "cloud/features/multi-env"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "group": "Python SDK",
+                    "pages": [
+                      "cloud/python-sdk/overview",
+                      "cloud/python-sdk/setup-guide",
+                      "cloud/python-sdk/usage-examples"
+                    ]
+                  }
+                ]
+              },
+              {
+                "group": "Orchestration",
+                "pages": [
                   "cloud/integrations/transformation-and-orchestration/airflow",
                   "cloud/integrations/transformation-and-orchestration/orchestration-tools",
                   "cloud/integrations/pipeline/fivetran"
@@ -294,6 +293,12 @@
                 ]
               },
               {
+                "group": "Semantic Layer",
+                "pages": [
+                  "cloud/integrations/semantic-layer/snowflake"
+                ]
+              },
+              {
                 "group": "Security and Connectivity",
                 "pages": [
                   "cloud/integrations/security-and-connectivity/aws-privatelink-integration",
@@ -306,15 +311,19 @@
           {
             "group": "Resources",
             "pages": [
-              "cloud/cloud-vs-oss",
               {
                 "group": "Best Practices Guide",
-                "icon": "check",
                 "pages": [
                   "cloud/best-practices/introduction",
-                  "cloud/best-practices/governance-for-observability",
                   "cloud/best-practices/detection-and-coverage",
                   "cloud/best-practices/triage-and-response"
+                ]
+              },
+              {
+                "group": "Onboarding guides",
+                "pages": [
+                  "cloud/guides/set-up-elementary",
+                  "cloud/guides/start-using-elementary"
                 ]
               },
               "cloud/resources/pricing",
@@ -671,6 +680,26 @@
   "js": ["kapa-widget.js"],
   "redirects": [
     {
+      "source": "/cloud/features/alerts-and-incidents/alert-configuration",
+      "destination": "/cloud/features/alerts-and-incidents/alerts-and-incidents-overview"
+    },
+    {
+      "source": "/cloud/features/anomaly-detection/monitors-configuration",
+      "destination": "/cloud/features/data-tests/cloud-tests-overview"
+    },
+    {
+      "source": "/cloud/features/anomaly-detection/monitors-feedback",
+      "destination": "/cloud/features/data-tests/cloud-tests-overview"
+    },
+    {
+      "source": "/cloud/features/data-lineage/semantic-layer",
+      "destination": "/cloud/integrations/semantic-layer/snowflake"
+    },
+    {
+      "source": "/cloud/guides/alerts-configuration",
+      "destination": "/cloud/features/alerts-and-incidents/owners-and-subscribers"
+    },
+    {
       "source": "/cloud/features/collaboration-and-communication/user-activity-logs",
       "destination": "/cloud/features/collaboration-and-communication/audit_logs/user-activity-logs"
     },
@@ -709,6 +738,66 @@
     {
       "source": "/cloud/features/collaboration-and-communication/table-usage",
       "destination": "/cloud/features/table-usage"
+    },
+    {
+      "source": "/cloud/features/anomaly-detection/monitors-overview",
+      "destination": "/cloud/features/data-tests/cloud-tests-overview"
+    },
+    {
+      "source": "/cloud/features/anomaly-detection/automated-monitors",
+      "destination": "/cloud/features/data-tests/cloud-tests-overview"
+    },
+    {
+      "source": "/cloud/features/data-tests/data-tests-overview",
+      "destination": "/cloud/features/data-tests/cloud-tests-overview"
+    },
+    {
+      "source": "/cloud/mcp/intro",
+      "destination": "/cloud/mcp/overview"
+    },
+    {
+      "source": "/cloud/features/data-governance/manage-metadata",
+      "destination": "/cloud/features/collaboration-and-communication/catalog"
+    },
+    {
+      "source": "/cloud/features/alerts-and-incidents/incident-management",
+      "destination": "/cloud/features/alerts-and-incidents/incidents"
+    },
+    {
+      "source": "/cloud/manage-team",
+      "destination": "/cloud/features/roles-and-permissions"
+    },
+    {
+      "source": "/cloud/features/ai-agents",
+      "destination": "/cloud/ai-agents/overview"
+    },
+    {
+      "source": "/cloud/features/mcp-server",
+      "destination": "/cloud/mcp/overview"
+    },
+    {
+      "source": "/features/alerts-and-incidents/alert-rules",
+      "destination": "/cloud/features/alerts-and-incidents/alert-rules"
+    },
+    {
+      "source": "/features/alerts-and-incidents/alerts-and-incidents-overview",
+      "destination": "/cloud/features/alerts-and-incidents/alerts-and-incidents-overview"
+    },
+    {
+      "source": "/features/alerts-and-incidents/incidents",
+      "destination": "/cloud/features/alerts-and-incidents/incidents"
+    },
+    {
+      "source": "/features/anomaly-detection/automated-freshness",
+      "destination": "/cloud/features/anomaly-detection/automated-freshness"
+    },
+    {
+      "source": "/features/anomaly-detection/automated-volume",
+      "destination": "/cloud/features/anomaly-detection/automated-volume"
+    },
+    {
+      "source": "/features/data-governance/critical_assets",
+      "destination": "/cloud/features/data-governance/critical_assets"
     }
   ]
 }
