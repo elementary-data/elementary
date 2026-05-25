@@ -207,9 +207,14 @@
                       }
                     ]
                   },
-                  "cloud/python-sdk/overview",
-                  "cloud/python-sdk/setup-guide",
-                  "cloud/python-sdk/usage-examples"
+                  {
+                    "group": "Python SDK",
+                    "pages": [
+                      "cloud/python-sdk/overview",
+                      "cloud/python-sdk/setup-guide",
+                      "cloud/python-sdk/usage-examples"
+                    ]
+                  }
                 ]
               },
               {
@@ -308,7 +313,6 @@
             "pages": [
               {
                 "group": "Best Practices Guide",
-                "icon": "check",
                 "pages": [
                   "cloud/best-practices/introduction",
                   "cloud/best-practices/detection-and-coverage",
