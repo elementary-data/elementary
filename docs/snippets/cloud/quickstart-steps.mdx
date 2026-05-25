@@ -2,18 +2,16 @@
   <Step title="Create an account">
     [Sign up to Elementary](https://elementary-data.frontegg.com/oauth/account/sign-up) using Google SSO or email.
   </Step>
-  <Step title="Install Elementary dbt package">
-    To start using Elementary, you need to [add our dbt package to your dbt project](/cloud/onboarding/quickstart-dbt-package).
+  <Step title="Install the Elementary dbt package">
+    [Add the Elementary dbt package](/data-tests/dbt/quickstart-package) to your dbt project. It collects test results, run metadata, and dbt artifacts automatically at runtime using on-run-end hooks.
   </Step>
   <Step title="Connect your data warehouse">
-    [Create your first environment](/cloud/onboarding/connect-data-warehouse) and sync the Elementary schema.  
-    Note: Elementary can't access your data. It only requires access to logs, test results, and metadata.
+    In Elementary, create your first environment and connect it to your data warehouse. Elementary only needs access to the Elementary schema — not your underlying data.
   </Step>
   <Step title="Connect your stack">
-Connect your [code repository](/cloud/integrations/code-repo/connect-code-repo), [messaging tools](/cloud/guides/enable-slack-alerts), [BI platforms](/cloud/integrations/bi/connect-bi-tool), and [external catalogs](/cloud/integrations/governance/atlan) to get full visibility and collaboration across your data workflows.
+    Connect your [code repository](/cloud/integrations/code-repo/connect-code-repo), [Slack or other alert channels](/cloud/integrations/alerts/slack), and [BI tools](/cloud/integrations/bi/connect-bi-tool) to get full visibility across your data workflows.
   </Step>
-  <Step title="Invite your team!" icon="party-horn">
-    You're done with initial onboarding. Now you can [invite team members](/cloud/manage-team) to join!
+  <Step title="Invite your team" icon="party-horn">
+    [Invite team members](/cloud/features/roles-and-permissions) and assign roles so everyone has access to what they need.
   </Step>
 </Steps>
-
