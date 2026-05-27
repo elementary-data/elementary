@@ -129,8 +129,7 @@
         current_tests_run_results_query already starts with WITH, so we
         cannot wrap it in another CTE.  Instead we materialise it into a
         temp table first, then build ordered_test_results on top.
-        Note: sqlserver adapter inherits from fabric, so this dispatch
-        covers both fabric and sqlserver targets automatically.
+        sqlserver targets use sqlserver__get_test_results (delegates here).
     #}
     {% set elementary_tests_allowlist_status = ['fail', 'warn'] if disable_passed_test_metrics else ['fail', 'warn', 'pass']  %}
 
@@ -180,6 +179,10 @@
     {% do elementary.fully_drop_relation(ordered_relation) %}
 
     {% do return(elementary_cli._process_raw_test_results(test_results_agate, test_result_rows_agate, elementary_tests_allowlist_status, skip_test_result_rows)) %}
+{%- endmacro -%}
+
+{%- macro sqlserver__get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false, skip_test_result_rows = false) -%}
+    {% do return(elementary_cli.fabric__get_test_results(days_back, invocations_per_test, disable_passed_test_metrics, skip_test_result_rows)) %}
 {%- endmacro -%}
 
 {%- macro clickhouse__get_test_results(days_back = 7, invocations_per_test = 720, disable_passed_test_metrics = false, skip_test_result_rows = false) -%}
