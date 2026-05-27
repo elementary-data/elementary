@@ -268,7 +268,6 @@
                   "cloud/integrations/alerts/jira",
                   "cloud/integrations/alerts/linear",
                   "cloud/integrations/alerts/servicenow",
-                  "cloud/integrations/alerts/webhooks",
                   "cloud/integrations/alerts/email"
                 ]
               },
