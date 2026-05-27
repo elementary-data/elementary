@@ -129,7 +129,6 @@
         current_tests_run_results_query already starts with WITH, so we
         cannot wrap it in another CTE.  Instead we materialise it into a
         temp table first, then build ordered_test_results on top.
-        sqlserver targets use sqlserver__get_test_results (delegates here).
     #}
     {% set elementary_tests_allowlist_status = ['fail', 'warn'] if disable_passed_test_metrics else ['fail', 'warn', 'pass']  %}
 
