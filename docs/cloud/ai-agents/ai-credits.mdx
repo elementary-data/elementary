@@ -1,0 +1,48 @@
+---
+title: "AI credits"
+sidebarTitle: "AI credits"
+---
+
+AI credits are consumed when Elementary's AI does the reasoning.
+
+With [MCP](/cloud/mcp/overview), Elementary returns data to the connected agent. The LLM (Cursor, Claude, etc.) handles reasoning and bills to that provider.
+
+---
+
+## What uses AI credits
+
+| Action | What the AI does |
+|---|---|
+| [**Incident investigation**](/cloud/ai-agents/triage-resolution-agent) | Diagnoses a data issue: root cause, impacted tables, suggested fix |
+| [**Data discovery**](/cloud/ai-agents/catalog-agent) | Identifies which tables or columns to use for a specific metric or use case |
+| [**Test coverage**](/cloud/ai-agents/test-recommendation-agent) | Generates dbt test PRs based on configured data policies and opens them for review |
+| [**CI PR review**](/cloud/features/ci) | Lineage-aware review on every dbt PR, surfacing downstream impact before merge |
+
+---
+
+## What doesn't use AI credits
+
+| Feature | Why |
+|---|---|
+| **All MCP tool calls** | Elementary returns data to the connected agent. The LLM handles reasoning |
+| **Slack alerts and notifications** | Pure notification delivery. No AI involved |
+| **Anomaly detection and monitors** | Volume and freshness monitors run on statistical algorithms, not LLMs |
+| **Lineage and catalog browsing** | All UI navigation: lineage graphs, asset catalog, test coverage pages |
+| **Manual incident merging** | Selecting and merging incidents by hand is a platform feature, not AI |
+| **Deterministic incident grouping** | Rule-based clustering (e.g. Fivetran fail + downstream freshness). Coming soon |
+
+---
+
+## Get more from credits
+
+<Tip>
+Enable automatic root cause. With it on, Elementary runs one AI call per incident posted to Slack instead of multiple team members each triggering their own analysis. More efficient, and everyone sees the same context.
+</Tip>
+
+<Tip>
+Use MCP for ad hoc exploration. Querying lineage, assets, or test results via MCP costs zero Elementary credits. Use it freely from Cursor, Claude, or any MCP-compatible tool.
+</Tip>
+
+Credits consumed and credits remaining are always visible in the Elementary dashboard.
+
+Need a breakdown by user, action type, or time period? Contact the account team for a detailed usage report.

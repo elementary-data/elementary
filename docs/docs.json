@@ -36,7 +36,9 @@
               "cloud/ai-agents/triage-resolution-agent",
               "cloud/ai-agents/test-recommendation-agent",
               "cloud/ai-agents/catalog-agent",
-              "cloud/ai-agents/performance-cost-agent"
+              "cloud/ai-agents/performance-cost-agent",
+              "cloud/features/ci",
+              "cloud/ai-agents/ai-credits"
             ]
           },
           {
@@ -50,8 +52,7 @@
                   "cloud/mcp/recommended-rules"
                 ]
               },
-              "cloud/mcp/mcp-tools",
-              "cloud/features/ci"
+              "cloud/mcp/mcp-tools"
             ]
           },
           {
