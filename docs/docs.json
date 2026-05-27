@@ -25,7 +25,7 @@
               "cloud/features",
               "cloud/features/integrations",
               "cloud/general/security-and-privacy",
-              { "page": "cloud/ai-agents/ai-credits", "icon": "coins" }
+              "cloud/ai-agents/ai-credits"
             ]
           },
           {
@@ -38,7 +38,7 @@
               "cloud/ai-agents/test-recommendation-agent",
               "cloud/ai-agents/catalog-agent",
               "cloud/ai-agents/performance-cost-agent",
-              { "page": "cloud/features/ci", "icon": "comment-code" }
+              "cloud/features/ci"
             ]
           },
           {
