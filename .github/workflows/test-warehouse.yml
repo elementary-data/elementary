@@ -348,7 +348,12 @@ jobs:
       - name: Seed e2e dbt project
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         if: steps.seed-cache.outputs.cache-hit != 'true' && inputs.warehouse-type != 'dremio' && inputs.warehouse-type != 'spark'
-        run: dbt seed -f --target "$WAREHOUSE_TYPE"
+        run: |
+          # The seed step runs before Elementary models exist, so artifact hooks
+          # would try to insert into missing Elementary relations.
+          dbt seed -f \
+            --target "$WAREHOUSE_TYPE" \
+            --vars '{"disable_run_results": true, "disable_dbt_invocation_autoupload": true}'
 
       - name: Save seed cache from Docker volumes
         if: steps.seed-cache.outputs.cache-hit != 'true' && (inputs.warehouse-type == 'postgres' || inputs.warehouse-type == 'clickhouse')
