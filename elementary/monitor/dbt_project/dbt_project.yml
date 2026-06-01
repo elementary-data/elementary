@@ -22,8 +22,8 @@ packages-install-path: "{{ env_var('DBT_PACKAGES_FOLDER', 'dbt_packages') }}"
 
 target-path: "{{ env_var('DBT_TARGET_PATH', 'target') }}" # directory which will store compiled SQL files
 clean-targets: # directories to be removed by `dbt clean`
-  - "target"
-  - "dbt_packages"
+  - "{{ env_var('DBT_TARGET_PATH', 'target') }}"
+  - "{{ env_var('DBT_PACKAGES_FOLDER', 'dbt_packages') }}"
   - "dbt_modules"
 
 # Configuring models
