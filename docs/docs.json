@@ -64,6 +64,7 @@
                   "cloud/features/data-tests/cloud-tests-overview",
                   "cloud/features/anomaly-detection/automated-freshness",
                   "cloud/features/anomaly-detection/automated-volume",
+                  "cloud/features/anomaly-detection/cloud-pipeline-task-performance",
                   "cloud/features/data-tests/data-contract-test",
                   "cloud/features/anomaly-detection/metrics",
                   "cloud/features/anomaly-detection/monitor-dwh-assets"

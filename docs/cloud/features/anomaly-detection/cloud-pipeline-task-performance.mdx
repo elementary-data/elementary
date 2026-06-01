@@ -1,0 +1,58 @@
+---
+title: "Cloud Pipeline Task Performance"
+sidebarTitle: "Cloud pipeline task performance"
+badge: "Elementary Cloud"
+---
+
+<Snippet file="cloud/cloud-feature-tag.mdx" />
+
+The pipeline task performance monitor tracks the **execution duration** of dbt models, seeds, and snapshots on each run, and alerts when a node takes significantly longer than expected — or exceeds a fixed SLA threshold.
+
+This is an automated monitor: Elementary creates it for every dbt node in your project, with no configuration required to get started.
+
+## Monitoring modes
+
+### Anomaly detection (default)
+
+Elementary uses a z-score seasonal model to learn normal execution duration for each node. The model accounts for time-of-day and day-of-week patterns, so a model that reliably runs longer on Monday mornings will not be flagged during that window.
+
+No configuration is required. Elementary builds the baseline from your pipeline run history automatically.
+
+### Static SLA
+
+Set a fixed duration threshold. The monitor fails whenever the observed execution time exceeds that threshold, regardless of historical norms.
+
+Use static SLA when you have a hard operational or contractual limit (e.g., "this model must finish within 10 minutes").
+
+## Understand the monitor result
+
+The result shows the execution duration of the dbt node for the latest run alongside the historical baseline.
+
+- **Anomaly detection** — data points outside the expected range (grey band) are flagged. The expected range is derived from the seasonal model trained on historical durations.
+- **Static SLA** — a horizontal line marks the threshold. Any run that crosses it is a failure.
+
+Use the **Anomaly settings** button to adjust mode, sensitivity, or training period after the monitor is created.
+
+## Anomaly settings
+
+| Setting | Description | Default |
+|---|---|---|
+| `mode` | `"anomaly"` or `"static"` | `"anomaly"` |
+| `sensitivity` | `"low"`, `"medium"`, or `"high"` (anomaly mode only) | `"medium"` |
+| `training_period` | Days of history used to train the model (anomaly mode only) | `14` |
+| `anomaly_direction` | `"spike"` (duration longer than expected), `"drop"`, or `"both"` (anomaly mode only) | `"spike"` |
+| `excluded_time_ranges` | Time ranges excluded from training and detection (anomaly mode only) | `[]` |
+| `fixed_threshold` | Max allowed execution duration in seconds (static SLA mode only) | — |
+
+<Snippet file="cloud/features/anomaly-detection/all-anomalies-configuration.mdx" />
+
+## Alerts
+
+Failures raise alerts in the **`pipeline_performance`** alert category, routed through [alert rules](/features/alerts-and-incidents/alert-rules) to all configured integrations (Slack, PagerDuty, Teams, OpsGenie, email).
+
+By default, alerts are not active. To enable them, go to **Setup → Alert Rules** and add **Pipeline performance** to the relevant rule's alert categories.
+
+## Related
+
+- [Performance Alerts](/features/performance-monitoring/performance-alerts) — setup guide and API reference for creating `pipeline_task_performance` monitors
+- [Automated monitors overview](/features/anomaly-detection/automated-monitors) — how automated monitors work across freshness, volume, and performance
