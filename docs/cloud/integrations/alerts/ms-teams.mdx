@@ -31,98 +31,24 @@ The alerts include rich context, and you can create [alert rules](/cloud/feature
   </div>
 </Frame>
 
-3. For each MS Teams channel you connect to Elementary, you will need to create a Webhook. There are two ways to create a webhook:
+3. For each MS Teams channel you want to connect, create a webhook using Power Automate. Power Automate is Microsoft's recommended way to receive webhook requests in Teams. You can set it up in two ways — both produce the same webhook URL:
 
-<Accordion title="Option 1: Using Power Automate Workflows (Recommended)">
+   **Option A — directly from Teams (faster):**
+   1. Go to your Teams channel
+   2. Click the three dots (...) next to the channel name
+   3. Select `Workflows`
+   4. Choose the template "Post to channel when a webhook request is received"
+   5. Copy the webhook URL
 
-You can create a webhook using Power Automate in two ways:
+   **Option B — from the Power Automate website:**
+   1. Go to [Power Automate](https://flow.microsoft.com)
+   2. Create a new instant cloud flow
+   3. Search for "When a HTTP request is received" as your trigger
+   4. Add a "Post adaptive card in a chat or channel" action
+   5. Configure the team and channel where you want to post
+   6. Save the flow and copy the HTTP POST URL
 
-### Method 1: Directly from Teams (Recommended)
-
-1. Go to your Teams channel
-2. Click the three dots (...) next to the channel name
-3. Select `Workflows`
-4. Choose the template "Post to channel when a webhook request is received"
-5. Copy the webhook URL
-
-### Method 2: From Power Automate Website
-
-1. Go to [Power Automate](https://flow.microsoft.com)
-2. Create a new instant cloud flow
-3. Search for "When a HTTP request is received" as your trigger
-4. In the flow, add a "Post adaptive card in a chat or channel" action
-5. Configure the team and channel where you want to post
-6. Save the flow and copy the HTTP POST URL
-
-<Note>When using Power Automate Workflows, Elementary cannot directly verify if messages were successfully delivered. Monitor your workflow runs in Power Automate to check for any errors.</Note>
-
-</Accordion>
-
-<Accordion title="Option 2: Using Microsoft Teams Connectors (Legacy)">
-
-<Warning>Microsoft 365 Connectors are nearing deprecation and the creation of new connectors will soon be blocked. Use Power Automate Workflows instead.</Warning>
-
-1. Go to a channel in your Team and choose `Manage channel`.
-
-<Frame>
-  <div className="dark:bg-white rounded-md p-1">
-    <img
-      src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707203620/npn3p0tsmdvk723etyxn.png"
-      alt="Teams manage channel"
-      width="400"
-    />
-  </div>
-</Frame>
-
-2. Click on `Edit` connectors.
-
-<Frame>
-  <div className="dark:bg-white rounded-md p-1">
-    <img
-      src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707203932/utnld7rzvgiwfgumzhtv.png"
-      alt="Teams edit connectors"
-      width="500"
-    />
-  </div>
-</Frame>
-
-3. Search for `Incoming webhook` and choose `Add`.
-
-<Frame>
-  <div className="dark:bg-white rounded-md p-1">
-    <img
-      src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204047/esvfhescsxgttanzv3kx.png"
-      alt="Teams add incoming webhook"
-      width="400"
-    />
-  </div>
-</Frame>
-
-4. Choose `Add` again, add a name to your webhook, then click `Create`.
-
-<Frame>
-  <div className="dark:bg-white rounded-md p-1">
-    <img
-      src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204465/mcncjpvsnptd0gcsbb21.png"
-      alt="Teams create webhook"
-      width="400"
-    />
-  </div>
-</Frame>
-
-5. Copy the URL of the webhook.
-
-<Frame>
-  <div className="dark:bg-white rounded-md p-1">
-    <img
-      src="https://res.cloudinary.com/dgxyrldax/image/upload/v1707204718/gkt2uhz2qaow1lm1frnp.png"
-      alt="Teams copy URL webhook"
-      width="400"
-    />
-  </div>
-</Frame>
-
-</Accordion>
+<Note>Elementary cannot directly verify if messages were successfully delivered via Power Automate. Monitor your workflow runs in Power Automate to check for any errors.</Note>
 
 4. Configure your Microsoft Teams webhooks and give each one a name indicating its connected channel:
 
@@ -151,3 +77,9 @@ You can create a webhook using Power Automate in two ways:
     />
   </div>
 </Frame>
+
+## Microsoft 365 Connectors
+
+Microsoft 365 Connectors (the legacy incoming webhook method) are no longer supported by Microsoft. If you previously connected Elementary using a Connector-based webhook, you'll need to recreate it using Power Automate Workflows above.
+
+See [Microsoft's retirement announcement](https://devblogs.microsoft.com/microsoft365dev/retirement-of-office-365-connectors-within-microsoft-teams/) for more details.
