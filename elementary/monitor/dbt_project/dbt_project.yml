@@ -20,9 +20,9 @@ snapshot-paths: ["snapshots"]
 
 packages-install-path: "{{ env_var('DBT_PACKAGES_FOLDER', 'dbt_packages') }}"
 
-target-path: "{{ env_var('DBT_TARGET_PATH', 'target') }}" # directory which will store compiled SQL files
+target-path: "{{ env_var('EDR_INTERNAL_TARGET_PATH', 'target') }}" # directory which will store compiled SQL files
 clean-targets: # directories to be removed by `dbt clean`
-  - "{{ env_var('DBT_TARGET_PATH', 'target') }}"
+  - "{{ env_var('EDR_INTERNAL_TARGET_PATH', 'target') }}"
   - "{{ env_var('DBT_PACKAGES_FOLDER', 'dbt_packages') }}"
   - "dbt_modules"
 
