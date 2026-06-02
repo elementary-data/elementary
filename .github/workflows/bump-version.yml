@@ -101,14 +101,13 @@ jobs:
       - name: Push code
         run: git push origin "$RELEASE_BRANCH"
       - name: Create pull request
-        # repo-sync/pull-request v2.12.1, checked 2026-04-26.
-        uses: repo-sync/pull-request@7e79a9f5dc3ad0ce53138f01df2fad14a04831c5
+        uses: peter-evans/create-pull-request@v8.0.0
         with:
-          source_branch: ${{ env.RELEASE_BRANCH }}
-          destination_branch: master
-          pr_title: "Release v${{ env.CLI_VERSION }}"
-          pr_body: "Opened automatically using bump version workflow"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ env.RELEASE_BRANCH }}
+          base: master
+          title: "Release v${{ env.CLI_VERSION }}"
+          body: "Opened automatically using bump version workflow"
 
   update-docs-branch:
     needs: validate-version
@@ -145,11 +144,10 @@ jobs:
       - name: Push code
         run: git push origin "$DOCS_RELEASE_BRANCH"
       - name: Create pull request
-        # repo-sync/pull-request v2.12.1, checked 2026-04-26.
-        uses: repo-sync/pull-request@7e79a9f5dc3ad0ce53138f01df2fad14a04831c5
+        uses: peter-evans/create-pull-request@v8.0.0
         with:
-          source_branch: "release/docs-v${{ needs.validate-version.outputs.validated-cli-version }}"
-          destination_branch: "docs"
-          pr_title: "Docs: bump dbt package to v${{ env.DBT_PACKAGE_VERSION }}"
-          pr_body: "Opened automatically using bump version workflow"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ env.DOCS_RELEASE_BRANCH }}
+          base: docs
+          title: "Docs: bump dbt package to v${{ env.DBT_PACKAGE_VERSION }}"
+          body: "Opened automatically using bump version workflow"
