@@ -106,7 +106,7 @@ jobs:
           source_branch: ${{ env.RELEASE_BRANCH }}
           destination_branch: master
           pr_title: "Release v${{ env.CLI_VERSION }}"
-          pr_body: "Open automatically using bump version workflow"
+          pr_body: "Opened automatically using bump version workflow"
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
   update-docs-branch:
@@ -150,5 +150,5 @@ jobs:
           source_branch: "release/docs-v${{ needs.validate-version.outputs.validated-cli-version }}"
           destination_branch: "docs"
           pr_title: "Docs: bump dbt package to v${{ env.DBT_PACKAGE_VERSION }}"
-          pr_body: "Open automatically using bump version workflow"
+          pr_body: "Opened automatically using bump version workflow"
           github_token: ${{ secrets.GITHUB_TOKEN }}
