@@ -80,7 +80,7 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-      # dbt-core==1.8 is the first dbt version we support (see pre-commit verify-dbt-project-packages-lock).
+      # dbt-core==1.8 is the first dbt version we support
       - name: Install dbt-core
         run: pip install "dbt-core==1.8"
       - name: Create release branch
