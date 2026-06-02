@@ -96,8 +96,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ env.RELEASE_BRANCH }}
           base: master
-          commit-message: "release v${{ env.CLI_VERSION }}"
-          title: "Release v${{ env.CLI_VERSION }}"
+          commit-message: "release v${{ env.CLI_VERSION }} (dbt package v${{ env.DBT_PACKAGE_VERSION }})"
+          title: "Release v${{ env.CLI_VERSION }} (dbt package v${{ env.DBT_PACKAGE_VERSION }})"
           body: "Opened automatically using bump version workflow"
 
   update-docs-branch:
