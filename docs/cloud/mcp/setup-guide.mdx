@@ -18,6 +18,8 @@ The server is available at:
 https://prod.api.elementary-data.com/mcp/
 ```
 
+<Warning>The trailing slash in the URL is required. Omitting it will cause the connection to fail.</Warning>
+
 ---
 
 ## Configure your client
@@ -28,7 +30,8 @@ Add the following to your MCP client configuration.
 {
   "mcpServers": {
     "Elementary": {
-      "url": "https://prod.api.elementary-data.com/mcp"
+      "url": "https://prod.api.elementary-data.com/mcp/",
+      "type": "http"
     }
   }
 }
