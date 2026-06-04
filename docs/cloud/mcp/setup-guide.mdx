@@ -6,36 +6,91 @@ badge: "Elementary Cloud"
 
 This guide walks you through connecting any MCP-compatible client (Cursor, Claude Desktop, and others) to Elementary's remote MCP server.
 
-## How it works
-
-Elementary's MCP server uses the **Streamable HTTP** transport with **OAuth 2.1** and dynamic client registration for authentication.
-
-When you start the MCP server for the first time, your client will open a browser window so you can log in with your Elementary account. No access tokens or API keys are required — the server uses your user permissions directly.
-
 The server is available at:
 
 ```
 https://prod.api.elementary-data.com/mcp/
 ```
 
-<Warning>The trailing slash in the URL is required. Omitting it will cause the connection to fail.</Warning>
+## Authentication
+
+<Tabs>
+  <Tab title="OAuth 2.1 (recommended)">
+    Elementary's MCP server supports the **Streamable HTTP** transport with **OAuth 2.1** and dynamic client registration.
+
+    When you start the MCP server for the first time, your client opens a browser window so you can log in with your Elementary account. The MCP server uses your authenticated user's permissions directly (user-scoped).
+
+    ```json filename="mcp.json"
+    {
+      "mcpServers": {
+        "Elementary": {
+          "url": "https://prod.api.elementary-data.com/mcp/"
+        }
+      }
+    }
+    ```
+
+    <Note>
+    Re-authentication is only required when your session expires or you explicitly sign out.
+    </Note>
+  </Tab>
+
+  <Tab title="Access token">
+    Use this method for headless setups, CI environments, or any client that doesn't support browser-based OAuth.
+
+    #### Prerequisites
+
+    | Requirement | Why it's needed |
+    |-------------|-----------------|
+    | **Node.js 18 LTS or newer** | `mcp-remote` runs on Node. Verify with `node --version`. |
+    | **npm / npx** | `npx` fetches `mcp-remote` on demand. Bundled with Node. |
+
+    <Tip>
+    If you don't have Node.js installed, use [nvm](https://github.com/nvm-sh/nvm) for easy installation:
+
+    ```bash
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+    # Restart your terminal, then:
+    nvm install --lts && nvm use --lts
+    ```
+    </Tip>
+
+    #### Generate an access token
+
+    Go to [User → Personal Tokens](https://app.elementary-data.com/settings/user-tokens) or [Account → Account Tokens](https://app.elementary-data.com/settings/account-tokens) and click **Generate token**. Copy the token and store it securely — it is shown only once.
+
+    - **Personal tokens** are user-scoped and inherit your workspace permissions.
+    - **Account tokens** are account-scoped with "Can View" permissions.
+
+    Treat tokens like passwords: do not share or commit them, rotate regularly, and revoke immediately if compromised.
+
+    ```jsonc filename="mcp.json"
+    {
+      "mcpServers": {
+        "elementary-remote": {
+          "command": "npx",
+          "args": [
+            "-y",
+            "mcp-remote@latest",
+            "https://prod.api.elementary-data.com/mcp/",
+            "--header",
+            "Authorization:${AUTH_HEADER}"
+          ],
+          "env": {
+            "AUTH_HEADER": "Bearer <AUTH_TOKEN>"
+          }
+        }
+      }
+    }
+    ```
+
+    Replace `<AUTH_TOKEN>` with the token you generated above.
+  </Tab>
+</Tabs>
 
 ---
 
 ## Configure your client
-
-Add the following to your MCP client configuration.
-
-```json filename="mcp.json"
-{
-  "mcpServers": {
-    "Elementary": {
-      "url": "https://prod.api.elementary-data.com/mcp/",
-      "type": "http"
-    }
-  }
-}
-```
 
 ### Cursor IDE
 
@@ -44,10 +99,10 @@ Add the following to your MCP client configuration.
     Go to **Settings → Model Context Protocol → Add Custom Server**, or edit `~/.cursor/mcp.json` (global) / `<project>/.cursor/mcp.json` (workspace).
   </Step>
   <Step title="Add the server">
-    Paste the JSON block above and save. Cursor will restart its MCP agent automatically.
+    Paste the JSON block from the authentication tab above and save. Cursor restarts its MCP agent automatically.
   </Step>
   <Step title="Authenticate">
-    The first time the server starts, a browser window opens. Log in with your Elementary account to complete authentication.
+    If using OAuth, a browser window opens on first launch. Log in with your Elementary account to complete authentication.
   </Step>
 </Steps>
 
@@ -58,13 +113,9 @@ Add the following to your MCP client configuration.
     In the menu bar, choose **Claude → Settings → Developer** and click **Edit** under **Local MCP Servers**.
   </Step>
   <Step title="Add the server">
-    Paste the JSON block above and save.
+    Paste the JSON block from the authentication tab above and save.
   </Step>
   <Step title="Restart Claude">
-    Quit and reopen Claude Desktop. On first launch, a browser window opens for authentication.
+    Quit and reopen Claude Desktop. If using OAuth, a browser window opens on first launch for authentication.
   </Step>
 </Steps>
-
-<Note>
-Re-authentication is only required when your session expires or you explicitly sign out.
-</Note>
