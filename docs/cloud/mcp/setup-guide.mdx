@@ -104,30 +104,61 @@ https://prod.api.elementary-data.com/mcp/
 
 ## Configure your client
 
-### Cursor IDE
+<Tabs>
+  <Tab title="Claude Connector">
 
-<Steps>
-  <Step title="Open MCP settings">
-    Go to **Settings → Model Context Protocol → Add Custom Server**, or edit `~/.cursor/mcp.json` (global) / `<project>/.cursor/mcp.json` (workspace).
-  </Step>
-  <Step title="Add the server">
-    Paste the JSON block from the authentication tab above and save. Cursor restarts its MCP agent automatically.
-  </Step>
-  <Step title="Authenticate">
-    If using OAuth, a browser window opens on first launch. Log in with your Elementary account to complete authentication.
-  </Step>
-</Steps>
+    <Steps>
+      <Step title="Add Elementary as a custom connector">
+        Click the link below to open Claude with the Elementary connector pre-filled:
 
-### Claude Desktop
+        [Add Elementary connector →](https://claude.ai/customize/connectors?modal=add-custom-connector&connectorName=Elementary&connectorUrl=https%3A%2F%2Fprod.api.elementary-data.com%2Fmcp)
 
-<Steps>
-  <Step title="Open Developer settings">
-    In the menu bar, choose **Claude → Settings → Developer** and click **Edit** under **Local MCP Servers**.
-  </Step>
-  <Step title="Add the server">
-    Paste the JSON block from the authentication tab above and save.
-  </Step>
-  <Step title="Restart Claude">
-    Quit and reopen Claude Desktop. If using OAuth, a browser window opens on first launch for authentication.
-  </Step>
-</Steps>
+        <Frame>
+          <img
+            src="/pics/cloud/mcp/claude-add-custom-connector.png"
+          />
+        </Frame>
+
+        Click **Add**. The Elementary connector will appear in your connectors list.
+      </Step>
+      <Step title="Connect and authenticate">
+        Click **Connect**. A browser window opens for you to log in with your Elementary account.
+
+        <Frame caption="Elementary connector added — click Connect to authenticate">
+          <img
+            src="/pics/cloud/mcp/claude-connector-connect.png"
+            alt="Elementary connector added — click Connect to authenticate"
+          />
+        </Frame>
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="Claude MCP config">
+    <Steps>
+      <Step title="Open Developer settings">
+        In the menu bar, choose **Claude → Settings → Developer** and click **Edit** under **Local MCP Servers**.
+      </Step>
+      <Step title="Add the server">
+        Paste the JSON block from the authentication tab above and save.
+      </Step>
+      <Step title="Restart Claude">
+        Quit and reopen Claude Desktop. If using OAuth, a browser window opens on first launch for authentication.
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="Cursor">
+    <Steps>
+      <Step title="Open MCP settings">
+        Go to **Settings → Model Context Protocol → Add Custom Server**, or edit `~/.cursor/mcp.json` (global) / `<project>/.cursor/mcp.json` (workspace).
+      </Step>
+      <Step title="Add the server">
+        Paste the JSON block from the authentication tab above and save. Cursor restarts its MCP agent automatically.
+      </Step>
+      <Step title="Authenticate">
+        If using OAuth, a browser window opens on first launch. Log in with your Elementary account to complete authentication.
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
