@@ -20,6 +20,8 @@ https://prod.api.elementary-data.com/mcp/
 
     When you start the MCP server for the first time, your client opens a browser window so you can log in with your Elementary account. The MCP server uses your authenticated user's permissions directly (user-scoped).
 
+    Use the following config in the client setup steps below:
+
     ```json filename="mcp.json"
     {
       "mcpServers": {
@@ -63,6 +65,16 @@ https://prod.api.elementary-data.com/mcp/
     - **Account tokens** are account-scoped with "Can View" permissions.
 
     Treat tokens like passwords: do not share or commit them, rotate regularly, and revoke immediately if compromised.
+
+    #### Install `mcp-remote` (optional)
+
+    Our configs use `npx` to fetch `mcp-remote` automatically — no global install required. If you prefer a global install:
+
+    ```bash
+    npm install -g mcp-remote@latest
+    ```
+
+    Use the following config in the client setup steps below:
 
     ```jsonc filename="mcp.json"
     {
