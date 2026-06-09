@@ -62,6 +62,44 @@ vars:
 Disabling these hooks means you will lose this data for those runs. Only disable hooks for runs you don't want to monitor (e.g., local development). This will reduce the amount of data processed and uploaded at the end of each run, but will impact the completeness of reports and monitoring for those runs.
 </Warning>
 
+## Disable test table cleanup during on-run-end
+
+Elementary creates temporary tables during test execution and cleans them up at the end of each run. For large projects with many tests, this cleanup phase can become a significant portion of the `on_run_end` time.
+
+If you observe in the logs that the slow phase is the test table cleanup, you can disable it during `on_run_end` and offload it to a dedicated scheduled job instead.
+
+### Disable automatic cleanup
+
+Add the following to your `dbt_project.yml`:
+
+```yaml dbt_project.yml
+vars:
+  clean_elementary_temp_tables: false
+```
+
+### Run cleanup in a dedicated job
+
+After disabling automatic cleanup, schedule a recurring dbt operation to clean up stale test tables:
+
+```bash
+dbt run-operation elementary.cleanup_stale_test_tables
+```
+
+You can pass optional arguments to control the cleanup behavior:
+
+```bash
+dbt run-operation elementary.cleanup_stale_test_tables --args '{"hours": 48, "limit": 1000}'
+```
+
+**Parameters:**
+
+- **`hours`** (default: `24`): Only delete test tables that are older than this many hours. Increase this value if you want to retain temporary tables for longer before cleanup.
+- **`limit`** (default: `2000`): Maximum number of tables to delete per run. Use this to cap the cleanup operation and avoid long-running jobs when many stale tables have accumulated.
+
+<Info>
+We recommend scheduling this job to run daily. If a large number of stale tables have built up, the `limit` parameter prevents the first cleanup from running indefinitely — you can run the job multiple times until all stale tables are removed.
+</Info>
+
 ## Limit Hooks to Production or Specific Targets
 
 If you only need full observability in production, configure Elementary to run hooks only for specific targets. This is especially useful when you want to:
