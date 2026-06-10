@@ -1,7 +1,7 @@
 import re
 import statistics
 from collections import defaultdict
-from typing import DefaultDict, Dict, List, Optional, Union, cast
+from typing import DefaultDict, Dict, List, Optional, Union
 
 from dateutil import tz
 
@@ -446,6 +446,30 @@ class TestsAPI(APIClient):
         )
 
     @staticmethod
+    def _normalize_results_sample(
+        sample_data: Optional[Union[dict, list]],
+    ) -> Optional[list]:
+        """Normalize sample_data to a list of row dicts.
+
+        The dbt macro get_test_results can return sample_data as either:
+          - a list of row dicts (expected shape, used by most dbt versions), or
+          - a dict wrapping the rows under a key such as "rows", "sample_rows",
+            "results_sample", or "data" (observed in some dbt-core 1.x / package
+            version combinations, causing results_sample to be silently empty in
+            the EDR report).
+
+        See: https://github.com/elementary-data/elementary/issues/2269
+        """
+        if isinstance(sample_data, list):
+            return sample_data
+        if isinstance(sample_data, dict):
+            for key in ("rows", "sample_rows", "results_sample", "data"):
+                value = sample_data.get(key)
+                if isinstance(value, list):
+                    return value
+        return None
+
+    @staticmethod
     def _get_test_result_from_test_result_db_row(
         test_result_db_row: TestResultDBRowSchema,
         disable_samples: bool = False,
@@ -453,8 +477,9 @@ class TestsAPI(APIClient):
         test_results: Optional[Union[DbtTestResultSchema, ElementaryTestResultSchema]]
 
         if test_result_db_row.test_type == "dbt_test":
-            # Sample data is always a list for non-elementary tests
-            sample_data = cast(Optional[list], test_result_db_row.sample_data)
+            sample_data = TestsAPI._normalize_results_sample(
+                test_result_db_row.sample_data
+            )
             if disable_samples:
                 sample_data = None
 
