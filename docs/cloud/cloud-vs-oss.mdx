@@ -2,57 +2,86 @@
 title: "Elementary OSS vs. Elementary Cloud"
 'og:title': "Elementary OSS vs. Elementary Cloud"
 sidebarTitle: "Cloud vs OSS"
-description: "Detailed comparison of Elementary product offerings."
+description: "Compare Elementary OSS and Elementary Cloud: AI agents, coverage, lineage, security, and how to choose between the open-source package and the managed platform."
 icon: "list-check"
 ---
 
 
-If you’re just beginning your data quality journey, the decision between OSS and Cloud depends on your goals and team setup:
+If you're just beginning your data quality journey, the decision between OSS and Cloud depends on your goals and team setup.
 
 <Icon icon="github" iconType="solid" /> **Elementary OSS**
 
-A self-maintained, open-source CLI that integrates seamlessly with your dbt project and the Elementary dbt package. It enables alerting and provides the self-hosted Elementary data observability report, offering a comprehensive view of your dbt runs, all dbt test results, data lineage, and test coverage.
+A self-maintained, open-source CLI that integrates with your dbt project and the Elementary dbt package. It covers a single dbt project with dbt test results, table-level lineage, test coverage, and basic alerting, all through the self-hosted Elementary observability report.
 
 <Icon icon="cloud" iconType="solid" /> **Elementary Cloud**
-  
-A fully managed, enterprise-ready solution designed for scalability and automation. It offers automated ML-powered anomaly detection, flexible data discovery, an integrated incident management system, and collaboration features. Delivering high value with minimal setup and infrastructure maintenance, it's ideal for teams looking to enhance data reliability without operational overhead.
 
-This short video covers the difference between OSS and Cloud:
+A fully managed platform for data observability, quality, and governance, with no infrastructure to maintain. It covers many dbt projects end to end, from ingestion to BI and AI consumption, with column-level lineage, ML-powered detection, governance, and enterprise security built in.
 
-<Frame>
-  <div style={{ paddingBottom: "64.98194945848375%" }}>
-    <iframe
-      src="https://www.loom.com/embed/01c6e1ae1ec045f2a594aa05ac56600f"
-      frameborder="0"
-      webkitAllowFullScreen
-      mozAllowFullScreen
-      allowfullscreen
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-      }}
-    ></iframe>
-  </div>
-</Frame>
+All of these signals feed the context engine that powers the Elementary AI agents and MCP. The agents work in the background while you supervise, and help you work at scale: they recommend tests, triage and resolve incidents, enrich governance metadata, and optimize costly models and tests.
+
+Through the MCP, the Elementary context is provided to other agents, like analytics and code agents, so they return more accurate results on trustworthy data.
+
+<Note>
+  Elementary is code-first. Tests, monitors, and configuration live in your dbt project and code repository, not locked inside a vendor UI. OSS and Cloud share the same foundation, so there is no vendor lock-in.
+</Note>
+
+<Card title="Not sure which one fits?" icon="calendar" href="https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs">
+  If you're trying to decide what would work best, feel free to talk to the team.
+</Card>
 
 ### Comparing Elementary OSS to Elementary Cloud
 
-Below is a detailed comparison between the OSS and Cloud features: 
+Below is a detailed comparison between the OSS and Cloud features:
 
 | Feature                | **OSS**                                  | **Cloud**                                                                                          |
 |------------------------|------------------------------------------|---------------------------------------------------------------------------------------------------|
-| **Detection**          | <ul><li>Anomaly detection and dbt tests</li></ul>       | <ul><li>Automated freshness & volume monitors</li><li>ML-powered anomaly detection</li><li>dbt and cloud tests</li><li>Bulk add/edit for tests</li></ul> |
-| **Triage & Response**  | <ul><li>Basic alerts</li><li>Table-level lineage</li></ul> | <ul><li>Interactive alerts</li><li>Column-level lineage up to BI</li><li>BI integrations</li><li>Test results history</li><li>Incident management</li></ul> |
-| **Performance Monitoring** | <ul><li>Model and test performance</li></ul>            | <ul><li>Model and test performance</li><li>Performance alerts</li></ul> |
-| **Enabling Non-Tech Users** | X                                      | <ul><li>No-code test editor</li><li>Data health scores</li><li>External catalog integrations</li><li>Ticketing system integrations</li></ul> |
-| **Governance**         | X                                      | <ul><li>Catalog</li><li>Metadata in code and UI</li></ul> |
+| **AI agents & MCP**    | <ul><li>No AI</li></ul>                  | <ul><li>A [team of AI agents](/cloud/ai-agents/overview) you put to work at scale while you supervise (governance, triage, test recommendation, catalog, performance & cost)</li><li>[Context engine](/cloud/ai-agents/context-engine) across your stack</li><li>[MCP server](/cloud/mcp/overview) for your own AI tools</li></ul> |
+| **Coverage**           | <ul><li>Single dbt project and its warehouse</li></ul> | <ul><li>Multiple dbt projects</li><li>End to end, from [ingestion](/cloud/integrations/pipeline/fivetran) (Fivetran, SAP, and more) through the warehouse and dbt to [BI](/cloud/features/data-lineage/exposures-lineage) and [AI consumption](/cloud/mcp/overview)</li></ul> |
+| **Data lineage**       | <ul><li>Table-level lineage</li></ul>    | <ul><li>[Column-level lineage up to BI](/cloud/features/data-lineage/column-level-lineage)</li><li>[Downstream exposures](/cloud/features/data-lineage/exposures-lineage)</li></ul> |
+| **Detection**          | <ul><li>dbt tests and anomaly detection tests (freshness, volume)</li></ul> | <ul><li>[ML-powered anomaly detection](/cloud/features/anomaly-detection/monitors-overview)</li><li>[No-code cloud tests](/cloud/features/data-tests/cloud-tests-overview)</li><li>[Schema validation](/cloud/features/data-tests/schema-validation-test) and [data contracts](/cloud/features/data-tests/data-contract-test)</li><li>Bulk add/edit for tests</li></ul> |
+| **Test coverage**      | <ul><li>Test results in the self-hosted report</li></ul> | <ul><li>[Test coverage screen](/cloud/features/data-tests/test-coverage-screen)</li><li>Automated coverage recommendations</li></ul> |
+| **Triage & Response**  | <ul><li>Basic Slack and Teams alerts</li></ul> | <ul><li>[Interactive alerts](/cloud/features/alerts-and-incidents/alerts-and-incidents-overview) and [alert rules](/cloud/features/alerts-and-incidents/alert-rules)</li><li>[Incident management](/cloud/features/alerts-and-incidents/incident-management)</li><li>[BI integrations](/cloud/integrations/bi/connect-bi-tool)</li><li>Test results history</li></ul> |
+| **Performance & cost** | <ul><li>Model and test performance</li></ul>            | <ul><li>[Model and test performance](/cloud/features/performance-monitoring/performance-monitoring)</li><li>[Performance alerts](/cloud/features/performance-monitoring/performance-alerts)</li><li>Continuous cost and performance monitoring</li></ul> |
+| **Governance**         | X                                      | <ul><li>[Catalog](/cloud/features/collaboration-and-communication/catalog)</li><li>[Metadata in code and UI](/cloud/features/data-governance/manage-metadata)</li><li>[AI-generated descriptions](/cloud/features/data-governance/ai-descriptions)</li><li>[Critical assets](/cloud/features/data-governance/critical_assets)</li></ul> |
+| **Enabling non-technical users** | X                                      | <ul><li>[No-code test editor](/cloud/features/data-tests/cloud-tests-overview)</li><li>[Data health scores](/cloud/features/collaboration-and-communication/data-health)</li><li>[External catalog integrations](/cloud/integrations/governance/atlan)</li><li>Ticketing integrations ([Jira](/cloud/integrations/alerts/jira), [Linear](/cloud/integrations/alerts/linear), [ServiceNow](/cloud/integrations/alerts/servicenow))</li></ul> |
+| **Security & privacy** | <ul><li>Fully self-hosted, your data and metadata stay in your environment</li></ul> | <ul><li>[RBAC](/cloud/features/roles-and-permissions) at account, environment, and asset level</li><li>SSO ([Okta](/cloud/integrations/security-and-connectivity/okta), [Microsoft Entra](/cloud/integrations/security-and-connectivity/ms-entra))</li><li>[Audit logs](/cloud/features/collaboration-and-communication/audit_logs/overview) and [PrivateLink](/cloud/integrations/security-and-connectivity/aws-privatelink-integration)</li><li>[SOC 2 Type II and HIPAA](/cloud/general/security-and-privacy), metadata only and no raw data access</li></ul> |
 
+### Frequently asked questions
+
+<AccordionGroup>
+  <Accordion title="What is the difference between Elementary OSS and Elementary Cloud?">
+    Elementary OSS is an open-source CLI and dbt package that you host yourself. It covers a single dbt project with dbt test results, table-level lineage, test coverage, and basic alerting. Elementary Cloud is a fully managed platform that adds ML-powered anomaly detection, column-level lineage up to BI, incident management, governance, enterprise security, and a team of AI agents you put to work at scale, across multiple dbt projects, with no infrastructure to maintain.
+  </Accordion>
+  <Accordion title="Is Elementary OSS free?">
+    Yes. Elementary OSS is open source and free to use. You install the dbt package and CLI in your own environment and run the observability report yourself.
+  </Accordion>
+  <Accordion title="Can I try Elementary Cloud for free?">
+    Yes. You can start a free Elementary Cloud trial at [app.elementary-data.com](https://app.elementary-data.com/). If you're not sure whether OSS or Cloud fits your setup, you can also [talk to the team](https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs).
+  </Accordion>
+  <Accordion title="Does Elementary Cloud include everything in OSS?">
+    Yes. Cloud builds on the same open-source foundation and includes the OSS capabilities, then adds automated detection, lineage, governance, security, and AI agents on top.
+  </Accordion>
+  <Accordion title="Can I move from Elementary OSS to Elementary Cloud?">
+    Yes. Cloud uses the same Elementary dbt package, so moving from OSS to Cloud means connecting your existing dbt project rather than starting over. See the [dbt package quickstart](/cloud/onboarding/quickstart-dbt-package).
+  </Accordion>
+  <Accordion title="Does Elementary lock me into a vendor?">
+    No. Elementary is code-first. Your tests, monitors, and configuration live in your dbt project and code repository, not inside a vendor UI, so you keep full ownership and can move between OSS and Cloud freely.
+  </Accordion>
+  <Accordion title="Is Elementary Cloud secure, and does it access my data?">
+    Elementary Cloud is SOC 2 Type II certified and HIPAA compliant. It collects metadata, logs, and aggregated metrics only, with no read access to raw data in your warehouse. It supports [RBAC](/cloud/features/roles-and-permissions), SSO, audit logs, and [PrivateLink](/cloud/integrations/security-and-connectivity/aws-privatelink-integration). See [security and privacy](/cloud/general/security-and-privacy) for details.
+  </Accordion>
+  <Accordion title="Which one should I choose?">
+    Choose OSS for a free, self-hosted package on a single dbt project. Choose Cloud to cover multiple projects end to end with automated detection, governance, enterprise security, and AI agents you supervise at scale, without managing infrastructure.
+  </Accordion>
+</AccordionGroup>
 
 ### Want to know more?
 
-<Card title="Book a call with our team" href="https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs" />
-
-<Card title="Get started with a free Cloud trial" href="https://app.elementary-data.com/" />
+<CardGroup cols={2}>
+  <Card title="Start free" icon="rocket" href="https://app.elementary-data.com/">
+    Get started with a free Elementary Cloud trial.
+  </Card>
+  <Card title="Want to know if it's what you need?" icon="calendar" href="https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs">
+    Book some time with our team.
+  </Card>
+</CardGroup>
