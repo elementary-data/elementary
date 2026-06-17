@@ -56,11 +56,104 @@
           ]
         },
         {
-          "type": "section",
-          "text": {
-            "type": "mrkdwn",
-            "text": "```Column 1     Column 2     Column 3\n-----------  -----------  -----------\nRow 1 Col 1  Row 1 Col 2  Row 1 Col 3\nRow 2 Col 1  Row 2 Col 2  Row 2 Col 3```"
-          }
+          "type": "table",
+          "rows": [
+            [
+              {
+                "type": "rich_text",
+                "elements": [
+                  {
+                    "type": "rich_text_section",
+                    "elements": [
+                      {
+                        "type": "text",
+                        "text": "Column 1",
+                        "style": {
+                          "bold": true
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "rich_text",
+                "elements": [
+                  {
+                    "type": "rich_text_section",
+                    "elements": [
+                      {
+                        "type": "text",
+                        "text": "Column 2",
+                        "style": {
+                          "bold": true
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "rich_text",
+                "elements": [
+                  {
+                    "type": "rich_text_section",
+                    "elements": [
+                      {
+                        "type": "text",
+                        "text": "Column 3",
+                        "style": {
+                          "bold": true
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ],
+            [
+              {
+                "type": "raw_text",
+                "text": "Row 1 Col 1"
+              },
+              {
+                "type": "raw_text",
+                "text": "Row 1 Col 2"
+              },
+              {
+                "type": "raw_text",
+                "text": "Row 1 Col 3"
+              }
+            ],
+            [
+              {
+                "type": "raw_text",
+                "text": "Row 2 Col 1"
+              },
+              {
+                "type": "raw_text",
+                "text": "Row 2 Col 2"
+              },
+              {
+                "type": "raw_text",
+                "text": "Row 2 Col 3"
+              }
+            ]
+          ],
+          "column_settings": [
+            {
+              "align": "left",
+              "is_wrapped": false
+            },
+            {
+              "align": "left",
+              "is_wrapped": false
+            },
+            {
+              "align": "left",
+              "is_wrapped": false
+            }
+          ]
         },
         {
           "type": "section",

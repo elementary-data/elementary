@@ -37,6 +37,14 @@ def _get_alert_node_name(alert: PendingAlertSchema) -> Optional[str]:
     return alert_node_name
 
 
+def _safe_parse_status(raw_status: Optional[str]) -> Optional[Status]:
+    """Parse a raw alert status into a Status enum, or None if it isn't recognized."""
+    try:
+        return Status(raw_status)
+    except ValueError:
+        return None
+
+
 def apply_filters_schema_on_alert(
     alert: PendingAlertSchema, filters_schema: FiltersSchema
 ) -> bool:
@@ -50,7 +58,9 @@ def apply_filters_schema_on_alert(
         else []
     )
     owners = alert.data.unified_owners or []
-    status = Status(alert.data.status)
+    status = _safe_parse_status(alert.data.status)
+    if status is None:
+        return False
     resource_type = ResourceType(alert.data.resource_type)
     if hasattr(alert.data, "test_unique_id"):
         test_ids = [alert.data.test_unique_id] if alert.data.test_unique_id else []

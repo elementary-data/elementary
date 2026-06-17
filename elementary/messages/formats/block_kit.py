@@ -2,7 +2,6 @@ import json
 from typing import Any, Callable, List, Optional, Tuple
 
 from slack_sdk.models import blocks as slack_blocks
-from tabulate import tabulate
 
 from elementary.messages.blocks import (
     ActionBlock,
@@ -50,7 +49,8 @@ ResolveMentionCallback = Callable[[str], Optional[str]]
 class BlockKitBuilder:
     _SECONDARY_FACT_CHUNK_SIZE = 2
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3  # length of markdown's code suffix (```)
-    _MAX_CELL_LENGTH_BY_COLUMN_COUNT = {4: 11, 3: 14, 2: 22, 1: 40, 0: 40}
+    _MAX_SLACK_TABLE_COLUMNS = 20
+    _MAX_SLACK_TABLE_ROWS = 100
 
     def __init__(
         self, resolve_mention: Optional[ResolveMentionCallback] = None
@@ -58,6 +58,7 @@ class BlockKitBuilder:
         self._blocks: List[dict] = []
         self._attachment_blocks: List[dict] = []
         self._is_divided = False
+        self._has_table_block = False
         self._resolve_mention = resolve_mention or (lambda x: None)
 
     def _format_icon(self, icon: Icon) -> str:
@@ -97,13 +98,6 @@ class BlockKitBuilder:
         return block.sep.join(
             [self._format_inline_block(inline) for inline in block.inlines]
         )
-
-    def _format_table_cell(self, cell_value: Any, column_count: int) -> str:
-        value = str(cell_value)
-        max_cell_length = self._MAX_CELL_LENGTH_BY_COLUMN_COUNT[column_count]
-        if len(value) > max_cell_length:
-            return value[: max_cell_length - 2] + ".."
-        return value
 
     def _format_markdown_section_text(self, text: str) -> dict:
         if len(text) > slack_blocks.SectionBlock.text_max_length:
@@ -257,24 +251,50 @@ class BlockKitBuilder:
         self._add_block({"type": "divider"})
         self._is_divided = True
 
+    def _make_header_cell(self, text: str) -> dict:
+        return {
+            "type": "rich_text",
+            "elements": [
+                {
+                    "type": "rich_text_section",
+                    "elements": [
+                        {"type": "text", "text": str(text), "style": {"bold": True}}
+                    ],
+                }
+            ],
+        }
+
+    def _make_data_cell(self, value: Any) -> dict:
+        text = str(value) if value is not None else "NULL"
+        return {"type": "raw_text", "text": text or " "}
+
     def _add_table_block(self, block: TableBlock) -> None:
         column_count = len(block.headers)
-        if column_count not in self._MAX_CELL_LENGTH_BY_COLUMN_COUNT:
+
+        if column_count > self._MAX_SLACK_TABLE_COLUMNS or self._has_table_block:
             dicts = [
                 {header: cell for header, cell in zip(block.headers, row)}
                 for row in block.rows
             ]
-            table_text = json.dumps(dicts, indent=2)
-        else:
-            new_rows = [
-                [self._format_table_cell(cell, column_count) for cell in row]
-                for row in block.rows
-            ]
-            new_headers = [
-                self._format_table_cell(cell, column_count) for cell in block.headers
-            ]
-            table_text = tabulate(new_rows, headers=new_headers, tablefmt="simple")
-        self._add_block(self._format_markdown_section(f"```{table_text}```"))
+            self._add_block(
+                self._format_markdown_section(f"```{json.dumps(dicts, indent=2)}```")
+            )
+            return
+
+        rows: List[List[dict]] = [[self._make_header_cell(h) for h in block.headers]]
+        for row in block.rows[: self._MAX_SLACK_TABLE_ROWS - 1]:
+            rows.append([self._make_data_cell(v) for v in row])
+
+        self._add_block(
+            {
+                "type": "table",
+                "rows": rows,
+                "column_settings": [
+                    {"align": "left", "is_wrapped": False} for _ in block.headers
+                ],
+            }
+        )
+        self._has_table_block = True
 
     def _add_actions_block(self, block: ActionsBlock) -> None:
         self._add_block(
@@ -337,6 +357,7 @@ class BlockKitBuilder:
     def build(self, message: MessageBody) -> FormattedBlockKitMessage:
         self._blocks = []
         self._attachment_blocks = []
+        self._has_table_block = False
         self._add_message_blocks(message.blocks)
         color_code = COLOR_MAP.get(message.color) if message.color else None
         blocks, attachment_blocks = self._get_final_blocks(message.color)

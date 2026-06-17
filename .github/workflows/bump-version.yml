@@ -68,6 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     env:
       CLI_VERSION: ${{ needs.validate-version.outputs.validated-cli-version }}
       DBT_PACKAGE_VERSION: ${{ needs.validate-version.outputs.validated-dbt-package-version || needs.validate-version.outputs.default-dbt-package-version }}
@@ -75,46 +76,59 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      - name: Create release branch
-        run: git checkout -b "$RELEASE_BRANCH"
-      - name: Initial config
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email noreply@github.com
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      # dbt-core==1.8 is the first dbt version we support
+      - name: Install dbt-core
+        run: pip install "dbt-core==1.8"
       - name: Bump version
         run: |
           sed -i "s/^version = \"[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\"/version = \"$CLI_VERSION\"/" ./pyproject.toml
-      - name: Bump version for package (using input)
-        if: ${{ needs.validate-version.outputs.validated-dbt-package-version != ''}}
+      - name: Bump dbt package version
         run: |
           sed -i "s/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: $DBT_PACKAGE_VERSION/" ./elementary/monitor/dbt_project/packages.yml
-          sed -i "s/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: $DBT_PACKAGE_VERSION/" ./docs/_snippets/quickstart-package-install.mdx
-      - name: Bump version for package (using default)
-        if: ${{ needs.validate-version.outputs.validated-dbt-package-version == ''}}
-        run: |
-          sed -i "s/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: $DBT_PACKAGE_VERSION/" ./elementary/monitor/dbt_project/packages.yml
-          sed -i "s/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: $DBT_PACKAGE_VERSION/" ./docs/_snippets/quickstart-package-install.mdx
-      - name: Commit changes
-        run: git commit -am "release v$CLI_VERSION"
-      - name: Push code
-        run: git push origin "$RELEASE_BRANCH"
+          dbt deps --lock --project-dir elementary/monitor/dbt_project
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v8.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ env.RELEASE_BRANCH }}
+          base: master
+          commit-message: "release v${{ env.CLI_VERSION }} (dbt package v${{ env.DBT_PACKAGE_VERSION }})"
+          title: "Release v${{ env.CLI_VERSION }} (dbt package v${{ env.DBT_PACKAGE_VERSION }})"
+          body: "Opened automatically using bump version workflow"
 
-  create-pr:
-    needs:
-      - validate-version
-      - bump-version
+  update-docs-branch:
+    needs: validate-version
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
+    env:
+      DBT_PACKAGE_VERSION: ${{ needs.validate-version.outputs.validated-dbt-package-version || needs.validate-version.outputs.default-dbt-package-version }}
+      DOCS_RELEASE_BRANCH: release/docs-v${{ needs.validate-version.outputs.validated-cli-version }}
     steps:
-      - uses: actions/checkout@v6
-      - name: create pull request
-        # repo-sync/pull-request v2.12.1, checked 2026-04-26.
-        uses: repo-sync/pull-request@7e79a9f5dc3ad0ce53138f01df2fad14a04831c5
+      - name: Checkout docs branch
+        uses: actions/checkout@v6
         with:
-          source_branch: "release/v${{ needs.validate-version.outputs.validated-cli-version }}"
-          destination_branch: "master"
-          pr_title: "release/v${{ needs.validate-version.outputs.validated-cli-version }}"
-          pr_body: "Open automatically using bump version workflow"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          ref: docs
+      - name: Bump dbt package
+        run: |
+          files=(
+            docs/snippets/quickstart-package-install.mdx
+            docs/data-tests/dbt/upgrade-package.mdx
+          )
+          for file in "${files[@]}"; do
+            sed -i "s/version: [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/version: $DBT_PACKAGE_VERSION/" "./$file"
+          done
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v8.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ env.DOCS_RELEASE_BRANCH }}
+          base: docs
+          commit-message: "docs: bump package version to v${{ env.DBT_PACKAGE_VERSION }}"
+          title: "Docs: bump dbt package to v${{ env.DBT_PACKAGE_VERSION }}"
+          body: "Opened automatically using bump version workflow"

@@ -211,3 +211,20 @@ edr monitor --suppression-interval [int]
 ```shell
 edr monitor --override-dbt-project-config --slack-token <your_slack_token> --slack-channel-name <slack_channel_to_post_at> --suppression-interval 0
 ```
+
+## Internal dbt project directories
+
+Elementary ships an internal dbt project that `edr` runs to read your test results. By default it writes its compiled SQL artifacts and installed dbt packages **inside the installed `elementary` package directory**. In restrictive deployments (UAT / production) where the executing user has no write access to that location, override the paths with the following environment variables:
+
+- **`EDR_INTERNAL_TARGET_PATH`** — directory for the internal dbt project's compiled SQL and run artifacts. Default is `target` (relative to the internal project). Set it to a writable absolute path, e.g. `/var/tmp/edr_target`. (This is intentionally distinct from dbt's standard `DBT_TARGET_PATH`, which `edr` uses to locate your own project's artifacts — see `upload-source-freshness`.)
+- **`DBT_PACKAGES_FOLDER`** — directory where the internal dbt project installs its dbt packages. Default is `dbt_packages` (relative to the internal project). Set it to a writable absolute path, e.g. `/var/tmp/edr_packages`.
+
+```shell
+export EDR_INTERNAL_TARGET_PATH="/var/tmp/edr_target"
+export DBT_PACKAGES_FOLDER="/var/tmp/edr_packages"
+edr monitor
+```
+
+<Info>
+  These environment variables configure the **internal** dbt project bundled with Elementary. They are separate from the `--target-path` CLI option above, which controls where `edr`'s own logs and reports are written.
+</Info>

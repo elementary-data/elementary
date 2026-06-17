@@ -104,7 +104,10 @@ elementary_tests:
       type: snowflake
       account: {{ snowflake_account | toyaml }}
       user: {{ snowflake_user | toyaml }}
-      password: {{ snowflake_password | toyaml }}
+      private_key: {{ snowflake_private_key | toyaml }}
+      {%- if snowflake_private_key_passphrase is defined and snowflake_private_key_passphrase %}
+      private_key_passphrase: {{ snowflake_private_key_passphrase | toyaml }}
+      {%- endif %}
       role: {{ snowflake_role | toyaml }}
       database: {{ snowflake_database | toyaml }}
       warehouse: {{ snowflake_warehouse | toyaml }}
