@@ -2,7 +2,7 @@ Elementary can capture and store the compiled SQL of [dbt microbatch incremental
 
 ## How it works
 
-Elementary provides the `capture_microbatch_compiled_code_sql` macro that captures the compiled SQL of each batch as it runs. The captured code is cached during the invocation and later written to `dbt_run_results.compiled_code`, so microbatch models populate this column the same way other incremental strategies do.
+Elementary provides the `capture_and_execute_microbatch_compiled_code_sql` macro that captures the compiled SQL of each batch as it runs. The captured code is cached during the invocation and later written to `dbt_run_results.compiled_code`, so microbatch models populate this column the same way other incremental strategies do.
 
 ## Enabling microbatch compiled code capture
 
@@ -12,7 +12,7 @@ Elementary provides the `capture_microbatch_compiled_code_sql` macro that captur
 
     ```sql filename="macros/get_incremental_microbatch_sql.sql"
     {% macro get_incremental_microbatch_sql(arg_dict) %}
-      {{ return(elementary.capture_microbatch_compiled_code_sql(arg_dict)) }}
+      {{ return(elementary.capture_and_execute_microbatch_compiled_code_sql(arg_dict)) }}
     {% endmacro %}
     ```
   </Step>
@@ -49,4 +49,3 @@ It is also not supported on dbt Fusion.
 
 On unsupported adapters and on Fusion, microbatch models continue to run normally but `dbt_run_results.compiled_code` remains empty for them.
 </Warning>
-
