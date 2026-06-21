@@ -10,4 +10,4 @@ packages:
   #   revision: 9f32d47faa00f77595d535619cdbc265d7f603c2
   #  When releasing a new version of the package, if the current version is using a commit hash, update the version to the new version.
   # - package: elementary-data/elementary
-  #   version: 0.24.0
+  #   version: 0.25.0
