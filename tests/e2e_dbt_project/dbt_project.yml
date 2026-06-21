@@ -32,4 +32,5 @@ models:
 
   elementary:
     +schema: elementary
+    +root_path: elementary
     +file_format: "{{ 'delta' if target.type == 'spark' else none }}"
