@@ -4,52 +4,100 @@ sidebarTitle: Incident management
 badge: "Elementary Cloud"
 ---
 
-The `Incidents` page is designed to enable your team to stay on top of open incidents and collaborate on resolving them.
-The page gives a comprehensive overview of all current and previous incidents, where users can view the status, prioritize, assign and resolve incidents.
+The Incidents page is designed to help your team stay on top of open incidents and collaborate on resolving them. It provides a comprehensive overview of all current and past incidents, where users can view the status, prioritize, assign, and resolve incidents.
 
-## Incidents view and filters
+## Incidents list
 
-The page provides a view of all incidents, and useful filters:
+Incidents are organized in a grouped table with three sections: **Open**, **Acknowledged**, and **Resolved**. Each group header shows a count of incidents and a breakdown by severity.
 
-- **Quick Filters:** Preset quick filters for all, unresolved and “open and unassigned” incidents.
-- **Filter:** Allows users to filter incidents based on various criteria such as status, severity, model name and assignee.
-- **Time frame:** Filter incidents which were open in a certain timeframe.
-
-<iframe
-width="700"
-height="400"
-src="https://res.cloudinary.com/dvmtceykh/video/upload/v1727258471/incidents_new_vid_utv3sq.mp4"
-frameborder="0"
-allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-allowfullscreen
-alt="Elementary Incidents page"
-></iframe>
-
-
-## Interacting with Incidents
-
-An incident has a status, assignee and severity.
-These can be set in the Incidents page, or from an alert in integrations that support alert actions.
-
-- **Incident status**: Will be set to `open` by default, and can be changed to `Acknowledged` and back to `Open`. When an alert is manually or automatically set as `Resolved`, it will close and will no longer be modified.
-- **Incident assignee**: An incident can be assigned to any user on the team, and they will be notified.
-    - If you assign an incident to a user, it is recommended to leave the incident `Open` until the user changes status to `Acknowledged`.
-- **Incident severity**: Severity of an incident can be Low, Normal, High or Critical. By default, model errors are set to Critical, test failures set to High and warnings are marked as Normal, but the severity can be changed manually.  _Coming soon_ : Severity will be automated by an analysis of the impacted assets.
-
-<Note> Incident severity is used to prioritize incidents and to set the urgency of resolving them. it is not the same as dbt test severity </Note>
-
-## Incidents overview and metrics
-
-The incidents are divided into categories based on their status, and the user can view the number of incidents in each category by severity.
-For resolved incidents, the user can view the average resolution time.
-
-_Coming soon_ : The option to create and share a periodic summary of incidents will be supported in the future.
-
-<Frame>
-<div className="dark:bg-white rounded-md p-1">
-  <img
-    src="https://res.cloudinary.com/dvmtceykh/image/upload/v1727264653/Incident_MGT_Overview_tfmrtj.png"
-    alt="Incidents overview"
-  />
-</div>
+<Frame caption="Incidents list grouped by Open, Acknowledged, and Resolved">
+  <img src="/pics/cloud/incidents_list.png" alt="Incidents list grouped by Open, Acknowledged, and Resolved" />
 </Frame>
+
+The table columns include:
+- **Severity** — editable inline via dropdown
+- **Incident** — title, with a "Merged" chip for incidents containing multiple monitors
+- **First Event** / **Last Event** — when the incident started and when the last failure occurred
+- **Monitors** — status chips showing pass/fail/warning counts
+- **Assignee** — editable inline, searchable dropdown
+- **Status** — editable inline
+
+Columns can be toggled on or off via the column menu. You can sort by severity, first event, last event, monitor count, or assignee.
+
+## Filtering
+
+The incidents page provides several ways to scope your view:
+
+- **Search** — full-text search across incident titles
+- **Filters** — severity, assignee, owner, database/schema/table, critical asset, and monitor count
+- **Quick filters** — preset combinations for common views:
+  - **Unassigned** — incidents with no assignee
+  - **High priority** — unassigned incidents with High or Critical severity
+  - **Critical Assets** — incidents on assets marked as critical
+  - **Merged** — incidents with more than one monitor (result of a merge)
+- **Days back** — adjust the time window (default: 3 days)
+- **Tree selection** — select a folder, asset, or test in the left navigation tree to scope the list
+
+## Incident detail
+
+Clicking an incident row opens a detail drawer on the right side of the screen.
+
+### Header
+
+The top of the drawer shows the incident title, metadata chips (assignee, status, severity), duration, and the number of failing monitors. You can also:
+- Edit the title
+- Add or edit a summary
+- Link or create tickets (Jira, Linear, ServiceNow, etc.)
+
+### Tabs
+
+<Tabs>
+  <Tab title="Lineage">
+    An interactive lineage graph showing the upstream and downstream assets related to all monitors in the incident. Use the hop controls to expand or collapse the graph.
+    
+    <Frame caption="Incident detail — Lineage tab">
+      <img src="/pics/cloud/incident_detail_lineage.png" alt="Incident detail — Lineage tab" />
+    </Frame>
+  </Tab>
+  <Tab title="Monitors">
+    A list of monitor cards — each showing the test name, asset, status, owners, and timestamps. 
+    
+    When an incident contains multiple monitors, you can select monitors and click **Detach** to [split them into separate incidents](/cloud/features/alerts-and-incidents/incident-merging#splitting-incidents-undo-a-merge).
+    
+    <Frame caption="Incident detail — Monitors tab">
+      <img src="/pics/cloud/incident_detail_monitors.png" alt="Incident detail — Monitors tab" />
+    </Frame>
+  </Tab>
+  <Tab title="Timeline">
+    A chronological feed of all events in the incident's history: status and severity changes, alerts sent (with destination links), monitors added or removed, tickets linked, and more.
+    
+    <Frame caption="Incident detail — Timeline tab">
+      <img src="/pics/cloud/incident_detail_timeline.png" alt="Incident detail — Timeline tab" />
+    </Frame>
+  </Tab>
+</Tabs>
+
+## Bulk actions
+
+Select multiple incidents using the checkboxes in the list to perform bulk operations via the floating action menu:
+
+- Change **status**, **severity**, or **assignee** for all selected incidents at once
+- **Merge** selected incidents into one — see [Incident merging](/cloud/features/alerts-and-incidents/incident-merging)
+
+<Frame caption="Bulk action menu for selected incidents">
+  <img src="/pics/cloud/incidents_bulk_actions.png" alt="Bulk action menu for selected incidents" />
+</Frame>
+
+## Ticketing
+
+From the incident detail drawer, you can:
+
+- **Create a ticket** in your connected ticketing tool (Jira, Linear, ServiceNow)
+- **Attach an existing ticket** by ID or URL
+- **Detach a ticket** from the incident
+
+When a ticket is linked, its status is shown in the drawer. If `close_linked_ticket_on_incident_resolve` is enabled, resolving the incident will also close the linked ticket.
+
+## Incident settings
+
+Click the **gear icon** on the incidents page to access incident settings. Currently this includes [auto-merge rules](/cloud/features/alerts-and-incidents/incident-merging#auto-merge-rules) for automatically grouping related incidents.
