@@ -105,6 +105,8 @@
                 "group": "Incidents",
                 "pages": [
                   "cloud/features/alerts-and-incidents/incidents",
+                  "cloud/features/alerts-and-incidents/incident-management",
+                  "cloud/features/alerts-and-incidents/incident-merging",
                   "cloud/features/alerts-and-incidents/incident-digest"
                 ]
               }
@@ -760,10 +762,6 @@
     {
       "source": "/cloud/features/data-governance/manage-metadata",
       "destination": "/cloud/features/collaboration-and-communication/catalog"
-    },
-    {
-      "source": "/cloud/features/alerts-and-incidents/incident-management",
-      "destination": "/cloud/features/alerts-and-incidents/incidents"
     },
     {
       "source": "/cloud/manage-team",
