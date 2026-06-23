@@ -19,15 +19,9 @@ def bump_packages_version(version: str) -> None:
     elementary_found = False
     for i, pkg in enumerate(packages):
         if "git" in pkg and "dbt-data-reliability" in pkg["git"]:
-            trailing = None
-            last_key = list(pkg.keys())[-1]
-            if last_key in pkg.ca.items:
-                trailing = pkg.ca.items[last_key]
             new_pkg = CommentedMap()
             new_pkg["package"] = "elementary-data/elementary"
             new_pkg["version"] = version
-            if trailing is not None:
-                new_pkg.ca.items["version"] = trailing
             packages[i] = new_pkg
             elementary_found = True
             break
