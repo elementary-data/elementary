@@ -162,6 +162,13 @@
                   "cloud/features/collaboration-and-communication/audit_logs/user-activity-logs",
                   "cloud/features/collaboration-and-communication/audit_logs/system-logs"
                 ]
+              },
+              {
+                "group": "Security & Privacy",
+                "pages": [
+                  "cloud/general/security-and-privacy",
+                  "cloud/general/ai-privacy-policy"
+                ]
               }
             ]
           },
