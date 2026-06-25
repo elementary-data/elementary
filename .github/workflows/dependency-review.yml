@@ -1,5 +1,15 @@
 name: Dependency Review
-on: [pull_request, workflow_dispatch]
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      base-ref:
+        description: Base git ref for comparison (e.g. a tag or commit SHA)
+        required: true
+      head-ref:
+        description: Head git ref for comparison (defaults to HEAD)
+        required: false
+        default: HEAD
 
 permissions: {}
 
@@ -16,6 +26,8 @@ jobs:
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
         with:
+          base-ref: ${{ inputs.base-ref || '' }}
+          head-ref: ${{ inputs.head-ref || '' }}
           allow-licenses: >-
             MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC,
             PSF-2.0, Python-2.0, 0BSD, BlueOak-1.0.0,
