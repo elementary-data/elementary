@@ -62,3 +62,13 @@ Configure log streaming from the Logs page by clicking the **Connect** icon, the
     />
   </div>
 </Frame>
+
+### Log Scope
+
+Each integration can be configured to receive a subset of logs:
+
+- **All logs** — account-level events plus every environment.
+- **Account-level only** — only events that aren't tied to a specific environment (e.g. user logins, role changes).
+- **Specific environment** — only events from the selected environment.
+
+Set the scope when connecting an integration, or change it later by editing the integration. Customers with separate cloud accounts per environment commonly pair one **Account-level only** destination for global audit with one **Specific environment** destination per environment.
