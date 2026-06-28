@@ -26,6 +26,7 @@ jobs:
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
         with:
+          fail-on-severity: high
           base-ref: ${{ inputs.base-ref || '' }}
           head-ref: ${{ inputs.head-ref || '' }}
           allow-licenses: >-
