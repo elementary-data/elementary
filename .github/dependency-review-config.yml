@@ -41,12 +41,5 @@ fail-on-severity: high
 # are still blocked.
 allow-dependencies-licenses:
   - pkg:pypi/aiohappyeyeballs
-  - pkg:pypi/gitdb
   - pkg:pypi/lxml
-  - pkg:pypi/python-gitlab
-  - pkg:pypi/text-unidecode
-  - pkg:pypi/python-daemon
-  - pkg:pypi/rfc3987-syntax
-  - pkg:pypi/types-sqlalchemy-utils
   - pkg:pypi/typing-extensions
-  - pkg:pypi/wirerope
