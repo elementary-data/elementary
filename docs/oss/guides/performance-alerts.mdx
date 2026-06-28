@@ -5,5 +5,11 @@ sidebarTitle: "Performance alerts"
 
 import PerformanceAlerts from '/snippets/guides/performance-alerts.mdx';
 
+<Note>
+  This guide covers the dbt-test method for performance alerts, built on top of the Elementary artifacts schema (the `model_run_results` view). This is the approach for Elementary OSS.
+
+  In **Elementary Cloud**, pipeline task performance is monitored natively — Elementary automatically creates a [Cloud pipeline task performance](/cloud/features/anomaly-detection/cloud-pipeline-task-performance) monitor for every model, seed, and snapshot, with anomaly detection or a static SLA. No dbt tests required.
+</Note>
+
 <PerformanceAlerts />
 
