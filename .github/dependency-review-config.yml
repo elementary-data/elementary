@@ -4,6 +4,7 @@ allow-licenses:
   - MIT-0
   - Apache-2.0
   - BSD-2-Clause
+  - BSD-2-Clause-Views
   - BSD-3-Clause
   - ISC
   - PSF-2.0
@@ -44,4 +45,8 @@ allow-dependencies-licenses:
   - pkg:pypi/lxml
   - pkg:pypi/python-gitlab
   - pkg:pypi/text-unidecode
+  - pkg:pypi/python-daemon
+  - pkg:pypi/rfc3987-syntax
+  - pkg:pypi/types-sqlalchemy-utils
   - pkg:pypi/typing-extensions
+  - pkg:pypi/wirerope
