@@ -43,7 +43,3 @@ jobs:
             LicenseRef-scancode-public-domain,
             LicenseRef-scancode-public-domain-disclaimer,
             LicenseRef-scancode-protobuf
-          deny-licenses: >-
-            AGPL-3.0-only, AGPL-3.0-or-later,
-            SSPL-1.0, BUSL-1.1,
-            Elastic-2.0
