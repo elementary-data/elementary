@@ -25,6 +25,10 @@ Select a tab below and follow the steps for your chosen method.
 
 <PermissionsAndSecurity />
 
+For BigQuery, this translates to:
+- **BigQuery Data Viewer** on the Elementary dataset (for reading Elementary schema data).
+- **BigQuery Metadata Viewer** and **BigQuery Resource Viewer** at the **project level** (for reading `INFORMATION_SCHEMA.JOBS` query history and table metadata). These project-level roles are required for BI integrations like Hex that rely on query history.
+
 ### Fill the connection form
 
 Use the **Authentication method** toggle at the top of the form to select either **Service account** or **Workload Identity Federation**, matching the method you set up above. The credentials upload field changes based on your selection:

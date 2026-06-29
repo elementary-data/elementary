@@ -5,9 +5,5 @@ Elementary Cloud doesn't require read permissions to your tables and schemas, bu
 - Read-only access to the Elementary schema.
 - Access to read metadata in `INFORMATION_SCHEMA` (table metadata and query history), related to the tables in your dbt project.
 
-For BigQuery, this translates to:
-- **BigQuery Data Viewer** on the Elementary dataset (for reading Elementary schema data).
-- **BigQuery Metadata Viewer** and **BigQuery Resource Viewer** at the **project level** (for reading `INFORMATION_SCHEMA.JOBS` query history and table metadata). These project-level roles are required for BI integrations like Hex that rely on query history.
-
 It is recommended to create a user using the instructions specified above to avoid granting excess privileges.
 For more details, refer to [security and privacy](/cloud/general/security-and-privacy).

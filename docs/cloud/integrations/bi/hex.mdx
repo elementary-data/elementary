@@ -10,7 +10,7 @@ This will provide you end-to-end data lineage to understand your downstream depe
 
 The Hex integration relies on BigQuery query history to discover which tables Hex projects query. For the integration to work, Elementary's service account must have **read access to `INFORMATION_SCHEMA.JOBS`** in the BigQuery project(s) where Hex executes queries.
 
-This requires the **BigQuery Resource Viewer** role (`roles/bigquery.resourceViewer`) granted at the **project level**. See [BigQuery permissions](/cloud/integrations/dwh/bigquery) for detailed setup instructions.
+This requires the **BigQuery Metadata Viewer** (`roles/bigquery.metadataViewer`) and **BigQuery Resource Viewer** (`roles/bigquery.resourceViewer`) roles granted at the **project level**. See [BigQuery permissions](/cloud/integrations/dwh/bigquery) for detailed setup instructions.
 
 <Note>
 If Elementary cannot read query history, the Hex integration will not discover any exposures. Verify that the service account has the `bigquery.jobs.listAll` permission on the relevant GCP project(s).
