@@ -6,6 +6,16 @@ badge: "Context Engine"
 After you connect Hex, Elementary will automatically and continuously extend the lineage to the project & cell level.
 This will provide you end-to-end data lineage to understand your downstream dependencies, called exposures.
 
+### Prerequisites
+
+The Hex integration relies on BigQuery query history to discover which tables Hex projects query. For the integration to work, Elementary's service account must have **read access to `INFORMATION_SCHEMA.JOBS`** in the BigQuery project(s) where Hex executes queries.
+
+This requires the **BigQuery Resource Viewer** role (`roles/bigquery.resourceViewer`) granted at the **project level**. See [BigQuery permissions](/cloud/integrations/dwh/bigquery) for detailed setup instructions.
+
+<Note>
+If Elementary cannot read query history, the Hex integration will not discover any exposures. Verify that the service account has the `bigquery.jobs.listAll` permission on the relevant GCP project(s).
+</Note>
+
 ### Create API Token
 
 Elementary needs a workspace token in your account in order to access Hex's API on your behalf. <br/>
@@ -20,6 +30,15 @@ Choose the Hex connection and provide the following details to validate and comp
 - **Base URL**: Your Hex workspace URL. For example: `https://app.hex.tech/my-workspace/`
 - **Workspace Token**: The Hex workspace token you've created on the previous step.
 
+### Using a different BigQuery project for Hex queries
+
+By default, Elementary reads query history from the BigQuery project(s) referenced in your dbt project. If Hex executes queries through a **different GCP project** (e.g., a dedicated Hex execution project), you will need to:
+
+1. **Grant permissions on that project** — assign the **BigQuery Resource Viewer** and **BigQuery Metadata Viewer** roles to the Elementary service account at the project level for the Hex execution project (same as for your primary project).
+
+2. **Let us know** — contact Elementary support with the GCP project name so we can configure your environment to also read query history from that project.
+
+Without both steps, Elementary will not find any Hex queries in that project's `INFORMATION_SCHEMA.JOBS`, and no Hex exposures will appear.
 
 ### Limitations
 
