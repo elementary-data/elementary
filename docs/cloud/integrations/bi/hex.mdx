@@ -8,12 +8,15 @@ This will provide you end-to-end data lineage to understand your downstream depe
 
 ### Prerequisites
 
-The Hex integration relies on BigQuery query history to discover which tables Hex projects query. For the integration to work, Elementary's service account must have **read access to `INFORMATION_SCHEMA.JOBS`** in the BigQuery project(s) where Hex executes queries.
+The Hex integration relies on **query history** to discover which tables Hex projects query. Elementary's service account must have permissions to read query history from the data warehouse where Hex executes queries.
 
-This requires the **BigQuery Metadata Viewer** (`roles/bigquery.metadataViewer`) and **BigQuery Resource Viewer** (`roles/bigquery.resourceViewer`) roles granted at the **project level**. See [BigQuery permissions](/cloud/integrations/dwh/bigquery) for detailed setup instructions.
+Refer to the permissions section in your warehouse's setup page for the required roles:
+- [BigQuery permissions](/cloud/integrations/dwh/bigquery#grant-service-user-access)
+- [Snowflake permissions](/cloud/integrations/dwh/snowflake)
+- [Databricks permissions](/cloud/integrations/dwh/databricks)
 
 <Note>
-If Elementary cannot read query history, the Hex integration will not discover any exposures. Verify that the service account has the `bigquery.jobs.listAll` permission on the relevant GCP project(s).
+If Elementary cannot read query history, the Hex integration will not discover any exposures.
 </Note>
 
 ### Create API Token
@@ -30,15 +33,15 @@ Choose the Hex connection and provide the following details to validate and comp
 - **Base URL**: Your Hex workspace URL. For example: `https://app.hex.tech/my-workspace/`
 - **Workspace Token**: The Hex workspace token you've created on the previous step.
 
-### Using a different BigQuery project for Hex queries
+### Hex queries on a different warehouse project
 
-By default, Elementary reads query history from the BigQuery project(s) referenced in your dbt project. If Hex executes queries through a **different GCP project** (e.g., a dedicated Hex execution project), you will need to:
+By default, Elementary reads query history from the warehouse projects and databases referenced in your dbt project. If Hex executes queries through a **different project or database** (e.g., a dedicated Hex execution project), you will need to:
 
-1. **Grant permissions on that project** — assign the **BigQuery Resource Viewer** and **BigQuery Metadata Viewer** roles to the Elementary service account at the project level for the Hex execution project (same as for your primary project).
+1. **Grant query history permissions on that project** — the same permissions required for your primary project. See the [prerequisites](#prerequisites) above for links to your warehouse's permissions page.
 
-2. **Let us know** — contact Elementary support with the GCP project name so we can configure your environment to also read query history from that project.
+2. **Let us know** — contact Elementary support with the project or database name so we can configure your environment to also read query history from it.
 
-Without both steps, Elementary will not find any Hex queries in that project's `INFORMATION_SCHEMA.JOBS`, and no Hex exposures will appear.
+Without both steps, Elementary will not find any Hex queries in that project and no Hex exposures will appear.
 
 ### Limitations
 
