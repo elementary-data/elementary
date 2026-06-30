@@ -33,15 +33,15 @@ Choose the Hex connection and provide the following details to validate and comp
 - **Base URL**: Your Hex workspace URL. For example: `https://app.hex.tech/my-workspace/`
 - **Workspace Token**: The Hex workspace token you've created on the previous step.
 
-### Hex queries on a different warehouse project
+### Hex queries on a different warehouse environment
 
-By default, Elementary reads query history from the warehouse projects and databases referenced in your dbt project. If Hex executes queries through a **different project or database** (e.g., a dedicated Hex execution project), you will need to:
+By default, Elementary reads query history from the warehouse environments (e.g., BigQuery projects, Snowflake accounts, Databricks workspaces) referenced in your dbt project. If Hex executes queries through a **different environment** (e.g., a dedicated Hex execution environment), you will need to:
 
-1. **Grant query history permissions on that project** — the same permissions required for your primary project. See the [prerequisites](#prerequisites) above for links to your warehouse's permissions page.
+1. **Grant query history permissions** — the same permissions required for your primary environment. See the [prerequisites](#prerequisites) above for links to your warehouse's permissions page.
 
-2. **Let us know** — contact Elementary support with the project or database name so we can configure your environment to also read query history from it.
+2. **Let us know** — contact Elementary support with the environment details so we can configure Elementary to also read query history from it.
 
-Without both steps, Elementary will not find any Hex queries in that project and no Hex exposures will appear.
+Without both steps, Elementary will not find any Hex queries in that environment and no Hex exposures will appear.
 
 ### Limitations
 
