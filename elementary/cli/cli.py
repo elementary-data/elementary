@@ -5,6 +5,8 @@ import click
 
 import elementary.cli.logo
 import elementary.cli.upgrade
+from elementary.artifacts.cli import artifacts
+from elementary.artifacts.common import is_artifacts_invocation
 from elementary.config.config import Config
 from elementary.monitor.cli import monitor, report, send_report
 from elementary.operations.cli import run_operation
@@ -12,8 +14,11 @@ from elementary.tracking.anonymous_tracking import AnonymousCommandLineTracking
 from elementary.utils import package
 from elementary.utils.log import get_logger, set_root_logger_handlers
 
-elementary.cli.logo.print_elementary_logo()
-elementary.cli.upgrade.recommend_version_upgrade()
+_ARTIFACTS_MODE = is_artifacts_invocation()
+
+if not _ARTIFACTS_MODE:
+    elementary.cli.logo.print_elementary_logo()
+    elementary.cli.upgrade.recommend_version_upgrade()
 
 logger = get_logger(__name__)
 
@@ -44,7 +49,8 @@ class ElementaryCLI(click.Group):
 
     def format_help(self, ctx, formatter):
         try:
-            click.echo("Loading dependencies (this might take a few seconds)")
+            if not _ARTIFACTS_MODE:
+                click.echo("Loading dependencies (this might take a few seconds)")
             AnonymousCommandLineTracking(config=Config()).track_cli_help()
         except Exception:
             pass
@@ -55,9 +61,14 @@ class ElementaryCLI(click.Group):
 
     def invoke(self, ctx: click.Context) -> Any:
         files_target_path = get_log_path(ctx)
-        quiet_logs = get_quiet_logs(ctx)
-        set_root_logger_handlers("elementary", files_target_path, quiet_logs=quiet_logs)
-        if not quiet_logs:
+        quiet_logs = get_quiet_logs(ctx) or _ARTIFACTS_MODE
+        set_root_logger_handlers(
+            "elementary",
+            files_target_path,
+            quiet_logs=quiet_logs,
+            use_stderr=_ARTIFACTS_MODE,
+        )
+        if not quiet_logs and not _ARTIFACTS_MODE:
             click.echo(
                 "Any feedback and suggestions are welcomed! join our community here - "
                 "https://bit.ly/slack-elementary\n"
@@ -82,6 +93,7 @@ cli.add_command(monitor)
 cli.add_command(report)
 cli.add_command(send_report, name="send-report")
 cli.add_command(run_operation, name="run-operation")
+cli.add_command(artifacts)
 
 
 if __name__ == "__main__":
