@@ -1,0 +1,125 @@
+---
+title: "column_value_anomalies"
+sidebarTitle: "Column value anomalies"
+---
+
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+
+<AiGenerateTest />
+
+`elementary.column_value_anomalies`
+
+Monitors individual values of a column and detects anomalous rows by comparing each value against the historical distribution of that column.
+
+Unlike [`column_anomalies`](/data-tests/anomaly-detection-tests/column-anomalies) which computes aggregate metrics (like `min`, `max`, `average`) per time bucket and detects anomalies in the metric time series, `column_value_anomalies` operates directly on the raw column values — no additional aggregation functions are needed.
+
+### How it works
+
+1. **Training**: The test collects all values of the column within the [training period](/data-tests/anomaly-detection-configuration/training-period) and computes a baseline distribution (mean and standard deviation).
+2. **Detection**: For each row in the [detection period](/data-tests/anomaly-detection-configuration/detection-period), the test computes a [z-score](/data-tests/data-anomaly-detection) for the column value against the historical baseline.
+3. **Anomaly flagging**: Rows where the z-score exceeds the configured [`anomaly_sensitivity`](/data-tests/anomaly-detection-configuration/anomaly-sensitivity) threshold are flagged as anomalous. If any anomalous rows are found, the test fails.
+
+<Note>
+This test is designed for **numeric columns**. It detects individual row-level outliers, making it ideal for catching unexpected spikes or drops in values such as transaction amounts, prices, scores, or measurements.
+</Note>
+
+### When to use
+
+| Use case | Recommended test |
+|---|---|
+| Detect anomalies in **aggregate statistics** (avg, min, max) of a column over time | [`column_anomalies`](/data-tests/anomaly-detection-tests/column-anomalies) |
+| Detect **individual rows** with anomalous column values | `column_value_anomalies` |
+
+### Test configuration
+
+A `timestamp_column` is required for this test as it uses historical data to build the baseline distribution.
+
+{/* prettier-ignore */}
+<pre>
+ <code>
+  columns:
+    &nbsp;&nbsp;- name: column name
+      &nbsp;&nbsp;&nbsp;&nbsp;data_tests:
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- elementary.column_value_anomalies:
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arguments:
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/timestamp-column"><font color="#CD7D55">timestamp_column: column name</font></a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/where-expression"><font color="#CD7D55">where_expression: sql expression</font></a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/anomaly-sensitivity"><font color="#CD7D55">anomaly_sensitivity: int</font></a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/anomaly-direction"><font color="#CD7D55">anomaly_direction: [both | spike | drop]</font></a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-period"><font color="#CD7D55">detection_period:</font></a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-period"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-period"><font color="#CD7D55">count: int</font></a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/training-period"><font color="#CD7D55">training_period:</font></a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/training-period"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/training-period"><font color="#CD7D55">count: int</font></a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/seasonality"><font color="#CD7D55">seasonality: day_of_week</font></a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-delay"><font color="#CD7D55">detection_delay:</font></a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-delay"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/detection-delay"><font color="#CD7D55">count: int</font></a>
+ </code>
+</pre>
+
+<RequestExample>
+
+```yml Models
+models:
+  - name: < model name >
+    config:
+      elementary:
+        timestamp_column: < timestamp column >
+    columns:
+      - name: < column name >
+        data_tests:
+          - elementary.column_value_anomalies:
+              arguments:
+                where_expression: < sql expression >
+                training_period:
+                  period: < time period >
+                  count: < number of periods >
+                detection_period:
+                  period: < time period >
+                  count: < number of periods >
+```
+
+```yml Models example
+models:
+  - name: orders
+    config:
+      elementary:
+        timestamp_column: "created_at"
+    columns:
+      - name: order_amount
+        data_tests:
+          - elementary.column_value_anomalies:
+              arguments:
+                anomaly_sensitivity: 3
+                training_period:
+                  period: day
+                  count: 30
+              config:
+                tags: ["elementary"]
+
+  - name: transactions
+    config:
+      elementary:
+        timestamp_column: "transaction_date"
+    columns:
+      - name: amount
+        data_tests:
+          - elementary.column_value_anomalies:
+              arguments:
+                anomaly_direction: spike
+                anomaly_sensitivity: 3
+                where_expression: "status = 'completed'"
+                training_period:
+                  period: day
+                  count: 30
+                detection_period:
+                  period: day
+                  count: 1
+              config:
+                severity: warn
+                tags: ["elementary"]
+```
+
+</RequestExample>
