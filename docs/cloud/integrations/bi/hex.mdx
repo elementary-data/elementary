@@ -8,12 +8,11 @@ This will provide you end-to-end data lineage to understand your downstream depe
 
 ### Prerequisites
 
-The Hex integration relies on **query history** to discover which tables Hex projects query. Elementary's service account must have permissions to read query history from the data warehouse where Hex executes queries.
+The Hex integration relies on **query history** to discover which tables Hex projects query. It is supported on **BigQuery** and **Snowflake**.
 
-Refer to the permissions section in your warehouse's setup page for the required roles:
+Elementary's service account must have permissions to read query history. Refer to your warehouse's setup page for the required roles:
 - [BigQuery permissions](/cloud/integrations/dwh/bigquery#grant-service-user-access)
 - [Snowflake permissions](/cloud/integrations/dwh/snowflake)
-- [Databricks permissions](/cloud/integrations/dwh/databricks)
 
 <Note>
 If Elementary cannot read query history, the Hex integration will not discover any exposures.
@@ -35,7 +34,7 @@ Choose the Hex connection and provide the following details to validate and comp
 
 ### Hex queries on a different warehouse environment
 
-By default, Elementary reads query history from the warehouse environments (e.g., BigQuery projects, Snowflake accounts, Databricks workspaces) referenced in your dbt project. If Hex executes queries through a **different environment** (e.g., a dedicated Hex execution environment), you will need to:
+By default, Elementary reads query history from the warehouse environments (e.g., BigQuery projects, Snowflake accounts) referenced in your dbt project. If Hex executes queries through a **different environment** (e.g., a dedicated Hex execution environment), you will need to:
 
 1. **Grant query history permissions** — the same permissions required for your primary environment. See the [prerequisites](#prerequisites) above for links to your warehouse's permissions page.
 
