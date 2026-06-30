@@ -1,0 +1,164 @@
+---
+title: "incident.io"
+---
+
+Elementary's incident.io integration enables sending alerts to [incident.io](https://incident.io) when data issues are detected.
+
+Alerts are sent as **alert events** to an incident.io [HTTP Alert Source](https://incident.io/docs/alerting/alert-sources). incident.io then creates or updates alerts based on your routing and escalation rules.
+
+It is recommended to create [alert rules](/cloud/features/alerts-and-incidents/alert-rules) to filter and select the alerts that will be sent to incident.io.
+
+{/* TODO: Screenshot of an alert in incident.io showing Elementary alert details */}
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src=""
+      alt="Elementary alert in incident.io"
+    />
+  </div>
+</Frame>
+
+## Prerequisites
+
+You need an incident.io account with access to create Alert Sources.
+
+## Create an HTTP Alert Source in incident.io
+
+Before connecting Elementary, you need to create an HTTP Alert Source in incident.io:
+
+1. In incident.io, go to **Alerts** → **Alert Sources**.
+2. Click **Create alert source** and select **HTTP**.
+
+{/* TODO: Screenshot of incident.io "Create alert source" page with HTTP selected */}
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src=""
+      alt="Create HTTP alert source in incident.io"
+    />
+  </div>
+</Frame>
+
+3. Give the alert source a name (e.g. "Elementary").
+4. After creating the source, copy the **Alert source URL** — you will need this when connecting in Elementary.
+
+{/* TODO: Screenshot of the alert source details page showing the alert source URL */}
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src=""
+      alt="incident.io alert source URL"
+    />
+  </div>
+</Frame>
+
+<Info>
+The alert source URL contains a secret token. Keep it secure and do not share it publicly.
+</Info>
+
+## Connect incident.io in Elementary
+
+1. Go to the **Environments** page on the sidebar.
+
+2. Select an environment and click connect on the **Connect incident management tool** card, and select **incident.io**.
+
+{/* TODO: Screenshot of Elementary environment page showing incident management connect card with incident.io selected */}
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src=""
+      alt="Select incident.io as incident management tool"
+      width="500"
+    />
+  </div>
+</Frame>
+
+3. Paste the **Alert source URL** you copied from incident.io and click **Connect**.
+
+{/* TODO: Screenshot of Elementary incident.io connection dialog with the URL field */}
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src=""
+      alt="Enter incident.io alert source URL"
+      width="500"
+    />
+  </div>
+</Frame>
+
+4. Elementary will send a test alert to verify the connection. You should see it appear in your incident.io alerts.
+
+5. **incident.io** will now be available as a destination on the [alert rules](/cloud/features/alerts-and-incidents/alert-rules) page.
+
+## Configure Alert Attributes in incident.io
+
+Elementary sends metadata with each alert (such as severity, owners, and tags). To use these fields for routing, filtering, or displaying in incident.io, you need to configure **Alert Attributes** in your alert source settings.
+
+1. In incident.io, go to **Alerts** → **Alert Sources** and select your Elementary alert source.
+2. Open a received alert payload (the test alert or any real alert) to see the available fields.
+3. Click **Edit attributes** to map metadata fields to alert attributes.
+
+{/* TODO: Screenshot of incident.io alert source "Edit attributes" screen showing the mapping UI with an Elementary alert payload on the left */}
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src=""
+      alt="Configure alert attributes in incident.io"
+    />
+  </div>
+</Frame>
+
+### Available metadata fields
+
+Elementary sends the following metadata fields depending on the alert type. All fields are optional — they are included only when the data is available.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `metadata.severity` | String | Alert severity (e.g. `warn`, `fail`, `error`) |
+| `metadata.owners` | Array of strings | Asset and test owners (email addresses) |
+| `metadata.tags` | Array of strings | Asset and test tags |
+| `metadata.environment` | String | Elementary environment name |
+| `metadata.test_description` | String | Test description (test alerts only) |
+| `metadata.source` | String | Pipeline tool name (pipeline alerts only) |
+| `metadata.connector` | String | Connector name (pipeline alerts only) |
+| `metadata.failure_reason` | String | Failure reason (pipeline alerts only) |
+
+<Tip>
+When configuring attributes in incident.io, use the test alert payload as a reference — it includes sample values for all common metadata fields, making it easy to set up mappings.
+</Tip>
+
+### Recommended attribute mappings
+
+For the best experience, we recommend mapping these fields in incident.io:
+
+- **`metadata.severity`** → a **Severity** or **Priority** attribute — enables routing alerts by severity
+- **`metadata.owners`** → a multi-value **String** attribute — enables filtering and routing by data owner
+- **`metadata.tags`** → a multi-value **String** attribute — enables filtering by tag
+
+<Note>
+For array fields like `owners` and `tags`, make sure to select a type that supports multiple values (e.g. **String array** or **List**) in incident.io's attribute configuration.
+</Note>
+
+## How alerts work
+
+### Alert creation and deduplication
+
+Each Elementary alert includes a **deduplication key** based on the alert's identity (test, model, or pipeline). incident.io uses this key to:
+
+- **Create** a new alert when a new issue is detected
+- **Deduplicate** — avoid creating duplicate alerts for the same ongoing issue
+- **Auto-resolve** — when a test passes again, Elementary sends a resolved event with the same deduplication key, which closes the alert in incident.io
+
+### Alert types
+
+Elementary sends the following alert types to incident.io:
+
+- **Test alerts** — dbt and Elementary test failures
+- **Model alerts** — dbt model and snapshot failures
+- **Source freshness alerts** — source freshness check failures
+- **Pipeline alerts** — pipeline connector failures (Fivetran, etc.)
+- **Resolved alerts** — automatically sent when a previously failing test/model passes
+
+### Link to Elementary
+
+Each alert includes a **source URL** linking back to the relevant page in Elementary Cloud, so you can quickly investigate the issue.
