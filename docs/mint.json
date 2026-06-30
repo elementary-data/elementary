@@ -269,6 +269,7 @@
           "pages": [
             "cloud/integrations/alerts/slack",
             "cloud/integrations/alerts/ms-teams",
+            "cloud/integrations/alerts/ms-teams-app",
             "cloud/integrations/alerts/pagerduty",
             "cloud/integrations/alerts/opsgenie",
             "cloud/integrations/alerts/jira",

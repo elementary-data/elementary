@@ -1,0 +1,128 @@
+---
+title: "Microsoft Teams (App)"
+---
+
+Elementary's Microsoft Teams app sends alerts when data issues happen, as
+[Adaptive Cards](https://adaptivecards.io/) with rich context. Unlike the
+[webhook integration](/cloud/integrations/alerts/ms-teams), the app is installed
+once per team — no per-channel webhooks to create — and Elementary posts to any
+standard channel in that team.
+
+You can create [alert rules](/features/alerts-and-incidents/alert-rules) to
+distribute alerts to different channels and destinations.
+
+{/* SCREENSHOT 1 (hero): an Elementary alert Adaptive Card posted in a Teams channel */}
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img src="REPLACE_WITH_HOSTED_URL" alt="Elementary alert in a Microsoft Teams channel" width="500" />
+  </div>
+</Frame>
+
+## Connecting the Microsoft Teams app
+
+<Steps>
+  <Step title="Start the connection in Elementary">
+    In Elementary, go to `Environments` → `Connect messaging app` and choose
+    **Microsoft Teams** (the app — not the **Legacy webhook** option).
+
+    {/* SCREENSHOT 2: Elementary "Connect your messaging tool" picker (Slack / Microsoft Teams / Legacy webhook) */}
+    <Frame>
+      <div className="dark:bg-white rounded-md p-1">
+        <img src="REPLACE_WITH_HOSTED_URL" alt="Choose Microsoft Teams in Elementary's messaging picker" width="500" />
+      </div>
+    </Frame>
+  </Step>
+
+  <Step title="Install the Elementary app in Microsoft Teams">
+    Elementary opens a short setup dialog. Click **Open in Microsoft Teams** to
+    install the Elementary app, add it to the team where you want to receive
+    alerts, then return to Elementary and click **Continue**.
+
+    {/* SCREENSHOT 3: Elementary "Connect MS Teams via Bot" dialog with the "Open in Microsoft Teams" link and install steps */}
+    <Frame>
+      <div className="dark:bg-white rounded-md p-1">
+        <img src="REPLACE_WITH_HOSTED_URL" alt="Connect MS Teams via Bot dialog with install steps" width="500" />
+      </div>
+    </Frame>
+  </Step>
+
+  <Step title="Open the welcome message and click Connect to Elementary">
+    Once the app is added, Elementary posts a welcome message in the team. Click
+    **Connect to Elementary** to link the workspace to your Elementary account.
+    You can regenerate the link any time by typing **`@Elementary connect`** in
+    the channel.
+
+    {/* SCREENSHOT 4: the "Elementary has been added to this team!" welcome card with the Connect button */}
+    <Frame>
+      <div className="dark:bg-white rounded-md p-1">
+        <img src="REPLACE_WITH_HOSTED_URL" alt="Elementary welcome card with Connect to Elementary button" width="500" />
+      </div>
+    </Frame>
+  </Step>
+
+  <Step title="Confirm the connection">
+    The link opens Elementary and connects this Teams workspace to your account.
+    Connecting requires an Elementary user with the **Edit integrations**
+    permission. When it completes, Elementary posts a confirmation card back in
+    Teams, and the integration shows as **Connected** under
+    `Environments` → `Connect messaging app`.
+
+    {/* SCREENSHOT 5: the "Connected to {account}" card in Teams, and/or Settings → Environments → Messaging showing Microsoft Teams (App) — Connected */}
+    <Frame>
+      <div className="dark:bg-white rounded-md p-1">
+        <img src="REPLACE_WITH_HOSTED_URL" alt="Microsoft Teams app connected to Elementary" width="500" />
+      </div>
+    </Frame>
+  </Step>
+
+  <Step title="Route alerts to channels">
+    Select the channels that should receive alerts. Use
+    [alert rules](/features/alerts-and-incidents/alert-rules) to control which
+    alerts go to which channels.
+
+    <Note>
+      Setting a default channel automatically adds a default
+      [alert rule](/features/alerts-and-incidents/alert-rules) that sends all
+      failures to that channel. Alerts on warnings are not sent by default — to
+      change this, go to the `Alert Rules` page.
+    </Note>
+
+    {/* SCREENSHOT 6: the Elementary channel-selection UI (channel dropdown populated with the team's channels) */}
+    <Frame>
+      <div className="dark:bg-white rounded-md p-1">
+        <img src="REPLACE_WITH_HOSTED_URL" alt="Select a Microsoft Teams channel for alerts" width="500" />
+      </div>
+    </Frame>
+  </Step>
+</Steps>
+
+## Bot commands
+
+Mention the bot in any channel it's installed in:
+
+- **`@Elementary help`** — what Elementary can do and how to get started.
+- **`@Elementary connect`** — a fresh link to connect the team to your Elementary account.
+
+{/* SCREENSHOT 7: the @Elementary help response card */}
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img src="REPLACE_WITH_HOSTED_URL" alt="@Elementary help response" width="500" />
+  </div>
+</Frame>
+
+## Supported channels
+
+The app posts to **standard channels** in the team it's installed in. Private
+and shared channels are not supported.
+
+## Disconnecting
+
+The connection status reflects where the Elementary app is installed in Teams.
+To disconnect, remove the Elementary app from the team in Microsoft Teams
+(`Manage team` → `Apps` → remove **Elementary**). The integration will then show
+as disconnected in Elementary.
+
+<Note>
+  Each Teams team can be connected to a single Elementary account. If a team is
+  already connected to a different account, connecting it again is rejected.
+</Note>
