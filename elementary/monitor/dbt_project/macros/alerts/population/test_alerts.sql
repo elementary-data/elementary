@@ -126,7 +126,7 @@
     )
 
     select distinct
-        failed_tests.alert_id,
+        failed_tests.alert_id as alert_id,
         {# Generate elementary unique id which is used to identify between tests, and set it as alert_class_id #}
         {{ dbt.concat(["coalesce(failed_tests.test_unique_id, 'None')", "'.'", "coalesce(failed_tests.column_name, 'None')", "'.'", "coalesce(failed_tests.sub_type, 'None')"]) }} as alert_class_id,
         case
@@ -135,26 +135,26 @@
             when tests.short_name = 'dimension_anomalies' then failed_tests.test_unique_id
             else {{ dbt.concat(["coalesce(failed_tests.test_unique_id, 'None')", "'.'", "coalesce(failed_tests.column_name, 'None')", "'.'", "coalesce(failed_tests.sub_type, 'None')"]) }}
         end as elementary_unique_id,
-        failed_tests.data_issue_id,
-        failed_tests.test_execution_id,
-        failed_tests.test_unique_id,
-        failed_tests.model_unique_id,
+        failed_tests.data_issue_id as data_issue_id,
+        failed_tests.test_execution_id as test_execution_id,
+        failed_tests.test_unique_id as test_unique_id,
+        failed_tests.model_unique_id as model_unique_id,
         {# Explicit aliases for columns that exist in both failed_tests and tests tables to avoid ClickHouse column name ambiguity #}
         failed_tests.database_name as database_name,
-        failed_tests.detected_at,
+        failed_tests.detected_at as detected_at,
         {{ elementary.edr_current_timestamp() }} as created_at,
         failed_tests.schema_name as schema_name,
-        failed_tests.table_name,
-        failed_tests.column_name,
+        failed_tests.table_name as table_name,
+        failed_tests.column_name as column_name,
         failed_tests.test_type as alert_type,
-        failed_tests.sub_type,
+        failed_tests.sub_type as sub_type,
         failed_tests.test_results_description as alert_description,
-        failed_tests.owners,
+        failed_tests.owners as owners,
         failed_tests.tags as tags,
         failed_tests.test_results_query as alert_results_query,
-        failed_tests.other,
-        failed_tests.test_name,
-        failed_tests.test_short_name,
+        failed_tests.other as other,
+        failed_tests.test_name as test_name,
+        failed_tests.test_short_name as test_short_name,
         failed_tests.test_params as test_params,
         failed_tests.severity as severity,
         failed_tests.status as status,
@@ -162,12 +162,12 @@
         tests.meta as test_meta,
         tests.description as test_description,
         artifacts_meta.meta as model_meta,
-        invocations.job_id,
-        invocations.job_name,
-        invocations.job_run_id,
-        invocations.job_url,
-        invocations.job_run_url,
-        invocations.orchestrator
+        invocations.job_id as job_id,
+        invocations.job_name as job_name,
+        invocations.job_run_id as job_run_id,
+        invocations.job_url as job_url,
+        invocations.job_run_url as job_run_url,
+        invocations.orchestrator as orchestrator
     from failed_tests
     left join tests on failed_tests.test_unique_id = tests.unique_id
     left join artifacts_meta on failed_tests.model_unique_id = artifacts_meta.unique_id
