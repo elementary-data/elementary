@@ -8,15 +8,6 @@ Alerts are sent as **alert events** to an incident.io [HTTP Alert Source](https:
 
 To send alerts to incident.io, you need to create [alert rules](/cloud/features/alerts-and-incidents/alert-rules) and select incident.io as the destination.
 
-<Frame>
-  <div className="dark:bg-white rounded-md p-1">
-    <img
-      src="/pics/cloud/incident_io_alert_detail.png"
-      alt="Elementary alert in incident.io"
-    />
-  </div>
-</Frame>
-
 ## Prerequisites
 
 You need an incident.io account with access to create Alert Sources.
@@ -203,11 +194,22 @@ Elementary sends the following alert types to incident.io:
 
 Each alert includes a **source URL** linking back to the relevant page in Elementary Cloud, so you can quickly investigate the issue.
 
-### Incidents
+### Alerts and incidents in incident.io
 
-When an alert matches your incident.io routing rules, it automatically creates an incident with full context — including the alert title, description, attributes, and a link back to Elementary.
+Each alert sent by Elementary appears in incident.io with full metadata, attributes, and a link back to Elementary Cloud.
 
-<Frame>
+<Frame caption="Alert detail in incident.io">
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="/pics/cloud/incident_io_alert_detail.png"
+      alt="Elementary alert detail in incident.io"
+    />
+  </div>
+</Frame>
+
+When an alert matches your incident.io routing rules, it automatically creates an incident with full context.
+
+<Frame caption="Incident created from an Elementary alert">
   <div className="dark:bg-white rounded-md p-1">
     <img
       src="/pics/cloud/incident_io_incident.png"
