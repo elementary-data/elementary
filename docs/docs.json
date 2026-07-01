@@ -276,6 +276,7 @@
                   "cloud/integrations/alerts/ms-teams",
                   "cloud/integrations/alerts/pagerduty",
                   "cloud/integrations/alerts/opsgenie",
+                  "cloud/integrations/alerts/incident-io",
                   "cloud/integrations/alerts/jira",
                   "cloud/integrations/alerts/linear",
                   "cloud/integrations/alerts/servicenow",
