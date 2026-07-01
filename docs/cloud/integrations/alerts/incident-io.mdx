@@ -6,7 +6,7 @@ Elementary's incident.io integration enables sending alerts to [incident.io](htt
 
 Alerts are sent as **alert events** to an incident.io [HTTP Alert Source](https://incident.io/docs/alerting/alert-sources). incident.io then creates or updates alerts based on your routing and escalation rules.
 
-It is recommended to create [alert rules](/cloud/features/alerts-and-incidents/alert-rules) to filter and select the alerts that will be sent to incident.io.
+To send alerts to incident.io, you need to create [alert rules](/cloud/features/alerts-and-incidents/alert-rules) and select incident.io as the destination.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
@@ -48,7 +48,7 @@ Before connecting Elementary, you need to create an HTTP Alert Source in inciden
   </div>
 </Frame>
 
-4. On the connection details page, you will see the **URL** and **authentication headers**. You will need the **alert source config ID** (from the URL) and the **API token** (from the Authorization header) when connecting in Elementary.
+4. On the connection details page, you will see the **URL** and **authentication headers**. You will need the **alert source config ID** (from the URL) and the **API token** (from the Authorization header) when connecting in Elementary. Keep this page open — you will come back to it after sending a test alert.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
@@ -92,7 +92,7 @@ The API token is a secret. Keep it secure and do not share it publicly.
   </div>
 </Frame>
 
-4. Expand **Test connection** to send a test alert and verify the integration is working. You should see the test alert appear in your incident.io alert source.
+4. Expand **Test connection** to send a test alert and verify the integration is working.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
@@ -113,21 +113,29 @@ The test connection sends a real alert event to incident.io. You may need to man
 You can add multiple alert sources by clicking **+ Add source** — for example, to route different alert rules to different incident.io alert sources.
 </Tip>
 
-## Configure Alert Attributes in incident.io
+## Configure the Alert Source in incident.io
 
-Elementary sends metadata with each alert (such as severity, owners, and tags). To use these fields for routing, filtering, or displaying in incident.io, you need to configure **Alert Attributes** in your alert source settings.
+After sending a test alert from Elementary, go back to the incident.io alert source setup page. You should see the test alert appear in the alerts list on the right side. Click **Continue**.
 
-<Steps>
-  <Step title="Open your alert source">
-    In incident.io, go to **Alerts** → **Configuration** → **Alert Sources** and select your Elementary alert source.
-  </Step>
-  <Step title="Find an alert payload">
-    Open a received alert (the test alert or any real alert) to see the available fields in the payload.
-  </Step>
-  <Step title="Map attributes">
-    Click **Attributes** to map metadata fields to alert attributes. The payload is displayed on the right, making it easy to see which fields are available.
-  </Step>
-</Steps>
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="/pics/cloud/incident_io_source_with_test_alert.png"
+      alt="Alert source showing received test alert with Continue button"
+    />
+  </div>
+</Frame>
+2. You will land on the alert source configuration page, where you can set up:
+   - **Title** — how the alert title is extracted from the payload
+   - **Connections** — routing rules for how alerts create incidents
+   - **Attributes** — map metadata fields from the alert payload to structured attributes (see below)
+3. Click **Save** to finish the alert source setup.
+
+## Configure Alert Attributes
+
+Elementary sends metadata with each alert (such as severity, owners, and tags). To use these fields for routing, filtering, or displaying in incident.io, configure **Alert Attributes** in your alert source settings.
+
+In the alert source configuration, click **Attributes** to map metadata fields. The alert payload is displayed on the right, making it easy to see which fields are available and map them.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
@@ -168,6 +176,8 @@ We recommend mapping these fields in incident.io:
 <Note>
 For array fields like `owners` and `tags`, make sure to select a type that supports multiple values in incident.io's attribute configuration.
 </Note>
+
+If you need additional metadata fields for your routing that are not currently included, [reach out to us](https://www.elementary-data.com/contact-us) and we'll work with you to add them.
 
 ## How alerts work
 
