@@ -8,17 +8,14 @@ Alerts are sent as **alert events** to an incident.io [HTTP Alert Source](https:
 
 It is recommended to create [alert rules](/cloud/features/alerts-and-incidents/alert-rules) to filter and select the alerts that will be sent to incident.io.
 
-{/* TODO: Screenshot of an alert in incident.io showing Elementary alert details */}
-{/*
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
-      src=""
+      src="/pics/cloud/incident_io_alert_detail.png"
       alt="Elementary alert in incident.io"
     />
   </div>
 </Frame>
-*/}
 
 ## Prerequisites
 
@@ -195,3 +192,29 @@ Elementary sends the following alert types to incident.io:
 ### Link to Elementary
 
 Each alert includes a **source URL** linking back to the relevant page in Elementary Cloud, so you can quickly investigate the issue.
+
+### Incidents
+
+When an alert matches your incident.io routing rules, it automatically creates an incident with full context — including the alert title, description, attributes, and a link back to Elementary.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="/pics/cloud/incident_io_incident.png"
+      alt="Incident created from Elementary alert in incident.io"
+    />
+  </div>
+</Frame>
+
+### Slack notifications
+
+If you have Slack notifications configured in incident.io, alerts and incidents will appear in your Slack channels with the alert details, labels, and action buttons.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="/pics/cloud/incident_io_slack_notification.png"
+      alt="Elementary alert notification in Slack via incident.io"
+    />
+  </div>
+</Frame>
