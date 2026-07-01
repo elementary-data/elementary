@@ -9,6 +9,7 @@ Alerts are sent as **alert events** to an incident.io [HTTP Alert Source](https:
 It is recommended to create [alert rules](/cloud/features/alerts-and-incidents/alert-rules) to filter and select the alerts that will be sent to incident.io.
 
 {/* TODO: Screenshot of an alert in incident.io showing Elementary alert details */}
+{/*
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
@@ -17,6 +18,7 @@ It is recommended to create [alert rules](/cloud/features/alerts-and-incidents/a
     />
   </div>
 </Frame>
+*/}
 
 ## Prerequisites
 
@@ -26,34 +28,42 @@ You need an incident.io account with access to create Alert Sources.
 
 Before connecting Elementary, you need to create an HTTP Alert Source in incident.io:
 
-1. In incident.io, go to **Alerts** → **Alert Sources**.
-2. Click **Create alert source** and select **HTTP**.
+1. In incident.io, go to **Alerts** → **Configuration** → **Alert Sources**.
+2. Click **Create alert source**, search for **HTTP**, and select it.
 
-{/* TODO: Screenshot of incident.io "Create alert source" page with HTTP selected */}
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
-      src=""
-      alt="Create HTTP alert source in incident.io"
+      src="/pics/cloud/incident_io_search_http_source.png"
+      alt="Search for HTTP alert source in incident.io"
     />
   </div>
 </Frame>
 
-3. Give the alert source a name (e.g. "Elementary").
-4. After creating the source, copy the **Alert source URL** — you will need this when connecting in Elementary.
+3. Give the alert source a name (e.g. "Elementary Cloud"), select **Default** as the type, and click **Continue**.
 
-{/* TODO: Screenshot of the alert source details page showing the alert source URL */}
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
-      src=""
-      alt="incident.io alert source URL"
+      src="/pics/cloud/incident_io_create_http_source.png"
+      alt="Create HTTP alert source with name and type"
+    />
+  </div>
+</Frame>
+
+4. On the connection details page, you will see the **URL** and **authentication headers**. You will need the **alert source config ID** (from the URL) and the **API token** (from the Authorization header) when connecting in Elementary.
+
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="/pics/cloud/incident_io_http_source_details.png"
+      alt="HTTP alert source connection details"
     />
   </div>
 </Frame>
 
 <Info>
-The alert source URL contains a secret token. Keep it secure and do not share it publicly.
+The API token is a secret. Keep it secure and do not share it publicly.
 </Info>
 
 ## Connect incident.io in Elementary
@@ -62,47 +72,70 @@ The alert source URL contains a secret token. Keep it secure and do not share it
 
 2. Select an environment and click connect on the **Connect incident management tool** card, and select **incident.io**.
 
-{/* TODO: Screenshot of Elementary environment page showing incident management connect card with incident.io selected */}
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
-      src=""
+      src="/pics/cloud/incident_io_select_provider.png"
       alt="Select incident.io as incident management tool"
-      width="500"
     />
   </div>
 </Frame>
 
-3. Paste the **Alert source URL** you copied from incident.io and click **Connect**.
+3. Fill in the connection details from your incident.io alert source:
+   - **Source name** — a display name for this alert source (e.g. "Elementary Cloud")
+   - **Alert source config ID** — the config ID from the alert source URL
+   - **API token** — the Bearer token from the authentication headers
 
-{/* TODO: Screenshot of Elementary incident.io connection dialog with the URL field */}
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
-      src=""
-      alt="Enter incident.io alert source URL"
-      width="500"
+      src="/pics/cloud/incident_io_connect_form.png"
+      alt="Enter incident.io connection details"
     />
   </div>
 </Frame>
 
-4. Elementary will send a test alert to verify the connection. You should see it appear in your incident.io alerts.
+4. Expand **Test connection** to send a test alert and verify the integration is working. You should see the test alert appear in your incident.io alert source.
 
-5. **incident.io** will now be available as a destination on the [alert rules](/cloud/features/alerts-and-incidents/alert-rules) page.
+<Frame>
+  <div className="dark:bg-white rounded-md p-1">
+    <img
+      src="/pics/cloud/incident_io_test_connection.png"
+      alt="Test the incident.io connection"
+    />
+  </div>
+</Frame>
+
+<Warning>
+The test connection sends a real alert event to incident.io. You may need to manually resolve or close it after testing.
+</Warning>
+
+5. Click **Save**. **incident.io** will now be available as a destination on the [alert rules](/cloud/features/alerts-and-incidents/alert-rules) page.
+
+<Tip>
+You can add multiple alert sources by clicking **+ Add source** — for example, to route different alert rules to different incident.io alert sources.
+</Tip>
 
 ## Configure Alert Attributes in incident.io
 
 Elementary sends metadata with each alert (such as severity, owners, and tags). To use these fields for routing, filtering, or displaying in incident.io, you need to configure **Alert Attributes** in your alert source settings.
 
-1. In incident.io, go to **Alerts** → **Alert Sources** and select your Elementary alert source.
-2. Open a received alert payload (the test alert or any real alert) to see the available fields.
-3. Click **Edit attributes** to map metadata fields to alert attributes.
+<Steps>
+  <Step title="Open your alert source">
+    In incident.io, go to **Alerts** → **Configuration** → **Alert Sources** and select your Elementary alert source.
+  </Step>
+  <Step title="Find an alert payload">
+    Open a received alert (the test alert or any real alert) to see the available fields in the payload.
+  </Step>
+  <Step title="Map attributes">
+    Click **Attributes** to map metadata fields to alert attributes. The payload is displayed on the right, making it easy to see which fields are available.
+  </Step>
+</Steps>
 
-{/* TODO: Screenshot of incident.io alert source "Edit attributes" screen showing the mapping UI with an Elementary alert payload on the left */}
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
     <img
-      src=""
+      src="/pics/cloud/incident_io_attributes.png"
       alt="Configure alert attributes in incident.io"
     />
   </div>
@@ -124,19 +157,19 @@ Elementary sends the following metadata fields depending on the alert type. All 
 | `metadata.failure_reason` | String | Failure reason (pipeline alerts only) |
 
 <Tip>
-When configuring attributes in incident.io, use the test alert payload as a reference — it includes sample values for all common metadata fields, making it easy to set up mappings.
+When configuring attributes, use the test alert payload as a reference — it includes sample values for the common metadata fields, making it easy to set up mappings.
 </Tip>
 
 ### Recommended attribute mappings
 
-For the best experience, we recommend mapping these fields in incident.io:
+We recommend mapping these fields in incident.io:
 
-- **`metadata.severity`** → a **Severity** or **Priority** attribute — enables routing alerts by severity
-- **`metadata.owners`** → a multi-value **String** attribute — enables filtering and routing by data owner
-- **`metadata.tags`** → a multi-value **String** attribute — enables filtering by tag
+- **`metadata.severity`** → a **Severity** or text attribute — enables routing alerts by severity
+- **`metadata.owners`** → a multi-value text attribute — enables filtering and routing by data owner
+- **`metadata.tags`** → a multi-value text attribute — enables filtering by tag
 
 <Note>
-For array fields like `owners` and `tags`, make sure to select a type that supports multiple values (e.g. **String array** or **List**) in incident.io's attribute configuration.
+For array fields like `owners` and `tags`, make sure to select a type that supports multiple values in incident.io's attribute configuration.
 </Note>
 
 ## How alerts work
