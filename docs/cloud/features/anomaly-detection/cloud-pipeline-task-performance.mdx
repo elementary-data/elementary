@@ -8,7 +8,11 @@ badge: "Elementary Cloud"
 
 The pipeline task performance monitor tracks the **execution duration** of dbt models, seeds, and snapshots on each run, and alerts when a node takes significantly longer than expected — or exceeds a fixed SLA threshold.
 
-This is an automated monitor: Elementary creates it for every dbt node in your project, with no configuration required to get started.
+You create this monitor manually from the UI for the dbt models, seeds, and snapshots you want to track.
+
+<Note>
+  **Coming soon:** automated creation of pipeline task performance monitors on models, seeds, and snapshots.
+</Note>
 
 ## Monitoring modes
 
@@ -16,7 +20,7 @@ This is an automated monitor: Elementary creates it for every dbt node in your p
 
 Elementary uses a z-score seasonal model to learn normal execution duration for each node. The model accounts for time-of-day and day-of-week patterns, so a model that reliably runs longer on Monday mornings will not be flagged during that window.
 
-No configuration is required. Elementary builds the baseline from your pipeline run history automatically.
+Elementary builds the baseline from your pipeline run history.
 
 ### Static SLA
 
@@ -37,9 +41,9 @@ Use the **Anomaly settings** button to adjust mode, sensitivity, or training per
 
 | Setting | Description | Default |
 |---|---|---|
-| `mode` | `"anomaly"` or `"static"` | `"anomaly"` |
+| `mode` | `"anomaly"` or `"threshold"` | `"anomaly"` |
 | `sensitivity` | `"low"`, `"medium"`, or `"high"` (anomaly mode only) | `"medium"` |
-| `training_period` | Days of history used to train the model (anomaly mode only) | `14` |
+| `training_period` | Days of history used to train the model (anomaly mode only) | `23` |
 | `anomaly_direction` | `"spike"` (duration longer than expected), `"drop"`, or `"both"` (anomaly mode only) | `"spike"` |
 | `excluded_time_ranges` | Time ranges excluded from training and detection (anomaly mode only) | `[]` |
 | `fixed_threshold` | Max allowed execution duration in seconds (static SLA mode only) | — |
@@ -54,5 +58,5 @@ By default, alerts are not active. To enable them, go to **Setup → Alert Rules
 
 ## Related
 
-- [Performance Alerts](/cloud/features/performance-monitoring/performance-alerts) — the legacy dbt-test method for performance alerts (Elementary OSS); not required in Cloud, where this monitor is created automatically
+- [Performance Alerts](/cloud/features/performance-monitoring/performance-alerts) — the legacy dbt-test method for performance alerts (Elementary OSS); replaced in Cloud by this monitor
 - [Automated monitors overview](/cloud/features/anomaly-detection/automated-monitors) — how automated monitors work across freshness, volume, and performance
