@@ -8,7 +8,7 @@ badge: "Elementary Cloud"
 
 The pipeline task performance monitor tracks the **execution duration** of dbt models, seeds, and snapshots on each run, and alerts when a node takes significantly longer than expected — or exceeds a fixed SLA threshold.
 
-You create this monitor manually from the UI for the dbt models, seeds, and snapshots you want to track.
+You create this monitor manually from the UI for the dbt models you want to track.
 
 <Note>
   **Coming soon:** automated creation of pipeline task performance monitors on models, seeds, and snapshots.
@@ -22,18 +22,18 @@ Elementary uses a z-score seasonal model to learn normal execution duration for 
 
 Elementary builds the baseline from your pipeline run history.
 
-### Threshold
+### Static SLA
 
 Set a fixed duration threshold. The monitor fails whenever the observed execution time exceeds that threshold, regardless of historical norms.
 
-Use threshold mode when you have a hard operational or contractual limit (e.g., "this model must finish within 10 minutes").
+Use static SLA when you have a hard operational or contractual limit (e.g., "this model must finish within 10 minutes").
 
 ## Understand the monitor result
 
 The result shows the execution duration of the dbt node for the latest run alongside the historical baseline.
 
 - **Anomaly detection** — data points outside the expected range (grey band) are flagged. The expected range is derived from the seasonal model trained on historical durations.
-- **Threshold** — a horizontal line marks the threshold. Any run that crosses it is a failure.
+- **Static SLA** — a horizontal line marks the threshold. Any run that crosses it is a failure.
 
 Use the **Anomaly settings** button to adjust mode, sensitivity, or training period after the monitor is created.
 
@@ -46,7 +46,7 @@ Use the **Anomaly settings** button to adjust mode, sensitivity, or training per
 | `training_period` | Days of history used to train the model (anomaly mode only) | `23` |
 | `anomaly_direction` | `"spike"` (duration longer than expected), `"drop"`, or `"both"` (anomaly mode only) | `"spike"` |
 | `excluded_time_ranges` | Time ranges excluded from training and detection (anomaly mode only) | `[]` |
-| `fixed_threshold` | Max allowed execution duration in seconds (threshold mode only) | — |
+| `fixed_threshold` | Max allowed execution duration in seconds (static SLA mode only) | — |
 
 <Snippet file="cloud/features/anomaly-detection/all-anomalies-configuration.mdx" />
 
