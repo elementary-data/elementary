@@ -63,6 +63,10 @@ jobs:
           "dbt-core"
           "dbt-${{ (matrix.warehouse-type == 'databricks_catalog' && 'databricks') || (matrix.warehouse-type == 'athena' && 'athena-community') || matrix.warehouse-type }}"
 
+      - name: Pin PyAthena for dbt-athena compatibility
+        if: matrix.warehouse-type == 'athena'
+        run: pip install "pyathena>=2.25,<3.35"
+
       - name: Write dbt profiles
         env:
           CI_WAREHOUSE_SECRETS: ${{ secrets.CI_WAREHOUSE_SECRETS || '' }}

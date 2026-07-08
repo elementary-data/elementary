@@ -280,6 +280,14 @@ jobs:
             pip install ".[$EXTRA]"
           fi
 
+      - name: Pin PyAthena for dbt-athena compatibility
+        if: inputs.warehouse-type == 'athena'
+        run: |
+          # dbt-athena 1.10.x calls PyAthena's internal _execute(work_group=...) API,
+          # removed in PyAthena 3.35. Unpin once dbt-athena ships the boto3 connection
+          # manager (dbt-labs/dbt-adapters#1637).
+          pip install "pyathena>=2.25,<3.35"
+
       - name: Write dbt profiles
         env:
           CI_WAREHOUSE_SECRETS: ${{ secrets.CI_WAREHOUSE_SECRETS || '' }}
