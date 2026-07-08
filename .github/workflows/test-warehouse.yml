@@ -247,7 +247,12 @@ jobs:
             DBT_ADAPTER_VERSION_SPEC="~=$DBT_VERSION"
           fi
 
-          pip install "$DBT_CORE_SPEC" "dbt-${DBT_ADAPTER}${DBT_ADAPTER_EXTRA}${DBT_ADAPTER_VERSION_SPEC}"
+          CONSTRAINTS_ARGS=()
+          if [ "$WAREHOUSE_TYPE" = "athena" ]; then
+            CONSTRAINTS_ARGS=(-c tests/ci/athena-constraints.txt)
+          fi
+
+          pip install "${CONSTRAINTS_ARGS[@]}" "$DBT_CORE_SPEC" "dbt-${DBT_ADAPTER}${DBT_ADAPTER_EXTRA}${DBT_ADAPTER_VERSION_SPEC}"
 
       # dbt-vertica pins dbt-core~=1.8 which lacks the 'arguments' attribute
       # used by newer dbt-core.  Install dbt-vertica without deps first, then
@@ -279,14 +284,6 @@ jobs:
             fi
             pip install ".[$EXTRA]"
           fi
-
-      - name: Pin PyAthena for dbt-athena compatibility
-        if: inputs.warehouse-type == 'athena'
-        run: |
-          # dbt-athena 1.10.x calls PyAthena's internal _execute(work_group=...) API,
-          # removed in PyAthena 3.35. Unpin once dbt-athena ships the boto3 connection
-          # manager (dbt-labs/dbt-adapters#1637).
-          pip install "pyathena>=2.25,<3.35"
 
       - name: Write dbt profiles
         env:

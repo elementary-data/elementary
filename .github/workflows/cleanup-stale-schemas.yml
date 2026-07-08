@@ -42,6 +42,14 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           aws-region: eu-west-1
 
+      - name: Checkout Elementary constraints
+        if: matrix.warehouse-type == 'athena'
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: |
+            tests/ci/athena-constraints.txt
+          sparse-checkout-cone-mode: false
+
       - name: Checkout dbt package
         uses: actions/checkout@v6
         with:
@@ -58,14 +66,13 @@ jobs:
           cache: "pip"
 
       - name: Install dbt
-        run: >
-          pip install
-          "dbt-core"
-          "dbt-${{ (matrix.warehouse-type == 'databricks_catalog' && 'databricks') || (matrix.warehouse-type == 'athena' && 'athena-community') || matrix.warehouse-type }}"
-
-      - name: Pin PyAthena for dbt-athena compatibility
-        if: matrix.warehouse-type == 'athena'
-        run: pip install "pyathena>=2.25,<3.35"
+        run: |
+          CONSTRAINTS_ARGS=()
+          if [ "${{ matrix.warehouse-type }}" = "athena" ]; then
+            CONSTRAINTS_ARGS=(-c "${{ github.workspace }}/tests/ci/athena-constraints.txt")
+          fi
+          pip install "${CONSTRAINTS_ARGS[@]}" dbt-core \
+            "dbt-${{ (matrix.warehouse-type == 'databricks_catalog' && 'databricks') || (matrix.warehouse-type == 'athena' && 'athena-community') || matrix.warehouse-type }}"
 
       - name: Write dbt profiles
         env:
