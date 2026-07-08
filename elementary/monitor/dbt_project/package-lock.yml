@@ -2,5 +2,5 @@ packages:
   - package: dbt-labs/dbt_utils
     version: 0.8.6
   - package: elementary-data/elementary
-    version: 0.25.0
-sha1_hash: b57ead25dbc08ddb03118b6fc50db53f0f18ce87
+    version: 0.25.1
+sha1_hash: 68fe9eb04892ecc310b082314176f8b800a4a93c
