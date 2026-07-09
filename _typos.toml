@@ -1,0 +1,5 @@
+[default]
+# SVG gradient element IDs for the Vertica logo; not prose.
+extend-ignore-identifiers-re = [
+    "vertica_(page|oss|cloud)_ot_gradient",
+]
