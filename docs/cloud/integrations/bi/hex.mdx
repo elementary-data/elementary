@@ -6,6 +6,18 @@ badge: "Context Engine"
 After you connect Hex, Elementary will automatically and continuously extend the lineage to the project & cell level.
 This will provide you end-to-end data lineage to understand your downstream dependencies, called exposures.
 
+### Prerequisites
+
+The Hex integration relies on **query history** to discover which tables Hex projects query. It is supported on **BigQuery** and **Snowflake**.
+
+Elementary's service account must have permissions to read query history. Refer to your warehouse's setup page for the required roles:
+- [BigQuery permissions](/cloud/integrations/dwh/bigquery#grant-service-user-access)
+- [Snowflake permissions](/cloud/integrations/dwh/snowflake)
+
+<Note>
+If Elementary cannot read query history, the Hex integration will not discover any exposures.
+</Note>
+
 ### Create API Token
 
 Elementary needs a workspace token in your account in order to access Hex's API on your behalf. <br/>
@@ -20,6 +32,15 @@ Choose the Hex connection and provide the following details to validate and comp
 - **Base URL**: Your Hex workspace URL. For example: `https://app.hex.tech/my-workspace/`
 - **Workspace Token**: The Hex workspace token you've created on the previous step.
 
+### Hex queries on a different warehouse environment
+
+By default, Elementary reads query history from the warehouse environments (e.g., BigQuery projects, Snowflake accounts) referenced in your dbt project. If Hex executes queries through a **different environment** (e.g., a dedicated Hex execution environment), you will need to:
+
+1. **Grant query history permissions** — the same permissions required for your primary environment. See the [prerequisites](#prerequisites) above for links to your warehouse's permissions page.
+
+2. **Let us know** — contact Elementary support with the environment details so we can configure Elementary to also read query history from it.
+
+Without both steps, Elementary will not find any Hex queries in that environment and no Hex exposures will appear.
 
 ### Limitations
 

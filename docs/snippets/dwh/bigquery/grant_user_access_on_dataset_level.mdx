@@ -1,15 +1,39 @@
-### Grant service user access to specific datasets
+### Grant service user access
 
-In order for a service user to work with Elementary cloud, it requires the following permissions:
+In order for a service user to work with Elementary Cloud, it requires the following permissions:
 
-- Role "BigQuery Data Viewer" on your Elementary dataset.
-- Roles "BigQuery Metadata Viewer", "BigQuery Resource Viewer" on the entire project and any external sources it is referencing.
+- Role **"BigQuery Data Viewer"** on your Elementary dataset.
+- Roles **"BigQuery Metadata Viewer"** and **"BigQuery Resource Viewer"** at the **project level** for the project containing your dbt models and any external projects it references.
 
-To grant a role on a specific dataset, follow these steps:
+<Note>
+"BigQuery Metadata Viewer" and "BigQuery Resource Viewer" **must be granted at the project level** (via IAM & Admin), not at the dataset level. These roles include permissions such as `bigquery.jobs.listAll` which are required for reading query history and metadata from `INFORMATION_SCHEMA` — they cannot be granted on individual datasets.
+</Note>
 
-1. Go to your project in [BigQuery console](https://console.cloud.google.com/bigquery)
+#### Step 1: Grant project-level roles
 
-2. In the "Explorer" tab, find your desired dataset.
+These roles are required for Elementary to read query history (`INFORMATION_SCHEMA.JOBS`) and table metadata. Without them, BI integrations (such as Hex) that rely on query history will not function.
+
+1. Go to [IAM & Admin](https://console.cloud.google.com/iam-admin/iam) in the Google Cloud Console.
+
+2. Select the project that contains your dbt models.
+
+3. Click **"Grant Access"** at the top.
+
+4. Fill out the form:
+   - In the "New principals" field, enter the **email address** of the Elementary service account.
+   - Add the role **"BigQuery Metadata Viewer"** (`roles/bigquery.metadataViewer`).
+   - Click **"Add another role"** and add **"BigQuery Resource Viewer"** (`roles/bigquery.resourceViewer`).
+   - Click **"Save"**.
+
+5. **Repeat for any additional GCP projects** referenced in your dbt sources or used by BI tools (e.g., Hex, Looker) for query execution.
+
+#### Step 2: Grant dataset-level role on the Elementary dataset
+
+This role provides read access to your Elementary schema data.
+
+1. Go to your project in [BigQuery console](https://console.cloud.google.com/bigquery).
+
+2. In the "Explorer" tab, find your Elementary dataset.
 
 3. Click on the three dots icon next to the dataset name, then Share.
 
@@ -26,13 +50,11 @@ To grant a role on a specific dataset, follow these steps:
 />
 
 5. Fill out the form:
-   - In the "New principals" textbox, write the **email address** of your user.
-   - In the "Select a role" dropdown menu, choose the desired role (BigQuery Data Viewer for your Elementary dataset, BigQuery Metadata Viewer, BigQuery Resource Viewer for your dbt dataset).
+   - In the "New principals" textbox, write the **email address** of your service account.
+   - In the "Select a role" dropdown menu, choose **"BigQuery Data Viewer"**.
    - Click "Save".
 
 <img
   src="https://res.cloudinary.com/diuctyblm/image/upload/f_auto,q_auto/v1/dwh/bigquery/grant_access_form"
   alt="Grant access"
 />
-
-Make sure to grant the correct access to your Elementary dataset **and** your dbt dataset.
