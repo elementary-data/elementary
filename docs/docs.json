@@ -169,7 +169,8 @@
                 "group": "Security & Privacy",
                 "pages": [
                   "cloud/general/security-and-privacy",
-                  "cloud/general/ai-privacy-policy"
+                  "cloud/general/ai-privacy-policy",
+                  "cloud/general/sub-processors"
                 ]
               }
             ]
