@@ -38,7 +38,9 @@
               "cloud/ai-agents/test-recommendation-agent",
               "cloud/ai-agents/catalog-agent",
               "cloud/ai-agents/performance-cost-agent",
-              "cloud/features/ci"
+              "cloud/features/ci",
+              "cloud/ai-agents/mcp-connections",
+              "cloud/ai-agents/byok"
             ]
           },
           {

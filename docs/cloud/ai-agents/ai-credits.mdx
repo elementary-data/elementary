@@ -31,6 +31,7 @@ With [MCP](/cloud/mcp/overview), Elementary returns data to the connected agent.
 | **Lineage and catalog browsing** | All UI navigation: lineage graphs, asset catalog, test coverage pages |
 | **Manual incident merging** | Selecting and merging incidents by hand is a platform feature, not AI |
 | **Deterministic incident grouping** | Rule-based clustering (e.g. Fivetran fail + downstream freshness). Coming soon |
+| [**Reasoning on your own LLM key (BYOK)**](/cloud/ai-agents/byok) | When you connect your own Anthropic or OpenAI key, reasoning is billed by that provider, not by Elementary |
 
 ---
 
@@ -42,6 +43,10 @@ Enable automatic root cause. With it on, Elementary runs one AI call per inciden
 
 <Tip>
 Use MCP for ad hoc exploration. Querying lineage, assets, or test results via MCP costs zero Elementary credits. Use it freely from Cursor, Claude, or any MCP-compatible tool.
+</Tip>
+
+<Tip>
+[Bring your own LLM key (BYOK)](/cloud/ai-agents/byok). Connect your own Anthropic or OpenAI key and the agent's reasoning is billed by that provider — Elementary charges no AI credits for it.
 </Tip>
 
 Credits consumed and credits remaining are always visible in the Elementary dashboard.

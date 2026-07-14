@@ -1,0 +1,37 @@
+---
+title: "Connect MCP servers to the agent"
+sidebarTitle: "MCP connections"
+icon: "plug"
+badge: "Elementary Cloud"
+---
+
+MCP connections let the Elementary AI Agent pull context from external systems through their own [MCP](/cloud/mcp/overview) servers. Their tools are added to the agent alongside Elementary's own tools, so root cause analysis and triage can reach across systems Elementary doesn't own.
+
+<Note>
+This is the inbound direction — external MCP servers feeding tools **into** the Elementary agent. For exposing Elementary's own data **to** other AI tools (Cursor, Claude, etc.), see the [MCP Server](/cloud/mcp/overview).
+</Note>
+
+## Available connectors
+
+| Connector | Transport | What it adds |
+|---|---|---|
+| **dbt Cloud** | Remote HTTP | dbt Cloud run, job, and model context for the agent |
+
+## dbt Cloud
+
+Connect dbt Cloud so the agent has complete context when triaging issues — it can pull dbt Cloud run and job context directly through its MCP tools.
+
+1. Go to **Account → Agent Settings → MCP Connections**.
+2. Add a **dbt Cloud** connection.
+3. Paste your dbt Cloud MCP server URL and a service token. Tokens are stored encrypted.
+4. Save.
+
+<Frame>
+  <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1784016599/image_58_zorvpq.png" alt="Connecting dbt Cloud to the Elementary agent under Agent Settings" />
+</Frame>
+
+Once connected, the agent's dbt Cloud tools are available in chat and in automated runs. Enable the connection from the chat integrations picker to include it in a session.
+
+See the [dbt Cloud integration](/cloud/integrations/transformation-and-orchestration/dbt-cloud#connect-dbt-cloud-to-the-agent) for the full setup.
+
+<Note>Managing MCP connections requires the **Edit integrations** permission.</Note>
