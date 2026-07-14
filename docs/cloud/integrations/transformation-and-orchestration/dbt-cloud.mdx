@@ -12,6 +12,16 @@ Elementary integrates with dbt Cloud for the supported data warehouses.
 Elementary automatically collects jobs data from dbt Cloud, including `job run url` and `job id`. These are presented in the lineage node info tab.
 To collect additional job info such as `job name`, see the [collect job data guide](/cloud/guides/collect-job-data).
 
+## Connect dbt Cloud to the agent
+
+Connect dbt Cloud to Elementary's agent so it has complete context when triaging issues. The agent can then pull dbt Cloud run and job context directly through its MCP tools, so root cause analysis reaches across your transformation layer.
+
+Go to **Account → Agent Settings → MCP Connections**, add a dbt Cloud connection, and paste your dbt Cloud MCP server URL and a service token. Tokens are stored encrypted.
+
+<Frame>
+  <img src="https://res.cloudinary.com/do5hrgokq/image/upload/v1784016599/image_58_zorvpq.png" alt="Connecting dbt Cloud to the Elementary agent under Agent Settings" />
+</Frame>
+
 ## Syncs schedule
 
 For near-real-time results, it is recommended to change the sync configuration from the default hourly syncs to [webhook triggered syncs](/cloud/guides/sync-scheduling).
