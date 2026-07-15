@@ -1,0 +1,3 @@
+# Temporary pin: dbt-athena 1.10.x breaks on PyAthena 3.35+ (ExecuteOptions refactor).
+# Remove when dbt-athena ships the boto3 connection manager (dbt-labs/dbt-adapters#1637).
+pyathena>=2.25,<3.35

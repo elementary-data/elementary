@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "elementary-data"
-version = "0.24.1"
+version = "0.25.1"
 description = "Data monitoring and lineage"
 authors = ["Elementary"]
 keywords = ["data", "lineage", "data lineage", "data warehouse", "DWH", "observability", "data monitoring", "data observability", "Snowflake", "BigQuery", "Redshift", "data reliability", "analytics engineering"]
@@ -56,6 +56,8 @@ dbt-postgres = {version = ">=1.8,<2.0.0", optional = true}
 dbt-databricks = {version = ">=1.8,<2.0.0", optional = true}
 dbt-spark = {version = ">=1.8,<2.0.0", optional = true}
 dbt-athena-community = {version = ">=1.8,<2.0.0", optional = true}
+# dbt-athena 1.10.x is incompatible with PyAthena 3.35+; remove when dbt-athena ships boto3 connection manager.
+pyathena = {version = ">=2.25,<3.35", optional = true}
 dbt-trino = {version = ">=1.8,<2.0.0", optional = true}
 dbt-clickhouse = {version = ">=1.8,<2.0.0", optional = true}
 dbt-duckdb = {version = ">=1.8,<2.0.0", optional = true}
@@ -69,7 +71,7 @@ redshift = ["dbt-redshift"]
 postgres = ["dbt-postgres"]
 databricks = ["dbt-databricks"]
 spark = ["dbt-spark"]
-athena = ["dbt-athena-community"]
+athena = ["dbt-athena-community", "pyathena"]
 clickhouse = ["dbt-clickhouse"]
 trino = ["dbt-trino"]
 duckdb = ["dbt-duckdb"]
@@ -80,7 +82,7 @@ sqlserver = ["dbt-sqlserver"]
 # outdated transitive dependencies (dbt-core==1.8.5, azure-cli pre-release) that block
 # security patches for deepdiff, protobuf, and pyopenssl. Users who need these adapters
 # can still install them directly (e.g. pip install dbt-fabricspark dbt-vertica).
-all = ["dbt-snowflake", "dbt-bigquery", "dbt-redshift", "dbt-postgres", "dbt-databricks", "dbt-spark", "dbt-athena-community", "dbt-trino", "dbt-clickhouse", "dbt-duckdb", "dbt-dremio", "dbt-fabric", "dbt-sqlserver"]
+all = ["dbt-snowflake", "dbt-bigquery", "dbt-redshift", "dbt-postgres", "dbt-databricks", "dbt-spark", "dbt-athena-community", "pyathena", "dbt-trino", "dbt-clickhouse", "dbt-duckdb", "dbt-dremio", "dbt-fabric", "dbt-sqlserver"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -1,0 +1,31 @@
+name: Dependency Review
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      base-ref:
+        description: Base git ref for comparison (e.g. a tag or commit SHA)
+        required: true
+      head-ref:
+        description: Head git ref for comparison (defaults to HEAD)
+        required: false
+        default: HEAD
+
+permissions: {}
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          base-ref: ${{ inputs.base-ref || '' }}
+          head-ref: ${{ inputs.head-ref || '' }}
+          config-file: ./.github/dependency-review-config.yml
