@@ -49,9 +49,9 @@ After creating a network policy you would need to activate it. To activate a net
 ALTER USER <user_name> SET NETWORK_POLICY = ELEMENTARY_CLOUD;
 ```
 
-### Enable column-level lineage for dynamic tables
+### Grant permissions to monitor dynamic tables
 
-Elementary can extend [column-level lineage](/cloud/features/data-lineage/column-level-lineage) to Snowflake dynamic tables that aren't managed by your dbt project. This requires the `MONITOR` privilege on those dynamic tables, granted per database.
+To monitor Snowflake dynamic tables that aren't managed by your dbt project, Elementary needs the `MONITOR` privilege on those dynamic tables, granted per database.
 
 <Note>
   This privilege isn't included in the roles granted during user creation. Grant it separately for each database containing dynamic tables you want Elementary to monitor.
