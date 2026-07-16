@@ -117,7 +117,7 @@ def main():
         # Send results to Elementary Cloud
         PROJECT_ID = "my-python-project"  # Your Python project identifier (used to deduplicate and identify assets)
         API_KEY = "your-api-key"
-        URL = "https://app.elementary-data.com/sdk-ingest/{env_id}/batch"
+        URL = "https://prod.api.elementary-data.com/sdk-ingest/{env_id}/batch"
         
         client = ElementaryCloudClient(PROJECT_ID, API_KEY, URL)
         client.send_to_cloud(ctx)

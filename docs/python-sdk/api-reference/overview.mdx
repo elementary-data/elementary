@@ -40,7 +40,7 @@ Where:
 - `project_id` is your Python project identifier (chosen by you, used to deduplicate and identify reported assets)
 - `api_key` is your API token (generated from the steps above)
 - `url` is the full SDK ingest endpoint URL (the Elementary team will provide you with this URL): `{base_url}/sdk-ingest/{env_id}/batch`
-  - Example: `https://app.elementary-data.com/sdk-ingest/a6b2425d-36e2-4e13-8458-9825688ca1f2/batch`
+  - Example: `https://prod.api.elementary-data.com/sdk-ingest/a6b2425d-36e2-4e13-8458-9825688ca1f2/batch`
 
 ## Test Context
 
@@ -86,7 +86,7 @@ You can also use context managers for inline tests:
 with elementary_test_context(asset=asset) as ctx:
     # Using context managers
     with ctx.boolean_test(name="my_test", description="Inline test") as my_bool_test:
-        my_bool_test.assert_value(my_test_function())
+        my_bool_test.check_value(my_test_function())
     
     with ctx.expected_values_test(
         name="country_count",
@@ -95,23 +95,23 @@ with elementary_test_context(asset=asset) as ctx:
         metadata={"my_metadata_field": "my_metadata_value"},
     ) as my_expected_values_test:
         # This will fail
-        my_expected_values_test.assert_value(5)
+        my_expected_values_test.check_value(5)
         # This will pass
-        my_expected_values_test.assert_value(3)
+        my_expected_values_test.check_value(3)
     
     with ctx.expected_range_test(
         name="age_range",
         min=18,
         max=50,
     ) as my_range_test:
-        my_range_test.assert_value(25.5)
+        my_range_test.check_value(25.5)
     
     with ctx.row_count_test(
         name="row_count",
         min=1,
         max=1000,
     ) as my_row_count_test:
-        my_row_count_test.assert_value(users_df)  # Passes DataFrame, list, etc.
+        my_row_count_test.check_value(users_df)  # Passes DataFrame, list, etc.
 ```
 
 ## Supported Objects
