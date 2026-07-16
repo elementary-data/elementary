@@ -22,9 +22,10 @@ DECLARE
     SELECT VALUE::STRING AS db_name FROM TABLE(FLATTEN(INPUT => :databases));
 BEGIN
   FOR record IN db_cursor DO
-    GRANT MONITOR ON ALL DYNAMIC TABLES IN DATABASE IDENTIFIER(:record.db_name)
+    LET db_name STRING := record.db_name;
+    GRANT MONITOR ON ALL DYNAMIC TABLES IN DATABASE IDENTIFIER(:db_name)
       TO ROLE IDENTIFIER(:elementary_role);
-    GRANT MONITOR ON FUTURE DYNAMIC TABLES IN DATABASE IDENTIFIER(:record.db_name)
+    GRANT MONITOR ON FUTURE DYNAMIC TABLES IN DATABASE IDENTIFIER(:db_name)
       TO ROLE IDENTIFIER(:elementary_role);
   END FOR;
   RETURN 'Granted MONITOR on dynamic tables for ' || ARRAY_SIZE(:databases) || ' database(s).';
