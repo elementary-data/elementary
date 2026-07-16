@@ -18,17 +18,15 @@ Run the following in a Snowflake worksheet with **admin permissions**. Set `data
 DECLARE
   databases ARRAY DEFAULT ARRAY_CONSTRUCT('DB1', 'DB2', 'DB3');
   elementary_role STRING DEFAULT 'ELEMENTARY_ROLE';
-  db_cursor CURSOR FOR
-    SELECT VALUE::STRING AS db_name FROM TABLE(FLATTEN(INPUT => :databases));
 BEGIN
-  FOR record IN db_cursor DO
-    LET db_name STRING := record.db_name;
+  FOR i IN 0 TO ARRAY_SIZE(databases) - 1 DO
+    LET db_name STRING := databases[i]::STRING;
     GRANT MONITOR ON ALL DYNAMIC TABLES IN DATABASE IDENTIFIER(:db_name)
       TO ROLE IDENTIFIER(:elementary_role);
     GRANT MONITOR ON FUTURE DYNAMIC TABLES IN DATABASE IDENTIFIER(:db_name)
       TO ROLE IDENTIFIER(:elementary_role);
   END FOR;
-  RETURN 'Granted MONITOR on dynamic tables for ' || ARRAY_SIZE(:databases) || ' database(s).';
+  RETURN 'Granted MONITOR on dynamic tables for ' || ARRAY_SIZE(databases) || ' database(s).';
 END;
 ```
 
