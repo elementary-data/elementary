@@ -4,6 +4,32 @@ This guide contains the necessary steps to connect a Snowflake environment to yo
 
 <CreateUserOperationSnowflake />
 
+### Grant permissions to monitor dynamic tables
+
+To monitor [Snowflake dynamic tables](https://docs.snowflake.com/en/user-guide/dynamic-tables/overview), Elementary needs the `MONITOR` privilege on those dynamic tables, granted per database.
+
+<Note>
+  This privilege isn't included in the roles granted during user creation. Grant it separately for each database containing dynamic tables you want Elementary to monitor.
+</Note>
+
+Run the following in a Snowflake worksheet with **admin permissions**. Set `databases` to the list of databases containing the dynamic tables you want Elementary to monitor, and `elementary_role` to your Elementary role name:
+
+```sql
+DECLARE
+  databases ARRAY DEFAULT ARRAY_CONSTRUCT('DB1', 'DB2', 'DB3');
+  elementary_role STRING DEFAULT 'ELEMENTARY_ROLE';
+BEGIN
+  FOR i IN 0 TO ARRAY_SIZE(databases) - 1 DO
+    LET db_name STRING := databases[i]::STRING;
+    GRANT MONITOR ON ALL DYNAMIC TABLES IN DATABASE IDENTIFIER(:db_name)
+      TO ROLE IDENTIFIER(:elementary_role);
+    GRANT MONITOR ON FUTURE DYNAMIC TABLES IN DATABASE IDENTIFIER(:db_name)
+      TO ROLE IDENTIFIER(:elementary_role);
+  END FOR;
+  RETURN 'Granted MONITOR on dynamic tables for ' || ARRAY_SIZE(databases) || ' database(s).';
+END;
+```
+
 ### Fill the connection form
 
 Provide the following fields:
