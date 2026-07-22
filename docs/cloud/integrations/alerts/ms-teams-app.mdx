@@ -1,0 +1,122 @@
+---
+title: "Microsoft Teams"
+---
+
+Elementary's Microsoft Teams app sends alerts when data issues happen, as
+[Adaptive Cards](https://adaptivecards.io/) with rich context. The app is
+installed once per team and Elementary posts to any standard channel in that
+team.
+
+You can create [alert rules](/features/alerts-and-incidents/alert-rules) to
+distribute alerts to different channels and destinations.
+
+<Frame>
+  <img src="/images/teams/hero-alert.png" alt="Elementary alert in a Microsoft Teams channel" width="500" />
+</Frame>
+
+<iframe
+  width="560"
+  height="315"
+  src="https://www.youtube.com/embed/sT1CHwTKloM"
+  title="Elementary Microsoft Teams App — alerts and incidents"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+/>
+
+## Connecting the Microsoft Teams app
+
+<Steps>
+  <Step title="Install the Elementary app in Microsoft Teams">
+    Install the [Elementary app from the Microsoft Teams App Store](https://marketplace.microsoft.com/en-us/product/teams-app/WA200011427)
+    and add it to the team where you want to receive alerts.
+  </Step>
+
+  <Step title="Connect your Teams workspace to Elementary">
+    Once the bot is installed in a team, you should see this card.
+    Click **Connect to Elementary** to link this workspace to your
+    Elementary account.
+
+    <Frame>
+      <img src="/images/teams/welcome-card.png" alt="Elementary welcome card with Connect to Elementary button" width="500" />
+    </Frame>
+
+    This opens **Elementary** and connects the workspace automatically.
+    Connecting requires an Elementary user with the **Edit integrations**
+    permission — usually a user with the **Admin** role.
+
+    Once complete, you should see both:
+
+    **In Elementary** — a dialog confirming the workspace is connected.
+    Pick a **Default channel** to start receiving alerts right away.
+
+    <Frame>
+      <img src="/images/teams/connected-dialog.png" alt="Elementary dialog showing Microsoft Teams workspace is connected, with default channel picker" width="500" />
+    </Frame>
+
+    <Note>
+      Setting a default channel automatically adds a default
+      [alert rule](/features/alerts-and-incidents/alert-rules) that sends all
+      failures to that channel. Alerts on warnings are not sent by default — to
+      refine this, go to the `Alert Rules` page.
+    </Note>
+
+    **In Microsoft Teams** — a confirmation card in the channel:
+
+    <Frame>
+      <img src="/images/teams/teams-cards-after-connection.png" alt="Welcome and connected confirmation cards in Microsoft Teams" width="500" />
+    </Frame>
+
+    <Tip>
+      You can regenerate the connection link any time by typing
+      **`@Elementary connect`** in the channel.
+    </Tip>
+  </Step>
+
+  <Step title="Route alerts to channels">
+    Use [alert rules](/features/alerts-and-incidents/alert-rules) to control
+    which alerts go to which channels — for example, routing test failures to
+    one channel and freshness issues to another.
+  </Step>
+</Steps>
+
+## Bot commands
+
+**In Microsoft Teams**, mention the bot in any channel it's installed in:
+
+- **`@Elementary help`** — what Elementary can do and how to get started.
+
+<Frame>
+  <img src="/images/teams/help-card.png" alt="@Elementary help response" width="500" />
+</Frame>
+
+- **`@Elementary connect`** — a fresh link to connect the team to your Elementary account.
+
+<Frame>
+  <img src="/images/teams/connect-command.png" alt="@Elementary connect response" width="500" />
+</Frame>
+
+## Supported channels
+
+The app posts to **standard channels** in the team it's installed in. Private
+and shared channels are not supported.
+
+## Disconnecting
+
+You can disconnect from either side:
+
+- **From Elementary** — go to `Environments` → `Connect messaging app`, open the
+  **Microsoft Teams App** menu, and choose **Disconnect**. This unlinks the
+  workspace from your Elementary account and stops alerts. The app stays
+  installed in Teams — remove it there too if you want to fully uninstall.
+- **In Microsoft Teams** — remove the Elementary app from the team
+  (`Manage team` → `Apps` → remove **Elementary**). This uninstalls the app, and
+  the integration then shows as disconnected **in Elementary**.
+
+Either way, you can reconnect later from the welcome message or by typing
+**`@Elementary connect`** in the channel.
+
+<Note>
+  Each Teams team can be connected to a single Elementary account. If a team is
+  already connected to a different account, connecting it again is rejected.
+</Note>
