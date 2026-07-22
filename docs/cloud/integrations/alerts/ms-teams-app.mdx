@@ -15,6 +15,16 @@ distribute alerts to different channels and destinations.
   <img src="/images/teams/hero-alert.png" alt="Elementary alert in a Microsoft Teams channel" width="500" />
 </Frame>
 
+<iframe
+  width="560"
+  height="315"
+  src="https://www.youtube.com/embed/sT1CHwTKloM"
+  title="Elementary Microsoft Teams App — alerts and incidents"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+/>
+
 ## Connecting the Microsoft Teams app
 
 <Steps>
@@ -38,11 +48,19 @@ distribute alerts to different channels and destinations.
 
     Once complete, you should see both:
 
-    **In Elementary** — a dialog confirming the workspace is connected:
+    **In Elementary** — a dialog confirming the workspace is connected.
+    Pick a **Default channel** to start receiving alerts right away.
 
     <Frame>
-      <img src="/images/teams/connected-dialog.png" alt="Elementary dialog showing Microsoft Teams workspace is connected" width="500" />
+      <img src="/images/teams/connected-dialog.png" alt="Elementary dialog showing Microsoft Teams workspace is connected, with default channel picker" width="500" />
     </Frame>
+
+    <Note>
+      Setting a default channel automatically adds a default
+      [alert rule](/features/alerts-and-incidents/alert-rules) that sends all
+      failures to that channel. Alerts on warnings are not sent by default — to
+      refine this, go to the `Alert Rules` page.
+    </Note>
 
     **In Microsoft Teams** — a confirmation card in the channel:
 
@@ -57,18 +75,9 @@ distribute alerts to different channels and destinations.
   </Step>
 
   <Step title="Route alerts to channels">
-    **In Elementary**, pick a **Default channel** in the connected view to start
-    receiving alerts right away. Use
-    [alert rules](/features/alerts-and-incidents/alert-rules) to control which
-    alerts go to which channels.
-
-    <Note>
-      Setting a default channel automatically adds a default
-      [alert rule](/features/alerts-and-incidents/alert-rules) that sends all
-      failures to that channel. Alerts on warnings are not sent by default — to
-      change this, go to the `Alert Rules` page.
-    </Note>
-
+    Use [alert rules](/features/alerts-and-incidents/alert-rules) to control
+    which alerts go to which channels — for example, routing test failures to
+    one channel and freshness issues to another.
   </Step>
 </Steps>
 
