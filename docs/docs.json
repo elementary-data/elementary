@@ -276,6 +276,7 @@
                 "group": "Alerts & Incidents",
                 "pages": [
                   "cloud/integrations/alerts/slack",
+                  "cloud/integrations/alerts/ms-teams-app",
                   "cloud/integrations/alerts/ms-teams",
                   "cloud/integrations/alerts/pagerduty",
                   "cloud/integrations/alerts/opsgenie",
