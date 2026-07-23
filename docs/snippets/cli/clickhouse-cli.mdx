@@ -28,8 +28,52 @@ elementary:
       # sslmode: [optional, set the sslmode used to connect to the database]
 ```
 
-Note: Anomaly detection is not supported for Clickhouse.
-
 We support the same format and connection methods (user password, key pair authentication, SSO) as dbt. Please refer to
 dbt's documentation of [Clickhouse profile](https://docs.getdbt.com/reference/warehouse-setups/clickhouse-setup) for
 further details.
+
+### Multi-node / replicated ClickHouse clusters
+
+<Warning>
+  On a multi-node ClickHouse cluster behind a load balancer, you **must** make all Elementary tables — including its intermediate staging tables — replicated. Otherwise `data_monitoring_metrics` can silently end up empty (non-deterministically, with no error).
+</Warning>
+
+Elementary computes metrics into an intermediate staging table, then persists them on a separate connection. With dbt-clickhouse's default non-replicated `MergeTree()`, those staging rows are node-local, so behind a load balancer the persist step can hit a different node and write 0 metrics. Note that dbt-clickhouse only replicates your own models by default — Elementary's staging tables need it too.
+
+Configure replicated engines at three levels:
+
+```yml profiles.yml
+elementary:
+  outputs:
+    default:
+      type: clickhouse
+      # ...connection fields...
+      # Replicates DDL without ON CLUSTER
+      database_engine: "Replicated('/clickhouse/databases/{uuid}','{shard}','{replica}')"
+      custom_settings:
+        # Make the cross-node read wait for replication
+        select_sequential_consistency: 1
+        # Unblock Elementary's result-table upsert (ALTER ... DELETE ... WHERE id IN (subquery))
+        allow_nondeterministic_mutations: 1
+```
+
+```yml dbt_project.yml
+models:
+  elementary:
+    # Replicate the persisted Elementary tables
+    +engine: "ReplicatedMergeTree"
+```
+
+```yml _schema.yml
+# The key fix: replicate the intermediate staging tables too, on the test config
+models:
+  - name: my_model
+    columns:
+      - name: my_column
+        data_tests:
+          - elementary.column_anomalies:
+              config:
+                engine: "ReplicatedMergeTree"
+```
+
+Verified with ClickHouse 8, dbt-clickhouse 1.10.1, elementary 0.25.1 over plain HTTP.
