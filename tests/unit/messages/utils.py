@@ -19,17 +19,19 @@ def get_expected_file_path(fixture_dir: Path, filename: str) -> Path:
     if not path.exists():
         path.parent.mkdir(parents=True, exist_ok=True)
         if filename.endswith(".json"):
-            path.write_text(json.dumps({}))
+            path.write_text(json.dumps({}), encoding="utf-8", newline="\n")
         else:
-            path.write_text("")
+            path.write_text("", encoding="utf-8", newline="\n")
     return path
 
 
 def assert_expected_json(result: dict, expected_json_path: Path) -> None:
-    expected = json.loads(expected_json_path.read_text())
+    expected = json.loads(expected_json_path.read_text(encoding="utf-8"))
     if OVERRIDE:
         logger.warning(f"Overriding expected JSON file: {expected_json_path}")
-        expected_json_path.write_text(json.dumps(result, indent=2) + "\n")
+        expected_json_path.write_text(
+            json.dumps(result, indent=2) + "\n", encoding="utf-8", newline="\n"
+        )
     else:
         try:
             assert result == expected
@@ -44,12 +46,12 @@ def assert_expected_json(result: dict, expected_json_path: Path) -> None:
 
 
 def assert_expected_text(result: str, expected_file_path: Path) -> None:
-    expected = expected_file_path.read_text()
+    expected = expected_file_path.read_text(encoding="utf-8")
     if OVERRIDE:
         logger.warning(f"Overriding expected text file: {expected_file_path}")
         if not result.endswith("\n"):
             # for code quality, we want to ensure that all files end with a newline
             result += "\n"
-        expected_file_path.write_text(result)
+        expected_file_path.write_text(result, encoding="utf-8", newline="\n")
     else:
         assert result.strip() == expected.strip()
