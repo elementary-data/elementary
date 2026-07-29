@@ -693,7 +693,7 @@
       "apiKey": "phc_56XBEzZmh02mGkadqLiYW51eECyYKWPyecVwkGdGUfg"
     },
     "telemetry": {
-      "enabled": false
+      "enabled": true
     }
   },
   "js": ["kapa-widget.js"],
