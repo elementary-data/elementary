@@ -4,7 +4,7 @@ badge: "Context Engine"
 ---
 
 Elementary connects to your Fivetran account to automatically create incidents when connector syncs fail.
-When a sync fails, Elementary evaluates the outcome and opens or updates an incident accordingly.
+When a sync ends, Elementary evaluates the outcome and opens or updates an incident accordingly.
 
 <Warning>
   **Connector filtering is not yet supported.** Incidents will be created for all connectors in the monitored destination groups. Filtering by specific connectors will be added in a future release.
@@ -13,7 +13,7 @@ When a sync fails, Elementary evaluates the outcome and opens or updates an inci
 ## How it works
 
 1. You connect your Fivetran account to Elementary with a Fivetran API key and select which destination groups to monitor.
-2. Elementary sets up sync monitoring for the selected groups automatically — no manual configuration in Fivetran is required.
+2. Elementary subscribes to Fivetran's sync_end events for the selected groups automatically - no manual configuration in Fivetran is required.
 3. Each time a connector sync completes, Elementary evaluates the outcome and creates or updates an incident when the sync fails.
 4. The incident appears in Elementary's Incidents view, where you can investigate, comment, and resolve it.
 
@@ -25,7 +25,7 @@ When a sync fails, Elementary evaluates the outcome and opens or updates an inci
 
 <Steps>
   <Step title="Create a Fivetran API key">
-    In Fivetran, go to your account settings and generate an API key. Copy the **API key** and **API secret** — you'll need both in Elementary.
+    In Fivetran, go to your account settings and generate an API key. Copy the **API key** and **API secret** .
 
     See Fivetran's [API key documentation](https://fivetran.com/docs/rest-api/getting-started) for details.
   </Step>
@@ -36,7 +36,7 @@ When a sync fails, Elementary evaluates the outcome and opens or updates an inci
     Paste the **API key** and **API secret** and continue. Elementary validates the credentials and loads the destination groups available in your Fivetran account.
   </Step>
   <Step title="Select destination groups and connect">
-    Choose the destination groups you want to monitor, then save. Elementary connects to Fivetran and starts monitoring the selected groups automatically.
+    Choose the destination groups you want to monitor, then save. Elementary connects to Fivetran and automatically starts syncing and monitoring the selected groups.
   </Step>
 </Steps>
 
@@ -56,5 +56,5 @@ Fivetran sync failures appear in the **Incidents** view in Elementary. Each inci
 - Destination group ID
 
 <Note>
-  At this time, Fivetran incidents cannot be filtered by connector — all connectors in the monitored destination groups are included.
+  At this time, Fivetran incidents cannot be filtered by connector - all connectors in the monitored destination groups are included.
 </Note>
