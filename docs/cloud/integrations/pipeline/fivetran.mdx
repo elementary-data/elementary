@@ -3,57 +3,42 @@ title: "Fivetran"
 badge: "Context Engine"
 ---
 
-Elementary connects to Fivetran via webhook to automatically create incidents when connector syncs fail.
-When a `sync_end` event is received, Elementary evaluates the sync status and opens or updates an incident accordingly.
+Elementary connects to your Fivetran account to automatically create incidents when connector syncs fail.
+When a sync ends, Elementary evaluates the outcome and opens or updates an incident accordingly.
 
 <Warning>
-  **Connector filtering is not yet supported.** Incidents will be created for all connectors in the destination group. Filtering by specific connectors will be added in a future release.
+  **Connector filtering is not yet supported.** Incidents will be created for all connectors in the monitored destination groups. Filtering by specific connectors will be added in a future release.
 </Warning>
 
 ## How it works
 
-1. Register an Elementary webhook with Fivetran for a specific destination group.
-2. Fivetran sends a `sync_end` event to Elementary each time a connector sync completes.
-3. Elementary evaluates the sync outcome and creates or updates an incident when a sync fails.
+1. You connect your Fivetran account to Elementary with a Fivetran API key and select which destination groups to monitor.
+2. Elementary subscribes to Fivetran's sync_end events for the selected groups automatically - no manual configuration in Fivetran is required.
+3. Each time a connector sync completes, Elementary evaluates the outcome and creates or updates an incident when the sync fails.
 4. The incident appears in Elementary's Incidents view, where you can investigate, comment, and resolve it.
 
-## Setup
+## Enabling Fivetran
 
-### Step 1 – Generate webhook credentials
+<Info>
+  You need a Fivetran API key with permission to read connectors and manage webhooks, and Elementary permissions to edit integrations.
+</Info>
 
-1. In Elementary, go to **Settings → Environments** and select the environment you want to connect.
-2. Under **Integrations**, click **Connect Fivetran**.
-3. Click **Generate Webhook Credentials**.
-4. Copy the **Webhook URL** and **Secret** — you will need them in the next step.
+<Steps>
+  <Step title="Create a Fivetran API key">
+    In Fivetran, go to your account settings and generate an API key. Copy the **API key** and **API secret** .
 
-### Step 2 – Register the webhook in Fivetran
-
-Fivetran requires the webhook to be registered via their REST API. Use the following steps:
-
-1. In Fivetran, open the destination you want to monitor.
-2. On the **Overview** tab, copy the **Destination Group ID**.
-3. Call the [Fivetran Webhooks API](https://fivetran.com/docs/rest-api/api-reference/webhooks/create-group-webhook) to register a `sync_end` webhook for that group:
-
-```bash
-curl --request POST \
-  --url https://api.fivetran.com/v1/webhooks/group/{group_id} \
-  --header 'Authorization: Bearer <your-fivetran-api-key>' \
-  --header 'Content-Type: application/json' \
-  --data '{
-    "url": "<Webhook URL from Elementary>",
-    "events": ["sync_end"],
-    "active": true,
-    "secret": "<Secret from Elementary>"
-  }'
-```
-
-Replace `{group_id}` with your Destination Group ID, and fill in the Webhook URL and Secret copied from Elementary.
-
-### Step 3 – Verify the connection
-
-After registering the webhook, trigger a sync in Fivetran. Once the sync completes, Fivetran will send a `sync_end` event to Elementary. Elementary processes these events asynchronously, so it may take a short time before the resulting incident appears.
-
-To confirm the webhook is wired up correctly, check the **Incidents** view in Elementary after a failed sync — a new incident should appear for the affected connector.
+    See Fivetran's [API key documentation](https://fivetran.com/docs/rest-api/getting-started) for details.
+  </Step>
+  <Step title="Open the Fivetran integration in Elementary">
+    In Elementary, go to **Settings → Environments** and select the environment you want to connect. Under **Integrations**, click **Connect Fivetran**.
+  </Step>
+  <Step title="Enter your Fivetran credentials">
+    Paste the **API key** and **API secret** and continue. Elementary validates the credentials and loads the destination groups available in your Fivetran account.
+  </Step>
+  <Step title="Select destination groups and connect">
+    Choose the destination groups you want to monitor, then save. Elementary connects to Fivetran and automatically starts syncing and monitoring the selected groups.
+  </Step>
+</Steps>
 
 ## Where to see Fivetran incidents
 
@@ -63,7 +48,3 @@ Fivetran sync failures appear in the **Incidents** view in Elementary. Each inci
 - Sync status and failure reason (when available)
 - Event timestamp
 - Destination group ID
-
-<Note>
-  At this time, Fivetran incidents cannot be filtered by connector — all connectors in the registered destination group are monitored.
-</Note>
