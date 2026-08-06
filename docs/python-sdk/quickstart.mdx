@@ -115,7 +115,7 @@ def main():
         test_only_valid_countries(users_df)
         
         # Send results to Elementary Cloud
-        PROJECT_ID = "my-python-project"  # Your Python project identifier (used to deduplicate and identify assets)
+        PROJECT_ID = "my-python-project"  # Your Python project identifier (used to identify assets and tests across runs)
         API_KEY = "your-api-key"
         URL = "https://prod.api.elementary-data.com/sdk-ingest/{env_id}/batch"
         
@@ -189,7 +189,7 @@ def main():
         test_unique_ids(users_df)
         
         # Initialize client and send results
-        PROJECT_ID = "my-python-project"  # Your Python project identifier (used to deduplicate and identify assets)
+        PROJECT_ID = "my-python-project"  # Your Python project identifier (used to identify assets and tests across runs)
         API_KEY = "your-api-key"
         URL = "https://prod.api.elementary-data.com/sdk-ingest/{env_id}/batch"
         

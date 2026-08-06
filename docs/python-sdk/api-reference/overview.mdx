@@ -37,10 +37,17 @@ client = ElementaryCloudClient(project_id, api_key, url)
 ```
 
 Where:
-- `project_id` is your Python project identifier (chosen by you, used to deduplicate and identify reported assets)
+- `project_id` is your Python project identifier (chosen by you, used to identify assets and tests belonging to this project across runs)
 - `api_key` is your API token (generated from the steps above)
 - `url` is the full SDK ingest endpoint URL (the Elementary team will provide you with this URL): `{base_url}/sdk-ingest/{env_id}/batch`
   - Example: `https://prod.api.elementary-data.com/sdk-ingest/a6b2425d-36e2-4e13-8458-9825688ca1f2/batch`
+- `replace_existing_data` *(optional, default `False`)* — controls how each batch is handled on the cloud side:
+  - `False` (default): each batch is **merged** into existing data. Assets and tests not present in a given call are left untouched. Assets and tests that have not been reported for approximately one month are removed automatically.
+  - `True`: each batch is treated as the **complete set** of assets and tests for the project. Assets and tests previously sent but absent from the current batch are removed immediately on the cloud side.
+
+<Note>
+Use `replace_existing_data=True` only if every run of this client submits the full set of assets and tests for the project. If your runs cover a subset of assets, leave this as `False` (the default) to avoid data loss.
+</Note>
 
 ## Test Context
 
@@ -137,6 +144,28 @@ client.send_to_cloud(ctx)
 
 This automatically batches all test results from the context and sends them in a single request.
 
+### Sending results for multiple assets
+
+Each `elementary_test_context` holds one asset, so when your project monitors several tables you'll have one context per asset. Pass them together in a single `send_to_cloud` call instead of calling it once per asset:
+
+```python
+with elementary_test_context(asset=users_asset) as users_ctx:
+    test_unique_ids(users_df)
+    test_average_age(users_df)
+
+with elementary_test_context(asset=orders_asset) as orders_ctx:
+    test_unique_ids(orders_df)
+    test_row_count(orders_df)
+
+client.send_to_cloud([users_ctx, orders_ctx])
+```
+
+This matters most when `replace_existing_data=True`: sending one context at a time would cause each call to remove assets reported by the previous call. Passing all contexts together ensures the full set of assets and tests reaches the cloud in one atomic batch.
+
+<Note>
+If the same asset or test appears in more than one context, it is deduplicated — only the first occurrence is sent. All test executions are always kept, so the same test run against two contexts will produce two execution records.
+</Note>
+
 ## Error Handling
 
 The SDK handles errors automatically, but you can wrap calls in try-except blocks:
@@ -150,13 +179,9 @@ except Exception as e:
 
 ## Best Practices
 
-- **Run multiple tests in one context** - All tests in a single `elementary_test_context` are automatically batched
-- **Use descriptive test names** - Clear names help identify tests in the Elementary UI
-- **Include asset metadata** - Add descriptions, owners, tags, and dependencies to assets
-
-<Tip>
-All tests run within a single `elementary_test_context` are automatically batched and sent together.
-</Tip>
+- **One context per asset, one send call per project run** — Open one `elementary_test_context` per asset, then pass all contexts to a single `send_to_cloud` call.
+- **Use descriptive test names** — Clear names help identify tests in the Elementary UI.
+- **Include asset metadata** — Add descriptions, owners, tags, and dependencies to assets.
 
 ## Next Steps
 
