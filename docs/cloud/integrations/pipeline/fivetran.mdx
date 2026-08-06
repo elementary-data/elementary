@@ -20,12 +20,17 @@ When a sync ends, Elementary evaluates the outcome and opens or updates an incid
 ## Enabling Fivetran
 
 <Info>
-  You need a Fivetran API key with permission to read connectors and manage webhooks, and Elementary permissions to edit integrations.
+  Connecting Fivetran requires permission to edit integrations in Elementary.
 </Info>
 
 <Steps>
   <Step title="Create a Fivetran API key">
     In Fivetran, go to your account settings and generate an API key. Copy the **API key** and **API secret** .
+
+    **Which permissions should I provide to the API key?**
+
+    - Read permission to all resources
+    - Manage permission to the webhook resource
 
     See Fivetran's [API key documentation](https://fivetran.com/docs/rest-api/getting-started) for details.
   </Step>
