@@ -24,6 +24,20 @@ It is best to configure low-cardinality fields as `dimensions`.
 - _Relevant tests: `dimension_anomalies`, `column_anomalies`, `all_columns_anomalies`_
 - _Configuration level: test_
 
+#### Configuring more than one dimension
+
+Multiple dimensions do not create one series per column. Elementary concatenates the columns into a single composite value, separated by `; `, and monitors each observed **combination** as one series. With `dimensions: [country, device_os]`, the monitored series are `US; ios`, `US; android`, `DE; ios`, and so on. `NULL` values are rendered as the literal string `NULL`.
+
+<Warning>
+  Series count multiplies. Two dimensions of 20 and 10 values are up to 200 series, each needing its own training history. Combinations also have lower counts than either column alone, which makes them individually noisier. If you want each field monitored independently, define a separate test per field.
+</Warning>
+
+<Note>
+  The dimension list — including its **order** — is part of the identity of the collected metrics. Editing or reordering the list means the test no longer matches its previously collected history and starts building a training set from scratch.
+</Note>
+
+For the full picture, see [Understanding dimension anomalies](/data-tests/anomaly-detection-tests/understanding-dimension-anomalies).
+
 <RequestExample>
 
 ```yml test

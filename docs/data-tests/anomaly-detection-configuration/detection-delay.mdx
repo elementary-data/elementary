@@ -57,4 +57,41 @@ vars:
 #### How it works?
 
 The `detection_delay` param only works for tests that have `timestamp_column` configuration.
-It does not affect the other duration parameters, like `detection_period` or `training_period`.
+It does not affect the other duration parameters, like `detection_period` or `training_period` — it shifts the whole evaluated window back in time rather than resizing it.
+
+#### You don't need a delay to avoid partial buckets
+
+Elementary only ever evaluates **complete time buckets**. The newest bucket a test considers is the last one whose *end* falls at or before the invocation time, minus the delay. With daily buckets and dbt running at 02:00, the newest evaluated bucket runs from yesterday 00:00 to today 00:00 — today's two hours of data are never scored, with no delay configured.
+
+So a delay is not what protects you from testing a partial day. What it protects you from is **data that arrives after the bucket it belongs to has closed**: if yesterday's load only finishes at 04:00 and your tests run at 02:00, yesterday's bucket is complete by the clock but incomplete in the warehouse, and the test sees a drop.
+
+<Note>
+  The detection boundary comes from the dbt invocation time, which dbt reports in UTC, while buckets are aligned to midnight in the values of your `timestamp_column`. If that column holds local time, the newest bucket can be evaluated before it is actually complete. This is a genuine case for a delay.
+</Note>
+
+#### The delay snaps to bucket boundaries
+
+A delay smaller than one time bucket is rarely a small adjustment. With daily buckets and dbt running at 02:00:
+
+| `detection_delay` | Detection boundary | Newest evaluated bucket |
+| --- | --- | --- |
+| none | today 02:00 | **yesterday** |
+| 4 hours | yesterday 22:00 | day before yesterday |
+| 1 day | yesterday 02:00 | day before yesterday |
+
+A four-hour delay pushes the boundary back before midnight, so it costs a full day of freshness — the same as asking for a whole day. Reason about the delay in whole buckets.
+
+#### Choosing a delay
+
+A delay buys completeness and pays in detection latency. There is no setting that avoids the trade-off.
+
+- **No delay** is correct when the pipeline that populates a bucket reliably finishes before the tests run. This is the common case, and the default.
+- **A one-bucket delay** is correct when late-arriving data is normal — event data with a long ingestion tail, a source you don't control, a loader that sometimes finishes after the test. You accept finding out about yesterday tomorrow, in exchange for not being alerted by an artifact of scheduling.
+
+<Tip>
+  Before reaching for a delay, check whether a different timestamp fixes the problem outright. If `timestamp_column` is an *event* time (`occurred_at`) but rows land hours later, switch to a *load* time (`loaded_at`, `_synced_at`). Bucketing by when rows arrived removes the late-data problem instead of waiting it out, and keeps detection current.
+</Tip>
+
+<Warning>
+  A delay does not shorten the periods, it moves them. With `detection_delay: 1 day`, an incident inside the skipped bucket is caught on the *next* run, once that bucket enters the window. Make sure your delay plus your run cadence still evaluates every bucket.
+</Warning>

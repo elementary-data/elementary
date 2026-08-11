@@ -18,6 +18,12 @@ It is best to configure it on low-cardinality fields.
 
 If `timestamp_column` is configured, the distribution is collected per `time_bucket`. If not, it counts the total rows per dimension.
 
+Every distinct dimension value is monitored as its own series, with its own training set and expected range. A value that drops to zero is flagged even if the table's total row count is unchanged.
+
+<Card horizontal="true" title="Understanding dimension anomalies" icon="book-open" href="/data-tests/anomaly-detection-tests/understanding-dimension-anomalies">
+  How multiple dimensions combine, how to reason about `detection_delay`, and the training/detection overlap that causes false negatives.
+</Card>
+
 ### Test configuration
 
 _Required configuration: `dimensions`_

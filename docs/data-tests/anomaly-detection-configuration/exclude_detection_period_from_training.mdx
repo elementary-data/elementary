@@ -14,9 +14,19 @@ When the detection period spans multiple values, there can be overlap between th
 
 Setting `exclude_detection_period_from_training: true` ensures that no values from the detection period are used in the training calculation, preventing this overlap and improving anomaly detection accuracy.
 
+**Why the overlap happens:**
+
+The expected range at a given time bucket is calculated from the values of that metric **up to and including that bucket**. When `detection_period` spans a single bucket this is harmless, but as soon as it spans several, earlier detection buckets feed the training statistics of the later ones.
+
 **Example use case:**
 
-When `detection_period` is set to more than 1 time bucket (e.g., `detection_period: 7 days`), the detection period overlaps with the training period. Without excluding the detection period from training, values being evaluated for anomalies are also contributing to the expected range calculation, which can mask actual anomalies and result in false negatives.
+An incident starts on Monday and continues through Wednesday, with `detection_period: 3 days`. Monday's inflated value is flagged. It then joins the training data used to evaluate Tuesday, pulling the average up and the standard deviation wider. Wednesday is evaluated against a range that the incident itself widened. A sustained incident hides its own tail — you get an alert on day one and silence afterwards, which reads like a resolved blip rather than an ongoing failure.
+
+Setting this to `true` removes every detection-period bucket from the training calculation, so all three days are judged against pre-incident history only.
+
+<Warning>
+  If your `detection_period` is longer than one time bucket, set `exclude_detection_period_from_training: true`. Leaving it off produces false negatives on exactly the multi-day incidents you most want to catch.
+</Warning>
 
 - _Default: false_
 - _Supported values: `true`, `false`_
