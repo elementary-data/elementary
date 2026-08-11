@@ -57,30 +57,30 @@ vars:
 #### How it works?
 
 The `detection_delay` param only works for tests that have `timestamp_column` configuration.
-It does not affect the other duration parameters, like `detection_period` or `training_period` — it shifts the whole evaluated window back in time rather than resizing it.
+It does not affect the other duration parameters, like `detection_period` or `training_period` — it moves the whole tested window into the past instead of making it shorter.
 
-#### You don't need a delay to avoid partial buckets
+#### You don't need a delay to avoid testing a half-finished day
 
-Elementary only ever evaluates **complete time buckets** — the newest one considered is the last whose *end* falls at or before the invocation time, minus the delay. With daily buckets and dbt running at 02:00, the newest evaluated bucket runs from yesterday 00:00 to today 00:00, so today's partial data is never scored without any delay configured.
+Elementary only ever tests **finished time buckets**. The newest one it looks at is the last bucket that had already ended when dbt started, minus any delay. With daily buckets and dbt running at 02:00, the newest bucket tested is yesterday, midnight to midnight — today's two hours are never tested, without setting anything.
 
-A delay is instead for **data that arrives after its bucket has closed**: if yesterday's load finishes at 04:00 but tests run at 02:00, yesterday's bucket is complete by the clock and incomplete in the warehouse, and the test sees a drop.
+What a delay is really for is **data that shows up late**. If yesterday's load does not finish until 04:00 but your tests run at 02:00, yesterday looks finished on the calendar but is still missing rows in the warehouse, and the test sees a drop.
 
-The delay also snaps to bucket boundaries, so a sub-bucket delay is not a small adjustment. Daily buckets, dbt running at 02:00:
+A delay also only moves in whole buckets, so a small delay is not a small change. Daily buckets, dbt running at 02:00:
 
-| `detection_delay` | Detection boundary | Newest evaluated bucket |
+| `detection_delay` | Cutoff | Newest bucket tested |
 | --- | --- | --- |
 | none | today 02:00 | **yesterday** |
 | 4 hours | yesterday 22:00 | day before yesterday |
 | 1 day | yesterday 02:00 | day before yesterday |
 
-A four-hour delay pushes the boundary back before midnight, costing a full day of freshness — the same as asking for a whole day.
+A four-hour delay pushes the cutoff back past midnight, so it costs you a whole day — the same as asking for one.
 
 <Tip>
-  Before reaching for a delay, check whether a different timestamp fixes the problem outright. If `timestamp_column` is an *event* time (`occurred_at`) but rows land hours later, switch to a *load* time (`loaded_at`, `_synced_at`). Bucketing by arrival removes the late-data problem instead of waiting it out.
+  Before adding a delay, see whether a different column solves it. If `timestamp_column` is when something happened (`occurred_at`) but the rows only land hours later, switch to when it was loaded (`loaded_at`, `_synced_at`). Grouping by arrival time avoids the problem instead of waiting it out.
 </Tip>
 
 <Note>
-  Bucket boundaries and the detection boundary are not derived the same way: buckets start at midnight of a calendar date, while the detection boundary carries the dbt invocation time, which dbt reports in UTC. If your `timestamp_column` is not stored in UTC, confirm which bucket your test actually scores — depending on your warehouse and the column's type, the newest bucket can be evaluated before it has closed in the column's own timezone. That is a real case for a delay.
+  Time buckets are built from calendar dates, but the cutoff for "how recent" comes from when dbt started running, and dbt uses UTC. If your timestamp column holds local time rather than UTC, the newest day can get tested before that day has actually ended where your data lives. Check which day your test is really looking at, and add a delay if it is testing too early.
 </Note>
 
 For the full trade-off, see [Understanding dimension anomalies](/data-tests/anomaly-detection-tests/understanding-dimension-anomalies).
