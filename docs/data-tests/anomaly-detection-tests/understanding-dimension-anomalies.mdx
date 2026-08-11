@@ -50,19 +50,23 @@ Listing two columns does not test each column separately. Elementary joins them 
 
 ## A long detection period can hide problems
 
-The expected range for a bucket is worked out from that value's numbers **up to and including that bucket**. That is fine when [`detection_period`](/data-tests/anomaly-detection-configuration/detection-period) covers a single bucket. It works against you when it covers several.
+The training period and the detection period **always overlap**. This is not a mistake you can avoid by picking different period lengths: the expected range for a bucket is worked out from that value's numbers **up to and including that bucket**, so the days being tested are also part of what they are tested against.
+
+That is harmless when [`detection_period`](/data-tests/anomaly-detection-configuration/detection-period) covers a single bucket. It works against you when it covers several — which, with the default 2-day detection period and daily buckets, it already does.
 
 Say something breaks on Monday and stays broken through Wednesday, with `detection_period: 3 days`. Monday gets flagged. Monday's bad number then becomes part of what Tuesday is compared against, pulling the average up and widening the range. By Wednesday the test is comparing against a range the problem itself stretched. **A long problem covers its own tracks** — you get one alert, then silence that looks like it was fixed.
 
 <Warning>
-  If `detection_period` is longer than one time bucket, set [`exclude_detection_period_from_training`](/data-tests/anomaly-detection-configuration/exclude_detection_period_from_training) to `true`.
+  If `detection_period` is longer than one time bucket, set [`exclude_detection_period_from_training`](/data-tests/anomaly-detection-configuration/exclude_detection_period_from_training) to `true`. On the defaults — 2-day detection period, daily buckets — that means most tests.
 </Warning>
 
 Two related limits. A value with only one past data point cannot be checked at all, so the default 14-day [`training_period`](/data-tests/anomaly-detection-configuration/training-period) means 14 buckets *for each value* — not much for values that only show up now and then. And [`seasonality`](/data-tests/anomaly-detection-configuration/seasonality) splits each value again by day of week, so every value needs far more history.
 
 ## How to think about `detection_delay`
 
-[`detection_delay`](/data-tests/anomaly-detection-configuration/detection-delay) moves the whole tested window further into the past. It is tempting to always set a one-day delay so the test never looks at a half-finished day — but **Elementary only ever tests finished buckets**. With daily buckets and dbt running at 02:00, the newest bucket tested is yesterday, midnight to midnight. Today's two hours are never tested, without setting anything.
+[`detection_delay`](/data-tests/anomaly-detection-configuration/detection-delay) moves the whole tested window further into the past. It is tempting to always set a one-day delay so the test never looks at a half-finished day — but **Elementary only ever tests finished buckets**, so you don't need a delay for that.
+
+Your job does not need to run at midnight for this to hold. With daily buckets, the newest day tested is always yesterday, whether dbt starts at 00:30, 02:00 or 23:00. Today's partial data is never tested, without setting anything.
 
 What a delay is really for is **data that shows up late**. If yesterday's load does not finish until 04:00 but your tests run at 02:00, yesterday looks finished on the calendar but is still missing rows in the warehouse, and every value looks like it dropped.
 

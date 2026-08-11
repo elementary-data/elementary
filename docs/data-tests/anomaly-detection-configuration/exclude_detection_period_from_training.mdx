@@ -16,7 +16,9 @@ Setting `exclude_detection_period_from_training: true` ensures that no values fr
 
 **Why the overlap happens:**
 
-The expected range for a time bucket is worked out from that metric's numbers **up to and including that bucket**. That is harmless when `detection_period` covers a single bucket, but as soon as it covers several, the earlier detection buckets become part of what the later ones are compared against.
+The two periods always overlap. This is not something you can avoid by picking different period lengths: the expected range for a time bucket is worked out from that metric's numbers **up to and including that bucket**, so the buckets being tested are also part of what they are tested against.
+
+That is harmless when `detection_period` covers a single bucket. As soon as it covers several, the earlier detection buckets become part of what the later ones are compared against — and with the default 2-day detection period and daily buckets, it already covers two.
 
 **Example use case:**
 
