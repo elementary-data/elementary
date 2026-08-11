@@ -7,121 +7,66 @@ import AiGenerateTest from '/snippets/ai-generate-test.mdx';
 
 <AiGenerateTest />
 
-`dimension_anomalies` monitors the **distribution** of values in a field over time, not the size of the table. It catches problems that volume tests structurally cannot see: one country stops reporting, a payment provider drops to zero, a new enum value appears from an upstream schema change — all while the total row count stays flat.
+`dimension_anomalies` monitors the **distribution** of values in a field over time, not the size of the table. It catches what volume tests structurally cannot see: one country stops reporting, a payment provider drops to zero, a new enum value appears upstream — all while the total row count stays flat.
 
-That extra power comes with configuration decisions that don't exist in the other anomaly tests. This page explains what the test does per dimension value, how multiple dimensions combine, and how to reason about the delay and period parameters. For the parameter list itself, see [dimension_anomalies](/data-tests/anomaly-detection-tests/dimension-anomalies).
+For the parameter list, see [dimension_anomalies](/data-tests/anomaly-detection-tests/dimension-anomalies). This page covers the decisions that don't exist in the other anomaly tests.
 
 ## One independent test per dimension value
 
-The test counts rows grouped by your `dimensions`, per [time bucket](/data-tests/anomaly-detection-configuration/time-bucket). Every distinct dimension value becomes its **own metric series with its own training set, its own expected range, and its own anomaly score**.
-
-Given `dimensions: [country]` on a daily bucket:
+The test counts rows grouped by your `dimensions`, per [time bucket](/data-tests/anomaly-detection-configuration/time-bucket). Every distinct dimension value becomes its own series, with its own training set and expected range.
 
 | `bucket_end` | `dimension_value` | `metric_value` |
 | --- | --- | --- |
 | 2026-03-01 | `US` | 48,120 |
-| 2026-03-01 | `DE` | 3,301 |
 | 2026-03-01 | `JP` | 96 |
 | 2026-03-02 | `US` | 47,880 |
-| 2026-03-02 | `DE` | 3,410 |
 | 2026-03-02 | `JP` | 0 |
 
-`JP` dropping to zero is evaluated only against `JP`'s own history. It is flagged even though the table's total row count barely moved — which is exactly the point of the test.
+`JP` dropping to zero is scored only against `JP`'s own history, so it is flagged even though the table's total barely moved. That is the point of the test.
 
-The practical consequence is that **noise scales with the number of dimension values**. A dimension with 500 values is 500 chances per run to produce a false positive, and the small-volume values are the noisiest: a series that normally sits at 5 rows a day has a large relative standard deviation, so it flips in and out of the expected range on its own. Prefer fields with a handful of stable values, and use [`where_expression`](/data-tests/anomaly-detection-configuration/where-expression) to scope the test to the values you actually care about.
+The cost is that **noise scales with cardinality**. 500 values is 500 chances per run for a false positive, and the low-volume values are the noisiest: a series that normally sits at 5 rows a day has a large relative standard deviation and drifts in and out of range on its own. Prefer a handful of stable values, and scope with [`where_expression`](/data-tests/anomaly-detection-configuration/where-expression).
 
 <Tip>
-  `dimension_anomalies` monitors **row count** per group. If you want a *column* metric — null rate, average, uniqueness — segmented per group, use [`column_anomalies`](/data-tests/anomaly-detection-tests/column-anomalies) with the [`dimensions`](/data-tests/anomaly-detection-configuration/dimensions) parameter instead.
+  This test monitors **row count** per group. For a *column* metric — null rate, average, uniqueness — segmented per group, use [`column_anomalies`](/data-tests/anomaly-detection-tests/column-anomalies) with [`dimensions`](/data-tests/anomaly-detection-configuration/dimensions).
 </Tip>
 
-## What happens with multiple dimensions
+## Multiple dimensions monitor combinations
 
-Multiple dimensions do **not** create one test per column. Elementary concatenates the columns into a single composite value, separated by `; `, and monitors each observed **combination** as one series.
-
-With this configuration:
-
-```yaml
-models:
-  - name: login_events
-    config:
-      elementary:
-        timestamp_column: loaded_at
-    data_tests:
-      - elementary.dimension_anomalies:
-          arguments:
-            dimensions:
-              - country
-              - device_os
-```
-
-the monitored series are `US; ios`, `US; android`, `DE; ios`, and so on. `NULL` values are rendered as the literal string `NULL`, so `US; NULL` is a legitimate series and a spike in it is a real signal about missing `device_os`.
+Multiple dimensions do **not** create one test per column. Elementary concatenates them into a single composite value separated by `; `, and monitors each observed **combination** as one series. With `dimensions: [country, device_os]` the series are `US; ios`, `US; android`, `DE; ios`, and so on. `NULL` becomes the literal string `NULL`, so a spike in `US; NULL` is a real signal about missing `device_os`.
 
 <Warning>
-  Series count multiplies. Two dimensions of 20 and 10 values are up to 200 series, each needing its own training history and its own row per bucket in the metrics table. Combinations also have lower counts than either column alone, which makes them individually noisier. Adding a second dimension is a decision to monitor the *interaction*, not a shortcut for monitoring two fields.
+  Series count multiplies: 20 countries and 10 operating systems is up to 200 series, each needing its own history, and each combination has lower counts than either column alone. Adding a second dimension monitors the *interaction* — it is not a shortcut for monitoring two fields. For that, define one test per field.
 </Warning>
 
-If you want each field monitored independently, define **separate tests**:
-
-```yaml
-data_tests:
-  - elementary.dimension_anomalies:
-      arguments:
-        dimensions:
-          - country
-  - elementary.dimension_anomalies:
-      arguments:
-        dimensions:
-          - device_os
-```
-
-This gives you 30 series instead of 200, and an alert names the field that broke rather than a combination you have to decompose.
-
 <Note>
-  The dimension list is part of the identity of the collected metrics — including its **order**. Editing the list, or reordering it, means the test no longer matches its previously collected history and starts building a training set from scratch. Treat a change to `dimensions` as creating a new test, not tuning an existing one.
+  The dimension list, **including its order**, is part of the identity of the collected metrics. Editing or reordering it means the test no longer matches its history and starts training from scratch. Treat it as creating a new test.
 </Note>
 
-## How the history of a dimension value behaves
+## New and disappearing values
 
-Dimension values come and go, and the test handles the two directions asymmetrically.
+- **A value disappears.** Once Elementary has seen a value, it writes an explicit `0` for buckets where the value has no rows. This is what makes disappearance detectable.
+- **A value appears.** A never-seen value gets no backfilled zeros — its series starts at first appearance, and with no history there is no expected range. **A new value cannot raise an anomaly on the run it first appears.** To catch unexpected categories, add an `accepted_values` test.
+- **A value stays gone.** A value whose entire history inside the window is zero drops out of tracking, so retired values stop alerting.
 
-- **A value disappears.** Once Elementary has seen a dimension value, it writes an explicit `0` for buckets where the value has no rows. This is what makes disappearance detectable: the series drops to zero and is scored against its own history.
-- **A value appears.** A value that has never been seen has no backfilled zeros — its series simply starts at first appearance. With no history there is no expected range, so **a brand new dimension value does not raise an anomaly on the run it first appears**. It becomes monitorable once enough buckets accumulate.
-- **A value stays gone.** A value whose entire history inside the training window is zero is dropped from tracking, so a retired value stops generating alerts once it ages out of the window.
+## The detection period overlaps the training period
 
-<Note>
-  This means the test detects *new* values only indirectly — by the effect they have on the values that lost volume to them. If detecting unexpected new categories is the goal, pair this test with an [`accepted_values`](https://docs.getdbt.com/reference/resource-properties/data-tests) test on the same column.
-</Note>
+The expected range at a bucket is calculated from that series' values **up to and including that bucket**. Harmless when [`detection_period`](/data-tests/anomaly-detection-configuration/detection-period) is a single bucket, costly beyond that.
 
-## Training period, detection period, and the overlap between them
-
-For each series, the expected range at a given bucket is calculated from that series' values **up to and including that bucket**, within the [`training_period`](/data-tests/anomaly-detection-configuration/training-period). Buckets inside the [`detection_period`](/data-tests/anomaly-detection-configuration/detection-period) are the ones eligible to be flagged.
-
-Since the training window runs up to the bucket being evaluated, the two periods overlap by default. That overlap is harmless when `detection_period` is a single bucket, but it works against you as soon as it spans several:
-
-An incident starts on Monday and continues through Wednesday, with `detection_period: 3 days`. Monday's inflated value is flagged. It then joins the training data used to evaluate Tuesday, pulling the average up and the standard deviation wider. Wednesday is evaluated against a range that the incident itself widened. **A sustained incident hides its own tail** — you get an alert on day one and silence afterwards, which reads like a resolved blip rather than an ongoing failure.
-
-Set [`exclude_detection_period_from_training`](/data-tests/anomaly-detection-configuration/exclude_detection_period_from_training) to `true` to remove every detection-period bucket from the training calculation, so all three days are judged against pre-incident history only.
+An incident starts Monday and runs through Wednesday, with `detection_period: 3 days`. Monday is flagged, then joins the training data used to judge Tuesday — pulling the average up and the standard deviation wider. Wednesday is measured against a range the incident itself widened. **A sustained incident hides its own tail**: one alert, then silence that reads like recovery.
 
 <Warning>
-  If your `detection_period` is longer than one time bucket, set `exclude_detection_period_from_training: true`. Leaving it off produces false negatives on exactly the multi-day incidents you most want to catch.
+  If `detection_period` is longer than one time bucket, set [`exclude_detection_period_from_training`](/data-tests/anomaly-detection-configuration/exclude_detection_period_from_training) to `true`.
 </Warning>
 
-Two more things worth knowing about the training set:
-
-- **Every series needs its own history.** A series with a single training value gets no score at all. With `dimensions`, the default 14-day `training_period` is 14 daily buckets *per dimension value* — fine for values present every day, thin for values that appear sporadically.
-- **[Seasonality](/data-tests/anomaly-detection-configuration/seasonality) multiplies the requirement.** `seasonality: day_of_week` splits each series again by weekday, so a dimension value is compared only to the same weekday. Elementary extends the training period to compensate, but combining seasonality with many dimension values needs substantially more history before the test is useful.
+Two related constraints: a series with a single training value gets no score at all, so the default 14-day [`training_period`](/data-tests/anomaly-detection-configuration/training-period) is 14 buckets *per dimension value* — thin for values that appear sporadically. And [`seasonality`](/data-tests/anomaly-detection-configuration/seasonality) splits each series again by weekday, multiplying the history every value needs.
 
 ## How to think about `detection_delay`
 
-[`detection_delay`](/data-tests/anomaly-detection-configuration/detection-delay) shifts the whole evaluated window back in time. The instinct is to always set a one-day delay so the test never scores a partial day — but that isn't necessary, because **Elementary only ever evaluates complete time buckets**.
+[`detection_delay`](/data-tests/anomaly-detection-configuration/detection-delay) shifts the evaluated window back in time. The instinct is to always set a one-day delay so the test never scores a partial day — but **Elementary only ever evaluates complete time buckets**. With daily buckets and dbt running at 02:00, the newest scored bucket runs from yesterday 00:00 to today 00:00; today's two hours are never scored, with no delay configured.
 
-The newest bucket the test considers is the last one whose *end* falls at or before the invocation time (minus the delay). With daily buckets and dbt running at 02:00, the newest evaluated bucket runs from yesterday 00:00 to today 00:00, and today's two hours of data are never scored. No delay required.
+What a delay is for is **data that arrives after its bucket has closed**. If yesterday's load finishes at 04:00 and tests run at 02:00, yesterday's bucket is complete by the clock but incomplete in the warehouse, and every value looks like a drop.
 
-What the delay is actually for is **data that arrives after the bucket it belongs to has closed**. If yesterday's load only finishes at 04:00 and your tests run at 02:00, yesterday's bucket is complete by the clock but incomplete in the warehouse, and every dimension value looks like a drop.
-
-### The delay snaps to bucket boundaries
-
-A delay smaller than one bucket is rarely a small adjustment. Daily buckets, dbt running at 02:00:
+It also snaps to bucket boundaries, so a sub-bucket delay is not a small adjustment. Daily buckets, dbt running at 02:00:
 
 | `detection_delay` | Detection boundary | Newest evaluated bucket |
 | --- | --- | --- |
@@ -129,69 +74,28 @@ A delay smaller than one bucket is rarely a small adjustment. Daily buckets, dbt
 | 4 hours | yesterday 22:00 | day before yesterday |
 | 1 day | yesterday 02:00 | day before yesterday |
 
-A four-hour delay pushes the boundary back before midnight, so it costs a full day of freshness — the same as asking for a whole day. Any delay is worth reasoning about in whole buckets.
-
-### Choosing a delay
-
-The trade-off is real and there is no setting that avoids it: a delay buys completeness and pays in detection latency.
-
-- **No delay** is correct when the pipeline that populates a bucket reliably finishes before the tests run. This is the common case, and it is the default for a reason.
-- **A one-bucket delay** is correct when late-arriving data is normal — event data with a long ingestion tail, a source you don't control, a loader that sometimes finishes after the test. You accept finding out about yesterday tomorrow, in exchange for not being paged every morning by an artifact of scheduling.
+A four-hour delay pushes the boundary back before midnight and costs a full day of freshness, the same as asking for a whole day. So reason in whole buckets: no delay when the load reliably finishes before the tests run (the common case, and the default), one bucket when late-arriving data is normal and you accept hearing about yesterday tomorrow.
 
 <Tip>
-  Before reaching for a delay, check whether a different timestamp fixes the problem outright. If `timestamp_column` is an *event* time (`occurred_at`) but rows land hours later, switch to a *load* time (`loaded_at`, `_synced_at`). Bucketing by when rows arrived removes the late-data problem instead of waiting it out, and keeps detection current.
+  First check whether a different timestamp removes the problem outright. If `timestamp_column` is an *event* time (`occurred_at`) but rows land hours later, switch to a *load* time (`loaded_at`). Bucketing by arrival keeps detection current instead of waiting late data out.
 </Tip>
 
 <Note>
-  The detection boundary comes from the dbt invocation time, which dbt reports in UTC, while buckets are aligned to midnight in the values of your `timestamp_column`. If that column holds local time, the newest bucket can be evaluated before it is actually complete. This is a genuine case for a delay.
+  The boundary comes from the dbt invocation time, which dbt reports in UTC, while buckets align to midnight in the values of your `timestamp_column`. A local-time column can therefore be scored before it is complete — a genuine case for a delay.
 </Note>
-
-<Warning>
-  A delay does not shorten the periods, it moves them. With `detection_delay: 1 day`, an incident inside the skipped bucket is not caught late — it is caught on the *next* run, once that bucket enters the window. Make sure your delay plus your run cadence still evaluates every bucket.
-</Warning>
 
 ## Without a `timestamp_column`
 
-If no `timestamp_column` is configured, the test counts rows per dimension value across the whole table and stores one point per run. There are no time buckets: the training set is built from **previous runs**, so the default 14-day training period means roughly 14 runs on separate days before the test has a full training set. `time_bucket`, `detection_delay`, and the period parameters have no bucketing to act on.
-
-Use this mode for dimension tables and slowly changing reference data, where "how many rows does each category have right now" is the meaningful question. For anything append-only, configure a `timestamp_column`.
+The test counts rows per value across the whole table and stores one point per run. Training is built from **previous runs**, so the default 14-day period needs roughly 14 runs on separate days, and `time_bucket`, `detection_delay` and the period parameters have no buckets to act on. Use this mode for dimension tables and reference data. For anything append-only, configure a `timestamp_column`.
 
 ## Reading a failure
-
-The failure description names the affected values, with the observed metric and the training average:
 
 ```
 3 anomalous dimension values for dimension country; device_os:
 US; ios (0.0, avg 48120.4), DE; android (91204.0, avg 3410.2), JP; ios (0.0, avg 96.7)
 ```
 
-Two details in the results are specific to this test:
+- **The failure count is anomalous bucket/value pairs**, not affected values — one value anomalous across three buckets counts as three failures.
+- **Stored results include each affected value's full series**, not only the anomalous buckets, so the report and alert graph show the anomaly in context.
 
-- **The failure count is the number of anomalous bucket/value pairs**, not the number of affected dimension values. One value anomalous across three buckets counts as three failures.
-- **The stored results include the full series for every affected dimension value**, not just the anomalous buckets. This is deliberate: it lets the report and the alert graph show the anomaly in the context of that value's normal behavior.
-
-For queries to inspect collected metrics and scores directly, see the [anomaly tests troubleshooting guide](/data-tests/anomaly-detection-tests/Anomaly-troubleshooting-guide).
-
-## Configuration checklist
-
-<AccordionGroup>
-  <Accordion title="Rolling out a new dimension test">
-    1. Pick a **low-cardinality, stable** field. Check `count(distinct ...)` first.
-    2. Use one test per field unless you specifically want to monitor the interaction.
-    3. Scope with [`where_expression`](/data-tests/anomaly-detection-configuration/where-expression) to drop values you don't care about.
-    4. Configure a [`timestamp_column`](/data-tests/anomaly-detection-configuration/timestamp-column) that reflects when rows *arrived*, unless the model is a dimension table.
-    5. Start with `severity: warn` and let the training set build before promoting to `error`.
-  </Accordion>
-  <Accordion title="Tuning a noisy dimension test">
-    - Raise [`anomaly_sensitivity`](/data-tests/anomaly-detection-configuration/anomaly-sensitivity), or set [`ignore_small_changes`](/data-tests/anomaly-detection-configuration/ignore_small_changes) so small absolute moves in low-volume values are ignored.
-    - Set [`anomaly_direction`](/data-tests/anomaly-detection-configuration/anomaly-direction) to `drop` if only disappearing data matters.
-    - Increase [`training_period`](/data-tests/anomaly-detection-configuration/training-period) to widen the expected range with a larger sample.
-    - Filter out the long tail of rare values with [`where_expression`](/data-tests/anomaly-detection-configuration/where-expression), or use a coarser grouping expression.
-  </Accordion>
-  <Accordion title="Tuning a test that misses incidents">
-    - Set [`exclude_detection_period_from_training`](/data-tests/anomaly-detection-configuration/exclude_detection_period_from_training) to `true` if `detection_period` spans more than one bucket.
-    - Lower [`anomaly_sensitivity`](/data-tests/anomaly-detection-configuration/anomaly-sensitivity).
-    - Use a smaller [`time_bucket`](/data-tests/anomaly-detection-configuration/time-bucket) so a partial-day outage isn't averaged away inside a daily count.
-    - Check that the delay isn't larger than it needs to be, and that the values you expected to be monitored actually have enough history.
-  </Accordion>
-</AccordionGroup>
+To inspect collected metrics and scores directly, see the [anomaly tests troubleshooting guide](/data-tests/anomaly-detection-tests/Anomaly-troubleshooting-guide).
