@@ -24,6 +24,20 @@ It is best to configure low-cardinality fields as `dimensions`.
 - _Relevant tests: `dimension_anomalies`, `column_anomalies`, `all_columns_anomalies`_
 - _Configuration level: test_
 
+#### Listing more than one column
+
+Listing two columns does not test each column separately. Elementary joins them into one value with `; ` in between, then watches every **combination** it finds. With `dimensions: [country, device_os]`, what gets watched is `US; ios`, `US; android`, `DE; ios`, and so on. Empty values appear as the word `NULL`.
+
+<Warning>
+  Combinations multiply fast. 20 countries and 10 operating systems is up to 200 things to watch, each needing its own history, and each combination has fewer rows than either column on its own. To watch two fields separately, write two tests.
+</Warning>
+
+<Note>
+  Elementary saves the history under the exact list you configured, in the exact order. If you add a column, remove one, or just reorder them, the test can no longer find its old history and starts collecting again from scratch.
+</Note>
+
+For how to choose dimensions and read the results, see [Understanding dimension anomalies](/data-tests/anomaly-detection-tests/understanding-dimension-anomalies).
+
 <RequestExample>
 
 ```yml test

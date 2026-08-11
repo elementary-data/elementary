@@ -14,9 +14,21 @@ When the detection period spans multiple values, there can be overlap between th
 
 Setting `exclude_detection_period_from_training: true` ensures that no values from the detection period are used in the training calculation, preventing this overlap and improving anomaly detection accuracy.
 
+**Why the overlap happens:**
+
+The two periods always overlap. This is not something you can avoid by picking different period lengths: the expected range for a time bucket is worked out from that metric's numbers **up to and including that bucket**, so the buckets being tested are also part of what they are tested against.
+
+That is harmless when `detection_period` covers a single bucket. As soon as it covers several, the earlier detection buckets become part of what the later ones are compared against — and with the default 2-day detection period and daily buckets, it already covers two.
+
 **Example use case:**
 
-When `detection_period` is set to more than 1 time bucket (e.g., `detection_period: 7 days`), the detection period overlaps with the training period. Without excluding the detection period from training, values being evaluated for anomalies are also contributing to the expected range calculation, which can mask actual anomalies and result in false negatives.
+Say something breaks on Monday and stays broken through Wednesday, with `detection_period: 3 days`. Monday gets flagged. Monday's bad number then becomes part of what Tuesday is compared against, pulling the average up and widening the range. By Wednesday the test is comparing against a range the problem itself stretched. A long problem covers its own tracks — you get one alert, then silence that looks like it was fixed.
+
+Setting this to `true` leaves every detection period bucket out of that calculation, so all three days are compared against history from before the problem started.
+
+<Warning>
+  If your `detection_period` is longer than one time bucket, set `exclude_detection_period_from_training: true`. Leaving it off means missing exactly the multi-day problems you most want to catch.
+</Warning>
 
 - _Default: false_
 - _Supported values: `true`, `false`_

@@ -1,0 +1,105 @@
+---
+title: "Understanding dimension anomalies"
+sidebarTitle: "Understanding dimension anomalies"
+---
+
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+
+<AiGenerateTest />
+
+`dimension_anomalies` watches how your rows split across the values of a field, rather than how big the table is. It catches problems a volume test misses: one country stops sending data, a payment provider drops to zero, an unexpected new value shows up — all while the total row count barely moves.
+
+For the list of settings, see [dimension_anomalies](/data-tests/anomaly-detection-tests/dimension-anomalies). This page covers the choices that only come up with this test.
+
+## Every value is checked on its own
+
+The test counts rows for each value of your `dimensions`, in each [time bucket](/data-tests/anomaly-detection-configuration/time-bucket). Each value is then compared against its own past, with its own expected range.
+
+| `bucket_end` | `dimension_value` | `metric_value` |
+| --- | --- | --- |
+| 2026-03-01 | `US` | 48,120 |
+| 2026-03-01 | `JP` | 96 |
+| 2026-03-02 | `US` | 47,880 |
+| 2026-03-02 | `JP` | 0 |
+
+`JP` falling to zero is compared only to `JP`'s own history, so it gets caught even though the table total hardly changed. That is what this test is for.
+
+The trade-off is that **more values means more noise**. With 500 values, every run is 500 chances for a false alarm. Small values are the worst offenders: something that averages 5 rows a day swings a lot in percentage terms, so it drifts in and out of range on its own. Stick to fields with a few stable values, and use [`where_expression`](/data-tests/anomaly-detection-configuration/where-expression) to leave out the rest.
+
+<Tip>
+  This test counts **rows** per value. To track something about a column instead — null rate, average, uniqueness — split by value, use [`column_anomalies`](/data-tests/anomaly-detection-tests/column-anomalies) with [`dimensions`](/data-tests/anomaly-detection-configuration/dimensions).
+</Tip>
+
+## Listing two columns watches combinations
+
+Listing two columns does not test each column separately. Elementary joins them into one value with `; ` in between, then watches every combination it finds. With `dimensions: [country, device_os]`, what gets watched is `US; ios`, `US; android`, `DE; ios`, and so on. Empty values appear as the word `NULL`, so a jump in `US; NULL` is a real signal that `device_os` has gone missing.
+
+<Warning>
+  Combinations multiply fast. 20 countries and 10 operating systems is up to 200 things to watch, each needing its own history. Each combination also has fewer rows than either column on its own, which makes it noisier. Only list two columns when you want to watch the combination. To watch two fields, write two tests.
+</Warning>
+
+<Note>
+  Elementary saves the history under the exact list you configured, in the exact order. If you add a column, remove one, or just reorder them, the test can no longer find its old history and starts collecting again from scratch. Changing this list is really creating a new test.
+</Note>
+
+## New and missing values
+
+- **A value goes missing.** Once Elementary has seen a value, it records a `0` for buckets where that value has no rows. This is what lets it spot a value that disappears.
+- **A new value shows up.** A value Elementary has never seen has no past to compare against, so **it cannot be flagged on the run where it first appears**. To catch unexpected new values, add an `accepted_values` test.
+- **A value stays gone.** Once a value has been at zero for the whole period, Elementary stops watching it, so retired values do not keep alerting.
+
+## A long detection period can hide problems
+
+The training period and the detection period **always overlap**. This is not a mistake you can avoid by picking different period lengths: the expected range for a bucket is worked out from that value's numbers **up to and including that bucket**, so the days being tested are also part of what they are tested against.
+
+That is harmless when [`detection_period`](/data-tests/anomaly-detection-configuration/detection-period) covers a single bucket. It works against you when it covers several — which, with the default 2-day detection period and daily buckets, it already does.
+
+Say something breaks on Monday and stays broken through Wednesday, with `detection_period: 3 days`. Monday gets flagged. Monday's bad number then becomes part of what Tuesday is compared against, pulling the average up and widening the range. By Wednesday the test is comparing against a range the problem itself stretched. **A long problem covers its own tracks** — you get one alert, then silence that looks like it was fixed.
+
+<Warning>
+  If `detection_period` is longer than one time bucket, set [`exclude_detection_period_from_training`](/data-tests/anomaly-detection-configuration/exclude_detection_period_from_training) to `true`. On the defaults — 2-day detection period, daily buckets — that means most tests.
+</Warning>
+
+Two related limits. A value with only one past data point cannot be checked at all, so the default 14-day [`training_period`](/data-tests/anomaly-detection-configuration/training-period) means 14 buckets *for each value* — not much for values that only show up now and then. And [`seasonality`](/data-tests/anomaly-detection-configuration/seasonality) splits each value again by day of week, so every value needs far more history.
+
+## How to think about `detection_delay`
+
+[`detection_delay`](/data-tests/anomaly-detection-configuration/detection-delay) moves the whole tested window further into the past. It is tempting to always set a one-day delay so the test never looks at a half-finished day — but **Elementary only ever tests finished buckets**, so you don't need a delay for that.
+
+Your job does not need to run at midnight for this to hold. With daily buckets, the newest day tested is always yesterday, whether dbt starts at 00:30, 02:00 or 23:00. Today's partial data is never tested, without setting anything.
+
+What a delay is really for is **data that shows up late**. If yesterday's load does not finish until 04:00 but your tests run at 02:00, yesterday looks finished on the calendar but is still missing rows in the warehouse, and every value looks like it dropped.
+
+A delay also only moves in whole buckets, so a small delay is not a small change. Daily buckets, dbt running at 02:00:
+
+| `detection_delay` | Cutoff | Newest bucket tested |
+| --- | --- | --- |
+| none | today 02:00 | **yesterday** |
+| 4 hours | yesterday 22:00 | day before yesterday |
+| 1 day | yesterday 02:00 | day before yesterday |
+
+A four-hour delay pushes the cutoff back past midnight, so it costs you a whole day — the same as asking for one. So think in whole days: no delay when your data reliably lands before the tests run (the usual case, and the default), one day when late data is normal and you are fine hearing about yesterday tomorrow.
+
+<Tip>
+  Before adding a delay, see whether a different column solves it. If `timestamp_column` is when something happened (`occurred_at`) but the rows only land hours later, switch to when it was loaded (`loaded_at`). Grouping by arrival time avoids the problem instead of waiting it out.
+</Tip>
+
+<Note>
+  Time buckets are built from calendar dates, but the cutoff for "how recent" comes from when dbt started running, and dbt uses UTC. If your timestamp column holds local time rather than UTC, the newest day can get tested before that day has actually ended where your data lives. Check which day your test is really looking at, and add a delay if it is testing too early.
+</Note>
+
+## With no `timestamp_column`
+
+The test counts rows per value across the whole table and saves one number per run. Its history is built from **past runs**, so a 14-day training period needs roughly 14 runs on different days. `time_bucket`, `detection_delay` and the period settings have no buckets to work with. Use this for dimension tables and reference data. If rows are only ever added, set a `timestamp_column`.
+
+## Reading a failure
+
+```
+3 anomalous dimension values for dimension country; device_os:
+US; ios (0.0, avg 48120.4), DE; android (91204.0, avg 3410.2), JP; ios (0.0, avg 96.7)
+```
+
+- **The failure count counts buckets, not values.** One value that looks wrong across three buckets counts as three failures.
+- **The results include each affected value's whole history**, not just the bad buckets, so the report and the alert graph can show the problem in context.
+
+To look at the collected numbers and scores yourself, see the [anomaly tests troubleshooting guide](/data-tests/anomaly-detection-tests/Anomaly-troubleshooting-guide).
