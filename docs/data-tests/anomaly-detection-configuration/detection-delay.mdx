@@ -80,7 +80,7 @@ A four-hour delay pushes the boundary back before midnight, costing a full day o
 </Tip>
 
 <Note>
-  The boundary comes from the dbt invocation time, which dbt reports in UTC, while buckets align to midnight in the values of your `timestamp_column`. A local-time column can therefore be scored before it is complete — a genuine case for a delay.
+  Bucket boundaries and the detection boundary are not derived the same way: buckets start at midnight of a calendar date, while the detection boundary carries the dbt invocation time, which dbt reports in UTC. If your `timestamp_column` is not stored in UTC, confirm which bucket your test actually scores — depending on your warehouse and the column's type, the newest bucket can be evaluated before it has closed in the column's own timezone. That is a real case for a delay.
 </Note>
 
 For the full trade-off, see [Understanding dimension anomalies](/data-tests/anomaly-detection-tests/understanding-dimension-anomalies).
