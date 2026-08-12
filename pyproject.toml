@@ -77,9 +77,9 @@ all = [
 ]
 
 [project.urls]
-homepage = "https://www.elementary-data.com"
-repository = "https://github.com/elementary-data/elementary"
-documentation = "https://docs.elementary-data.com"
+Homepage = "https://www.elementary-data.com"
+Repository = "https://github.com/elementary-data/elementary"
+Documentation = "https://docs.elementary-data.com"
 
 [project.scripts]
 edr = "elementary.cli.cli:cli"
