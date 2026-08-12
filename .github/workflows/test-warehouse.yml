@@ -257,7 +257,19 @@ jobs:
             DBT_ADAPTER_VERSION_SPEC="~=$DBT_VERSION"
           fi
 
-          uv pip install "$DBT_CORE_SPEC" "dbt-${DBT_ADAPTER}${DBT_ADAPTER_EXTRA}${DBT_ADAPTER_VERSION_SPEC}"
+          # dbt-core-experimental-parser is published as an sdist whose build backend
+          # downloads a wheel from GitHub releases, which intermittently drops the
+          # connection, so retry the install before failing the job.
+          for attempt in 1 2 3; do
+            if uv pip install "$DBT_CORE_SPEC" "dbt-${DBT_ADAPTER}${DBT_ADAPTER_EXTRA}${DBT_ADAPTER_VERSION_SPEC}"; then
+              break
+            fi
+            if [ "$attempt" = 3 ]; then
+              exit 1
+            fi
+            echo "install failed (attempt $attempt), retrying in 15s"
+            sleep 15
+          done
 
       # dbt-vertica pins dbt-core~=1.8 which lacks the 'arguments' attribute
       # used by newer dbt-core.  Install dbt-vertica without deps first, then
