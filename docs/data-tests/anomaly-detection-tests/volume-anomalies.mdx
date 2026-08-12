@@ -21,6 +21,10 @@ and compares it to the row count of the previous time buckets.
 **The test will only run on completed time buckets**, so if you run it with daily buckets in the middle of today, the test would only count yesterday as a complete bucket.
 If there were any anomalies during the detection period, the test will fail.
 
+<Tip>
+  If you already know the acceptable range, for example "alert me if this table shrinks by more than 10 percent", use [`volume_threshold`](/data-tests/volume-threshold) instead. It compares the newest completed bucket against the previous one using explicit percentage thresholds rather than a z score, and has separate warn and error levels.
+</Tip>
+
 ### Test configuration
 
 No mandatory configuration, however it is highly recommended to configure a `timestamp_column`.

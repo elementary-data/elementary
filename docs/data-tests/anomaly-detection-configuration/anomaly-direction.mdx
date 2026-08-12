@@ -16,6 +16,12 @@ For some data monitors, you might only want to flag anomalies if they are above 
 For example - when monitoring for freshness, we only want to detect data delays and not data that is “early”.
 The anomaly_direction configuration is used to configure the direction of the expected range, and can be set to both, spike or drop.
 
+<Note>
+  This setting does not change how the expected range is calculated. The average and standard deviation are taken over every bucket in the training period, whichever direction you choose, and `anomaly_direction` only decides which side of the range raises an alert.
+
+  So `drop` does not mean "the standard deviation of drops only". A table that has never dropped still varies from bucket to bucket, and that variation is what a real drop gets measured against.
+</Note>
+
 - _Default: `both`_
 - _Supported values: `both`, `spike`, `drop`_
 - _Relevant tests: All anomaly detection tests_
