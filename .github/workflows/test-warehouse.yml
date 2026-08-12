@@ -70,6 +70,10 @@ on:
 permissions: {}
 
 env:
+  UV_VERSION: "0.12.1"
+  # Install into the interpreter provisioned by actions/setup-python, so that dbt and edr
+  # are invoked directly by the steps below.
+  UV_SYSTEM_PYTHON: "1"
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   DBT_VERSION: ${{ inputs.dbt-version || '' }}
   WAREHOUSE_TYPE: ${{ inputs.warehouse-type }}
@@ -216,6 +220,12 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v9
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+
       - name: Install Spark requirements
         if: inputs.warehouse-type == 'spark'
         run: sudo apt-get install -y python3-dev libsasl2-dev gcc
@@ -247,7 +257,7 @@ jobs:
             DBT_ADAPTER_VERSION_SPEC="~=$DBT_VERSION"
           fi
 
-          pip install "$DBT_CORE_SPEC" "dbt-${DBT_ADAPTER}${DBT_ADAPTER_EXTRA}${DBT_ADAPTER_VERSION_SPEC}"
+          uv pip install "$DBT_CORE_SPEC" "dbt-${DBT_ADAPTER}${DBT_ADAPTER_EXTRA}${DBT_ADAPTER_VERSION_SPEC}"
 
       # dbt-vertica pins dbt-core~=1.8 which lacks the 'arguments' attribute
       # used by newer dbt-core.  Install dbt-vertica without deps first, then
@@ -256,28 +266,28 @@ jobs:
       - name: Install dbt (Vertica)
         if: inputs.warehouse-type == 'vertica'
         run: |
-          pip install --no-deps dbt-vertica
-          pip install vertica-python
+          uv pip install --no-deps dbt-vertica
+          uv pip install vertica-python
           if [ -n "$DBT_VERSION" ]; then
-            pip install "dbt-core==$DBT_VERSION"
+            uv pip install "dbt-core==$DBT_VERSION"
           else
-            pip install dbt-core
+            uv pip install dbt-core
           fi
 
       - name: Install Elementary
         run: |
-          pip install -r dev-requirements.txt
+          uv pip install --group dev
           # For Vertica, dbt-vertica is already installed with --no-deps above;
           # using ".[vertica]" would re-resolve dbt-vertica's deps and downgrade
           # dbt-core to ~=1.8.  Install elementary without the adapter extra.
           if [ "$WAREHOUSE_TYPE" = "vertica" ]; then
-            pip install "."
+            uv pip install "."
           else
             EXTRA="$WAREHOUSE_TYPE"
             if [ "$WAREHOUSE_TYPE" = "databricks_catalog" ]; then
               EXTRA="databricks"
             fi
-            pip install ".[$EXTRA]"
+            uv pip install ".[$EXTRA]"
           fi
 
       - name: Write dbt profiles
