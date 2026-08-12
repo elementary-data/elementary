@@ -27,15 +27,15 @@ To learn more, refer to [core concepts](/data-tests/how-anomaly-detection-works)
 
 ## How the three time settings relate
 
-`time_bucket`, `training_period` and `detection_period` all take a `period` and a `count`, which makes them look like alternatives. They are not. One sets the resolution and the other two set the extent.
+`time_bucket`, `training_period` and `detection_period` all take a `period` and a `count`, which makes them look like alternatives. They are not. One sets how wide each data point is, and the other two set how far back you look.
 
-- [`time_bucket`](/data-tests/anomaly-detection-configuration/time-bucket) is the **resolution**: how wide each data point is. Daily by default.
-- [`training_period`](/data-tests/anomaly-detection-configuration/training-period) is the **extent**: how far back data is collected. 14 days by default.
-- [`detection_period`](/data-tests/anomaly-detection-configuration/detection-period) is how much of the newest end of that data can be flagged. 2 days by default.
+- [`time_bucket`](/data-tests/anomaly-detection-configuration/time-bucket) is **how wide each data point is**. One day by default.
+- [`training_period`](/data-tests/anomaly-detection-configuration/training-period) is **how far back data is collected**. 14 days by default.
+- [`detection_period`](/data-tests/anomaly-detection-configuration/detection-period) is **how much of the newest end can be flagged**. 2 days by default.
 
-Your number of data points is the extent divided by the resolution. On the defaults that is 14 days of daily buckets, so 14 points, with the newest 2 eligible to fail and the older 12 serving only as baseline.
+Your number of data points is the training period divided by the bucket size. On the defaults that is 14 days of daily buckets, so 14 points, with the newest 2 eligible to fail and the older 12 serving only as baseline.
 
-Changing the resolution changes how many points you get without changing how far back you look:
+Wider buckets give you fewer data points, without changing how far back you look:
 
 | `time_bucket` | `training_period` | Data points |
 | --- | --- | --- |
