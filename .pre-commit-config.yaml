@@ -21,6 +21,11 @@ repos:
       - id: prettier
         exclude: \.html$|^docs/|^tests/unit/messages/formats/markdown/fixtures/
 
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.12.1
+    hooks:
+      - id: uv-lock
+
   - repo: https://github.com/crate-ci/typos
     rev: v1.16.6
     hooks:

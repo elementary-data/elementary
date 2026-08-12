@@ -14,21 +14,25 @@ git clone https://github.com/elementary-data/elementary.git
 cd elementary
 ```
 
-#### (2) Create then activate a virtual environment
+#### (2) Install [uv](https://docs.astral.sh/uv/)
 
 ```
-python3 -m venv venv
-source venv/bin/activate
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-#### (3) Install requirements
+#### (3) Install the project
 
 ```
-pip install -r dev-requirements.txt
-pip install -e .
+uv sync
 ```
 
-You're done. Running `edr` will now run the code in your local repository.
+This creates a `.venv` virtual environment with the project (in editable mode) and the dev
+dependencies, as pinned in `uv.lock`.
+
+You're done. Running `uv run edr` will now run the code in your local repository (or activate
+the environment with `source .venv/bin/activate` and run `edr` directly).
+
+To work with a warehouse adapter, add its extra, e.g. `uv sync --extra snowflake`.
 
 ## First time contributors
 
@@ -85,23 +89,23 @@ In order to run them, please follow these steps:
 
 ```bash
 # Run in the root directory of the repository
-pip install -r dev-requirements.txt
+uv sync
 ```
 
 2. Run the tests:
 
 ```bash
 cd tests
-py.test -vvv --target <your_target>
+uv run pytest -vvv --target <your_target>
 ```
 
 ## Pre-commit hooks
 
 We use several pre-commit hooks in order to ensure code quality. These will also
 run in the CI, but we also recommend to install them locally using the following command (requires
-installing the dev-requirements as shown in the previous section):
+installing the dev dependencies as shown in the previous section):
 
 ```bash
 # Run in the root directory of the repository
-pre-commit install
+uv run pre-commit install
 ```
