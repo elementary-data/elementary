@@ -68,10 +68,10 @@ duckdb = ["dbt-duckdb>=1.8,<2.0.0"]
 dremio = ["dbt-dremio>=1.8,<2.0.0"]
 fabric = ["dbt-fabric>=1.8,<2.0.0"]
 sqlserver = ["dbt-sqlserver>=1.8,<2.0.0"]
-# dbt-fabricspark and dbt-vertica are removed from the lockfile resolution because they pin
-# outdated transitive dependencies (dbt-core==1.8.5, azure-cli pre-release) that block
-# security patches for deepdiff, protobuf, and pyopenssl. Users who need these adapters
-# can still install them directly (e.g. uv pip install dbt-fabricspark dbt-vertica).
+# dbt-fabricspark and dbt-vertica are intentionally not extras, because they pin outdated
+# transitive dependencies (dbt-core==1.8.5, azure-cli pre-release) that block security
+# patches for deepdiff, protobuf, and pyopenssl. Users who need these adapters can still
+# install them directly (e.g. uv pip install dbt-fabricspark dbt-vertica).
 all = [
     "elementary-data[snowflake,bigquery,redshift,postgres,databricks,spark,athena,clickhouse,trino,duckdb,dremio,fabric,sqlserver]",
 ]

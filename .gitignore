@@ -96,3 +96,6 @@ venv/
 # elementary outputs
 edr_target/
 **/dbt_packages/
+
+# uv
+uv.lock
