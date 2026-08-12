@@ -25,6 +25,32 @@ On each test elementary package executes the relevant monitors, and searches for
 
 To learn more, refer to [core concepts](/data-tests/how-anomaly-detection-works).
 
+## How the three time settings relate
+
+`time_bucket`, `training_period` and `detection_period` all take a `period` and a `count`, which makes them look like alternatives. They are not. One sets the resolution and the other two set the extent.
+
+- [`time_bucket`](/data-tests/anomaly-detection-configuration/time-bucket) is the **resolution**: how wide each data point is. Daily by default.
+- [`training_period`](/data-tests/anomaly-detection-configuration/training-period) is the **extent**: how far back data is collected. 14 days by default.
+- [`detection_period`](/data-tests/anomaly-detection-configuration/detection-period) is how much of the newest end of that data can be flagged. 2 days by default.
+
+Your number of data points is the extent divided by the resolution. On the defaults that is 14 days of daily buckets, so 14 points, with the newest 2 eligible to fail and the older 12 serving only as baseline.
+
+Changing the resolution changes how many points you get without changing how far back you look:
+
+| `time_bucket` | `training_period` | Data points |
+| --- | --- | --- |
+| 1 day | 14 days | 14 |
+| 4 hours | 14 days | 84 |
+| 1 week | 14 days | 2 |
+
+<Warning>
+  That last row is a real risk. Widening the time bucket without also raising the training period leaves too few points to detect anything. If you move to weekly buckets, raise `training_period` to match.
+</Warning>
+
+<Note>
+  The two periods are nested, not sequential. `training_period` is the whole window, and `detection_period` is carved out of the end of it, so `training_period: 14 days` with `detection_period: 2 days` is 14 days of data in total and not 16. Raising `detection_period` shrinks your baseline instead of extending the window.
+</Note>
+
 ## What does it mean when a test fails?
 
 When a test fail, it means that an anomaly was detected on this metric and dataset. To learn more, refer to [anomaly detection method](/data-tests/data-anomaly-detection).
