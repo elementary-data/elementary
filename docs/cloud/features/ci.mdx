@@ -7,6 +7,8 @@ badge: "Elementary Cloud"
 
 Elementary posts a structured data quality comment on every pull request that touches your dbt models, giving reviewers live context on test history, incidents, downstream impact, and merge risk — without leaving the PR.
 
+Findings that point at a specific line are also posted as review comments on the changed lines themselves, so reviewers see each issue in the diff where it originates.
+
 <Frame caption="Elementary data quality review comment on a pull request">
   <img
     src="/pics/cloud/code_review_comment.png"
@@ -24,13 +26,41 @@ Elementary posts a structured data quality comment on every pull request that to
 
 The comment is concise when everything looks clean. It expands only when there are actual issues to flag, and updates automatically on every new push.
 
+## Where findings appear
+
+| Surface | What it contains |
+|---|---|
+| **Summary comment** | The full review: change analysis, performance and cost, blast radius, tests and incidents, and the risk summary. Updated in place on every push, so a PR never collects duplicate review comments. |
+| **Inline review comments** | Individual findings anchored to the changed line they refer to. Replaced on every re-run, so findings you have already fixed disappear. Anything that cannot be anchored to a line in the diff stays in the summary comment. |
+
+Elementary posts inline comments itself, through your connected GitHub integration, so they need no extra token or workflow permission. Inline comments are available on GitHub pull requests.
+
 ## How it works
 
 When a PR is opened or updated:
 
 1. A CI job sends the repository name and branch to Elementary's API
 2. Elementary fetches the diff, runs static SQL analysis, and queries live data quality context for the changed models
-3. A structured Markdown comment is posted on the PR or MR
+3. A structured Markdown summary comment is posted on the PR or MR
+4. On GitHub, findings that map to a changed line are also posted as inline review comments
+
+## Upgrading from v1
+
+Inline review comments are what v2 adds: v1 posts the summary comment only. On GitHub, upgrading takes three edits to your workflow file.
+
+<Steps>
+  <Step title="Bump the action to v2">
+    Change `elementary-data/elementary-ci@v1` to `elementary-data/elementary-ci@v2`. Inline comments are on by default from there, so no new input is required.
+  </Step>
+  <Step title="Remove the checkout step">
+    Delete the `actions/checkout` step. v2 does not read the repository from the runner, since Elementary fetches the diff server side.
+  </Step>
+  <Step title="Trim the permissions block">
+    `contents: read` is no longer needed. Keep `pull-requests: write` and `issues: write` for the summary comment.
+  </Step>
+</Steps>
+
+Your API key, secrets, and environment ID stay as they are. GitLab needs no change: it remains on v1.
 
 ## Setup
 
@@ -59,18 +89,17 @@ When a PR is opened or updated:
       elementary-review:
         runs-on: ubuntu-latest
         permissions:
-          contents: read
           pull-requests: write
           issues: write
         steps:
-          - uses: actions/checkout@v4
-            with:
-              fetch-depth: 0
-
-          - uses: elementary-data/elementary-ci@v1
+          - uses: elementary-data/elementary-ci@v2
             with:
               elementary-api-key: ${{ secrets.ELEMENTARY_API_KEY }}
     ```
+
+    <Note>
+      No `actions/checkout` step is needed. Elementary fetches the diff server side through your connected repository integration.
+    </Note>
   </Step>
   <Step title="Add a repository secret">
     Go to **Settings > Secrets and variables > Actions** in your GitHub repository and add:
@@ -88,12 +117,21 @@ When a PR is opened or updated:
   </Step>
 </Steps>
 
+#### Action inputs
+
+| Input | Default | Description |
+|---|---|---|
+| `elementary-api-key` | required | Your Elementary Cloud API key |
+| `elementary-env-id` | none | Elementary environment ID. Only needed when the repository is connected to more than one environment |
+| `post-inline-comments` | `true` | Post findings as review comments on the changed lines they refer to, in addition to the summary comment. Set to `false` for the summary comment only |
+| `elementary-api-url` | `https://prod.api.elementary-data.com` | Elementary API base URL. Override only if Elementary asks you to |
+
 <Accordion title="Optional: specify environment">
 
   If your repository is connected to multiple Elementary environments, add `env-id` to specify which one to use:
 
   ```yaml
-  - uses: elementary-data/elementary-ci@v1
+  - uses: elementary-data/elementary-ci@v2
     with:
       elementary-api-key: ${{ secrets.ELEMENTARY_API_KEY }}
       elementary-env-id: "169e9308-9a70-4200-b810-ad486cb42f3a"
@@ -113,6 +151,12 @@ When a PR is opened or updated:
     include:
       - remote: 'https://raw.githubusercontent.com/elementary-data/elementary-ci/v1/templates/mr-review.yml'
     ```
+
+    The job runs on merge request pipelines only, and is `allow_failure: true`, so a failed review never blocks your pipeline.
+
+    <Note>
+      GitLab stays on `v1`. Merge requests get the summary comment, without the inline review comments described above.
+    </Note>
   </Step>
   <Step title="Add CI/CD variables">
     Go to **Settings > CI/CD > Variables** and add:
@@ -137,15 +181,27 @@ When a PR is opened or updated:
   />
 </Frame>
 
+## Limits
+
+- **20 reviews per hour** per Elementary account. Runs beyond that return a rate limit error and post no comment.
+- **500 KB maximum diff size.** Larger diffs are rejected, so split very large PRs.
+- **5 minute review timeout.** A review that runs past it returns a timeout error instead of a comment.
+
+On GitLab the job is `allow_failure: true`, so none of these fail your pipeline. On GitHub Actions the step fails, so keep the job out of your required status checks if you do not want a failed review to block merging.
+
 ## Troubleshooting
 
-**No comment appears after the job runs**
+**No summary comment appears after the job runs**
 
-Make sure `contents: read`, `pull-requests: write`, and `issues: write` are set under `permissions` in the workflow. An explicit `permissions` block sets any unlisted scope to `none`, so omitting a required scope causes the step to fail silently.
+Make sure `pull-requests: write` and `issues: write` are set under `permissions` in the workflow. The job posts the summary comment with the built-in `GITHUB_TOKEN`, and an explicit `permissions` block sets any unlisted scope to `none`, so omitting a required scope causes the step to fail.
+
+**The summary comment appears but no inline comments do**
+
+Check that `post-inline-comments` is not set to `false`, and that your GitHub integration is connected on the `Environments` page. Elementary posts inline comments through that integration rather than through the CI job. Findings that cannot be anchored to a line in the diff always stay in the summary comment, and inline comments are not available on GitLab.
 
 **The review says the repository is not connected**
 
-Go to **Settings > Environments** in Elementary Cloud and verify your repository is connected.
+Go to the `Environments` page on the sidebar in Elementary Cloud and verify your repository is connected. The page is visible to admins only.
 
 **The review says the repository is connected to multiple environments**
 
