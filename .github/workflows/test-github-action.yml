@@ -23,7 +23,7 @@ on:
 permissions: {}
 
 env:
-  UV_VERSION: "0.12.1"
+  UV_VERSION: "0.12.3"
   # Install into the interpreter provisioned by actions/setup-python, so that dbt and edr
   # are invoked directly by the steps below.
   UV_SYSTEM_PYTHON: "1"

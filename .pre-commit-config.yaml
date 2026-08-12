@@ -22,7 +22,7 @@ repos:
         exclude: \.html$|^docs/|^tests/unit/messages/formats/markdown/fixtures/
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.12.1
+    rev: 0.12.3
     hooks:
       - id: uv-lock
 

@@ -17,7 +17,7 @@ RUN apt-get update \
     /var/tmp/*
 
 COPY . /app
-ARG UV_VERSION=0.12.1
+ARG UV_VERSION=0.12.3
 RUN pip install --no-cache-dir "uv==${UV_VERSION}" \
     && uv pip install --no-cache --system "/app[all]"
 
