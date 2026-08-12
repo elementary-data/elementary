@@ -1,0 +1,76 @@
+---
+title: "Elementary Agent in Slack"
+sidebarTitle: "Slack"
+icon: "slack"
+badge: "Elementary Cloud"
+---
+
+Tag `@Elementary` in a Slack thread to ask the agent a question, and it answers in that thread. When you ask in the thread of an Elementary alert, the agent already knows which incident the alert refers to, so you can go straight to "why did this fail?" without repeating any context.
+
+It is the same agent as in the web app, backed by the same [Context Engine](/cloud/ai-agents/context-engine), so it can investigate incidents, trace root causes, explain lineage, and check test coverage. Actions that change anything still go through a pull request or an explicit confirmation.
+
+## How it works
+
+<Steps>
+  <Step title="Mention the agent">
+    Tag `@Elementary` in an alert thread, in any channel the app can post to, or in a direct message. The first time it is mentioned in a public channel, the app joins that channel by itself.
+  </Step>
+  <Step title="The agent picks up the thread">
+    Elementary reads the thread it was mentioned in, including which incident and environment the alert message refers to, and starts an agent session. It replies with a confirmation that carries a **View session** link into the web app, and sets the thread status to "Working...".
+  </Step>
+  <Step title="The answer arrives in the thread">
+    The response streams into the thread as a reply. Nothing is posted to the channel itself, so the conversation stays where the alert is.
+  </Step>
+  <Step title="Follow up in the same thread">
+    Tag `@Elementary` again to continue. The session keeps the full history of the thread, so follow-ups do not need to restate anything.
+  </Step>
+</Steps>
+
+<Note>
+  A thread's session belongs to the person who started it. Mentions from anyone else in that thread are ignored, which keeps two people from interleaving questions into one session. If a teammate wants to investigate the same alert, they can start their own thread, or open the session in the web app through the **View session** link.
+</Note>
+
+If you send a follow-up while the agent is still working, it replies that it is still working on the previous message. Wait for the answer, then ask again.
+
+## Setup
+
+**Prerequisites**
+
+- The [Slack integration](/cloud/integrations/alerts/slack) connected for alerts
+- AI features enabled for your Elementary account
+
+<Steps>
+  <Step title="Authorize the agent in Slack">
+    Go to the `Environments` page on the sidebar and authorize Slack for the agent. Workspaces that connected Slack for alerts before the agent existed need this extra approval: it grants the permissions the agent needs to read the thread it is mentioned in and reply there.
+
+    The `Environments` page is visible to admins only, so ask an admin on your account if you cannot see it.
+
+    Until the agent is authorized, Elementary alerts show a link reading "Add the agent to Slack to investigate this further", which takes you to the same place.
+  </Step>
+  <Step title="Check that alerts invite follow-ups">
+    Once the agent is authorized, Slack alerts include the tip "Tag `@Elementary` to send followup messages". That tip is the signal that the workspace is ready.
+  </Step>
+  <Step title="Invite the app to private channels">
+    The app joins public channels on its own when first mentioned. For private channels, invite `@Elementary` to the channel.
+  </Step>
+</Steps>
+
+## Who the agent runs as
+
+Elementary matches the email on your Slack profile to your Elementary Cloud user, and the session runs with your permissions and against your account's data. Nobody gets access through Slack that they do not already have in the web app.
+
+This means your Slack profile needs an email address, and that email needs to belong to a user in the same Elementary account.
+
+## Credits
+
+Sessions started from Slack consume [AI credits](/cloud/ai-agents/ai-credits) the same way in-app sessions do. A thread with several follow-ups is one session.
+
+## Troubleshooting
+
+| What the agent replies | What it means |
+|---|---|
+| "AI features are not enabled for this Elementary account." | Ask an Elementary admin on your account to enable AI features. |
+| "I couldn't verify your Elementary user from Slack. Please make sure your Slack profile has an email address." | Your Slack profile has no email address that Elementary can read. Add one in your Slack profile. |
+| "I couldn't find an Elementary user for your Slack email." | The email on your Slack profile does not match any user in this Elementary account. Ask an admin to [invite that address](/cloud/features/roles-and-permissions) to the account. |
+| "I'm still working on the previous message in this thread." | The session is mid-answer. Wait for the reply before following up. |
+| Nothing at all | The workspace has not authorized the agent yet, the app is not in the channel, or you are not the person who started this thread's session. |
