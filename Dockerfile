@@ -18,7 +18,9 @@ RUN apt-get update \
 
 COPY . /app
 ARG UV_VERSION=0.12.3
+# --directory is what makes uv read /app/pyproject.toml, so the security floors in
+# [tool.uv] constraint-dependencies apply to the image as well.
 RUN pip install --no-cache-dir "uv==${UV_VERSION}" \
-    && uv pip install --no-cache --system "/app[all]"
+    && uv pip install --no-cache --system --directory /app ".[all]"
 
 ENTRYPOINT ["edr"]

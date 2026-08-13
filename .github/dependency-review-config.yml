@@ -35,11 +35,22 @@ allow-licenses:
 
 fail-on-severity: high
 
-# Packages with GPL in compound license expressions that are actually
-# safe (dual-licensed, LGPL, or CPython license boilerplate).
+# Packages whose reported license expression is a scan artifact rather than
+# their actual license: compound expressions that are safe (dual-licensed,
+# LGPL, CPython boilerplate), stray license headers in vendored files, or
+# historical licensing mentioned in the README.
 # These are exempted individually so that genuinely GPL-only packages
 # are still blocked.
 allow-dependencies-licenses:
   - pkg:pypi/aiohappyeyeballs
   - pkg:pypi/lxml
   - pkg:pypi/typing-extensions
+  # Apache-2.0. Reported as AGPL/GPL because its README documents that
+  # versions <= 0.140.0 were AGPL and <= 0.208.2 were BSL.
+  - pkg:pypi/metricflow
+  # BSD-3-Clause, in a compound expression whose every component
+  # (0BSD, MIT, Zlib, CC0-1.0, Apache-2.0) is already allowed above.
+  - pkg:pypi/numpy
+  # MIT. The GPL comes from vendored taskflow example/sandbox sources that
+  # are not built into the wheel, and are themselves LGPLv3-or-MIT.
+  - pkg:pypi/rapidfuzz

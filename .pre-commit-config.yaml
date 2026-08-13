@@ -27,6 +27,11 @@ repos:
       - id: typos
         exclude: index\.html$|elementary_output\.json$
 
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.12.3
+    hooks:
+      - id: uv-lock
+
   - repo: local
     hooks:
       - id: no_commit
