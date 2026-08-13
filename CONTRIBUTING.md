@@ -27,7 +27,7 @@ uv sync
 ```
 
 This creates a `.venv` virtual environment with the project (in editable mode) and the dev
-dependencies.
+dependencies, as pinned in `uv.lock`.
 
 You're done. Running `uv run edr` will now run the code in your local repository (or activate
 the environment with `source .venv/bin/activate` and run `edr` directly).
