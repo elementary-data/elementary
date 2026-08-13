@@ -304,7 +304,8 @@
               {
                 "group": "Iceberg catalog",
                 "pages": [
-                  "cloud/integrations/metadata-layer/glue"
+                  "cloud/integrations/metadata-layer/glue",
+                  "cloud/integrations/metadata-layer/biglake"
                 ]
               },
               {
