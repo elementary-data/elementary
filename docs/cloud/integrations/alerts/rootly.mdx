@@ -16,11 +16,10 @@ You need a Rootly account with access to create Alert Sources.
 
 Before connecting Elementary, you need to create a Generic Webhook Alert Source in Rootly:
 
-1. In Rootly, go to **Alert Sources** and click **New alert source**. Search for **Generic Webhook** and select it.
+1. In Rootly, go to **Alerts** → **Alert Sources** and click **Add source**. Search for **Generic Webhook** and select it.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
-    {/* TODO: screenshot — locating Generic Webhook Alert Source in Rootly */}
     <img
       src="/pics/cloud/rootly_new_alert_source.png"
       alt="Locate Generic Webhook Alert Source in Rootly"
@@ -28,37 +27,21 @@ Before connecting Elementary, you need to create a Generic Webhook Alert Source 
   </div>
 </Frame>
 
-2. Give the alert source a name (e.g. "Elementary Cloud").
+2. Give the alert source a name (e.g. "Elementary Source"), then choose how alerts from this source should be routed — **In-App Routing** (build Routes in Rootly based on alert fields, e.g. severity or tags) or **Direct Routing** (embed a fixed target in the webhook URL). See [Routing alerts to a target](#routing-alerts-to-a-target) below for details on both.
+3. On the same setup page, copy the **webhook URL** and set the **Authorization Header** — scheme `Bearer`, and a credential value of your choosing. You will need both the URL and the credential when connecting in Elementary.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
-    {/* TODO: screenshot — naming the alert source */}
-    <img
-      src="/pics/cloud/rootly_name_source.png"
-      alt="Name the Rootly generic webhook alert source"
-    />
-  </div>
-</Frame>
-
-3. On the source setup page, you will see the **webhook URL** and a **Bearer Token**. You will need both when connecting in Elementary. Keep this page open — you will come back to it after sending a test alert.
-
-<Frame>
-  <div className="dark:bg-white rounded-md p-1">
-    {/* TODO: screenshot — webhook URL and Bearer Token on the source setup page */}
     <img
       src="/pics/cloud/rootly_webhook_details.png"
-      alt="Rootly generic webhook alert source connection details"
+      alt="Rootly generic webhook alert source setup — connection instructions, webhook URL, and Authorization header"
     />
   </div>
 </Frame>
 
 <Info>
-The Bearer Token is a secret. Keep it secure and do not share it publicly.
+The Bearer credential is a secret. Keep it secure and do not share it publicly.
 </Info>
-
-<Tip>
-If you want every alert from this source to always route to the same service, team, or escalation policy, use the fixed-target webhook URL variant Rootly offers (`.../notify/<type>/<id>`) instead of the base URL. See [Routing alerts to a target](#routing-alerts-to-a-target) below.
-</Tip>
 
 ## Connect Rootly in Elementary
 
@@ -68,7 +51,6 @@ If you want every alert from this source to always route to the same service, te
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
-    {/* TODO: screenshot — selecting Rootly as incident management tool */}
     <img
       src="/pics/cloud/rootly_select_provider.png"
       alt="Select Rootly as incident management tool"
@@ -76,29 +58,13 @@ If you want every alert from this source to always route to the same service, te
   </div>
 </Frame>
 
-3. Fill in the connection details from your Rootly alert source:
-   - **Source name** — a display name for this alert source (e.g. "Elementary Cloud")
-   - **Webhook endpoint URL** — the webhook URL from the Rootly alert source
-   - **Webhook secret** — the Bearer Token from the Rootly alert source
+3. Fill in the connection details from your Rootly alert source — **source name**, **webhook endpoint URL**, and **webhook secret** (the Bearer credential from the Authorization header) — then expand **Test connection** to send a test incident and verify the integration is working.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
-    {/* TODO: screenshot — Connect Rootly form with source name/webhook endpoint/secret */}
     <img
       src="/pics/cloud/rootly_connect_form.png"
-      alt="Enter Rootly connection details"
-    />
-  </div>
-</Frame>
-
-4. Expand **Test connection** to send a test incident and verify the integration is working.
-
-<Frame>
-  <div className="dark:bg-white rounded-md p-1">
-    {/* TODO: screenshot — Test incident section */}
-    <img
-      src="/pics/cloud/rootly_test_connection.png"
-      alt="Test the Rootly connection"
+      alt="Enter Rootly connection details and test the connection"
     />
   </div>
 </Frame>
@@ -107,7 +73,7 @@ If you want every alert from this source to always route to the same service, te
 The test connection sends a real alert event to Rootly. You may need to manually resolve or close it after testing.
 </Warning>
 
-5. Click **Save**. **Rootly** will now be available as a destination on the [alert rules](/cloud/features/alerts-and-incidents/alert-rules) page.
+4. Click **Save**. **Rootly** will now be available as a destination on the [alert rules](/cloud/features/alerts-and-incidents/alert-rules) page.
 
 <Tip>
 You can add multiple alert sources by clicking **+ Add source** — for example, to route different alert rules to different Rootly alert sources.
@@ -115,59 +81,55 @@ You can add multiple alert sources by clicking **+ Add source** — for example,
 
 ## Configure Alert Fields in Rootly
 
-After sending a test alert from Elementary, go back to the Rootly alert source setup page. You should see the test alert appear in the recent activity / payload preview. Use it as a reference while mapping fields.
+After sending a test alert from Elementary, open the alert in Rootly (or click **Send mock alert** on the source card for a sample payload without leaving Rootly) and switch to the **Payload** tab to see the raw JSON. Use it as a reference while mapping fields — click any key to copy its Liquid path.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
-    {/* TODO: screenshot — alert source showing received test alert payload */}
     <img
       src="/pics/cloud/rootly_source_test_alert.png"
-      alt="Rootly alert source showing received test alert"
+      alt="Rootly alert Payload tab showing the raw JSON received from Elementary"
     />
   </div>
 </Frame>
 
-Rootly doesn't require a specific payload shape — you map the JSON fields Elementary sends to Rootly's alert fields yourself, using Liquid expressions (or by clicking the field directly in the payload preview).
+Rootly doesn't require a specific payload shape — switch to the **Alert Fields** tab on the same alert to map the JSON keys Elementary sends to Rootly's alert fields yourself, using Liquid expressions (or by clicking the field directly in the payload preview).
 
-<Frame>
-  <div className="dark:bg-white rounded-md p-1">
-    {/* TODO: screenshot — Alert Fields mapping UI */}
-    <img
-      src="/pics/cloud/rootly_field_mapping.png"
-      alt="Map alert fields in Rootly"
-    />
-  </div>
-</Frame>
+None of this is enforced by Rootly — it will ingest the webhook and create an alert regardless of what you map. But skipping the mappings below has real consequences, so we recommend setting them up:
 
-At minimum, map these fields:
+| Rootly field | Map to | Without this mapping... |
+|---|---|---|
+| **Title** | `title` | Rootly falls back to a generic default, so alerts aren't identifiable at a glance |
+| **External Identifier** | `external_id` | Every alert Elementary sends is treated as unrelated — no deduplication |
+| **State** | `state` | [Auto-resolution](#configure-auto-resolution) can't work, since Rootly has no state to key off of |
+
+Optional, but useful:
 
 | Rootly field | Map to | Purpose |
 |---|---|---|
-| **Title** | `title` | Headline shown on the alert |
-| **External Identifier** | `external_id` | Stable key Rootly uses to match follow-up events to the same alert |
-| **State** | `state` | Lifecycle state (`triggered` / `resolved`) — drives auto-resolution |
 | **External URL** | `external_url` | Link back to the relevant page in Elementary Cloud |
-| **Description** | `description` | Present only on grouped-alert notifications |
+| **Description** | `description` | Only present on grouped-alert notifications, not individual alerts |
 
 ### Configure auto-resolution
 
 Elementary sends a `resolved` state event with the same `external_id` when a previously failing test or model passes again. To have Rootly automatically resolve the alert:
 
-1. In the alert source settings, open **Auto-Resolution**.
-2. Map the **external identifier** field to `external_id`.
-3. Map the **state** field to `state`.
-4. Set the resolved-state value to `resolved`.
-5. Turn on auto-resolution for the source.
+1. In the alert source settings, open the **Events** tab.
+2. Set **Unique Identifier** to `$.external_id`.
+3. Turn on **Combine duplicate alerts into one alert** and **Auto-Resolve alerts**.
+4. Under **Resolution Conditions**, set `{{ alert.data.state }}` **is** `resolved`.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
-    {/* TODO: screenshot — Auto-Resolution configuration */}
     <img
       src="/pics/cloud/rootly_auto_resolution.png"
-      alt="Configure auto-resolution in Rootly"
+      alt="Configure the Events tab in Rootly — Unique Identifier, Combine duplicate alerts, Auto-Resolve alerts, and Resolution Conditions"
     />
   </div>
 </Frame>
+
+<Warning>
+Rootly pre-fills the Unique Identifier field with `$.ID`, which is a field Rootly generates itself and is **different on every event** — it will never match a triggered alert to its resolved event. Make sure you change it to `$.external_id`, which is the field Elementary keeps stable across the triggered/resolved pair for the same alert. Getting this wrong is the most common cause of alerts not auto-resolving, or being combined that shouldn't be.
+</Warning>
 
 ### Available fields
 
@@ -206,47 +168,8 @@ If you need additional fields for your routing that are not currently included, 
 
 ## Routing alerts to a target
 
-Rootly supports two ways to route an alert to a service, team, or escalation policy:
+When creating the Generic Webhook Alert Source, Rootly asks how alerts from it should be routed. Elementary works with either option:
 
-- **URL-based** — use the fixed-target webhook URL variant (`.../notify/<type>/<id>`) as the webhook endpoint URL when connecting in Elementary. Every alert from that source routes to the same target. This is the simplest option and works well since Elementary alerts don't include a routing target in the payload.
-- **Payload-based** — map a routing target from the payload itself. Since Elementary doesn't send a routing target field, this option isn't applicable for this integration — use the URL-based approach instead, or add multiple Rootly sources (one per target) in Elementary and route different [alert rules](/cloud/features/alerts-and-incidents/alert-rules) to each.
+- **In-App Routing** (default, recommended) — create [Routes](https://docs.rootly.com/alerts/alert-routing) in Rootly that send alerts to a service, team, or escalation policy based on conditions over the alert fields you map above (e.g. route on `severity` or `tags`). This is the most flexible option and lets a single alert source fan out to different targets.
+- **Direct Routing** — embed a fixed target in the webhook URL (`.../notify/<type>/<id>`) so every alert from that source always routes to the same place. Simplest option if you only need one target; for multiple targets, add multiple Rootly sources in Elementary and route different [alert rules](/cloud/features/alerts-and-incidents/alert-rules) to each.
 
-## How alerts work
-
-### Alert creation and deduplication
-
-Each Elementary alert includes a stable **external identifier** based on the alert's identity (test, model, or pipeline). Rootly uses this identifier to:
-
-- **Create** a new alert when a new issue is detected
-- **Deduplicate** — avoid creating duplicate alerts for the same ongoing issue
-- **Auto-resolve** — when a test passes again, Elementary sends a resolved event with the same external identifier, which resolves the alert in Rootly (once auto-resolution is configured, see above)
-
-### Alert types
-
-Elementary sends the following alert types to Rootly:
-
-- **Test alerts** — dbt and Elementary test failures
-- **Model alerts** — dbt model and snapshot failures
-- **Source freshness alerts** — source freshness check failures
-- **Pipeline alerts** — pipeline connector failures (Fivetran, etc.)
-- **Resolved alerts** — automatically sent when a previously failing test/model passes
-
-### Link to Elementary
-
-Each alert includes an **external URL** linking back to the relevant page in Elementary Cloud, so you can quickly investigate the issue.
-
-### Alerts in Rootly
-
-Each alert sent by Elementary appears in Rootly with its mapped fields and a link back to Elementary Cloud.
-
-<Frame caption="Alert detail in Rootly">
-  <div className="dark:bg-white rounded-md p-1">
-    {/* TODO: screenshot — alert detail view in Rootly */}
-    <img
-      src="/pics/cloud/rootly_alert_detail.png"
-      alt="Elementary alert detail in Rootly"
-    />
-  </div>
-</Frame>
-
-When an alert matches your Rootly [alert workflows](https://docs.rootly.com/workflows/alert-workflows), it can automatically create an incident, page an on-call responder, or post to Slack or Microsoft Teams with full context.
