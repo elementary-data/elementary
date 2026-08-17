@@ -1,0 +1,52 @@
+---
+title: "Google BigLake (Iceberg)"
+badge: "Context Engine"
+---
+
+The Google BigLake integration in Elementary allows you to automatically monitor volume & freshness anomalies in your Iceberg tables managed by a BigLake Metastore catalog, by continuously syncing metadata about Iceberg snapshots.
+
+<Note>
+  BigLake Iceberg is only supported for BigQuery environments. The same service account used for your BigQuery warehouse connection is reused — no separate credentials are required.
+</Note>
+
+## GCP Setup
+
+### 1. Grant additional IAM roles
+
+Elementary reuses the service account that is already connected to your BigQuery environment. You only need to grant three additional roles to that service account:
+
+**On the GCP project that owns the BigLake catalog:**
+
+| Role | Purpose |
+|---|---|
+| `roles/biglake.metadataViewer` | Allows listing namespaces and tables in the BigLake Metastore catalog |
+| `roles/serviceusage.serviceUsageConsumer` | Required for the BigLake REST API to attribute quota usage to your project |
+| `roles/storage.objectViewer` (with condition — explained below) | Grants read access to Iceberg metadata files in GCS |
+
+### 2. Scope the Storage Object Viewer role to metadata files only
+
+For security, restrict the `Storage Object Viewer` role to Iceberg metadata files rather than granting access to all objects in the bucket.
+
+When assigning the role on the GCS bucket, add a **condition**:
+
+```json
+{
+  "expression": "resource.name.endsWith(\".metadata.json\")",
+  "title": "Iceberg metadata files only"
+}
+```
+
+This ensures the service account can only read `*.metadata.json` files — the Iceberg snapshot metadata — and nothing else in the bucket.
+
+## Elementary Configuration
+
+Navigate to **Account settings > Environments**, choose your BigQuery environment, and scroll to the **Metadata Layer** section. Select **BigLake**.
+
+### Connection Settings
+
+| Field | Required | Description |
+|---|---|---|
+| **Connection Name** | Yes | A descriptive name for this connection (e.g. "Data Lake"). Must be unique if adding multiple integrations. |
+| **Catalog name** | Yes | The name of your BigLake Metastore catalog. |
+| **GCP project** | No | Only required if the BigLake catalog is in a different GCP project than your connected BigQuery warehouse. |
+| **Catalog location** | No | Only required if the BigLake catalog is in a different GCP region than your connected BigQuery dataset. |
