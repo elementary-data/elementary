@@ -23,6 +23,10 @@ on:
 permissions: {}
 
 env:
+  UV_VERSION: "0.12.3"
+  # Install into the interpreter provisioned by actions/setup-python, so that dbt and edr
+  # are invoked directly by the steps below.
+  UV_SYSTEM_PYTHON: "1"
   BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
   ELEMENTARY_DBT_PACKAGE_PATH: ${{ github.workspace }}/dbt-data-reliability
   E2E_DBT_PROJECT_DIR: ${{ github.workspace }}/elementary/tests/e2e_dbt_project
@@ -57,16 +61,22 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+
       - name: Install dbt
         run: >
-          pip install
+          uv pip install
           "dbt-core${{ inputs.dbt-version && format('=={0}', inputs.dbt-version) }}"
           "dbt-snowflake${{ inputs.dbt-version && format('~={0}', inputs.dbt-version) }}"
 
       - name: Install Elementary
         run: |
-          pip install -r dev-requirements.txt
-          pip install ".[snowflake]"
+          uv pip install --group dev
+          uv pip install ".[snowflake]"
 
       - name: Write dbt profiles
         env:

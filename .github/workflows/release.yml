@@ -11,6 +11,8 @@ on:
       - v[0-9]+.[0-9]+.[0-9]+
 
 env:
+  UV_VERSION: "0.12.3"
+  UV_PYTHON: "3.10"
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
@@ -106,16 +108,13 @@ jobs:
         with:
           ref: ${{ needs.validate-release-ref.outputs.release-ref }}
 
-      - name: Setup Python
-        uses: actions/setup-python@v6
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v7
         with:
-          python-version: "3.10"
-
-      - name: Install 'build' package
-        run: pip install build
+          version: ${{ env.UV_VERSION }}
 
       - name: Build package
-        run: python -m build --sdist --wheel --outdir dist .
+        run: uv build --sdist --wheel --out-dir dist .
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v6
