@@ -97,6 +97,17 @@ jobs:
         with:
           path: elementary
           ref: ${{ inputs.elementary-ref }}
+          # Don't leave the base repo's token in the git config: the checked out
+          # code is fork-controlled (see below) and nothing here pushes.
+          persist-credentials: false
+          # Fork PRs are tested via pull_request_target intentionally: the
+          # integration tests need the CI secrets of our test warehouses, which
+          # a pull_request run of a fork cannot access. The caller
+          # (test-all-warehouses.yml) gates fork PRs behind the
+          # elementary_test_env environment, so a maintainer must approve the
+          # run before this fork code is checked out and executed, and only an
+          # explicit allowlist of secrets is passed in.
+          allow-unsafe-pr-checkout: true
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -110,6 +121,7 @@ jobs:
           repository: elementary-data/dbt-data-reliability
           path: dbt-data-reliability
           ref: ${{ inputs.dbt-data-reliability-ref }}
+          persist-credentials: false
 
       - name: Validate workflow inputs
         run: |
