@@ -504,7 +504,6 @@
       },
       {
         "tab": "API Reference",
-        "openapi": "api-reference/beta/openapi.json",
         "groups": [
           {
             "group": "Guides",
