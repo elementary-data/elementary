@@ -1,0 +1,97 @@
+---
+title: 'List tests'
+description: 'List test definitions in an environment. Coming soon.'
+---
+
+<Warning>
+  **Coming soon.** This endpoint is not live yet. The contract below is the
+  planned shape and may change. Calling it today returns `404`.
+</Warning>
+
+```
+GET /public/beta/{env_id}/tests
+```
+
+Returns test **definitions** (monitors and dbt tests) — not execution results.
+Join [latest test executions](/api/reference/latest-test-executions/list-latest-test-executions)
+on `test_id` for the current run. Table / relation name is a join to
+[table assets](/api/reference/assets/list-table-assets) on `asset_id`, not a
+field on the test.
+
+Supports a full scan and incremental feeds (`synced_since` / `deleted_since`),
+same contract as [assets](/api/incremental-sync). A new run does **not** bump
+`synced_at` on the test.
+
+## Query parameters
+
+Shared pagination: `cursor`, `limit` (default `500`, max `2000`). Filter arrays
+are any-of within a param, AND across params, max `1000` values each. Pass
+exactly one of `synced_since` or `deleted_since` — not both.
+
+| Parameter          | Notes                                                                                          |
+| ------------------ | ---------------------------------------------------------------------------------------------- |
+| `ids`              | Test ids.                                                                                      |
+| `asset_ids`        | Tests on these assets.                                                                         |
+| `test_types`       | Extensible. Examples: `elementary_cloud`, `generic`, `singular`, `source_freshness`.           |
+| `definition_types` | Extensible. Examples: `freshness_anomalies`, `volume_anomalies`, `not_null`, `unique`.         |
+| `source_types`     | Extensible. Examples: `elementary_cloud`, `dbt`, `python_sdk`.                                 |
+| `tags`             | Any-of tag match.                                                                              |
+| `disabled`         | `true` or `false`.                                                                             |
+| `order_by`         | `id` (default) or `synced_at`. Incremental feeds force `synced_at` / `deleted_at` ascending.   |
+| `direction`        | `asc` (default) or `desc`.                                                                     |
+| `synced_since`     | Upserts feed: tests created or updated at/after this UTC ISO-8601 timestamp.                   |
+| `deleted_since`    | Tombstones feed: tests soft-deleted at/after this timestamp. Mutually exclusive with `synced_since`. |
+
+## Response
+
+List envelope `{ items, next_cursor, has_more }`. On the `deleted_since` feed,
+`deleted_at` is set and other fields are last-known.
+
+```json
+{
+  "items": [
+    {
+      "id": "elementary_cloud.freshness_anomalies.analytics.orders",
+      "name": "freshness_anomalies",
+      "test_type": "elementary_cloud",
+      "definition_type": "freshness_anomalies",
+      "source_type": "elementary_cloud",
+      "asset_id": "table.analytics.orders",
+      "column_name": null,
+      "severity": "ERROR",
+      "disabled": false,
+      "config": {
+        "sensitivity": "medium"
+      },
+      "tags": [],
+      "owners": ["data-platform"],
+      "description": null,
+      "path": "elementary_cloud/freshness_anomalies",
+      "project": null,
+      "updated_at": "2026-08-20T12:00:00Z",
+      "synced_at": "2026-08-20T12:00:00Z",
+      "deleted_at": null
+    }
+  ],
+  "next_cursor": "eyJ...",
+  "has_more": true
+}
+```
+
+| Field             | Notes                                                                                          |
+| ----------------- | ---------------------------------------------------------------------------------------------- |
+| `severity`        | As stored: `ERROR` or `WARNING` (extensible string).                                           |
+| `config`          | JSON pass-through (sensitivity, threshold, training period, direction, …). `{}` when none.     |
+| `path`            | Tree path (same idea as asset `path`). Not the dbt file path.                                  |
+| `project`         | dbt package / namespace, when applicable.                                                      |
+| `owners`          | Display names.                                                                                 |
+| `description`     | Empty string in storage is returned as `null`.                                                 |
+
+No `column_id` and no embedded latest results.
+
+## Example
+
+```bash
+curl -H "Authorization: Bearer $ELEMENTARY_TOKEN" \
+  "$BASE/$ENV_ID/tests?test_types=elementary_cloud&definition_types=freshness_anomalies,volume_anomalies&limit=500"
+```

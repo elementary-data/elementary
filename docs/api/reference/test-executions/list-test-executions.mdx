@@ -1,0 +1,75 @@
+---
+title: 'List test executions'
+description: 'Execution history for one test. Coming soon.'
+---
+
+<Warning>
+  **Coming soon.** This endpoint is not live yet. The contract below is the
+  planned shape and may change. Calling it today returns `404`.
+</Warning>
+
+```
+GET /public/beta/{env_id}/tests/{test_id}/executions
+```
+
+History for **one** test — not an environment-wide dump of every run. Unknown
+or not-visible `test_id` → `404`.
+
+There is no `synced_since` feed on this nested list. Default lookback is the
+last **30 days** (`start_time >= now - 30d`) when `start_time_from` is omitted.
+Default sort is `start_time` **descending**.
+
+Item shape is shared with
+[latest test executions](/api/reference/latest-test-executions/list-latest-test-executions).
+Metrics (`metric_value`, `expected_min`, `expected_max`, `chart_data`) are not
+in this cut.
+
+## Query parameters
+
+Shared pagination: `cursor`, `limit` (default `500`, max `2000`). Filter arrays
+are any-of within a param, AND across params, max `1000` values each.
+
+| Parameter         | Notes                                                                                         |
+| ----------------- | --------------------------------------------------------------------------------------------- |
+| `sub_test_ids`    | Filter by `sub_test_unique_id`.                                                               |
+| `statuses`        | As stored: `PASS`, `WARN`, `FAIL`, `ERROR`, `SKIPPED`, `NO_DATA`.                             |
+| `start_time_from` | Inclusive lower bound (UTC ISO-8601). Default: 30 days ago.                                   |
+| `start_time_to`   | Inclusive upper bound (UTC ISO-8601).                                                         |
+| `order_by`        | `start_time` (default) or `id`.                                                               |
+| `direction`       | Default `desc` when `order_by` is omitted; otherwise `asc` unless you pass `desc`.            |
+
+## Response
+
+List envelope `{ items, next_cursor, has_more }`.
+
+```json
+{
+  "items": [
+    {
+      "id": "exec_9f3c2a",
+      "test_id": "elementary_cloud.freshness_anomalies.analytics.orders",
+      "sub_test_unique_id": "elementary_cloud.freshness_anomalies.analytics.orders",
+      "sub_type": "freshness_anomalies",
+      "column_name": null,
+      "status": "FAIL",
+      "failure_count": 0,
+      "start_time": "2026-08-20T11:55:00Z",
+      "duration_seconds": 12.4,
+      "quality_dimension": "freshness",
+      "result_reason": "ANOMALY_DETECTED",
+      "exception": null,
+      "description": null,
+      "synced_at": "2026-08-20T11:55:10Z"
+    }
+  ],
+  "next_cursor": "eyJ...",
+  "has_more": true
+}
+```
+
+## Example
+
+```bash
+curl -H "Authorization: Bearer $ELEMENTARY_TOKEN" \
+  "$BASE/$ENV_ID/tests/$TEST_ID/executions?limit=500"
+```

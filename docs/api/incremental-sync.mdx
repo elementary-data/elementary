@@ -73,6 +73,12 @@ Timestamps are UTC ISO-8601.
 | Column lineage | ✅        | ✅ (`synced_since`, `deleted_since`) |
 
 <Note>
+  **Coming soon:** tests will use the same `synced_since` / `deleted_since`
+  pair as assets. Latest test executions will be a full snapshot (no incremental
+  feed). Per-test execution history is a time window, not an incremental feed.
+</Note>
+
+<Note>
   Column lineage is returned one record per edge, but edges do not have their
   own timestamps. The incremental filters use the downstream column's
   timestamps. When a downstream column appears in the upserts feed, replace all

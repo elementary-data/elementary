@@ -1,0 +1,50 @@
+---
+title: 'Get a latest test execution'
+description: 'Fetch the current run for one sub-test. Coming soon.'
+---
+
+<Warning>
+  **Coming soon.** This endpoint is not live yet. The contract below is the
+  planned shape and may change. Calling it today returns `404`.
+</Warning>
+
+```
+GET /public/beta/{env_id}/latest-test-executions/{sub_test_unique_id}
+```
+
+Path parameter is **`sub_test_unique_id`**, not the execution `id`. Unknown,
+not permitted, or parent test not visible → `404`.
+
+The body's `id` is the **current** execution id and **changes** on every new
+run. Use `sub_test_unique_id` as the stable key.
+
+## Response
+
+Bare object. Field meanings match
+[List latest test executions](/api/reference/latest-test-executions/list-latest-test-executions).
+
+```json
+{
+  "id": "exec_9f3c2a",
+  "test_id": "elementary_cloud.freshness_anomalies.analytics.orders",
+  "sub_test_unique_id": "elementary_cloud.freshness_anomalies.analytics.orders",
+  "sub_type": "freshness_anomalies",
+  "column_name": null,
+  "status": "PASS",
+  "failure_count": 0,
+  "start_time": "2026-08-20T11:55:00Z",
+  "duration_seconds": 12.4,
+  "quality_dimension": "freshness",
+  "result_reason": "NO_ANOMALY_DETECTED",
+  "exception": null,
+  "description": null,
+  "synced_at": "2026-08-20T11:55:10Z"
+}
+```
+
+## Example
+
+```bash
+curl -H "Authorization: Bearer $ELEMENTARY_TOKEN" \
+  "$BASE/$ENV_ID/latest-test-executions/$SUB_TEST_UNIQUE_ID"
+```

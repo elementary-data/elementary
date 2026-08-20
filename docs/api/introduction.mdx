@@ -1,12 +1,12 @@
 ---
 title: 'Introduction'
-description: "Read Elementary's assets, columns, and lineage over a REST API."
+description: "Read Elementary's assets, columns, lineage, and tests over a REST API."
 ---
 
 The **Elementary Public API** is a REST interface for programmatically reading
-the assets, columns, and lineage Elementary tracks for one
-environment. Use it to sync your data catalog and lineage into your own systems
-(a warehouse, a BI tool, a data catalog, an internal service).
+the assets, columns, lineage, and tests Elementary tracks for one
+environment. Use it to sync your data catalog, lineage, and test results into
+your own systems (a warehouse, a BI tool, a data catalog, an internal service).
 
 <Warning>
   This API is in **active development (beta)** and is **not intended for
@@ -53,18 +53,22 @@ Follow `next_cursor` until `has_more` is `false` — see [Pagination](/api/pagin
 
 ## What you can read
 
-| Resource       | Endpoint                       | Notes                                    |
-| -------------- | ------------------------------ | ---------------------------------------- |
-| Environments   | `GET /environments`            | Account-scoped discovery                 |
-| Assets         | `GET /{env_id}/assets`         | Every asset, common fields + `kind`      |
-| Table assets   | `GET /{env_id}/assets/tables`  | Table assets + warehouse-specific fields |
-| BI assets      | `GET /{env_id}/assets/bi`      | BI assets + BI-specific fields           |
-| Columns        | `GET /{env_id}/columns`        | Columns of assets                        |
-| Asset lineage  | `GET /{env_id}/asset-lineage`  | Asset-to-asset edges                     |
-| Column lineage | `GET /{env_id}/column-lineage` | Column-to-column edges                   |
+| Resource                | Endpoint                                          | Notes                                           |
+| ----------------------- | ------------------------------------------------- | ----------------------------------------------- |
+| Environments            | `GET /environments`                               | Account-scoped discovery                        |
+| Assets                  | `GET /{env_id}/assets`                            | Every asset, common fields + `kind`             |
+| Table assets            | `GET /{env_id}/assets/tables`                     | Table assets + warehouse-specific fields        |
+| BI assets               | `GET /{env_id}/assets/bi`                         | BI assets + BI-specific fields                  |
+| Columns                 | `GET /{env_id}/columns`                           | Columns of assets                               |
+| Asset lineage           | `GET /{env_id}/asset-lineage`                     | Asset-to-asset edges                            |
+| Column lineage          | `GET /{env_id}/column-lineage`                    | Column-to-column edges                          |
+| Tests                   | `GET /{env_id}/tests`                             | Test definitions. **Coming soon.**              |
+| Latest test executions  | `GET /{env_id}/latest-test-executions`            | Current run per sub-test. **Coming soon.**      |
+| Test executions         | `GET /{env_id}/tests/{test_id}/executions`        | History for one test. **Coming soon.**          |
 
 Every list endpoint supports a full scan and keyset pagination; assets and
 columns also expose incremental feeds — see [Incremental sync](/api/incremental-sync).
+Tests will use the same incremental pair when they ship.
 
 ## Assets: one base endpoint, plus typed endpoints
 
@@ -92,13 +96,33 @@ A typical flow: page `/assets` to build the graph, then enrich the kinds you
 care about via the typed endpoints — use the `kind` field to decide which one.
 
 The full endpoint and schema reference is generated from the API and lives under
-**API Reference**.
+**API Reference**. Test endpoints are documented there as **coming soon** until
+they ship.
+
+## Tests (coming soon)
+
+Three datasets, one table each — definitions, current status, and per-test
+history are not merged into a single response:
+
+- **[`GET /tests`](/api/reference/tests/list-tests)** — the test definition
+  (name, type, asset, severity, config, owners/tags). Incremental
+  `synced_since` / `deleted_since`. A new run does not bump `Test.synced_at`.
+- **[`GET /latest-test-executions`](/api/reference/latest-test-executions/list-latest-test-executions)** —
+  the current run per sub-test. Full snapshot; no incremental feed in this cut.
+  Join to tests on `test_id`.
+- **[`GET /tests/{test_id}/executions`](/api/reference/test-executions/list-test-executions)** —
+  history for one test (default last 30 days). Not an environment-wide dump.
+
+Table / relation name is a join to [table assets](/api/reference/assets/list-table-assets)
+on `asset_id`, not a field on the test. Metric numbers behind a freshness/volume
+verdict are not in this cut.
 
 ## Forward compatibility
 
 Some string fields are **extensible enums**: they carry a value from a small,
 known set today (e.g. `kind`, `source_type`, `data_platform`, `materialization`,
-`bi_platform`, `bi_type`, `warehouse_type`, `last_sync_status`), but that set
+`bi_platform`, `bi_type`, `warehouse_type`, `last_sync_status`, `test_type`,
+`definition_type`, `status`), but that set
 grows as Elementary adds integrations and asset types. In the schema these
 fields are typed as plain strings with an `Extensible enum.` note and their
 currently-known values listed under `examples` — they are **not** a closed
