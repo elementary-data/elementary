@@ -36,6 +36,19 @@ above. The token is displayed **only once** — copy it and store it securely.
 In either case, click **Generate token** and copy the value into the
 `Authorization: Bearer` header.
 
+### Which token should I use?
+
+Both work identically on the wire — the difference is what the token is tied to:
+
+- Use a **personal token** for interactive work: notebooks, one-off scripts, and
+  local exploration. Its access mirrors yours and is revoked automatically when
+  your own access changes, so it's convenient but tied to your account lifecycle
+  (a token stops working if you leave the workspace or lose a permission).
+- Use an **account token** for anything long-lived or shared: CI jobs, backend
+  services, and third-party integrations. It isn't attached to a person, so it
+  keeps working through team changes and offboarding — which also makes it the
+  token you must rotate and guard most carefully.
+
 <Warning>
   Treat tokens like passwords: never share or commit them, rotate them
   regularly, and revoke a token immediately if it may have been exposed.
