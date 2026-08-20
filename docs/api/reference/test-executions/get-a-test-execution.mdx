@@ -1,0 +1,47 @@
+---
+title: 'Get a test execution'
+description: 'Fetch one historical execution for a test. Coming soon.'
+---
+
+<Info icon="clock">
+  **Coming soon.** This endpoint is not live yet. The contract below is the
+  planned shape and may change. Calling it today returns `404`.
+</Info>
+
+```
+GET /public/beta/{env_id}/tests/{test_id}/executions/{execution_id}
+```
+
+Path `test_id` unknown or not visible → `404`. An `execution_id` that exists
+but belongs to a **different** test also returns `404`.
+
+## Response
+
+Bare object. Field meanings match
+[Test execution history](/api/reference/test-executions/list-test-executions).
+
+```json
+{
+  "id": "exec_9f3c2a",
+  "test_id": "elementary_cloud.freshness_anomalies.analytics.orders",
+  "sub_test_unique_id": "elementary_cloud.freshness_anomalies.analytics.orders",
+  "sub_type": "freshness_anomalies",
+  "column_name": null,
+  "status": "FAIL",
+  "failure_count": 0,
+  "start_time": "2026-08-20T11:55:00Z",
+  "duration_seconds": 12.4,
+  "quality_dimension": "freshness",
+  "result_reason": "ANOMALY_DETECTED",
+  "exception": null,
+  "description": null,
+  "synced_at": "2026-08-20T11:55:10Z"
+}
+```
+
+## Example
+
+```bash
+curl -H "Authorization: Bearer $ELEMENTARY_TOKEN" \
+  "$BASE/$ENV_ID/tests/$TEST_ID/executions/$EXECUTION_ID"
+```

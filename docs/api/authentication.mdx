@@ -74,7 +74,8 @@ Access is governed by your token's role at three levels:
    `env_id` returns `403`.
 2. **Resource scope** — the asset, column, and lineage endpoints require the
    _assets_ view scope. A role that can reach the environment but isn't granted
-   the assets resource returns `403`.
+   the assets resource returns `403`. Test endpoints (**coming soon**) require
+   the _tests_ view scope.
 3. **Per-asset access** — see below.
 
 If your token's role is restricted to a subset of an environment's assets
@@ -87,9 +88,10 @@ columns and lineage edges derived from them — that you're allowed to see:
 - Column-lineage edges are returned only when the downstream column's asset is
   visible to you. A returned edge's `upstream_column_id` may reference a
   restricted upstream asset; only the id is exposed, not its metadata.
-- **Get-one endpoints** (`/assets/{id}`, `/columns/{id}`)
-  return `404` for an object you can't view — the same response as a nonexistent
-  object, so the API never discloses that a restricted asset exists.
+- **Get-one endpoints** (`/assets/{id}`, `/columns/{id}`, and coming-soon
+  `/tests/{id}`) return `404` for an object you can't view — the same response
+  as a nonexistent object, so the API never discloses that a restricted asset
+  or test exists.
 
 Because filtering is applied per page after rows are read, a page may contain
 fewer than `limit` items while `has_more` is still `true`. Always iterate on

@@ -1,0 +1,54 @@
+---
+title: 'Get a test'
+description: 'Fetch one test definition by id. Coming soon.'
+---
+
+<Info icon="clock">
+  **Coming soon.** This endpoint is not live yet. The contract below is the
+  planned shape and may change. Calling it today returns `404`.
+</Info>
+
+```
+GET /public/beta/{env_id}/tests/{test_id}
+```
+
+Returns a single test definition, or `404` if the id does not exist or is not
+visible to this token (same as [assets](/api/authentication)).
+
+## Response
+
+Bare object (not wrapped in the list envelope).
+
+```json
+{
+  "id": "elementary_cloud.freshness_anomalies.analytics.orders",
+  "name": "freshness_anomalies",
+  "test_type": "elementary_cloud",
+  "definition_type": "freshness_anomalies",
+  "source_type": "elementary_cloud",
+  "asset_id": "table.analytics.orders",
+  "column_name": null,
+  "severity": "ERROR",
+  "disabled": false,
+  "config": {
+    "sensitivity": "medium"
+  },
+  "tags": [],
+  "owners": ["data-platform"],
+  "description": null,
+  "path": "elementary_cloud/freshness_anomalies",
+  "project": null,
+  "updated_at": "2026-08-20T12:00:00Z",
+  "synced_at": "2026-08-20T12:00:00Z",
+  "deleted_at": null
+}
+```
+
+Field meanings match [List tests](/api/reference/tests/list-tests).
+
+## Example
+
+```bash
+curl -H "Authorization: Bearer $ELEMENTARY_TOKEN" \
+  "$BASE/$ENV_ID/tests/$TEST_ID"
+```

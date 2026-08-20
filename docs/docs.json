@@ -545,6 +545,27 @@
                   "api/reference/columns/get-a-column",
                   "api/reference/column-lineage/list-column-lineage"
                 ]
+              },
+              {
+                "group": "Tests",
+                "pages": [
+                  "api/reference/tests/list-tests",
+                  "api/reference/tests/get-a-test"
+                ]
+              },
+              {
+                "group": "Latest test executions",
+                "pages": [
+                  "api/reference/latest-test-executions/list-latest-test-executions",
+                  "api/reference/latest-test-executions/get-a-latest-test-execution"
+                ]
+              },
+              {
+                "group": "Test execution history",
+                "pages": [
+                  "api/reference/test-executions/list-test-executions",
+                  "api/reference/test-executions/get-a-test-execution"
+                ]
               }
             ]
           }
