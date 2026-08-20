@@ -15,6 +15,32 @@ curl -H "Authorization: Bearer $ELEMENTARY_TOKEN" \
 Both **personal tokens** and **account tokens** are accepted. The token resolves
 to an account, and requests are limited to the environments that token may view.
 
+## Creating a token
+
+Generate a token in the Elementary app, then send it as the bearer token shown
+above. The token is displayed **only once** — copy it and store it securely.
+
+<CardGroup cols={2}>
+  <Card title="Personal token" icon="user" href="https://app.elementary-data.com/settings/user-tokens">
+    **User → Personal Tokens.** User-scoped: inherits your own workspace
+    permissions, so it can read exactly the environments and assets you can.
+    Best for personal scripts and exploration.
+  </Card>
+  <Card title="Account token" icon="building" href="https://app.elementary-data.com/settings/account-tokens">
+    **Account → Account Tokens.** Account-scoped with "Can View" permissions and
+    not tied to a single user. Best for shared services, CI, and integrations.
+    Creating one requires the *Manage account tokens* permission.
+  </Card>
+</CardGroup>
+
+In either case, click **Generate token** and copy the value into the
+`Authorization: Bearer` header.
+
+<Warning>
+  Treat tokens like passwords: never share or commit them, rotate them
+  regularly, and revoke a token immediately if it may have been exposed.
+</Warning>
+
 ## Environment scope
 
 Every resource except `GET /environments` is nested under an environment:
