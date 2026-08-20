@@ -1,0 +1,33 @@
+---
+title: 'Versioning'
+description: 'How the beta channel evolves into a stable v1.'
+---
+
+The API uses a **staged versioning** strategy.
+
+## `beta` — today
+
+```
+/public/beta/...
+```
+
+`beta` is a rolling channel that always points at the latest not-yet-official
+version. While in beta we co-design the API with early adopters, so **breaking
+changes can happen** on this path. We'll flag them in advance to active users.
+
+## `v1` — at GA
+
+When the surface stabilizes, we promote it to a stable version:
+
+```
+/public/v1/...
+```
+
+From `v1` onward we follow an **additive-compatibility** contract: we may add
+fields and endpoints, but we won't remove or repurpose existing ones without a
+new major version.
+
+## Recommendation
+
+Build against `beta` today to get the features early, but pin to `v1` once it
+ships if you need long-term stability guarantees.

@@ -503,6 +503,55 @@
         ]
       },
       {
+        "tab": "API Reference",
+        "openapi": "api-reference/beta/openapi.json",
+        "groups": [
+          {
+            "group": "Guides",
+            "pages": [
+              "api/introduction",
+              "api/authentication",
+              "api/pagination",
+              "api/incremental-sync",
+              "api/rate-limits",
+              "api/errors",
+              "api/versioning"
+            ]
+          },
+          {
+            "group": "Endpoints",
+            "pages": [
+              {
+                "group": "Environments",
+                "pages": [
+                  "api/reference/environments/list-environments"
+                ]
+              },
+              {
+                "group": "Assets",
+                "pages": [
+                  "api/reference/assets/list-assets",
+                  "api/reference/assets/get-an-asset",
+                  "api/reference/assets/list-table-assets",
+                  "api/reference/assets/get-a-table-asset",
+                  "api/reference/assets/list-bi-assets",
+                  "api/reference/assets/get-a-bi-asset",
+                  "api/reference/asset-lineage/list-asset-lineage-edges"
+                ]
+              },
+              {
+                "group": "Columns",
+                "pages": [
+                  "api/reference/columns/list-columns",
+                  "api/reference/columns/get-a-column",
+                  "api/reference/column-lineage/list-column-lineage"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
         "tab": "Elementary OSS",
         "groups": [
           {

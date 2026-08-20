@@ -1,0 +1,65 @@
+---
+title: 'Pagination'
+description: 'Keyset pagination with opaque cursors across every list endpoint.'
+---
+
+All list endpoints use **keyset (cursor) pagination**. Each page reads live
+data, not a snapshot: concurrent writes can cause rows to shift between pages.
+For a consistent view, rerun the full scan after writes settle.
+
+## Request
+
+```
+GET /{env_id}/assets?limit=500
+```
+
+| Parameter   | Default | Notes                                                  |
+| ----------- | ------- | ------------------------------------------------------ |
+| `limit`     | `500`   | Items per page. Min `1`, max `2000`.                   |
+| `cursor`    | —       | Opaque token from a previous response's `next_cursor`. |
+| `order_by`  | `id`    | Sort key for full scans.                               |
+| `direction` | `asc`   | `asc` or `desc`.                                       |
+
+## Response envelope
+
+```json
+{
+  "items": [{ "id": "...", "...": "..." }],
+  "next_cursor": "eyJ...",
+  "has_more": true
+}
+```
+
+## Iterating
+
+Follow `next_cursor` until `has_more` is `false`:
+
+```bash
+cursor=""
+while : ; do
+  resp=$(curl -s -H "Authorization: Bearer $ELEMENTARY_TOKEN" \
+    "$BASE/$ENV_ID/assets?limit=500&cursor=$cursor")
+  echo "$resp" | jq '.items[]'
+  more=$(echo "$resp" | jq -r '.has_more')
+  [ "$more" = "true" ] || break
+  cursor=$(echo "$resp" | jq -r '.next_cursor')
+done
+```
+
+## Cursor rules
+
+- **Opaque.** The cursor is an encoded token — don't parse or construct it.
+- **Bound to filters.** A cursor is tied to the exact filter and sort context
+  that produced it. Reusing a cursor with a different filter set returns `400`
+  with the `invalid_cursor` code. Start a new iteration if you change filters.
+- **Deterministic order.** Ordering includes `id` as a tiebreaker, so a cursor
+  advances predictably when timestamps collide. It does not freeze the dataset
+  while you page through it.
+
+## Pages can be under-filled
+
+Never treat a short page as the end of the data. A page can hold fewer than
+`limit` items — even zero — while `has_more` is still `true`. This happens when
+asset-level permissions trim rows after a page is read (see
+[Visibility & permissions](/api/authentication)). Stop only when `has_more` is
+`false`.

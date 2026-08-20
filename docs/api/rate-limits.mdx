@@ -1,0 +1,36 @@
+---
+title: 'Rate limits'
+description: 'Per-account limits, standard headers, and how to back off.'
+---
+
+Requests are rate-limited **per account** (across all of that account's tokens).
+
+## Headers
+
+Every response carries the current window state:
+
+| Header                | Meaning                             |
+| --------------------- | ----------------------------------- |
+| `RateLimit-Limit`     | Max requests allowed in the window  |
+| `RateLimit-Remaining` | Requests left in the current window |
+| `RateLimit-Reset`     | Seconds until the window resets     |
+
+## When you're limited
+
+Exceeding the limit returns `429 Too Many Requests` with a `Retry-After` header
+(seconds to wait) and the standard error envelope with the `rate_limited` code:
+
+```http
+HTTP/1.1 429 Too Many Requests
+Retry-After: 12
+
+{
+  "error": {
+    "code": "rate_limited",
+    "message": "Rate limit exceeded: 120 requests per minute."
+  }
+}
+```
+
+Back off for at least `Retry-After` seconds before retrying. A client that reads
+`RateLimit-Remaining` and paces itself will rarely hit `429`.

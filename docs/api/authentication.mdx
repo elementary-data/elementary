@@ -1,0 +1,67 @@
+---
+title: 'Authentication'
+description: 'Authenticate with a bearer token and scope requests to an environment.'
+---
+
+## Bearer token
+
+Send your token in the `Authorization` header on every request:
+
+```bash
+curl -H "Authorization: Bearer $ELEMENTARY_TOKEN" \
+  https://app.elementary-data.com/api/public/beta/environments
+```
+
+Both **personal tokens** and **account tokens** are accepted. The token resolves
+to an account, and requests are limited to the environments that token may view.
+
+## Environment scope
+
+Every resource except `GET /environments` is nested under an environment:
+
+```
+/public/beta/{env_id}/assets
+```
+
+Call `GET /environments` first to discover the ids you can access. Passing an
+`env_id` you don't have access to returns `403`.
+
+## Visibility & permissions
+
+Access is governed by your token's role at three levels:
+
+1. **Environment access** — the token must be able to view the environment (as
+   returned by `GET /environments`). Otherwise every request under that
+   `env_id` returns `403`.
+2. **Resource scope** — the asset, column, and lineage endpoints require the
+   _assets_ view scope. A role that can reach the environment but isn't granted
+   the assets resource returns `403`.
+3. **Per-asset access** — see below.
+
+If your token's role is restricted to a subset of an environment's assets
+(resource-group permissions), the API only ever returns the assets — and the
+columns and lineage edges derived from them — that you're allowed to see:
+
+- **List endpoints** silently omit assets you can't view. Asset-lineage edges
+  are returned only when **both** of their endpoints are visible to you; an
+  edge that touches a restricted asset is dropped entirely.
+- Column-lineage edges are returned only when the downstream column's asset is
+  visible to you. A returned edge's `upstream_column_id` may reference a
+  restricted upstream asset; only the id is exposed, not its metadata.
+- **Get-one endpoints** (`/assets/{id}`, `/columns/{id}`)
+  return `404` for an object you can't view — the same response as a nonexistent
+  object, so the API never discloses that a restricted asset exists.
+
+Because filtering is applied per page after rows are read, a page may contain
+fewer than `limit` items while `has_more` is still `true`. Always iterate on
+`has_more`, not on item count — see [Pagination](/api/pagination).
+
+## Errors
+
+| Status | Code                | Meaning                                      |
+| ------ | ------------------- | -------------------------------------------- |
+| `401`  | `unauthenticated`   | Missing or invalid token                     |
+| `403`  | `permission_denied` | Token can't access the requested environment |
+| `404`  | `not_found`         | Environment or object doesn't exist          |
+
+See [Errors](/api/errors) for the full error contract.
