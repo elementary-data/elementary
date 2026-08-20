@@ -64,7 +64,7 @@ Follow `next_cursor` until `has_more` is `false` — see [Pagination](/api/pagin
 | Column lineage          | `GET /{env_id}/column-lineage`                    | Column-to-column edges                          |
 | Tests                   | `GET /{env_id}/tests`                             | Test definitions. **Coming soon.**              |
 | Latest test executions  | `GET /{env_id}/latest-test-executions`            | Current run per sub-test. **Coming soon.**      |
-| Test executions         | `GET /{env_id}/tests/{test_id}/executions`        | History for one test. **Coming soon.**          |
+| Test execution history  | `GET /{env_id}/tests/{test_id}/executions`        | History for one test. **Coming soon.**          |
 
 Every list endpoint supports a full scan and keyset pagination; assets and
 columns also expose incremental feeds — see [Incremental sync](/api/incremental-sync).

@@ -561,7 +561,7 @@
                 ]
               },
               {
-                "group": "Test executions",
+                "group": "Test execution history",
                 "pages": [
                   "api/reference/test-executions/list-test-executions",
                   "api/reference/test-executions/get-a-test-execution"

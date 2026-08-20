@@ -3,10 +3,10 @@ title: 'Get a test execution'
 description: 'Fetch one historical execution for a test. Coming soon.'
 ---
 
-<Warning>
+<Info icon="clock">
   **Coming soon.** This endpoint is not live yet. The contract below is the
   planned shape and may change. Calling it today returns `404`.
-</Warning>
+</Info>
 
 ```
 GET /public/beta/{env_id}/tests/{test_id}/executions/{execution_id}
@@ -18,7 +18,7 @@ but belongs to a **different** test also returns `404`.
 ## Response
 
 Bare object. Field meanings match
-[List test executions](/api/reference/test-executions/list-test-executions).
+[Test execution history](/api/reference/test-executions/list-test-executions).
 
 ```json
 {

@@ -3,10 +3,10 @@ title: 'List latest test executions'
 description: 'Current run per sub-test. Coming soon.'
 ---
 
-<Warning>
+<Info icon="clock">
   **Coming soon.** This endpoint is not live yet. The contract below is the
   planned shape and may change. Calling it today returns `404`.
-</Warning>
+</Info>
 
 ```
 GET /public/beta/{env_id}/latest-test-executions
@@ -42,7 +42,7 @@ are any-of within a param, AND across params, max `1000` values each.
 ## Response
 
 List envelope `{ items, next_cursor, has_more }`. Item shape is shared with
-[per-test execution history](/api/reference/test-executions/list-test-executions).
+[test execution history](/api/reference/test-executions/list-test-executions).
 
 ```json
 {
