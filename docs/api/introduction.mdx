@@ -1,0 +1,119 @@
+---
+title: 'Introduction'
+description: "Read Elementary's assets, columns, and lineage over a REST API."
+---
+
+The **Elementary Public API** is a REST interface for programmatically reading
+the assets, columns, and lineage Elementary tracks for one
+environment. Use it to sync your data catalog and lineage into your own systems
+(a warehouse, a BI tool, a data catalog, an internal service).
+
+<Warning>
+  This API is in **active development (beta)** and is **not intended for
+  production use**. The interface can change — including **breaking changes** —
+  while we co-design it with early adopters, and availability, stability, and
+  support are not guaranteed. Endpoints live under `/public/beta`; wait for a
+  stable `v1` before depending on it in production. See
+  [Versioning](/api/versioning).
+</Warning>
+
+## Base URL
+
+```
+https://prod.api.elementary-data.com/public/beta
+```
+
+## Quickstart
+
+<Steps>
+<Step title="Get a token">
+Create a personal or account token in Elementary and send it as a bearer token.
+See [Authentication](/api/authentication).
+</Step>
+
+<Step title="Discover your environments">
+
+```bash
+curl -H "Authorization: Bearer $ELEMENTARY_TOKEN" \
+  "https://prod.api.elementary-data.com/public/beta/environments"
+```
+
+Each returned `id` is an `env_id` you use in every other endpoint.
+
+</Step>
+
+<Step title="List assets">
+```bash
+curl -H "Authorization: Bearer $ELEMENTARY_TOKEN" \
+  "https://prod.api.elementary-data.com/public/beta/$ENV_ID/assets?limit=500"
+```
+Follow `next_cursor` until `has_more` is `false` — see [Pagination](/api/pagination).
+</Step>
+</Steps>
+
+## What you can read
+
+| Resource       | Endpoint                       | Notes                                    |
+| -------------- | ------------------------------ | ---------------------------------------- |
+| Environments   | `GET /environments`            | Account-scoped discovery                 |
+| Assets         | `GET /{env_id}/assets`         | Every asset, common fields + `kind`      |
+| Table assets   | `GET /{env_id}/assets/tables`  | Table assets + warehouse-specific fields |
+| BI assets      | `GET /{env_id}/assets/bi`      | BI assets + BI-specific fields           |
+| Columns        | `GET /{env_id}/columns`        | Columns of assets                        |
+| Asset lineage  | `GET /{env_id}/asset-lineage`  | Asset-to-asset edges                     |
+| Column lineage | `GET /{env_id}/column-lineage` | Column-to-column edges                   |
+
+Every list endpoint supports a full scan and keyset pagination; assets and
+columns also expose incremental feeds — see [Incremental sync](/api/incremental-sync).
+
+## Assets: one base endpoint, plus typed endpoints
+
+Elementary tracks assets of several kinds — warehouse tables and views, BI
+dashboards and explores, semantic models, and more. They share a common set of
+fields but each kind also has its own attributes, so the API splits them:
+
+- **`GET /assets`** returns **every** asset of every kind with the **common
+  fields** (`id`, `name`, `source_type`, `tags`, `owners`, timestamps, …) plus a
+  `kind` discriminator. This is the complete list of lineage nodes: every asset
+  id referenced by asset lineage or column lineage appears here, so you can
+  resolve any edge endpoint to a node.
+- **`GET /assets/tables`** and **`GET /assets/bi`** return the same assets
+  narrowed to a single kind, with that kind's extra fields fully populated —
+  warehouse coordinates (`db_name`, `schema_name`, `table_name`,
+  `materialization`) for tables, and `bi_platform` / `bi_type` / `url` for BI
+  assets. Kind-specific filters live here too (e.g. `db_names` on
+  `/assets/tables`, `bi_platforms` on `/assets/bi`).
+
+**Why the split?** A single asset shape would leave most fields null on any given
+row (a BI dashboard has no `db_name`; a table has no `bi_platform`). Keeping the
+common fields on `/assets` gives you a clean node list for building the lineage
+graph, while the typed endpoints give each kind a tight, fully-populated shape.
+A typical flow: page `/assets` to build the graph, then enrich the kinds you
+care about via the typed endpoints — use the `kind` field to decide which one.
+
+The full endpoint and schema reference is generated from the API and lives under
+**API Reference**.
+
+## Forward compatibility
+
+Some string fields are **extensible enums**: they carry a value from a small,
+known set today (e.g. `kind`, `source_type`, `data_platform`, `materialization`,
+`bi_platform`, `bi_type`, `warehouse_type`, `last_sync_status`), but that set
+grows as Elementary adds integrations and asset types. In the schema these
+fields are typed as plain strings with an `Extensible enum.` note and their
+currently-known values listed under `examples` — they are **not** a closed
+enum.
+
+To stay compatible as the API evolves, build your integration so that:
+
+- **Unknown values never break you.** Treat any value you don't recognize as a
+  safe fallback (for `kind`, use `other`) rather than failing. New values can
+  appear in a normal, non-breaking release.
+- **New fields are ignored, not rejected.** We may add fields to a response;
+  don't configure your parser to reject unknown properties.
+- **You iterate on `has_more`, not item counts** (see [Pagination](/api/pagination)).
+
+Our side of the contract: we add enum values and fields additively without a
+version bump, and never silently change the meaning of an existing value.
+**Removing or renaming** a field or a known value is a breaking change and would
+ship under a new API version, not under `beta`.

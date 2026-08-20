@@ -1,0 +1,82 @@
+---
+title: 'Incremental sync'
+description: 'Full scans plus incremental upsert and delete feeds.'
+---
+
+Every dataset can be read two ways: a **full scan** (default) and, where
+supported, **incremental feeds** that return only what changed.
+
+## Full scan
+
+With no incremental filter, a list endpoint returns every current object,
+paginated by cursor. Use this for the initial load or a periodic full refresh.
+
+```
+GET /{env_id}/assets?limit=500
+```
+
+## Incremental feeds
+
+Assets, columns, and column lineage expose two separate feeds so upserts and
+deletes stay clean and each can use its own index:
+
+| Filter          | Returns                                           | Use for   |
+| --------------- | ------------------------------------------------- | --------- |
+| `synced_since`  | Objects created or updated at/after the timestamp | Upserts   |
+| `deleted_since` | Soft-delete tombstones at/after the timestamp     | Deletions |
+
+```bash
+# New/changed assets since your last sync
+curl -H "Authorization: Bearer $ELEMENTARY_TOKEN" \
+  "$BASE/$ENV_ID/assets?synced_since=2026-08-01T00:00:00Z&limit=500"
+
+# Assets deleted since your last sync
+curl -H "Authorization: Bearer $ELEMENTARY_TOKEN" \
+  "$BASE/$ENV_ID/assets?deleted_since=2026-08-01T00:00:00Z&limit=500"
+```
+
+Timestamps are UTC ISO-8601.
+
+## Recommended loop
+
+1. Store the wall-clock time `T` when you start a sync.
+2. Re-query from a small safety overlap behind the previous watermark (for
+   example, `synced_since=<previous T - overlap>`). This covers clock skew and
+   commits that were in flight when the previous sync ran.
+3. Page the `synced_since` feed to upsert changed objects and the
+   `deleted_since` feed to remove tombstoned objects.
+4. After both feeds complete, persist `T` as the new watermark for the next run.
+
+<Note>
+  Drain each dataset once, then stay incremental. A full `column-lineage` scan
+  is significantly more expensive per page than the other feeds — its edges are
+  derived from each column's stored dependencies, so a full scan reads every
+  column in the environment — while `synced_since` and `deleted_since` reads are
+  index-backed and stay fast as the environment grows. Persist `next_cursor` and
+  the sync timestamp so a scheduled job resumes incrementally instead of
+  re-running the initial snapshot on every run.
+</Note>
+
+<Note>
+  Feeds are **at-least-once**: an object may reappear across runs or in the
+  safety overlap. Upserts and tombstones are keyed by `id`, so re-applying
+  overlapping rows is idempotent.
+</Note>
+
+## Support matrix
+
+| Dataset        | Full scan | Incremental                          |
+| -------------- | --------- | ------------------------------------ |
+| Assets         | ✅        | ✅ (`synced_since`, `deleted_since`) |
+| Columns        | ✅        | ✅ (`synced_since`, `deleted_since`) |
+| Asset lineage  | ✅        | Full replace                         |
+| Column lineage | ✅        | ✅ (`synced_since`, `deleted_since`) |
+
+<Note>
+  Column lineage is returned one record per edge, but edges do not have their
+  own timestamps. The incremental filters use the downstream column's
+  timestamps. When a downstream column appears in the upserts feed, replace all
+  of its edges rather than merging them. An edge removed while its downstream
+  column still exists has no individual tombstone; a downstream column tombstone
+  in `deleted_since` removes all of its edges.
+</Note>

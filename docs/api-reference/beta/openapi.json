@@ -1,0 +1,3300 @@
+{
+  "components": {
+    "schemas": {
+      "ApiError": {
+        "properties": {
+          "code": {
+            "description": "Stable code identifying the type of error.",
+            "title": "Code",
+            "type": "string"
+          },
+          "message": {
+            "description": "Human-readable explanation of the error.",
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": ["code", "message"],
+        "title": "ApiError",
+        "type": "object"
+      },
+      "ApiErrorResponse": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ApiError",
+            "description": "Structured details about the error."
+          }
+        },
+        "required": ["error"],
+        "title": "ApiErrorResponse",
+        "type": "object"
+      },
+      "Asset": {
+        "properties": {
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the asset was created in the source platform, when available.",
+            "title": "Created At"
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Soft-delete timestamp. Present only in the `deleted_since` feed.",
+            "title": "Deleted At"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Description from the source platform.",
+            "title": "Description"
+          },
+          "id": {
+            "description": "Unique asset identifier.",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "description": "Extensible enum. High-level asset category; picks the typed endpoint that exposes this asset's extra fields (`/assets/tables` for `table`, `/assets/bi` for `bi`). New values may be added over time \u2014 treat any unrecognized value as `other` and do not hard-fail.",
+            "examples": ["table", "bi", "semantic", "etl", "other"],
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "description": "Asset name.",
+            "title": "Name",
+            "type": "string"
+          },
+          "owners": {
+            "default": [],
+            "description": "Owners assigned to the asset.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Owners",
+            "type": "array"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ID of the parent asset (e.g. a BI dashboard containing this page).",
+            "title": "Parent Id"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Logical path of the asset in its project tree.",
+            "title": "Path"
+          },
+          "source_type": {
+            "description": "Extensible enum. Integration that synced this asset. New values may be added over time.",
+            "examples": ["dbt", "looker", "sigma", "fivetran", "tableau"],
+            "title": "Source Type",
+            "type": "string"
+          },
+          "synced_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When Elementary last synced this asset. Use with `synced_since` for incremental reads.",
+            "title": "Synced At"
+          },
+          "tags": {
+            "default": [],
+            "description": "Tags assigned to the asset.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the asset was updated in the source platform, when available.",
+            "title": "Updated At"
+          }
+        },
+        "required": ["id", "name", "kind", "source_type"],
+        "title": "Asset",
+        "type": "object"
+      },
+      "AssetLineage": {
+        "properties": {
+          "downstream_asset_id": {
+            "description": "Identifier of the downstream asset receiving data from upstream.",
+            "title": "Downstream Asset Id",
+            "type": "string"
+          },
+          "upstream_asset_id": {
+            "description": "Identifier of the upstream asset; data flows from upstream to downstream.",
+            "title": "Upstream Asset Id",
+            "type": "string"
+          }
+        },
+        "required": ["upstream_asset_id", "downstream_asset_id"],
+        "title": "AssetLineage",
+        "type": "object"
+      },
+      "BiAsset": {
+        "properties": {
+          "bi_platform": {
+            "description": "Extensible enum. BI platform name. New values may be added over time.",
+            "examples": ["looker", "sigma", "tableau", "powerbi"],
+            "title": "Bi Platform",
+            "type": "string"
+          },
+          "bi_type": {
+            "description": "Extensible enum. BI-specific asset type. New values may be added over time.",
+            "examples": ["dashboard", "explore", "look", "report"],
+            "title": "Bi Type",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the asset was created in the source platform, when available.",
+            "title": "Created At"
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Soft-delete timestamp. Present only in the `deleted_since` feed.",
+            "title": "Deleted At"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Description from the source platform.",
+            "title": "Description"
+          },
+          "id": {
+            "description": "Unique asset identifier.",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "description": "Extensible enum. High-level asset category; picks the typed endpoint that exposes this asset's extra fields (`/assets/tables` for `table`, `/assets/bi` for `bi`). New values may be added over time \u2014 treat any unrecognized value as `other` and do not hard-fail.",
+            "examples": ["table", "bi", "semantic", "etl", "other"],
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "description": "Asset name.",
+            "title": "Name",
+            "type": "string"
+          },
+          "owners": {
+            "default": [],
+            "description": "Owners assigned to the asset.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Owners",
+            "type": "array"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ID of the parent asset (e.g. a BI dashboard containing this page).",
+            "title": "Parent Id"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Logical path of the asset in its project tree.",
+            "title": "Path"
+          },
+          "source_type": {
+            "description": "Extensible enum. Integration that synced this asset. New values may be added over time.",
+            "examples": ["dbt", "looker", "sigma", "fivetran", "tableau"],
+            "title": "Source Type",
+            "type": "string"
+          },
+          "synced_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When Elementary last synced this asset. Use with `synced_since` for incremental reads.",
+            "title": "Synced At"
+          },
+          "tags": {
+            "default": [],
+            "description": "Tags assigned to the asset.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the asset was updated in the source platform, when available.",
+            "title": "Updated At"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "URL to the asset in its source platform.",
+            "title": "Url"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "source_type",
+          "bi_platform",
+          "bi_type"
+        ],
+        "title": "BiAsset",
+        "type": "object"
+      },
+      "Column": {
+        "properties": {
+          "asset_id": {
+            "description": "ID of the asset this column belongs to.",
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "data_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Data type reported by the source platform.",
+            "title": "Data Type"
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Soft-delete timestamp. Present only in the `deleted_since` feed.",
+            "title": "Deleted At"
+          },
+          "id": {
+            "description": "Unique column identifier.",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "description": "Column name.",
+            "title": "Name",
+            "type": "string"
+          },
+          "synced_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When Elementary last synced this column. Use with `synced_since` for incremental reads.",
+            "title": "Synced At"
+          }
+        },
+        "required": ["id", "name", "asset_id"],
+        "title": "Column",
+        "type": "object"
+      },
+      "ColumnLineage": {
+        "properties": {
+          "downstream_column_id": {
+            "description": "Identifier of the downstream column receiving data from upstream.",
+            "title": "Downstream Column Id",
+            "type": "string"
+          },
+          "upstream_column_id": {
+            "description": "Identifier of the upstream column; data flows from upstream to downstream.",
+            "title": "Upstream Column Id",
+            "type": "string"
+          }
+        },
+        "required": ["upstream_column_id", "downstream_column_id"],
+        "title": "ColumnLineage",
+        "type": "object"
+      },
+      "Direction": {
+        "enum": ["asc", "desc"],
+        "title": "Direction",
+        "type": "string"
+      },
+      "Environment": {
+        "properties": {
+          "cron": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Sync schedule as a cron expression, if configured.",
+            "title": "Cron"
+          },
+          "id": {
+            "description": "Use as `env_id` in all environment-scoped endpoints.",
+            "title": "Id",
+            "type": "string"
+          },
+          "last_sync_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Extensible enum. Status of the environment's most recent sync. New values may be added over time.",
+            "examples": ["success", "running", "error"],
+            "title": "Last Sync Status"
+          },
+          "last_synced_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When Elementary last synced the environment.",
+            "title": "Last Synced At"
+          },
+          "name": {
+            "description": "Environment name.",
+            "title": "Name",
+            "type": "string"
+          },
+          "warehouse_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Extensible enum. Warehouse the environment reads from. New values may be added over time.",
+            "examples": [
+              "snowflake",
+              "bigquery",
+              "databricks",
+              "redshift",
+              "postgres"
+            ],
+            "title": "Warehouse Type"
+          }
+        },
+        "required": ["id", "name"],
+        "title": "Environment",
+        "type": "object"
+      },
+      "OrderBy": {
+        "enum": ["id", "synced_at"],
+        "title": "OrderBy",
+        "type": "string"
+      },
+      "PaginatedResponse_AssetLineage_": {
+        "properties": {
+          "has_more": {
+            "default": false,
+            "description": "The only signal to continue pagination; a short page may still have more items because permission filtering can trim rows.",
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "description": "Objects returned in the current page.",
+            "items": {
+              "$ref": "#/components/schemas/AssetLineage"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Opaque cursor for the next page, valid only with identical query parameters.",
+            "title": "Next Cursor"
+          }
+        },
+        "required": ["items"],
+        "title": "PaginatedResponse[AssetLineage]",
+        "type": "object"
+      },
+      "PaginatedResponse_Asset_": {
+        "properties": {
+          "has_more": {
+            "default": false,
+            "description": "The only signal to continue pagination; a short page may still have more items because permission filtering can trim rows.",
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "description": "Objects returned in the current page.",
+            "items": {
+              "$ref": "#/components/schemas/Asset"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Opaque cursor for the next page, valid only with identical query parameters.",
+            "title": "Next Cursor"
+          }
+        },
+        "required": ["items"],
+        "title": "PaginatedResponse[Asset]",
+        "type": "object"
+      },
+      "PaginatedResponse_BiAsset_": {
+        "properties": {
+          "has_more": {
+            "default": false,
+            "description": "The only signal to continue pagination; a short page may still have more items because permission filtering can trim rows.",
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "description": "Objects returned in the current page.",
+            "items": {
+              "$ref": "#/components/schemas/BiAsset"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Opaque cursor for the next page, valid only with identical query parameters.",
+            "title": "Next Cursor"
+          }
+        },
+        "required": ["items"],
+        "title": "PaginatedResponse[BiAsset]",
+        "type": "object"
+      },
+      "PaginatedResponse_ColumnLineage_": {
+        "properties": {
+          "has_more": {
+            "default": false,
+            "description": "The only signal to continue pagination; a short page may still have more items because permission filtering can trim rows.",
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "description": "Objects returned in the current page.",
+            "items": {
+              "$ref": "#/components/schemas/ColumnLineage"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Opaque cursor for the next page, valid only with identical query parameters.",
+            "title": "Next Cursor"
+          }
+        },
+        "required": ["items"],
+        "title": "PaginatedResponse[ColumnLineage]",
+        "type": "object"
+      },
+      "PaginatedResponse_Column_": {
+        "properties": {
+          "has_more": {
+            "default": false,
+            "description": "The only signal to continue pagination; a short page may still have more items because permission filtering can trim rows.",
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "description": "Objects returned in the current page.",
+            "items": {
+              "$ref": "#/components/schemas/Column"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Opaque cursor for the next page, valid only with identical query parameters.",
+            "title": "Next Cursor"
+          }
+        },
+        "required": ["items"],
+        "title": "PaginatedResponse[Column]",
+        "type": "object"
+      },
+      "PaginatedResponse_TableAsset_": {
+        "properties": {
+          "has_more": {
+            "default": false,
+            "description": "The only signal to continue pagination; a short page may still have more items because permission filtering can trim rows.",
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "description": "Objects returned in the current page.",
+            "items": {
+              "$ref": "#/components/schemas/TableAsset"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Opaque cursor for the next page, valid only with identical query parameters.",
+            "title": "Next Cursor"
+          }
+        },
+        "required": ["items"],
+        "title": "PaginatedResponse[TableAsset]",
+        "type": "object"
+      },
+      "TableAsset": {
+        "properties": {
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the asset was created in the source platform, when available.",
+            "title": "Created At"
+          },
+          "data_platform": {
+            "description": "Extensible enum. Data platform name. New values may be added over time.",
+            "examples": [
+              "snowflake",
+              "bigquery",
+              "databricks",
+              "redshift",
+              "postgres"
+            ],
+            "title": "Data Platform",
+            "type": "string"
+          },
+          "db_name": {
+            "description": "Database (catalog) name.",
+            "title": "Db Name",
+            "type": "string"
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Soft-delete timestamp. Present only in the `deleted_since` feed.",
+            "title": "Deleted At"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Description from the source platform.",
+            "title": "Description"
+          },
+          "id": {
+            "description": "Unique asset identifier.",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "description": "Extensible enum. High-level asset category; picks the typed endpoint that exposes this asset's extra fields (`/assets/tables` for `table`, `/assets/bi` for `bi`). New values may be added over time \u2014 treat any unrecognized value as `other` and do not hard-fail.",
+            "examples": ["table", "bi", "semantic", "etl", "other"],
+            "title": "Kind",
+            "type": "string"
+          },
+          "materialization": {
+            "description": "Extensible enum. Materialization strategy. New values may be added over time.",
+            "examples": ["table", "view", "incremental", "ephemeral"],
+            "title": "Materialization",
+            "type": "string"
+          },
+          "name": {
+            "description": "Asset name.",
+            "title": "Name",
+            "type": "string"
+          },
+          "owners": {
+            "default": [],
+            "description": "Owners assigned to the asset.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Owners",
+            "type": "array"
+          },
+          "parent_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ID of the parent asset (e.g. a BI dashboard containing this page).",
+            "title": "Parent Id"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Logical path of the asset in its project tree.",
+            "title": "Path"
+          },
+          "schema_name": {
+            "description": "Schema name.",
+            "title": "Schema Name",
+            "type": "string"
+          },
+          "source_type": {
+            "description": "Extensible enum. Integration that synced this asset. New values may be added over time.",
+            "examples": ["dbt", "looker", "sigma", "fivetran", "tableau"],
+            "title": "Source Type",
+            "type": "string"
+          },
+          "synced_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When Elementary last synced this asset. Use with `synced_since` for incremental reads.",
+            "title": "Synced At"
+          },
+          "table_name": {
+            "description": "Table or view name.",
+            "title": "Table Name",
+            "type": "string"
+          },
+          "tags": {
+            "default": [],
+            "description": "Tags assigned to the asset.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the asset was updated in the source platform, when available.",
+            "title": "Updated At"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "source_type",
+          "data_platform",
+          "db_name",
+          "schema_name",
+          "table_name",
+          "materialization"
+        ],
+        "title": "TableAsset",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "description": "Personal or account token.",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "The Elementary Public API is a REST interface for programmatically reading\nElementary's assets, columns, and lineage for one environment.\n\n**Authentication.** Send a bearer token (personal or account token) in the\n`Authorization` header. The token resolves to an account; results are scoped to\nthe environments that token may view.\n\n**Environment scope.** Every resource lives under `/{env_id}`. Call\n`GET /environments` first to discover the ids you can access.\n\n**Pagination.** List endpoints are keyset-paginated: pass `limit` (default 500,\nmax 2000) and follow `next_cursor` until `has_more` is `false`. Cursors are opaque\nand bound to the filters that produced them \u2014 reusing a cursor with different\nfilters returns `400`.\n\n**Incremental sync.** Every dataset supports a full scan (default). Assets and\ncolumns also expose two incremental feeds: `synced_since` (upserts) and\n`deleted_since` (soft-delete tombstones).\n\n**Rate limiting.** Requests are rate-limited per account; responses carry\n`RateLimit-*` headers and `429` responses include `Retry-After`.\n\n_Beta: the shape may change while we co-design with early adopters._\n",
+    "title": "Elementary Public API",
+    "version": "beta"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/public/beta/environments": {
+      "get": {
+        "description": "Lists the environments the token can access. Each `id` is an `env_id` for the other endpoints. Call this first.",
+        "operationId": "list_environments_public_beta_environments_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Environment"
+                  },
+                  "title": "Response List Environments Public Beta Environments Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "List environments",
+        "tags": ["Environments"]
+      }
+    },
+    "/public/beta/{env_id}/asset-lineage": {
+      "get": {
+        "description": "Lists asset-to-asset lineage edges. Full scan only. Edges are returned as-is, including edges to and from ephemeral (CTE-only) dbt models; those assets are also returned by the assets endpoints.",
+        "operationId": "list_asset_lineage_public_beta__env_id__asset_lineage_get",
+        "parameters": [
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+              "title": "Cursor"
+            }
+          },
+          {
+            "description": "Maximum items to return per page (1-2000).",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "description": "Maximum items to return per page (1-2000).",
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return only edges touching these asset ids.",
+            "in": "query",
+            "name": "asset_ids",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only edges touching these asset ids.",
+              "title": "Asset Ids"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_AssetLineage_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "List asset lineage edges",
+        "tags": ["Asset lineage"]
+      }
+    },
+    "/public/beta/{env_id}/assets": {
+      "get": {
+        "description": "Lists lineage assets of every kind (tables, BI assets, semantic models, \u2026) with their common fields. Use `kind` to enrich a row from the typed endpoints (`/assets/tables`, `/assets/bi`). Full scan by default; pass `synced_since` for the upserts feed or `deleted_since` for the tombstones feed (mutually exclusive).",
+        "operationId": "list_assets_public_beta__env_id__assets_get",
+        "parameters": [
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Return only assets with these ids.",
+            "in": "query",
+            "name": "ids",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only assets with these ids.",
+              "title": "Ids"
+            }
+          },
+          {
+            "description": "Return only assets from these source types (e.g. `dbt`, `fivetran`, `looker`).",
+            "in": "query",
+            "name": "source_types",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only assets from these source types (e.g. `dbt`, `fivetran`, `looker`).",
+              "title": "Source Types"
+            }
+          },
+          {
+            "description": "Return only assets tagged with any of these tags.",
+            "in": "query",
+            "name": "tags",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only assets tagged with any of these tags.",
+              "title": "Tags"
+            }
+          },
+          {
+            "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+            "in": "query",
+            "name": "synced_since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+              "title": "Synced Since"
+            }
+          },
+          {
+            "description": "Tombstones feed: assets whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+            "in": "query",
+            "name": "deleted_since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Tombstones feed: assets whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+              "title": "Deleted Since"
+            }
+          },
+          {
+            "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+              "title": "Cursor"
+            }
+          },
+          {
+            "description": "Maximum items to return per page (1-2000).",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "description": "Maximum items to return per page (1-2000).",
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Sort field for a full scan. Ignored when `synced_since`/`deleted_since` is set (those feeds always order by their own cursor).",
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/OrderBy",
+              "default": "id",
+              "description": "Sort field for a full scan. Ignored when `synced_since`/`deleted_since` is set (those feeds always order by their own cursor)."
+            }
+          },
+          {
+            "description": "Sort direction for `order_by`.",
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Direction",
+              "default": "asc",
+              "description": "Sort direction for `order_by`."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_Asset_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "List assets",
+        "tags": ["Assets"]
+      }
+    },
+    "/public/beta/{env_id}/assets/bi": {
+      "get": {
+        "description": "Lists BI assets with their BI-specific fields (`bi_platform`, `bi_type`, `url`). Full scan by default; supports the `synced_since` / `deleted_since` feeds.",
+        "operationId": "list_bi_assets_public_beta__env_id__assets_bi_get",
+        "parameters": [
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Return only BI assets with these ids.",
+            "in": "query",
+            "name": "ids",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only BI assets with these ids.",
+              "title": "Ids"
+            }
+          },
+          {
+            "description": "Return only BI assets from these source types (e.g. `looker`, `sigma`).",
+            "in": "query",
+            "name": "source_types",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only BI assets from these source types (e.g. `looker`, `sigma`).",
+              "title": "Source Types"
+            }
+          },
+          {
+            "description": "Return only BI assets tagged with any of these tags.",
+            "in": "query",
+            "name": "tags",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only BI assets tagged with any of these tags.",
+              "title": "Tags"
+            }
+          },
+          {
+            "description": "Return only BI assets on these platforms (e.g. `looker`, `sigma`, `tableau`).",
+            "in": "query",
+            "name": "bi_platforms",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only BI assets on these platforms (e.g. `looker`, `sigma`, `tableau`).",
+              "title": "Bi Platforms"
+            }
+          },
+          {
+            "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+            "in": "query",
+            "name": "synced_since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+              "title": "Synced Since"
+            }
+          },
+          {
+            "description": "Tombstones feed: assets whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+            "in": "query",
+            "name": "deleted_since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Tombstones feed: assets whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+              "title": "Deleted Since"
+            }
+          },
+          {
+            "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+              "title": "Cursor"
+            }
+          },
+          {
+            "description": "Maximum items to return per page (1-2000).",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "description": "Maximum items to return per page (1-2000).",
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Sort field for a full scan. Ignored when `synced_since`/`deleted_since` is set (those feeds always order by their own cursor).",
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/OrderBy",
+              "default": "id",
+              "description": "Sort field for a full scan. Ignored when `synced_since`/`deleted_since` is set (those feeds always order by their own cursor)."
+            }
+          },
+          {
+            "description": "Sort direction for `order_by`.",
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Direction",
+              "default": "asc",
+              "description": "Sort direction for `order_by`."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_BiAsset_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "List BI assets",
+        "tags": ["Assets"]
+      }
+    },
+    "/public/beta/{env_id}/assets/bi/{asset_id}": {
+      "get": {
+        "description": "Fetches a single BI asset by id. Returns 404 if it doesn't exist in this environment or isn't a BI asset.",
+        "operationId": "get_bi_asset_public_beta__env_id__assets_bi__asset_id__get",
+        "parameters": [
+          {
+            "description": "Asset identifier.",
+            "in": "path",
+            "name": "asset_id",
+            "required": true,
+            "schema": {
+              "description": "Asset identifier.",
+              "title": "Asset Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BiAsset"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "Get a BI asset",
+        "tags": ["Assets"]
+      }
+    },
+    "/public/beta/{env_id}/assets/tables": {
+      "get": {
+        "description": "Lists warehouse table assets with their warehouse-specific fields (`data_platform`, `db_name`, `schema_name`, `table_name`, `materialization`). Full scan by default; supports the `synced_since` / `deleted_since` feeds.",
+        "operationId": "list_table_assets_public_beta__env_id__assets_tables_get",
+        "parameters": [
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Return only table assets with these ids.",
+            "in": "query",
+            "name": "ids",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only table assets with these ids.",
+              "title": "Ids"
+            }
+          },
+          {
+            "description": "Return only table assets from these source types (e.g. `dbt`, `fivetran`).",
+            "in": "query",
+            "name": "source_types",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only table assets from these source types (e.g. `dbt`, `fivetran`).",
+              "title": "Source Types"
+            }
+          },
+          {
+            "description": "Return only table assets tagged with any of these tags.",
+            "in": "query",
+            "name": "tags",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only table assets tagged with any of these tags.",
+              "title": "Tags"
+            }
+          },
+          {
+            "description": "Return only table assets in these databases.",
+            "in": "query",
+            "name": "db_names",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only table assets in these databases.",
+              "title": "Db Names"
+            }
+          },
+          {
+            "description": "Return only table assets in these schemas.",
+            "in": "query",
+            "name": "schema_names",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only table assets in these schemas.",
+              "title": "Schema Names"
+            }
+          },
+          {
+            "description": "Return only table assets with these materializations (e.g. `table`, `view`, `incremental`).",
+            "in": "query",
+            "name": "materializations",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only table assets with these materializations (e.g. `table`, `view`, `incremental`).",
+              "title": "Materializations"
+            }
+          },
+          {
+            "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+            "in": "query",
+            "name": "synced_since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+              "title": "Synced Since"
+            }
+          },
+          {
+            "description": "Tombstones feed: assets whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+            "in": "query",
+            "name": "deleted_since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Tombstones feed: assets whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+              "title": "Deleted Since"
+            }
+          },
+          {
+            "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+              "title": "Cursor"
+            }
+          },
+          {
+            "description": "Maximum items to return per page (1-2000).",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "description": "Maximum items to return per page (1-2000).",
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Sort field for a full scan. Ignored when `synced_since`/`deleted_since` is set (those feeds always order by their own cursor).",
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/OrderBy",
+              "default": "id",
+              "description": "Sort field for a full scan. Ignored when `synced_since`/`deleted_since` is set (those feeds always order by their own cursor)."
+            }
+          },
+          {
+            "description": "Sort direction for `order_by`.",
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Direction",
+              "default": "asc",
+              "description": "Sort direction for `order_by`."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_TableAsset_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "List table assets",
+        "tags": ["Assets"]
+      }
+    },
+    "/public/beta/{env_id}/assets/tables/{asset_id}": {
+      "get": {
+        "description": "Fetches a single table asset by id. Returns 404 if it doesn't exist in this environment or isn't a table asset.",
+        "operationId": "get_table_asset_public_beta__env_id__assets_tables__asset_id__get",
+        "parameters": [
+          {
+            "description": "Asset identifier.",
+            "in": "path",
+            "name": "asset_id",
+            "required": true,
+            "schema": {
+              "description": "Asset identifier.",
+              "title": "Asset Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableAsset"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "Get a table asset",
+        "tags": ["Assets"]
+      }
+    },
+    "/public/beta/{env_id}/assets/{asset_id}": {
+      "get": {
+        "description": "Fetches a single asset (common fields) by id. Returns 404 if it doesn't exist in this environment.",
+        "operationId": "get_asset_public_beta__env_id__assets__asset_id__get",
+        "parameters": [
+          {
+            "description": "Asset identifier.",
+            "in": "path",
+            "name": "asset_id",
+            "required": true,
+            "schema": {
+              "description": "Asset identifier.",
+              "title": "Asset Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Asset"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "Get an asset",
+        "tags": ["Assets"]
+      }
+    },
+    "/public/beta/{env_id}/column-lineage": {
+      "get": {
+        "description": "Lists column-to-column lineage edges, one record per edge (mirroring the asset-lineage shape). Full scan by default; the `synced_since` / `deleted_since` feeds filter on the downstream column's timestamps.",
+        "operationId": "list_column_lineage_public_beta__env_id__column_lineage_get",
+        "parameters": [
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Return only edges whose downstream column is in this set.",
+            "in": "query",
+            "name": "column_ids",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only edges whose downstream column is in this set.",
+              "title": "Column Ids"
+            }
+          },
+          {
+            "description": "Return only edges whose downstream column belongs to these asset ids.",
+            "in": "query",
+            "name": "asset_ids",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only edges whose downstream column belongs to these asset ids.",
+              "title": "Asset Ids"
+            }
+          },
+          {
+            "description": "Upserts feed: edges whose downstream column `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+            "in": "query",
+            "name": "synced_since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Upserts feed: edges whose downstream column `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+              "title": "Synced Since"
+            }
+          },
+          {
+            "description": "Tombstones feed: edges whose downstream column `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+            "in": "query",
+            "name": "deleted_since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Tombstones feed: edges whose downstream column `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+              "title": "Deleted Since"
+            }
+          },
+          {
+            "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+              "title": "Cursor"
+            }
+          },
+          {
+            "description": "Maximum items to return per page (1-2000).",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "description": "Maximum items to return per page (1-2000).",
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Sort field for a full scan. Ignored when `synced_since`/`deleted_since` is set (those feeds always order by their own cursor).",
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/OrderBy",
+              "default": "id",
+              "description": "Sort field for a full scan. Ignored when `synced_since`/`deleted_since` is set (those feeds always order by their own cursor)."
+            }
+          },
+          {
+            "description": "Sort direction for `order_by`.",
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Direction",
+              "default": "asc",
+              "description": "Sort direction for `order_by`."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_ColumnLineage_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "List column lineage",
+        "tags": ["Column lineage"]
+      }
+    },
+    "/public/beta/{env_id}/columns": {
+      "get": {
+        "description": "Lists asset columns. Full scan by default; pass `synced_since` for the upserts feed or `deleted_since` for the tombstones feed.",
+        "operationId": "list_columns_public_beta__env_id__columns_get",
+        "parameters": [
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Return only columns with these ids.",
+            "in": "query",
+            "name": "ids",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only columns with these ids.",
+              "title": "Ids"
+            }
+          },
+          {
+            "description": "Return only columns belonging to these asset ids.",
+            "in": "query",
+            "name": "asset_ids",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only columns belonging to these asset ids.",
+              "title": "Asset Ids"
+            }
+          },
+          {
+            "description": "Return only columns with these data types.",
+            "in": "query",
+            "name": "data_types",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only columns with these data types.",
+              "title": "Data Types"
+            }
+          },
+          {
+            "description": "Upserts feed: columns whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+            "in": "query",
+            "name": "synced_since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Upserts feed: columns whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+              "title": "Synced Since"
+            }
+          },
+          {
+            "description": "Tombstones feed: columns whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+            "in": "query",
+            "name": "deleted_since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Tombstones feed: columns whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+              "title": "Deleted Since"
+            }
+          },
+          {
+            "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+              "title": "Cursor"
+            }
+          },
+          {
+            "description": "Maximum items to return per page (1-2000).",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "description": "Maximum items to return per page (1-2000).",
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Sort field for a full scan. Ignored when `synced_since`/`deleted_since` is set (those feeds always order by their own cursor).",
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/OrderBy",
+              "default": "id",
+              "description": "Sort field for a full scan. Ignored when `synced_since`/`deleted_since` is set (those feeds always order by their own cursor)."
+            }
+          },
+          {
+            "description": "Sort direction for `order_by`.",
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Direction",
+              "default": "asc",
+              "description": "Sort direction for `order_by`."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_Column_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "List columns",
+        "tags": ["Columns"]
+      }
+    },
+    "/public/beta/{env_id}/columns/{column_id}": {
+      "get": {
+        "description": "Fetches a single column by id. Returns 404 if it doesn't exist in this environment.",
+        "operationId": "get_column_public_beta__env_id__columns__column_id__get",
+        "parameters": [
+          {
+            "description": "Column identifier.",
+            "in": "path",
+            "name": "column_id",
+            "required": true,
+            "schema": {
+              "description": "Column identifier.",
+              "title": "Column Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Column"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "Get a column",
+        "tags": ["Columns"]
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://prod.api.elementary-data.com"
+    }
+  ],
+  "tags": [
+    {
+      "description": "Discover accessible environments.",
+      "name": "Environments"
+    },
+    {
+      "description": "Lineage assets \u2014 tables, views, BI assets.",
+      "name": "Assets"
+    },
+    {
+      "description": "Columns of assets.",
+      "name": "Columns"
+    },
+    {
+      "description": "Asset-to-asset lineage edges.",
+      "name": "Asset lineage"
+    },
+    {
+      "description": "Column-level lineage edges.",
+      "name": "Column lineage"
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+---
+title: 'Errors'
+description: 'The error envelope, error codes, and how to handle them.'
+---
+
+Every failing request returns a standard HTTP status code and a JSON body with a
+single `error` object:
+
+```json
+{
+  "error": {
+    "code": "not_found",
+    "message": "Asset 'model.shop.orders' not found."
+  }
+}
+```
+
+| Field     | Description                                                              |
+| --------- | ------------------------------------------------------------------------ |
+| `code`    | Stable, machine-readable identifier. Branch on this, never on `message`. |
+| `message` | Human-readable explanation, intended for logs and debugging.             |
+
+`message` wording may change at any time; `code` values are part of the API
+contract and only change with a new API version. Treat an unrecognized `code` as
+a generic failure of its HTTP status class rather than failing hard.
+
+## Error codes
+
+| Code                | Status       | When it happens                                                                                                               |
+| ------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `invalid_request`   | `400`, `422` | A parameter is missing, malformed, out of range (e.g. `limit` above 2000), or two mutually exclusive filters were combined.   |
+| `invalid_cursor`    | `400`        | The `cursor` is not a cursor this API issued, or it is reused with different query parameters than the ones that produced it. |
+| `unauthenticated`   | `401`        | The `Authorization` header is missing, malformed, or the token is invalid or revoked.                                         |
+| `permission_denied` | `403`        | The token is valid but not allowed to read the requested environment or object.                                              |
+| `not_found`         | `404`        | The environment or object id doesn't exist — or exists but isn't visible to this token.                                       |
+| `rate_limited`      | `429`        | The account exceeded its request limit. See [Rate limits](/api/rate-limits).                                                  |
+| `internal_error`    | `5xx`        | Something failed on our side. The request was not necessarily rejected — retry it.                                            |
+
+<Note>
+  `404` is also returned instead of `403` for objects a token can't see, so that
+  the API doesn't reveal whether an id exists. A `404` on an id you expect to
+  exist usually means the token's permissions don't cover it.
+</Note>
+
+## Handling errors
+
+- **`400` / `422`** — the request is wrong; fix it and don't retry as-is. On
+  `invalid_cursor`, drop the cursor and restart the iteration from the first
+  page with the same filters.
+- **`401` / `403`** — check the token and its permissions; retrying won't help.
+- **`429`** — back off for at least the `Retry-After` seconds returned with the
+  response before retrying.
+- **`5xx`** — retry with exponential backoff and jitter. Feed requests are
+  idempotent, so replaying a page is safe.
+
+```python
+response = requests.get(url, headers=headers, params=params)
+
+if response.status_code >= 400:
+    error = response.json()["error"]
+    if error["code"] == "invalid_cursor":
+        params.pop("cursor", None)  # restart the iteration
+    elif error["code"] == "rate_limited":
+        time.sleep(int(response.headers.get("Retry-After", 5)))
+    else:
+        raise RuntimeError(f"{error['code']}: {error['message']}")
+```
