@@ -20,7 +20,7 @@ environment. Use it to sync your data catalog and lineage into your own systems
 ## Base URL
 
 ```
-https://app.elementary-data.com/api/public/beta
+https://prod.api.elementary-data.com/public/beta
 ```
 
 ## Quickstart
@@ -35,7 +35,7 @@ See [Authentication](/api/authentication).
 
 ```bash
 curl -H "Authorization: Bearer $ELEMENTARY_TOKEN" \
-  "https://app.elementary-data.com/api/public/beta/environments"
+  "https://prod.api.elementary-data.com/public/beta/environments"
 ```
 
 Each returned `id` is an `env_id` you use in every other endpoint.
@@ -45,7 +45,7 @@ Each returned `id` is an `env_id` you use in every other endpoint.
 <Step title="List assets">
 ```bash
 curl -H "Authorization: Bearer $ELEMENTARY_TOKEN" \
-  "https://app.elementary-data.com/api/public/beta/$ENV_ID/assets?limit=500"
+  "https://prod.api.elementary-data.com/public/beta/$ENV_ID/assets?limit=500"
 ```
 Follow `next_cursor` until `has_more` is `false` — see [Pagination](/api/pagination).
 </Step>
