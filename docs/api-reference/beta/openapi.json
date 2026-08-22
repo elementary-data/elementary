@@ -1080,7 +1080,7 @@
           },
           "source_type": {
             "description": "Extensible enum. Integration that synced this test. New values may be added over time.",
-            "examples": ["dbt", "elementary"],
+            "examples": ["dbt", "elementary_cloud", "python_sdk"],
             "title": "Source Type",
             "type": "string"
           },
@@ -1112,7 +1112,8 @@
               "dbt_test",
               "anomaly_detection",
               "schema_change",
-              "freshness"
+              "source_freshness",
+              "elementary_cloud"
             ],
             "title": "Test Type",
             "type": "string"
@@ -1210,8 +1211,9 @@
               "completeness",
               "uniqueness",
               "freshness",
-              "volume",
-              "validity"
+              "validity",
+              "accuracy",
+              "consistency"
             ],
             "title": "Quality Dimension"
           },
@@ -1281,12 +1283,6 @@
         ],
         "title": "TestExecution",
         "type": "object"
-      },
-      "TestExecutionStatus": {
-        "description": "Statuses a test execution can report.\n\nSerialized exactly as stored (uppercase). New values may be added over\ntime \u2014 treat an unrecognized status as an error state and do not hard-fail.",
-        "enum": ["PASS", "WARN", "FAIL", "ERROR", "SKIPPED", "NO_DATA"],
-        "title": "TestExecutionStatus",
-        "type": "string"
       }
     },
     "securitySchemes": {
@@ -3795,7 +3791,7 @@
             }
           },
           {
-            "description": "Return only executions from these source types (e.g. `dbt`, `elementary`).",
+            "description": "Return only executions from these source types (e.g. `dbt`, `elementary_cloud`).",
             "in": "query",
             "name": "source_types",
             "required": false,
@@ -3812,12 +3808,12 @@
                   "type": "null"
                 }
               ],
-              "description": "Return only executions from these source types (e.g. `dbt`, `elementary`).",
+              "description": "Return only executions from these source types (e.g. `dbt`, `elementary_cloud`).",
               "title": "Source Types"
             }
           },
           {
-            "description": "Return only executions with these statuses.",
+            "description": "Return only executions with these statuses, as stored (e.g. `PASS`, `WARN`, `FAIL`, `ERROR`, `SKIPPED`, `NO_DATA`).",
             "in": "query",
             "name": "statuses",
             "required": false,
@@ -3825,7 +3821,7 @@
               "anyOf": [
                 {
                   "items": {
-                    "$ref": "#/components/schemas/TestExecutionStatus"
+                    "type": "string"
                   },
                   "maxItems": 1000,
                   "type": "array"
@@ -3834,7 +3830,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Return only executions with these statuses.",
+              "description": "Return only executions with these statuses, as stored (e.g. `PASS`, `WARN`, `FAIL`, `ERROR`, `SKIPPED`, `NO_DATA`).",
               "title": "Statuses"
             }
           },
@@ -4165,7 +4161,7 @@
     },
     "/public/beta/{env_id}/tests": {
       "get": {
-        "description": "Lists test definitions. Disabled tests are omitted unless `disabled=true` is passed. Full scan by default; pass `synced_since` for the upserts feed or `deleted_since` for the tombstones feed (mutually exclusive). A test's `synced_at` changes when its definition changes \u2014 new executions do not bump it.",
+        "description": "Lists test definitions. On a full scan disabled tests are omitted unless `disabled=true` is passed; the `synced_since` and `deleted_since` feeds always include them (with `disabled: true`) so a sync can observe a test being disabled. Full scan by default; pass `synced_since` for the upserts feed or `deleted_since` for the tombstones feed (mutually exclusive). A test's `synced_at` changes when its definition changes \u2014 new executions do not bump it.",
         "operationId": "list_tests_public_beta__env_id__tests_get",
         "parameters": [
           {
@@ -4268,7 +4264,7 @@
             }
           },
           {
-            "description": "Return only tests from these source types (e.g. `dbt`, `elementary`).",
+            "description": "Return only tests from these source types (e.g. `dbt`, `elementary_cloud`).",
             "in": "query",
             "name": "source_types",
             "required": false,
@@ -4285,7 +4281,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Return only tests from these source types (e.g. `dbt`, `elementary`).",
+              "description": "Return only tests from these source types (e.g. `dbt`, `elementary_cloud`).",
               "title": "Source Types"
             }
           },
@@ -4724,7 +4720,7 @@
             }
           },
           {
-            "description": "Return only executions with these statuses.",
+            "description": "Return only executions with these statuses, as stored (e.g. `PASS`, `WARN`, `FAIL`, `ERROR`, `SKIPPED`, `NO_DATA`).",
             "in": "query",
             "name": "statuses",
             "required": false,
@@ -4732,7 +4728,7 @@
               "anyOf": [
                 {
                   "items": {
-                    "$ref": "#/components/schemas/TestExecutionStatus"
+                    "type": "string"
                   },
                   "maxItems": 1000,
                   "type": "array"
@@ -4741,7 +4737,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Return only executions with these statuses.",
+              "description": "Return only executions with these statuses, as stored (e.g. `PASS`, `WARN`, `FAIL`, `ERROR`, `SKIPPED`, `NO_DATA`).",
               "title": "Statuses"
             }
           },
