@@ -413,10 +413,11 @@ jobs:
           fi
           dbt run --target "$WAREHOUSE_TYPE" "${EXTRA_ARGS[@]}" || true
 
-          # Validate run_results.json: only error_model should be non-success
+          # Validate run_results.json: only error_model should fail (statuses like
+          # "skipped" or dbt 2.0's "no-op" for ephemeral models are not failures)
           jq -e '
-            [.results[] | select(.status != "success") | .unique_id]
-            | length == 1 and .[0] == "model.elementary_integration_tests.error_model"
+            [.results[] | select(.status == "error" or .status == "fail") | .unique_id]
+            == ["model.elementary_integration_tests.error_model"]
           ' target/run_results.json > /dev/null
           jq_exit=$?
 
@@ -424,7 +425,7 @@ jobs:
             echo "✅ Validation passed: only error_model failed."
           else
             echo "❌ Validation failed. Unexpected failures:"
-            jq '[.results[] | select(.status != "success") | .unique_id] | join(", ")' target/run_results.json
+            jq '[.results[] | select(.status == "error" or .status == "fail") | .unique_id] | join(", ")' target/run_results.json
           fi
 
           exit $jq_exit
