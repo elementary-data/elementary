@@ -134,6 +134,11 @@ jobs:
           # Fusion doesn't support Dremio anyway.
           sed -i '/+root_path: elementary/d' dbt_project.yml
 
+          # dbt 2.0 can't match an unrendered env_var package path against
+          # package-lock.yml, which breaks package context resolution (e.g.
+          # 'elementary' macros in run-operation), so render it upfront.
+          sed -i "s|{{ env_var('ELEMENTARY_DBT_PACKAGE_PATH') }}|$ELEMENTARY_DBT_PACKAGE_PATH|" packages.yml
+
       # ── Seed cache: compute key & restore volumes BEFORE starting services ──
       # This ensures Docker volumes are populated before containers initialize.
       - name: Compute seed cache key
@@ -415,20 +420,17 @@ jobs:
 
           # Validate run_results.json: only error_model should fail (statuses like
           # "skipped" or dbt 2.0's "no-op" for ephemeral models are not failures)
-          jq -e '
+          if jq -e '
             [.results[] | select(.status == "error" or .status == "fail") | .unique_id]
             == ["model.elementary_integration_tests.error_model"]
-          ' target/run_results.json > /dev/null
-          jq_exit=$?
-
-          if [ $jq_exit -eq 0 ]; then
+          ' target/run_results.json > /dev/null; then
             echo "✅ Validation passed: only error_model failed."
           else
+            jq_exit=$?
             echo "❌ Validation failed. Unexpected failures:"
             jq '[.results[] | select(.status == "error" or .status == "fail") | .unique_id] | join(", ")' target/run_results.json
+            exit $jq_exit
           fi
-
-          exit $jq_exit
 
       - name: Test e2e dbt project
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
