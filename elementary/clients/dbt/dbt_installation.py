@@ -31,6 +31,10 @@ def get_dbt_package_version() -> Optional[version.Version]:
 
 
 def is_dbt2_binary_available() -> bool:
+    env_path = os.getenv(DBT_FUSION_PATH_ENV_VAR)
+    if env_path and os.path.exists(os.path.expanduser(env_path)):
+        return True
+
     dbt_package_version = get_dbt_package_version()
     if dbt_package_version is not None and dbt_package_version.major >= 2:
         return True

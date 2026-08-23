@@ -126,6 +126,14 @@ jobs:
             exit 1
           fi
 
+      - name: Remove dbt 1.x-only configs from E2E dbt project
+        if: inputs.dbt-version == 'fusion' || startsWith(inputs.dbt-version, '2.')
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        run: |
+          # +root_path is a dbt-dremio (1.x-only) config that dbt 2.0 rejects;
+          # Fusion doesn't support Dremio anyway.
+          sed -i '/+root_path: elementary/d' dbt_project.yml
+
       # ── Seed cache: compute key & restore volumes BEFORE starting services ──
       # This ensures Docker volumes are populated before containers initialize.
       - name: Compute seed cache key
@@ -355,14 +363,6 @@ jobs:
           dbt deps --project-dir "$DBT_PROJECT_PATH"
           rm -rf "$DBT_PKGS_PATH/elementary"
           ln -vs "$GITHUB_WORKSPACE/dbt-data-reliability" "$DBT_PKGS_PATH/elementary"
-
-      - name: Remove dbt 1.x-only configs from E2E dbt project
-        if: inputs.dbt-version == 'fusion' || startsWith(inputs.dbt-version, '2.')
-        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        run: |
-          # +root_path is a dbt-dremio (1.x-only) config that dbt 2.0 rejects;
-          # Fusion doesn't support Dremio anyway.
-          sed -i '/+root_path: elementary/d' dbt_project.yml
 
       - name: Run deps for E2E dbt project
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}

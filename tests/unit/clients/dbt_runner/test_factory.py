@@ -6,7 +6,10 @@ from packaging import version
 
 from elementary.clients.dbt import factory
 from elementary.clients.dbt.dbt2_runner import Dbt2Runner
-from elementary.clients.dbt.dbt_installation import get_dbt2_binary_path
+from elementary.clients.dbt.dbt_installation import (
+    get_dbt2_binary_path,
+    is_dbt2_binary_available,
+)
 from elementary.clients.dbt.factory import (
     RunnerMethod,
     get_dbt_runner_class,
@@ -113,3 +116,27 @@ def test_dbt2_runner_honors_dbt_fusion_path_env_var(monkeypatch):
     monkeypatch.setenv("DBT_FUSION_PATH", "/custom/path/dbt")
 
     assert get_dbt2_binary_path() == "/custom/path/dbt"
+
+
+@mock.patch("elementary.clients.dbt.dbt_installation.os.path.exists")
+@mock.patch("elementary.clients.dbt.dbt_installation.get_dbt_package_version")
+def test_dbt2_binary_available_when_dbt_fusion_path_env_var_points_to_binary(
+    mock_get_dbt_package_version, mock_exists, monkeypatch
+):
+    monkeypatch.setenv("DBT_FUSION_PATH", "/custom/path/dbt")
+    mock_get_dbt_package_version.return_value = None
+    mock_exists.side_effect = lambda path: path == "/custom/path/dbt"
+
+    assert is_dbt2_binary_available()
+
+
+@mock.patch("elementary.clients.dbt.dbt_installation.os.path.exists")
+@mock.patch("elementary.clients.dbt.dbt_installation.get_dbt_package_version")
+def test_dbt2_binary_not_available_when_nothing_installed(
+    mock_get_dbt_package_version, mock_exists, monkeypatch
+):
+    monkeypatch.delenv("DBT_FUSION_PATH", raising=False)
+    mock_get_dbt_package_version.return_value = None
+    mock_exists.return_value = False
+
+    assert not is_dbt2_binary_available()
