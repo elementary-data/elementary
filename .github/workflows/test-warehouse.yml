@@ -350,6 +350,15 @@ jobs:
 
           echo "SCHEMA_NAME=$SCHEMA_NAME" >> "$GITHUB_ENV"
 
+          # The seeds schema is shared between jobs on the same warehouse, and
+          # the dbt 2.x jobs run in parallel with the dbt 1.x job on the same
+          # warehouses - give each dbt version its own seeds schema to avoid
+          # concurrent-write conflicts (e.g. Delta transaction conflicts).
+          if [ "$DBT_VERSION" = "fusion" ] || [[ "$DBT_VERSION" == 2* ]]; then
+            SAFE_DBT_VERSION=$(echo -n "$DBT_VERSION" | sed 's/[^a-zA-Z0-9]/_/g')
+            echo "TEST_SEEDS_SCHEMA=test_seeds_$SAFE_DBT_VERSION" >> "$GITHUB_ENV"
+          fi
+
           python "${{ github.workspace }}/elementary/tests/profiles/generate_profiles.py" \
             --template "${{ github.workspace }}/elementary/tests/profiles/profiles.yml.j2" \
             --output ~/.dbt/profiles.yml \

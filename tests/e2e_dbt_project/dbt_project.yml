@@ -23,7 +23,10 @@ vars:
   disable_dbt_artifacts_autoupload: true
 
 seeds:
-  +schema: test_seeds
+  # The seeds schema is shared between CI jobs on the same warehouse (the
+  # generate_schema_name macro doesn't prefix it with the target schema), so
+  # jobs that may run concurrently must use a distinct name.
+  +schema: "{{ env_var('TEST_SEEDS_SCHEMA', 'test_seeds') }}"
 
 models:
   elementary_integration_tests:
