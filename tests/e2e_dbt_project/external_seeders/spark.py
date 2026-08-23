@@ -10,10 +10,11 @@ from external_seeders.base import ExternalSeeder
 class SparkExternalSeeder(ExternalSeeder):
     """Load seeds into Spark via PyHive from CSV files mounted in the container."""
 
-    # dbt_project.yml sets ``+schema: test_seeds`` for seeds and the default
-    # ``generate_schema_name`` macro returns that verbatim, so the actual seed
-    # schema is always ``test_seeds`` regardless of the target schema name.
-    SEED_SCHEMA = "test_seeds"
+    # dbt_project.yml sets ``+schema`` for seeds (TEST_SEEDS_SCHEMA env var,
+    # defaulting to ``test_seeds``) and the ``generate_schema_name`` macro
+    # returns that verbatim, so the actual seed schema matches it regardless
+    # of the target schema name.
+    DEFAULT_SEED_SCHEMA = "test_seeds"
 
     @staticmethod
     def _q(name: str) -> str:
@@ -23,7 +24,7 @@ class SparkExternalSeeder(ExternalSeeder):
     def load(self) -> None:
         failures: list[str] = []
         q = self._q
-        seed_schema = self.SEED_SCHEMA
+        seed_schema = os.environ.get("TEST_SEEDS_SCHEMA", self.DEFAULT_SEED_SCHEMA)
         print(
             f"\n=== Loading Spark seeds via external CSV tables "
             f"(schema={seed_schema}) ==="
@@ -39,7 +40,7 @@ class SparkExternalSeeder(ExternalSeeder):
         host = os.environ.get("SPARK_HOST", "127.0.0.1")
         port = int(os.environ.get("SPARK_PORT", "10000"))
 
-        print(f"Connecting to Spark Thrift at {host}:{port}...")
+        print(f"Connecting to Spark Thrift at {host}:{port}...")  # noqa: E231
         conn = None
         cursor = None
         try:
