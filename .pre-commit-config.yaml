@@ -73,9 +73,12 @@ repos:
         name: Verify internal dbt project package lock
         entry: |
           bash -c '
-            dbt_version=$(python -c "from dbt.version import __version__; print(__version__)");
-            required_version="1.8";
-            if [[ $(echo -e "$dbt_version\n$required_version" | sort -V | tail -1) == "$dbt_version" ]]; then
+            dbt_version=$(python -c "from importlib.metadata import version; print(version(\"dbt-core\"))" 2>/dev/null || echo "");
+            if [[ -z "$dbt_version" ]]; then
+              echo "Skipping hook, dbt-core is not installed.";
+            elif [[ "$dbt_version" == 2* ]]; then
+              echo "Skipping hook, dbt-core version is $dbt_version (>= 2.0).";
+            elif [[ $(echo -e "$dbt_version\n1.8" | sort -V | tail -1) == "$dbt_version" ]]; then
               dbt deps --lock --project-dir elementary/monitor/dbt_project && git diff --quiet elementary/monitor/dbt_project/package-lock.yml || (echo "Changes detected in package lock file!" && exit 1);
             else
               echo "Skipping hook, dbt version is $dbt_version (< 1.8).";

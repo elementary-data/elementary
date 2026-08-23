@@ -132,3 +132,36 @@ jobs:
       CI_SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
       CI_SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
       AWS_OIDC_ROLE_ARN: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+
+  # dbt 2.0 (Fusion engine) targets, limited to Fusion-supported warehouses.
+  # 'fusion' installs the standalone binary from the 'dbt' PyPI package;
+  # a 2.x version installs the 'dbt-core' Python package.
+  # dbt 2.0 is still a prerelease; these jobs are separate from 'test' so they
+  # can be treated as informational (not required checks) while it stabilizes.
+  test-dbt2:
+    needs: [check-fork-status, approve-fork]
+    permissions:
+      contents: read
+      id-token: write
+    if: |
+      ! cancelled() &&
+      needs.check-fork-status.result == 'success' &&
+      needs.check-fork-status.outputs.should_skip != 'true' &&
+      (needs.check-fork-status.outputs.is_fork != 'true' || needs.approve-fork.result == 'success')
+    strategy:
+      fail-fast: false
+      matrix:
+        dbt-version: [fusion, 2.0.0b2]
+        warehouse-type: [snowflake, bigquery, databricks_catalog]
+    uses: ./.github/workflows/test-warehouse.yml
+    with:
+      warehouse-type: ${{ matrix.warehouse-type }}
+      elementary-ref: ${{ inputs.elementary-ref || ((github.event_name == 'pull_request_target' || github.event_name == 'pull_request') && github.event.pull_request.head.sha) || '' }}
+      dbt-data-reliability-ref: ${{ inputs.dbt-data-reliability-ref }}
+      dbt-version: ${{ matrix.dbt-version }}
+      generate-data: ${{ inputs.generate-data || false }}
+    secrets:
+      CI_WAREHOUSE_SECRETS: ${{ secrets.CI_WAREHOUSE_SECRETS }}
+      CI_SLACK_WEBHOOK: ${{ secrets.CI_SLACK_WEBHOOK }}
+      CI_SLACK_TOKEN: ${{ secrets.CI_SLACK_TOKEN }}
+      AWS_OIDC_ROLE_ARN: ${{ secrets.AWS_OIDC_ROLE_ARN }}

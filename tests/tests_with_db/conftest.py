@@ -4,9 +4,9 @@ from tempfile import mkdtemp
 
 import env
 import pytest
-from dbt.version import __version__ as dbt_version
 from packaging import version
 
+from elementary.clients.dbt.dbt_installation import get_dbt_core_version
 from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
 
 DBT_PROJECT_PATH = Path(__file__).parent / "dbt_project"
@@ -60,7 +60,8 @@ def requires_dbt_version(request):
         required_version = request.node.get_closest_marker("requires_dbt_version").args[
             0
         ]
-        if version.parse(dbt_version) < version.parse(required_version):
+        dbt_version = get_dbt_core_version()
+        if dbt_version is not None and dbt_version < version.parse(required_version):
             pytest.skip(
                 "Test requires dbt version {} or above, but {} is installed.".format(
                     required_version, dbt_version

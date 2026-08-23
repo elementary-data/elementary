@@ -32,7 +32,7 @@ on:
       dbt-version:
         type: string
         required: false
-        description: dbt's version to test with
+        description: dbt's version to test with ('fusion' for the dbt Fusion binary)
       generate-data:
         type: boolean
         required: false
@@ -121,7 +121,7 @@ jobs:
               ;;
           esac
 
-          if [ -n "$DBT_VERSION" ] && ! [[ "$DBT_VERSION" =~ ^[0-9]+(\.[0-9]+){1,2}([a-zA-Z0-9._+-]+)?$ ]]; then
+          if [ -n "$DBT_VERSION" ] && [ "$DBT_VERSION" != "fusion" ] && ! [[ "$DBT_VERSION" =~ ^[0-9]+(\.[0-9]+){1,2}([a-zA-Z0-9._+-]+)?$ ]]; then
             echo "Unsupported dbt version: $DBT_VERSION" >&2
             exit 1
           fi
@@ -214,7 +214,8 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.10"
+          # dbt 2.x (the Fusion engine) requires Python >= 3.11.
+          python-version: ${{ (inputs.dbt-version == 'fusion' || startsWith(inputs.dbt-version, '2.')) && '3.11' || '3.10' }}
 
       - name: Install Spark requirements
         if: inputs.warehouse-type == 'spark'
@@ -231,6 +232,19 @@ jobs:
       - name: Install dbt
         if: inputs.warehouse-type != 'vertica'
         run: |
+          if [ "$DBT_VERSION" = "fusion" ]; then
+            # The Fusion binary is installed after Elementary (see 'Install dbt Fusion')
+            # so that dbt-core, pulled in as a dependency of elementary, can be removed first.
+            echo "Skipping dbt installation for the fusion target"
+            exit 0
+          fi
+
+          if [[ "$DBT_VERSION" == 2* ]]; then
+            # dbt-core 2.x is the Fusion engine with adapters built in.
+            pip install --pre "dbt-core==$DBT_VERSION"
+            exit 0
+          fi
+
           DBT_CORE_SPEC="dbt-core"
           DBT_ADAPTER="$WAREHOUSE_TYPE"
           DBT_ADAPTER_EXTRA=""
@@ -270,7 +284,9 @@ jobs:
           # For Vertica, dbt-vertica is already installed with --no-deps above;
           # using ".[vertica]" would re-resolve dbt-vertica's deps and downgrade
           # dbt-core to ~=1.8.  Install elementary without the adapter extra.
-          if [ "$WAREHOUSE_TYPE" = "vertica" ]; then
+          # For dbt 2.x / fusion, adapters are built into the engine, and the 1.x
+          # adapter extras would downgrade dbt-core.
+          if [ "$WAREHOUSE_TYPE" = "vertica" ] || [ "$DBT_VERSION" = "fusion" ] || [[ "$DBT_VERSION" == 2* ]]; then
             pip install "."
           else
             EXTRA="$WAREHOUSE_TYPE"
@@ -279,6 +295,18 @@ jobs:
             fi
             pip install ".[$EXTRA]"
           fi
+
+      - name: Install dbt Fusion
+        if: inputs.dbt-version == 'fusion'
+        run: |
+          # Remove dbt-core (pulled in as a dependency of elementary) so the
+          # environment matches a binary-only Fusion installation, then install
+          # the Fusion binary from the 'dbt' package.
+          # Note: without --pre, 'pip install dbt' resolves to the unrelated legacy
+          # dbt Cloud CLI package, hence the explicit >=2 prerelease spec.
+          pip uninstall -y dbt-core
+          pip install --pre "dbt>=2.0.0rc1"
+          dbt --version
 
       - name: Write dbt profiles
         env:
@@ -327,6 +355,14 @@ jobs:
           dbt deps --project-dir "$DBT_PROJECT_PATH"
           rm -rf "$DBT_PKGS_PATH/elementary"
           ln -vs "$GITHUB_WORKSPACE/dbt-data-reliability" "$DBT_PKGS_PATH/elementary"
+
+      - name: Remove dbt 1.x-only configs from E2E dbt project
+        if: inputs.dbt-version == 'fusion' || startsWith(inputs.dbt-version, '2.')
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        run: |
+          # +root_path is a dbt-dremio (1.x-only) config that dbt 2.0 rejects;
+          # Fusion doesn't support Dremio anyway.
+          sed -i '/+root_path: elementary/d' dbt_project.yml
 
       - name: Run deps for E2E dbt project
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
