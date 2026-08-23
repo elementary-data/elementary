@@ -14,10 +14,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "code",
-          "message"
-        ],
+        "required": ["code", "message"],
         "title": "ApiError",
         "type": "object"
       },
@@ -28,9 +25,7 @@
             "description": "Structured details about the error."
           }
         },
-        "required": [
-          "error"
-        ],
+        "required": ["error"],
         "title": "ApiErrorResponse",
         "type": "object"
       },
@@ -81,13 +76,7 @@
           },
           "kind": {
             "description": "Extensible enum. High-level asset category; picks the typed endpoint that exposes this asset's extra fields (`/assets/tables` for `table`, `/assets/bi` for `bi`). New values may be added over time \u2014 treat any unrecognized value as `other` and do not hard-fail.",
-            "examples": [
-              "table",
-              "bi",
-              "semantic",
-              "etl",
-              "other"
-            ],
+            "examples": ["table", "bi", "semantic", "etl", "other"],
             "title": "Kind",
             "type": "string"
           },
@@ -131,13 +120,7 @@
           },
           "source_type": {
             "description": "Extensible enum. Integration that synced this asset. New values may be added over time.",
-            "examples": [
-              "dbt",
-              "looker",
-              "sigma",
-              "fivetran",
-              "tableau"
-            ],
+            "examples": ["dbt", "looker", "sigma", "fivetran", "tableau"],
             "title": "Source Type",
             "type": "string"
           },
@@ -177,12 +160,7 @@
             "title": "Updated At"
           }
         },
-        "required": [
-          "id",
-          "name",
-          "kind",
-          "source_type"
-        ],
+        "required": ["id", "name", "kind", "source_type"],
         "title": "Asset",
         "type": "object"
       },
@@ -199,10 +177,7 @@
             "type": "string"
           }
         },
-        "required": [
-          "upstream_asset_id",
-          "downstream_asset_id"
-        ],
+        "required": ["upstream_asset_id", "downstream_asset_id"],
         "title": "AssetLineage",
         "type": "object"
       },
@@ -210,23 +185,13 @@
         "properties": {
           "bi_platform": {
             "description": "Extensible enum. BI platform name. New values may be added over time.",
-            "examples": [
-              "looker",
-              "sigma",
-              "tableau",
-              "powerbi"
-            ],
+            "examples": ["looker", "sigma", "tableau", "powerbi"],
             "title": "Bi Platform",
             "type": "string"
           },
           "bi_type": {
             "description": "Extensible enum. BI-specific asset type. New values may be added over time.",
-            "examples": [
-              "dashboard",
-              "explore",
-              "look",
-              "report"
-            ],
+            "examples": ["dashboard", "explore", "look", "report"],
             "title": "Bi Type",
             "type": "string"
           },
@@ -275,13 +240,7 @@
           },
           "kind": {
             "description": "Extensible enum. High-level asset category; picks the typed endpoint that exposes this asset's extra fields (`/assets/tables` for `table`, `/assets/bi` for `bi`). New values may be added over time \u2014 treat any unrecognized value as `other` and do not hard-fail.",
-            "examples": [
-              "table",
-              "bi",
-              "semantic",
-              "etl",
-              "other"
-            ],
+            "examples": ["table", "bi", "semantic", "etl", "other"],
             "title": "Kind",
             "type": "string"
           },
@@ -325,13 +284,7 @@
           },
           "source_type": {
             "description": "Extensible enum. Integration that synced this asset. New values may be added over time.",
-            "examples": [
-              "dbt",
-              "looker",
-              "sigma",
-              "fivetran",
-              "tableau"
-            ],
+            "examples": ["dbt", "looker", "sigma", "fivetran", "tableau"],
             "title": "Source Type",
             "type": "string"
           },
@@ -450,11 +403,7 @@
             "title": "Synced At"
           }
         },
-        "required": [
-          "id",
-          "name",
-          "asset_id"
-        ],
+        "required": ["id", "name", "asset_id"],
         "title": "Column",
         "type": "object"
       },
@@ -471,18 +420,12 @@
             "type": "string"
           }
         },
-        "required": [
-          "upstream_column_id",
-          "downstream_column_id"
-        ],
+        "required": ["upstream_column_id", "downstream_column_id"],
         "title": "ColumnLineage",
         "type": "object"
       },
       "Direction": {
-        "enum": [
-          "asc",
-          "desc"
-        ],
+        "enum": ["asc", "desc"],
         "title": "Direction",
         "type": "string"
       },
@@ -515,11 +458,7 @@
               }
             ],
             "description": "Extensible enum. Status of the environment's most recent sync. New values may be added over time.",
-            "examples": [
-              "success",
-              "running",
-              "error"
-            ],
+            "examples": ["success", "running", "error"],
             "title": "Last Sync Status"
           },
           "last_synced_at": {
@@ -560,26 +499,17 @@
             "title": "Warehouse Type"
           }
         },
-        "required": [
-          "id",
-          "name"
-        ],
+        "required": ["id", "name"],
         "title": "Environment",
         "type": "object"
       },
       "HistoryOrderBy": {
-        "enum": [
-          "start_time",
-          "id"
-        ],
+        "enum": ["start_time", "id"],
         "title": "HistoryOrderBy",
         "type": "string"
       },
       "OrderBy": {
-        "enum": [
-          "id",
-          "synced_at"
-        ],
+        "enum": ["id", "synced_at"],
         "title": "OrderBy",
         "type": "string"
       },
@@ -612,9 +542,7 @@
             "title": "Next Cursor"
           }
         },
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "title": "PaginatedResponse[AssetLineage]",
         "type": "object"
       },
@@ -647,9 +575,7 @@
             "title": "Next Cursor"
           }
         },
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "title": "PaginatedResponse[Asset]",
         "type": "object"
       },
@@ -682,9 +608,7 @@
             "title": "Next Cursor"
           }
         },
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "title": "PaginatedResponse[BiAsset]",
         "type": "object"
       },
@@ -717,9 +641,7 @@
             "title": "Next Cursor"
           }
         },
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "title": "PaginatedResponse[ColumnLineage]",
         "type": "object"
       },
@@ -752,9 +674,7 @@
             "title": "Next Cursor"
           }
         },
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "title": "PaginatedResponse[Column]",
         "type": "object"
       },
@@ -787,9 +707,7 @@
             "title": "Next Cursor"
           }
         },
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "title": "PaginatedResponse[TableAsset]",
         "type": "object"
       },
@@ -822,9 +740,7 @@
             "title": "Next Cursor"
           }
         },
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "title": "PaginatedResponse[TestExecution]",
         "type": "object"
       },
@@ -857,9 +773,7 @@
             "title": "Next Cursor"
           }
         },
-        "required": [
-          "items"
-        ],
+        "required": ["items"],
         "title": "PaginatedResponse[Test]",
         "type": "object"
       },
@@ -927,24 +841,13 @@
           },
           "kind": {
             "description": "Extensible enum. High-level asset category; picks the typed endpoint that exposes this asset's extra fields (`/assets/tables` for `table`, `/assets/bi` for `bi`). New values may be added over time \u2014 treat any unrecognized value as `other` and do not hard-fail.",
-            "examples": [
-              "table",
-              "bi",
-              "semantic",
-              "etl",
-              "other"
-            ],
+            "examples": ["table", "bi", "semantic", "etl", "other"],
             "title": "Kind",
             "type": "string"
           },
           "materialization": {
             "description": "Extensible enum. Materialization strategy. New values may be added over time.",
-            "examples": [
-              "table",
-              "view",
-              "incremental",
-              "ephemeral"
-            ],
+            "examples": ["table", "view", "incremental", "ephemeral"],
             "title": "Materialization",
             "type": "string"
           },
@@ -993,13 +896,7 @@
           },
           "source_type": {
             "description": "Extensible enum. Integration that synced this asset. New values may be added over time.",
-            "examples": [
-              "dbt",
-              "looker",
-              "sigma",
-              "fivetran",
-              "tableau"
-            ],
+            "examples": ["dbt", "looker", "sigma", "fivetran", "tableau"],
             "title": "Source Type",
             "type": "string"
           },
@@ -1177,20 +1074,13 @@
           },
           "severity": {
             "description": "Configured severity of the test.",
-            "examples": [
-              "ERROR",
-              "WARNING"
-            ],
+            "examples": ["ERROR", "WARNING"],
             "title": "Severity",
             "type": "string"
           },
           "source_type": {
             "description": "Extensible enum. Integration that synced this test. New values may be added over time.",
-            "examples": [
-              "dbt",
-              "elementary_cloud",
-              "python_sdk"
-            ],
+            "examples": ["dbt", "elementary_cloud", "python_sdk"],
             "title": "Source Type",
             "type": "string"
           },
@@ -1337,9 +1227,7 @@
               }
             ],
             "description": "Extensible enum. Why the execution produced its status, when Elementary could determine it.",
-            "examples": [
-              "PERMISSIONS_ERROR"
-            ],
+            "examples": ["PERMISSIONS_ERROR"],
             "title": "Result Reason"
           },
           "start_time": {
@@ -1350,14 +1238,7 @@
           },
           "status": {
             "description": "Extensible enum. Result of the execution. New values may be added over time.",
-            "examples": [
-              "PASS",
-              "WARN",
-              "FAIL",
-              "ERROR",
-              "SKIPPED",
-              "NO_DATA"
-            ],
+            "examples": ["PASS", "WARN", "FAIL", "ERROR", "SKIPPED", "NO_DATA"],
             "title": "Status",
             "type": "string"
           },
@@ -1536,9 +1417,7 @@
           }
         },
         "summary": "List environments",
-        "tags": [
-          "Environments"
-        ]
+        "tags": ["Environments"]
       }
     },
     "/public/beta/{env_id}/asset-lineage": {
@@ -1721,9 +1600,7 @@
           }
         },
         "summary": "List asset lineage edges",
-        "tags": [
-          "Asset lineage"
-        ]
+        "tags": ["Asset lineage"]
       }
     },
     "/public/beta/{env_id}/assets": {
@@ -2010,9 +1887,7 @@
           }
         },
         "summary": "List assets",
-        "tags": [
-          "Assets"
-        ]
+        "tags": ["Assets"]
       }
     },
     "/public/beta/{env_id}/assets/bi": {
@@ -2321,9 +2196,7 @@
           }
         },
         "summary": "List BI assets",
-        "tags": [
-          "Assets"
-        ]
+        "tags": ["Assets"]
       }
     },
     "/public/beta/{env_id}/assets/bi/{asset_id}": {
@@ -2463,9 +2336,7 @@
           }
         },
         "summary": "Get a BI asset",
-        "tags": [
-          "Assets"
-        ]
+        "tags": ["Assets"]
       }
     },
     "/public/beta/{env_id}/assets/tables": {
@@ -2818,9 +2689,7 @@
           }
         },
         "summary": "List table assets",
-        "tags": [
-          "Assets"
-        ]
+        "tags": ["Assets"]
       }
     },
     "/public/beta/{env_id}/assets/tables/{asset_id}": {
@@ -2960,9 +2829,7 @@
           }
         },
         "summary": "Get a table asset",
-        "tags": [
-          "Assets"
-        ]
+        "tags": ["Assets"]
       }
     },
     "/public/beta/{env_id}/assets/{asset_id}": {
@@ -3102,9 +2969,7 @@
           }
         },
         "summary": "Get an asset",
-        "tags": [
-          "Assets"
-        ]
+        "tags": ["Assets"]
       }
     },
     "/public/beta/{env_id}/column-lineage": {
@@ -3369,9 +3234,7 @@
           }
         },
         "summary": "List column lineage",
-        "tags": [
-          "Column lineage"
-        ]
+        "tags": ["Column lineage"]
       }
     },
     "/public/beta/{env_id}/columns": {
@@ -3658,9 +3521,7 @@
           }
         },
         "summary": "List columns",
-        "tags": [
-          "Columns"
-        ]
+        "tags": ["Columns"]
       }
     },
     "/public/beta/{env_id}/columns/{column_id}": {
@@ -3800,9 +3661,7 @@
           }
         },
         "summary": "Get a column",
-        "tags": [
-          "Columns"
-        ]
+        "tags": ["Columns"]
       }
     },
     "/public/beta/{env_id}/latest-test-executions": {
@@ -4157,9 +4016,7 @@
           }
         },
         "summary": "List latest test executions",
-        "tags": [
-          "Latest test executions"
-        ]
+        "tags": ["Latest test executions"]
       }
     },
     "/public/beta/{env_id}/latest-test-executions/{sub_test_unique_id}": {
@@ -4299,9 +4156,7 @@
           }
         },
         "summary": "Get a latest test execution",
-        "tags": [
-          "Latest test executions"
-        ]
+        "tags": ["Latest test executions"]
       }
     },
     "/public/beta/{env_id}/tests": {
@@ -4672,9 +4527,7 @@
           }
         },
         "summary": "List tests",
-        "tags": [
-          "Tests"
-        ]
+        "tags": ["Tests"]
       }
     },
     "/public/beta/{env_id}/tests/{test_id}": {
@@ -4814,9 +4667,7 @@
           }
         },
         "summary": "Get a test",
-        "tags": [
-          "Tests"
-        ]
+        "tags": ["Tests"]
       }
     },
     "/public/beta/{env_id}/tests/{test_id}/executions": {
@@ -5092,9 +4943,7 @@
           }
         },
         "summary": "List test executions",
-        "tags": [
-          "Test executions"
-        ]
+        "tags": ["Test executions"]
       }
     },
     "/public/beta/{env_id}/tests/{test_id}/executions/{execution_id}": {
@@ -5245,9 +5094,7 @@
           }
         },
         "summary": "Get a test execution",
-        "tags": [
-          "Test executions"
-        ]
+        "tags": ["Test executions"]
       }
     }
   },
