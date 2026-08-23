@@ -35,5 +35,8 @@ models:
     # dbt-dremio config; rejected by dbt 2.0 (Fusion), which doesn't support
     # Dremio - the CI strips it for dbt 2.x targets.
     +root_path: elementary
+# This flag and the 'arguments:' syntax in the schema files require
+# dbt-core >= 1.10.5 (or dbt 2.x), so that's the minimum for running the E2E
+# project (the elementary package itself still supports dbt-core >= 1.8).
 flags:
   require_generic_test_arguments_property: true
