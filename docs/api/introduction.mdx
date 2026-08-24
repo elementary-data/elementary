@@ -62,13 +62,14 @@ Follow `next_cursor` until `has_more` is `false` — see [Pagination](/api/pagin
 | Columns                 | `GET /{env_id}/columns`                           | Columns of assets                               |
 | Asset lineage           | `GET /{env_id}/asset-lineage`                     | Asset-to-asset edges                            |
 | Column lineage          | `GET /{env_id}/column-lineage`                    | Column-to-column edges                          |
-| Tests                   | `GET /{env_id}/tests`                             | Test definitions. **Coming soon.**              |
-| Latest test executions  | `GET /{env_id}/latest-test-executions`            | Current run per sub-test. **Coming soon.**      |
-| Test execution history  | `GET /{env_id}/tests/{test_id}/executions`        | History for one test. **Coming soon.**          |
+| Tests                   | `GET /{env_id}/tests`                             | Test definitions                                |
+| Latest test executions  | `GET /{env_id}/latest-test-executions`            | Current run per sub-test                        |
+| Test execution history  | `GET /{env_id}/tests/{test_id}/executions`        | History for one test                            |
 
-Every list endpoint supports a full scan and keyset pagination; assets and
-columns also expose incremental feeds — see [Incremental sync](/api/incremental-sync).
-Tests will use the same incremental pair when they ship.
+Every list endpoint supports a full scan and keyset pagination. Assets,
+columns, and tests also expose incremental feeds — see
+[Incremental sync](/api/incremental-sync). Latest test executions are a full
+snapshot; per-test history is a time window.
 
 ## Assets: one base endpoint, plus typed endpoints
 
@@ -96,10 +97,9 @@ A typical flow: page `/assets` to build the graph, then enrich the kinds you
 care about via the typed endpoints — use the `kind` field to decide which one.
 
 The full endpoint and schema reference is generated from the API and lives under
-**API Reference**. Test endpoints are documented there as **coming soon** until
-they ship.
+**API Reference**.
 
-## Tests (coming soon)
+## Tests
 
 Three datasets, one table each — definitions, current status, and per-test
 history are not merged into a single response:
@@ -108,7 +108,7 @@ history are not merged into a single response:
   (name, type, asset, severity, config, owners/tags). Incremental
   `synced_since` / `deleted_since`. A new run does not bump `Test.synced_at`.
 - **[`GET /latest-test-executions`](/api/reference/latest-test-executions/list-latest-test-executions)** —
-  the current run per sub-test. Full snapshot; no incremental feed in this cut.
+  the current run per sub-test. Full snapshot; no incremental feed.
   Join to tests on `test_id`.
 - **[`GET /tests/{test_id}/executions`](/api/reference/test-executions/list-test-executions)** —
   history for one test (default last 30 days). Not an environment-wide dump.

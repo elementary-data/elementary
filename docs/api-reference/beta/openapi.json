@@ -503,6 +503,11 @@
         "title": "Environment",
         "type": "object"
       },
+      "HistoryOrderBy": {
+        "enum": ["start_time", "id"],
+        "title": "HistoryOrderBy",
+        "type": "string"
+      },
       "OrderBy": {
         "enum": ["id", "synced_at"],
         "title": "OrderBy",
@@ -706,6 +711,72 @@
         "title": "PaginatedResponse[TableAsset]",
         "type": "object"
       },
+      "PaginatedResponse_TestExecution_": {
+        "properties": {
+          "has_more": {
+            "default": false,
+            "description": "The only signal to continue pagination; a short page may still have more items because permission filtering can trim rows.",
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "description": "Objects returned in the current page.",
+            "items": {
+              "$ref": "#/components/schemas/TestExecution"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Opaque cursor for the next page, valid only with identical query parameters.",
+            "title": "Next Cursor"
+          }
+        },
+        "required": ["items"],
+        "title": "PaginatedResponse[TestExecution]",
+        "type": "object"
+      },
+      "PaginatedResponse_Test_": {
+        "properties": {
+          "has_more": {
+            "default": false,
+            "description": "The only signal to continue pagination; a short page may still have more items because permission filtering can trim rows.",
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "description": "Objects returned in the current page.",
+            "items": {
+              "$ref": "#/components/schemas/Test"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Opaque cursor for the next page, valid only with identical query parameters.",
+            "title": "Next Cursor"
+          }
+        },
+        "required": ["items"],
+        "title": "PaginatedResponse[Test]",
+        "type": "object"
+      },
       "TableAsset": {
         "properties": {
           "created_at": {
@@ -883,6 +954,335 @@
         ],
         "title": "TableAsset",
         "type": "object"
+      },
+      "Test": {
+        "properties": {
+          "asset_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "ID of the asset this test runs on, when known.",
+            "title": "Asset Id"
+          },
+          "column_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Column the test runs on, for column-level tests.",
+            "title": "Column Name"
+          },
+          "config": {
+            "additionalProperties": true,
+            "default": {},
+            "description": "Test configuration as defined in the source system.",
+            "title": "Config",
+            "type": "object"
+          },
+          "definition_type": {
+            "description": "Extensible enum. The test's name in the source system \u2014 dbt test name for dbt tests, test type for Elementary tests.",
+            "examples": [
+              "not_null",
+              "unique",
+              "volume_anomalies",
+              "source_freshness"
+            ],
+            "title": "Definition Type",
+            "type": "string"
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Soft-delete timestamp. Present only in the `deleted_since` feed.",
+            "title": "Deleted At"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Description from the source platform.",
+            "title": "Description"
+          },
+          "disabled": {
+            "description": "Whether the test is disabled. A full scan omits disabled tests unless `disabled=true` is passed; the `synced_since` and `deleted_since` feeds always include them, so a sync observes a test being disabled.",
+            "title": "Disabled",
+            "type": "boolean"
+          },
+          "id": {
+            "description": "Unique test identifier.",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "description": "Test name.",
+            "title": "Name",
+            "type": "string"
+          },
+          "owners": {
+            "default": [],
+            "description": "Owners assigned to the test.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Owners",
+            "type": "array"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Logical path of the test in its project tree.",
+            "title": "Path"
+          },
+          "project": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Project the test belongs to, when known.",
+            "title": "Project"
+          },
+          "severity": {
+            "description": "Configured severity of the test.",
+            "examples": ["ERROR", "WARNING"],
+            "title": "Severity",
+            "type": "string"
+          },
+          "source_type": {
+            "description": "Extensible enum. Integration that synced this test. New values may be added over time.",
+            "examples": ["dbt", "elementary_cloud", "python_sdk"],
+            "title": "Source Type",
+            "type": "string"
+          },
+          "synced_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When Elementary last synced this test definition. Bumped by definition changes only \u2014 new executions do not bump it. Use with `synced_since` for incremental reads.",
+            "title": "Synced At"
+          },
+          "tags": {
+            "default": [],
+            "description": "Tags assigned to the test.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "test_type": {
+            "description": "Extensible enum. Elementary's category for the test. New values may be added over time.",
+            "examples": [
+              "dbt_test",
+              "anomaly_detection",
+              "schema_change",
+              "source_freshness",
+              "elementary_cloud"
+            ],
+            "title": "Test Type",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the test definition was last updated in the source platform.",
+            "title": "Updated At"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "test_type",
+          "definition_type",
+          "source_type",
+          "severity",
+          "disabled"
+        ],
+        "title": "Test",
+        "type": "object"
+      },
+      "TestExecution": {
+        "properties": {
+          "column_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Column this execution checked, when applicable.",
+            "title": "Column Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Description of the test at execution time.",
+            "title": "Description"
+          },
+          "duration_seconds": {
+            "description": "How long the execution took.",
+            "title": "Duration Seconds",
+            "type": "number"
+          },
+          "exception": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Error message when the execution errored.",
+            "title": "Exception"
+          },
+          "failure_count": {
+            "description": "Number of failed rows or detected issues.",
+            "title": "Failure Count",
+            "type": "integer"
+          },
+          "id": {
+            "description": "Identifier of this execution.",
+            "title": "Id",
+            "type": "string"
+          },
+          "quality_dimension": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Extensible enum. Data-quality dimension the test covers, when classified.",
+            "examples": [
+              "completeness",
+              "uniqueness",
+              "freshness",
+              "validity",
+              "accuracy",
+              "consistency"
+            ],
+            "title": "Quality Dimension"
+          },
+          "result_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Extensible enum. Why the execution produced its status, when Elementary could determine it.",
+            "examples": ["PERMISSIONS_ERROR"],
+            "title": "Result Reason"
+          },
+          "start_time": {
+            "description": "When the execution started.",
+            "format": "date-time",
+            "title": "Start Time",
+            "type": "string"
+          },
+          "status": {
+            "description": "Extensible enum. Result of the execution. New values may be added over time.",
+            "examples": ["PASS", "WARN", "FAIL", "ERROR", "SKIPPED", "NO_DATA"],
+            "title": "Status",
+            "type": "string"
+          },
+          "sub_test_unique_id": {
+            "description": "Stable identifier of the sub-test (a test can explode into several sub-tests, e.g. one per column). Use it to key latest executions.",
+            "title": "Sub Test Unique Id",
+            "type": "string"
+          },
+          "sub_type": {
+            "description": "Sub-test type within the test (e.g. the anomaly type checked).",
+            "title": "Sub Type",
+            "type": "string"
+          },
+          "synced_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When Elementary last synced this execution.",
+            "title": "Synced At"
+          },
+          "test_id": {
+            "description": "ID of the test that produced this execution.",
+            "title": "Test Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "test_id",
+          "sub_test_unique_id",
+          "sub_type",
+          "status",
+          "failure_count",
+          "start_time",
+          "duration_seconds"
+        ],
+        "title": "TestExecution",
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -894,7 +1294,7 @@
     }
   },
   "info": {
-    "description": "The Elementary Public API is a REST interface for programmatically reading\nElementary's assets, columns, and lineage for one environment.\n\n**Authentication.** Send a bearer token (personal or account token) in the\n`Authorization` header. The token resolves to an account; results are scoped to\nthe environments that token may view.\n\n**Environment scope.** Every resource lives under `/{env_id}`. Call\n`GET /environments` first to discover the ids you can access.\n\n**Pagination.** List endpoints are keyset-paginated: pass `limit` (default 500,\nmax 2000) and follow `next_cursor` until `has_more` is `false`. Cursors are opaque\nand bound to the filters that produced them \u2014 reusing a cursor with different\nfilters returns `400`.\n\n**Incremental sync.** Every dataset supports a full scan (default). Assets and\ncolumns also expose two incremental feeds: `synced_since` (upserts) and\n`deleted_since` (soft-delete tombstones).\n\n**Rate limiting.** Requests are rate-limited per account; responses carry\n`RateLimit-*` headers and `429` responses include `Retry-After`.\n\n_Beta: the shape may change while we co-design with early adopters._\n",
+    "description": "The Elementary Public API is a REST interface for programmatically reading\nElementary's assets, columns, lineage, tests, and test results for one\nenvironment.\n\n**Authentication.** Send a bearer token (personal or account token) in the\n`Authorization` header. The token resolves to an account; results are scoped to\nthe environments that token may view.\n\n**Environment scope.** Every resource lives under `/{env_id}`. Call\n`GET /environments` first to discover the ids you can access.\n\n**Pagination.** List endpoints are keyset-paginated: pass `limit` (default 500,\nmax 2000) and follow `next_cursor` until `has_more` is `false`. Cursors are opaque\nand bound to the filters that produced them \u2014 reusing a cursor with different\nfilters returns `400`.\n\n**Incremental sync.** Every dataset supports a full scan (default). Assets,\ncolumns, and tests also expose two incremental feeds: `synced_since` (upserts)\nand `deleted_since` (soft-delete tombstones). A test's `synced_at` tracks its\ndefinition \u2014 new executions do not bump it.\n\nLatest test executions and per-test execution history are **not** incremental.\nLatest executions are a full snapshot replaced in place: re-read it. Execution\nhistory is append-only and scoped to one test, filtered by `start_time_from` /\n`start_time_to` (last 30 days by default).\n\n**Rate limiting.** Requests are rate-limited per account; responses carry\n`RateLimit-*` headers and `429` responses include `Retry-After`.\n\n_Beta: the shape may change while we co-design with early adopters._\n",
     "title": "Elementary Public API",
     "version": "beta"
   },
@@ -3263,6 +3663,1439 @@
         "summary": "Get a column",
         "tags": ["Columns"]
       }
+    },
+    "/public/beta/{env_id}/latest-test-executions": {
+      "get": {
+        "description": "Lists the most recent execution of every sub-test \u2014 a full snapshot of current test results. Not an incremental feed: rows are replaced in place, so re-read the snapshot instead of passing `synced_since`. Executions of disabled tests are omitted unless `disabled=true` is passed, and executions whose test was deleted are never returned.",
+        "operationId": "list_latest_test_executions_public_beta__env_id__latest_test_executions_get",
+        "parameters": [
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Return only executions of these sub-tests.",
+            "in": "query",
+            "name": "sub_test_ids",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only executions of these sub-tests.",
+              "title": "Sub Test Ids"
+            }
+          },
+          {
+            "description": "Return only executions of these tests.",
+            "in": "query",
+            "name": "test_ids",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only executions of these tests.",
+              "title": "Test Ids"
+            }
+          },
+          {
+            "description": "Return only executions of tests on these asset ids.",
+            "in": "query",
+            "name": "asset_ids",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only executions of tests on these asset ids.",
+              "title": "Asset Ids"
+            }
+          },
+          {
+            "description": "Return only executions of tests of these test types.",
+            "in": "query",
+            "name": "test_types",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only executions of tests of these test types.",
+              "title": "Test Types"
+            }
+          },
+          {
+            "description": "Return only executions of tests of these definition types.",
+            "in": "query",
+            "name": "definition_types",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only executions of tests of these definition types.",
+              "title": "Definition Types"
+            }
+          },
+          {
+            "description": "Return only executions from these source types (e.g. `dbt`, `elementary_cloud`).",
+            "in": "query",
+            "name": "source_types",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only executions from these source types (e.g. `dbt`, `elementary_cloud`).",
+              "title": "Source Types"
+            }
+          },
+          {
+            "description": "Return only executions with these statuses, as stored (e.g. `PASS`, `WARN`, `FAIL`, `ERROR`, `SKIPPED`, `NO_DATA`).",
+            "in": "query",
+            "name": "statuses",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only executions with these statuses, as stored (e.g. `PASS`, `WARN`, `FAIL`, `ERROR`, `SKIPPED`, `NO_DATA`).",
+              "title": "Statuses"
+            }
+          },
+          {
+            "description": "Disabled tests' executions are omitted by default. Pass `true` to return only the disabled ones, `false` for the default (enabled only).",
+            "in": "query",
+            "name": "disabled",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Disabled tests' executions are omitted by default. Pass `true` to return only the disabled ones, `false` for the default (enabled only).",
+              "title": "Disabled"
+            }
+          },
+          {
+            "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+              "title": "Cursor"
+            }
+          },
+          {
+            "description": "Maximum items to return per page (1-2000).",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "description": "Maximum items to return per page (1-2000).",
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Sort field for a full scan. Ignored when `synced_since`/`deleted_since` is set (those feeds always order by their own cursor).",
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/OrderBy",
+              "default": "id",
+              "description": "Sort field for a full scan. Ignored when `synced_since`/`deleted_since` is set (those feeds always order by their own cursor)."
+            }
+          },
+          {
+            "description": "Sort direction for `order_by`.",
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Direction",
+              "default": "asc",
+              "description": "Sort direction for `order_by`."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_TestExecution_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "List latest test executions",
+        "tags": ["Latest test executions"]
+      }
+    },
+    "/public/beta/{env_id}/latest-test-executions/{sub_test_unique_id}": {
+      "get": {
+        "description": "Fetches the most recent execution of a single sub-test by its `sub_test_unique_id`. Returns 404 if it doesn't exist in this environment or its test was deleted.",
+        "operationId": "get_latest_test_execution_public_beta__env_id__latest_test_executions__sub_test_unique_id__get",
+        "parameters": [
+          {
+            "description": "Sub-test identifier (`sub_test_unique_id`).",
+            "in": "path",
+            "name": "sub_test_unique_id",
+            "required": true,
+            "schema": {
+              "description": "Sub-test identifier (`sub_test_unique_id`).",
+              "title": "Sub Test Unique Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestExecution"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "Get a latest test execution",
+        "tags": ["Latest test executions"]
+      }
+    },
+    "/public/beta/{env_id}/tests": {
+      "get": {
+        "description": "Lists test definitions. On a full scan disabled tests are omitted unless `disabled=true` is passed; the `synced_since` and `deleted_since` feeds always include them (with `disabled: true`) so a sync can observe a test being disabled. Full scan by default; pass `synced_since` for the upserts feed or `deleted_since` for the tombstones feed (mutually exclusive). A test's `synced_at` changes when its definition changes \u2014 new executions do not bump it.",
+        "operationId": "list_tests_public_beta__env_id__tests_get",
+        "parameters": [
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Return only tests with these ids.",
+            "in": "query",
+            "name": "ids",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only tests with these ids.",
+              "title": "Ids"
+            }
+          },
+          {
+            "description": "Return only tests running on these asset ids.",
+            "in": "query",
+            "name": "asset_ids",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only tests running on these asset ids.",
+              "title": "Asset Ids"
+            }
+          },
+          {
+            "description": "Return only tests of these test types.",
+            "in": "query",
+            "name": "test_types",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only tests of these test types.",
+              "title": "Test Types"
+            }
+          },
+          {
+            "description": "Return only tests of these definition types.",
+            "in": "query",
+            "name": "definition_types",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only tests of these definition types.",
+              "title": "Definition Types"
+            }
+          },
+          {
+            "description": "Return only tests from these source types (e.g. `dbt`, `elementary_cloud`).",
+            "in": "query",
+            "name": "source_types",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only tests from these source types (e.g. `dbt`, `elementary_cloud`).",
+              "title": "Source Types"
+            }
+          },
+          {
+            "description": "Return only tests tagged with any of these tags.",
+            "in": "query",
+            "name": "tags",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only tests tagged with any of these tags.",
+              "title": "Tags"
+            }
+          },
+          {
+            "description": "Disabled tests are omitted by default. Pass `true` to return only the disabled ones, `false` for the default (enabled only).",
+            "in": "query",
+            "name": "disabled",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Disabled tests are omitted by default. Pass `true` to return only the disabled ones, `false` for the default (enabled only).",
+              "title": "Disabled"
+            }
+          },
+          {
+            "description": "Upserts feed: tests whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+            "in": "query",
+            "name": "synced_since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Upserts feed: tests whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+              "title": "Synced Since"
+            }
+          },
+          {
+            "description": "Tombstones feed: tests whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+            "in": "query",
+            "name": "deleted_since",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Tombstones feed: tests whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+              "title": "Deleted Since"
+            }
+          },
+          {
+            "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+              "title": "Cursor"
+            }
+          },
+          {
+            "description": "Maximum items to return per page (1-2000).",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "description": "Maximum items to return per page (1-2000).",
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Sort field for a full scan. Ignored when `synced_since`/`deleted_since` is set (those feeds always order by their own cursor).",
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/OrderBy",
+              "default": "id",
+              "description": "Sort field for a full scan. Ignored when `synced_since`/`deleted_since` is set (those feeds always order by their own cursor)."
+            }
+          },
+          {
+            "description": "Sort direction for `order_by`.",
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Direction",
+              "default": "asc",
+              "description": "Sort direction for `order_by`."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_Test_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "List tests",
+        "tags": ["Tests"]
+      }
+    },
+    "/public/beta/{env_id}/tests/{test_id}": {
+      "get": {
+        "description": "Fetches a single test by id, including disabled tests. Returns 404 if it doesn't exist in this environment.",
+        "operationId": "get_test_public_beta__env_id__tests__test_id__get",
+        "parameters": [
+          {
+            "description": "Test identifier.",
+            "in": "path",
+            "name": "test_id",
+            "required": true,
+            "schema": {
+              "description": "Test identifier.",
+              "title": "Test Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Test"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "Get a test",
+        "tags": ["Tests"]
+      }
+    },
+    "/public/beta/{env_id}/tests/{test_id}/executions": {
+      "get": {
+        "description": "Lists the execution history of a single test, most recent first. Covers the last 30 days unless `start_time_from` is passed. Not an incremental feed \u2014 page through it with `start_time_from` / `start_time_to`. Returns 404 if the test doesn't exist in this environment or isn't visible to the token.",
+        "operationId": "list_test_executions_public_beta__env_id__tests__test_id__executions_get",
+        "parameters": [
+          {
+            "description": "Test identifier.",
+            "in": "path",
+            "name": "test_id",
+            "required": true,
+            "schema": {
+              "description": "Test identifier.",
+              "title": "Test Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Return only executions of these sub-tests.",
+            "in": "query",
+            "name": "sub_test_ids",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only executions of these sub-tests.",
+              "title": "Sub Test Ids"
+            }
+          },
+          {
+            "description": "Return only executions with these statuses, as stored (e.g. `PASS`, `WARN`, `FAIL`, `ERROR`, `SKIPPED`, `NO_DATA`).",
+            "in": "query",
+            "name": "statuses",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only executions with these statuses, as stored (e.g. `PASS`, `WARN`, `FAIL`, `ERROR`, `SKIPPED`, `NO_DATA`).",
+              "title": "Statuses"
+            }
+          },
+          {
+            "description": "Return only executions that started at or after this time. Defaults to 30 days ago.",
+            "in": "query",
+            "name": "start_time_from",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only executions that started at or after this time. Defaults to 30 days ago.",
+              "title": "Start Time From"
+            }
+          },
+          {
+            "description": "Return only executions that started at or before this time.",
+            "in": "query",
+            "name": "start_time_to",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date-time",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only executions that started at or before this time.",
+              "title": "Start Time To"
+            }
+          },
+          {
+            "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+              "title": "Cursor"
+            }
+          },
+          {
+            "description": "Maximum items to return per page (1-2000).",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "description": "Maximum items to return per page (1-2000).",
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Sort field for the execution history.",
+            "in": "query",
+            "name": "order_by",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/HistoryOrderBy",
+              "default": "start_time",
+              "description": "Sort field for the execution history."
+            }
+          },
+          {
+            "description": "Sort direction for `order_by`.",
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Direction",
+              "default": "desc",
+              "description": "Sort direction for `order_by`."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_TestExecution_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "List test executions",
+        "tags": ["Test executions"]
+      }
+    },
+    "/public/beta/{env_id}/tests/{test_id}/executions/{execution_id}": {
+      "get": {
+        "description": "Fetches a single execution of a test. Returns 404 if the execution or the test doesn't exist in this environment, or if the execution belongs to a different test.",
+        "operationId": "get_test_execution_public_beta__env_id__tests__test_id__executions__execution_id__get",
+        "parameters": [
+          {
+            "description": "Test identifier.",
+            "in": "path",
+            "name": "test_id",
+            "required": true,
+            "schema": {
+              "description": "Test identifier.",
+              "title": "Test Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Test execution identifier.",
+            "in": "path",
+            "name": "execution_id",
+            "required": true,
+            "schema": {
+              "description": "Test execution identifier.",
+              "title": "Execution Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestExecution"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "Get a test execution",
+        "tags": ["Test executions"]
+      }
     }
   },
   "security": [
@@ -3295,6 +5128,18 @@
     {
       "description": "Column-level lineage edges.",
       "name": "Column lineage"
+    },
+    {
+      "description": "Test definitions and their configuration.",
+      "name": "Tests"
+    },
+    {
+      "description": "Most recent execution of every sub-test.",
+      "name": "Latest test executions"
+    },
+    {
+      "description": "Execution history of a single test.",
+      "name": "Test executions"
     }
   ]
 }
