@@ -263,8 +263,9 @@ jobs:
           if [[ "$DBT_VERSION" == 2* ]]; then
             # dbt-core 2.x is the Fusion engine with adapters built in.
             if [ "$DBT_VERSION" = "2.x" ]; then
-              # Track the latest 2.x release, including pre-releases.
-              pip install --pre "dbt-core>=2,<3"
+              # Track the latest 2.x release, including pre-releases (which
+              # order below 2.0.0, hence the >=2.0.0a0 lower bound).
+              pip install --pre "dbt-core>=2.0.0a0,<3"
             else
               pip install --pre "dbt-core==$DBT_VERSION"
             fi
