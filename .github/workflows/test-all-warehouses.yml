@@ -154,6 +154,12 @@ jobs:
       matrix:
         dbt-version: [fusion, 2.x]
         warehouse-type: [snowflake, bigquery, databricks_catalog]
+        exclude:
+          # dbt-core 2.0.0b2 (the latest 2.x on PyPI) hangs on Snowflake even
+          # with threads: 1 (dbt-labs/dbt-fusion#410); the fusion target covers
+          # Snowflake until a dbt-core 2.x with a newer engine is released.
+          - dbt-version: 2.x
+            warehouse-type: snowflake
     uses: ./.github/workflows/test-warehouse.yml
     with:
       warehouse-type: ${{ matrix.warehouse-type }}

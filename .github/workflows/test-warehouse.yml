@@ -452,8 +452,8 @@ jobs:
             EXTRA_ARGS+=(--threads 1)
           fi
           # The dbt 2.x Snowflake driver hangs with concurrent connections
-          # (dbt-labs/dbt-fusion#410); dbt-core 2.x builds don't reliably honor
-          # the profile threads setting, so pass --threads explicitly.
+          # (dbt-labs/dbt-fusion#410); pass --threads 1 explicitly on top of
+          # the profile-level setting as an extra safeguard.
           if { [ "$DBT_VERSION" = "fusion" ] || [[ "$DBT_VERSION" == 2* ]]; } &&
              [ "$WAREHOUSE_TYPE" = "snowflake" ]; then
             EXTRA_ARGS+=(--threads 1)
@@ -484,8 +484,8 @@ jobs:
             EXTRA_ARGS+=(--threads 1 --exclude tag:ephemeral_model)
           fi
           # The dbt 2.x Snowflake driver hangs with concurrent connections
-          # (dbt-labs/dbt-fusion#410); dbt-core 2.x builds don't reliably honor
-          # the profile threads setting, so pass --threads explicitly.
+          # (dbt-labs/dbt-fusion#410); pass --threads 1 explicitly on top of
+          # the profile-level setting as an extra safeguard.
           if { [ "$DBT_VERSION" = "fusion" ] || [[ "$DBT_VERSION" == 2* ]]; } &&
              [ "$WAREHOUSE_TYPE" = "snowflake" ]; then
             EXTRA_ARGS+=(--threads 1)
