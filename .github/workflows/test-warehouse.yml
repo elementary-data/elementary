@@ -127,6 +127,13 @@ jobs:
             exit 1
           fi
 
+          # dbt 2.x / Fusion has adapters built into the engine and doesn't
+          # support third-party adapters such as dbt-vertica.
+          if [ "$WAREHOUSE_TYPE" = "vertica" ] && { [ "$DBT_VERSION" = "fusion" ] || [[ "$DBT_VERSION" == 2* ]]; }; then
+            echo "dbt version '$DBT_VERSION' is not supported with the vertica warehouse" >&2
+            exit 1
+          fi
+
       - name: Remove dbt 1.x-only configs from E2E dbt project
         if: inputs.dbt-version == 'fusion' || startsWith(inputs.dbt-version, '2.')
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}

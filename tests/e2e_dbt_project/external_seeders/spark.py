@@ -47,7 +47,7 @@ class SparkExternalSeeder(ExternalSeeder):
             conn = hive.Connection(host=host, port=port, username="dbt")
             cursor = conn.cursor()
             print(f"Creating schema '{seed_schema}'...")
-            cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{seed_schema}`")
+            cursor.execute(f"CREATE DATABASE IF NOT EXISTS {q(seed_schema)}")
 
             for subdir, csv_path, table_name in self.iter_seed_csvs():
                 fname = os.path.basename(csv_path)
