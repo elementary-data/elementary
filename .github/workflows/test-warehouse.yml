@@ -326,10 +326,9 @@ jobs:
           # Note: without a version pin, 'pip install dbt' resolves to the
           # unrelated legacy dbt Cloud CLI package, hence the explicit 2.x spec.
           pip uninstall -y dbt-core
-          # Pinned: 2.0.0-preview.212 (rc212) hangs indefinitely on Snowflake at
-          # arbitrary commands; rc205 is the last version validated against
-          # Snowflake in dbt-data-reliability's CI.
-          pip install "dbt==2.0.0rc205"
+          # Pinned for reproducible CI runs (rc205, for example, generates
+          # broken BigQuery temp-table DDL: "Invalid timestamp: '{}'").
+          pip install "dbt==2.0.0rc212"
           dbt --version
 
       - name: Write dbt profiles
@@ -369,10 +368,19 @@ jobs:
             echo "TEST_SEEDS_SCHEMA=test_seeds_$SAFE_DBT_VERSION" >> "$GITHUB_ENV"
           fi
 
+          # dbt Fusion's Snowflake driver can hang with concurrent connections
+          # (see dbt-labs/dbt-fusion#410); threads: 1 is the documented
+          # mitigation.
+          PROFILE_ARGS=()
+          if [ "$DBT_VERSION" = "fusion" ] && [ "$WAREHOUSE_TYPE" = "snowflake" ]; then
+            PROFILE_ARGS+=(--var snowflake_threads=1)
+          fi
+
           python "${{ github.workspace }}/elementary/tests/profiles/generate_profiles.py" \
             --template "${{ github.workspace }}/elementary/tests/profiles/profiles.yml.j2" \
             --output ~/.dbt/profiles.yml \
-            --schema-name "$SCHEMA_NAME"
+            --schema-name "$SCHEMA_NAME" \
+            "${PROFILE_ARGS[@]}"
 
       - name: Run Python package unit tests
         run: pytest -vv tests/unit --warehouse-type "$WAREHOUSE_TYPE"

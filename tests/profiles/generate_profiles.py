@@ -71,11 +71,18 @@ def _yaml_inline(value: Any) -> str:
     show_default=True,
     help="Name of the env-var holding the base64-encoded JSON secrets blob.",
 )
+@click.option(
+    "--var",
+    "extra_vars",
+    multiple=True,
+    help="Extra template variable as KEY=VALUE (may be repeated).",
+)
 def main(
     template: Path,
     output: Path,
     schema_name: str,
     secrets_json_env: str,
+    extra_vars: tuple[str, ...],
 ) -> None:
     """Render a Jinja2 profiles template into a dbt profiles.yml file.
 
@@ -116,6 +123,14 @@ def main(
             "No secrets found — rendering template for docker-only targets.",
             err=True,
         )
+
+    for extra_var in extra_vars:
+        key, sep, value = extra_var.partition("=")
+        if not sep or not key:
+            raise click.ClickException(
+                f"Invalid --var {extra_var!r}, expected KEY=VALUE"
+            )
+        context[key.lower()] = value
 
     # ── Render ──────────────────────────────────────────────────────────
     # When secrets are loaded, use StrictUndefined so typos in secret keys
