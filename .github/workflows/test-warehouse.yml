@@ -451,6 +451,13 @@ jobs:
           if [ "$WAREHOUSE_TYPE" = "dremio" ]; then
             EXTRA_ARGS+=(--threads 1)
           fi
+          # The dbt 2.x Snowflake driver hangs with concurrent connections
+          # (dbt-labs/dbt-fusion#410); dbt-core 2.x builds don't reliably honor
+          # the profile threads setting, so pass --threads explicitly.
+          if { [ "$DBT_VERSION" = "fusion" ] || [[ "$DBT_VERSION" == 2* ]]; } &&
+             [ "$WAREHOUSE_TYPE" = "snowflake" ]; then
+            EXTRA_ARGS+=(--threads 1)
+          fi
           dbt run --target "$WAREHOUSE_TYPE" "${EXTRA_ARGS[@]}" || true
 
           # Validate run_results.json: only error_model should fail (statuses like
@@ -475,6 +482,13 @@ jobs:
           EXTRA_ARGS=()
           if [ "$WAREHOUSE_TYPE" = "dremio" ]; then
             EXTRA_ARGS+=(--threads 1 --exclude tag:ephemeral_model)
+          fi
+          # The dbt 2.x Snowflake driver hangs with concurrent connections
+          # (dbt-labs/dbt-fusion#410); dbt-core 2.x builds don't reliably honor
+          # the profile threads setting, so pass --threads explicitly.
+          if { [ "$DBT_VERSION" = "fusion" ] || [[ "$DBT_VERSION" == 2* ]]; } &&
+             [ "$WAREHOUSE_TYPE" = "snowflake" ]; then
+            EXTRA_ARGS+=(--threads 1)
           fi
           dbt test --target "$WAREHOUSE_TYPE" "${EXTRA_ARGS[@]}"
 
