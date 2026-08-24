@@ -5105,7 +5105,7 @@
   ],
   "servers": [
     {
-      "url": "https://app.elementary-data.com/api"
+      "url": "https://prod.api.elementary-data.com"
     }
   ],
   "tags": [
