@@ -17,8 +17,8 @@ GET /{env_id}/assets?limit=500
 
 ## Incremental feeds
 
-Assets, columns, and column lineage expose two separate feeds so upserts and
-deletes stay clean and each can use its own index:
+Assets, columns, column lineage, and tests expose two separate feeds so upserts
+and deletes stay clean and each can use its own index:
 
 | Filter          | Returns                                           | Use for   |
 | --------------- | ------------------------------------------------- | --------- |
@@ -65,17 +65,22 @@ Timestamps are UTC ISO-8601.
 
 ## Support matrix
 
-| Dataset        | Full scan | Incremental                          |
-| -------------- | --------- | ------------------------------------ |
-| Assets         | ✅        | ✅ (`synced_since`, `deleted_since`) |
-| Columns        | ✅        | ✅ (`synced_since`, `deleted_since`) |
-| Asset lineage  | ✅        | Full replace                         |
-| Column lineage | ✅        | ✅ (`synced_since`, `deleted_since`) |
+| Dataset                  | Full scan | Incremental                          |
+| ------------------------ | --------- | ------------------------------------ |
+| Assets                   | ✅        | ✅ (`synced_since`, `deleted_since`) |
+| Columns                  | ✅        | ✅ (`synced_since`, `deleted_since`) |
+| Asset lineage            | ✅        | Full replace                         |
+| Column lineage           | ✅        | ✅ (`synced_since`, `deleted_since`) |
+| Tests                    | ✅        | ✅ (`synced_since`, `deleted_since`) |
+| Latest test executions   | ✅        | Full snapshot                        |
+| Test execution history   | ✅        | Time window (default last 30 days)   |
 
 <Note>
-  **Coming soon:** tests will use the same `synced_since` / `deleted_since`
-  pair as assets. Latest test executions will be a full snapshot (no incremental
-  feed). Per-test execution history is a time window, not an incremental feed.
+  A new test run does not bump `Test.synced_at` — current status lives on
+  latest test executions. Disabled tests are omitted from a full scan unless
+  `disabled=true`; the incremental feeds always include them so a sync observes
+  a disable. Latest test executions have no incremental feed. Per-test history
+  is filtered by `start_time`, not `synced_since`.
 </Note>
 
 <Note>
