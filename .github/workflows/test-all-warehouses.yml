@@ -135,7 +135,8 @@ jobs:
 
   # dbt 2.0 (Fusion engine) targets, limited to Fusion-supported warehouses.
   # 'fusion' installs the standalone binary from the 'dbt' PyPI package;
-  # a 2.x version installs the 'dbt-core' Python package.
+  # '2.x' installs the latest 'dbt-core' 2.x Python package (including
+  # pre-releases); an explicit 2.x version pins that package version.
   # dbt 2.0 is still a prerelease; these jobs are separate from 'test' so they
   # can be treated as informational (not required checks) while it stabilizes.
   test-dbt2:
@@ -151,7 +152,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dbt-version: [fusion, 2.0.0b2]
+        dbt-version: [fusion, 2.x]
         warehouse-type: [snowflake, bigquery, databricks_catalog]
     uses: ./.github/workflows/test-warehouse.yml
     with:
