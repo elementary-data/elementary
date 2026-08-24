@@ -368,11 +368,11 @@ jobs:
             echo "TEST_SEEDS_SCHEMA=test_seeds_$SAFE_DBT_VERSION" >> "$GITHUB_ENV"
           fi
 
-          # dbt Fusion's Snowflake driver can hang with concurrent connections
-          # (see dbt-labs/dbt-fusion#410); threads: 1 is the documented
-          # mitigation.
+          # The dbt 2.x (Fusion) Snowflake driver can hang with concurrent
+          # connections (see dbt-labs/dbt-fusion#410); threads: 1 is the
+          # documented mitigation.
           PROFILE_ARGS=()
-          if [ "$DBT_VERSION" = "fusion" ] && [ "$WAREHOUSE_TYPE" = "snowflake" ]; then
+          if { [ "$DBT_VERSION" = "fusion" ] || [[ "$DBT_VERSION" == 2* ]]; } && [ "$WAREHOUSE_TYPE" = "snowflake" ]; then
             PROFILE_ARGS+=(--var snowflake_threads=1)
           fi
 
