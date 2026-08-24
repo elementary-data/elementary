@@ -32,7 +32,7 @@ on:
       dbt-version:
         type: string
         required: false
-        description: dbt's version to test with
+        description: dbt's version to test with ('fusion' for the dbt Fusion binary)
       generate-data:
         type: boolean
         required: false
@@ -80,6 +80,7 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 90
     permissions:
       contents: read
       id-token: write
@@ -121,10 +122,30 @@ jobs:
               ;;
           esac
 
-          if [ -n "$DBT_VERSION" ] && ! [[ "$DBT_VERSION" =~ ^[0-9]+(\.[0-9]+){1,2}([a-zA-Z0-9._+-]+)?$ ]]; then
+          if [ -n "$DBT_VERSION" ] && [ "$DBT_VERSION" != "fusion" ] && [ "$DBT_VERSION" != "2.x" ] && ! [[ "$DBT_VERSION" =~ ^[0-9]+(\.[0-9]+){1,2}([a-zA-Z0-9._+-]+)?$ ]]; then
             echo "Unsupported dbt version: $DBT_VERSION" >&2
             exit 1
           fi
+
+          # dbt 2.x / Fusion has adapters built into the engine and doesn't
+          # support third-party adapters such as dbt-vertica.
+          if [ "$WAREHOUSE_TYPE" = "vertica" ] && { [ "$DBT_VERSION" = "fusion" ] || [[ "$DBT_VERSION" == 2* ]]; }; then
+            echo "dbt version '$DBT_VERSION' is not supported with the vertica warehouse" >&2
+            exit 1
+          fi
+
+      - name: Remove dbt 1.x-only configs from E2E dbt project
+        if: inputs.dbt-version == 'fusion' || startsWith(inputs.dbt-version, '2.')
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        run: |
+          # +root_path is a dbt-dremio (1.x-only) config that dbt 2.0 rejects;
+          # Fusion doesn't support Dremio anyway.
+          sed -i '/+root_path: elementary/d' dbt_project.yml
+
+          # dbt 2.0 can't match an unrendered env_var package path against
+          # package-lock.yml, which breaks package context resolution (e.g.
+          # 'elementary' macros in run-operation), so render it upfront.
+          sed -i "s|{{ env_var('ELEMENTARY_DBT_PACKAGE_PATH') }}|$ELEMENTARY_DBT_PACKAGE_PATH|" packages.yml
 
       # ── Seed cache: compute key & restore volumes BEFORE starting services ──
       # This ensures Docker volumes are populated before containers initialize.
@@ -214,7 +235,8 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.10"
+          # dbt 2.x (the Fusion engine) requires Python >= 3.11.
+          python-version: ${{ (inputs.dbt-version == 'fusion' || startsWith(inputs.dbt-version, '2.')) && '3.11' || '3.10' }}
 
       - name: Install Spark requirements
         if: inputs.warehouse-type == 'spark'
@@ -231,6 +253,26 @@ jobs:
       - name: Install dbt
         if: inputs.warehouse-type != 'vertica'
         run: |
+          if [ "$DBT_VERSION" = "fusion" ]; then
+            # The Fusion binary is installed after Elementary (see 'Install dbt Fusion')
+            # so that dbt-core, pulled in as a dependency of elementary, can be removed first.
+            echo "Skipping dbt installation for the fusion target"
+            exit 0
+          fi
+
+          if [[ "$DBT_VERSION" == 2* ]]; then
+            # dbt-core 2.x is the Fusion engine with adapters built in.
+            if [ "$DBT_VERSION" = "2.x" ]; then
+              # Track the latest 2.x release, including pre-releases (which
+              # order below 2.0.0, hence the >=2.0.0a0 lower bound).
+              pip install --pre "dbt-core>=2.0.0a0,<3"
+            else
+              pip install --pre "dbt-core==$DBT_VERSION"
+            fi
+            dbt --version
+            exit 0
+          fi
+
           DBT_CORE_SPEC="dbt-core"
           DBT_ADAPTER="$WAREHOUSE_TYPE"
           DBT_ADAPTER_EXTRA=""
@@ -270,7 +312,9 @@ jobs:
           # For Vertica, dbt-vertica is already installed with --no-deps above;
           # using ".[vertica]" would re-resolve dbt-vertica's deps and downgrade
           # dbt-core to ~=1.8.  Install elementary without the adapter extra.
-          if [ "$WAREHOUSE_TYPE" = "vertica" ]; then
+          # For dbt 2.x / fusion, adapters are built into the engine, and the 1.x
+          # adapter extras would downgrade dbt-core.
+          if [ "$WAREHOUSE_TYPE" = "vertica" ] || [ "$DBT_VERSION" = "fusion" ] || [[ "$DBT_VERSION" == 2* ]]; then
             pip install "."
           else
             EXTRA="$WAREHOUSE_TYPE"
@@ -279,6 +323,20 @@ jobs:
             fi
             pip install ".[$EXTRA]"
           fi
+
+      - name: Install dbt Fusion
+        if: inputs.dbt-version == 'fusion'
+        run: |
+          # Remove dbt-core (pulled in as a dependency of elementary) so the
+          # environment matches a binary-only Fusion installation, then install
+          # the Fusion binary from the 'dbt' package.
+          # Note: without a version pin, 'pip install dbt' resolves to the
+          # unrelated legacy dbt Cloud CLI package, hence the explicit 2.x spec.
+          pip uninstall -y dbt-core
+          # Pinned for reproducible CI runs (rc205, for example, generates
+          # broken BigQuery temp-table DDL: "Invalid timestamp: '{}'").
+          pip install "dbt==2.0.0rc212"
+          dbt --version
 
       - name: Write dbt profiles
         env:
@@ -308,10 +366,28 @@ jobs:
 
           echo "SCHEMA_NAME=$SCHEMA_NAME" >> "$GITHUB_ENV"
 
+          # The seeds schema is shared between jobs on the same warehouse, and
+          # the dbt 2.x jobs run in parallel with the dbt 1.x job on the same
+          # warehouses - give each dbt version its own seeds schema to avoid
+          # concurrent-write conflicts (e.g. Delta transaction conflicts).
+          if [ "$DBT_VERSION" = "fusion" ] || [[ "$DBT_VERSION" == 2* ]]; then
+            SAFE_DBT_VERSION=$(echo -n "$DBT_VERSION" | sed 's/[^a-zA-Z0-9]/_/g')
+            echo "TEST_SEEDS_SCHEMA=test_seeds_$SAFE_DBT_VERSION" >> "$GITHUB_ENV"
+          fi
+
+          # The dbt 2.x (Fusion) Snowflake driver can hang with concurrent
+          # connections (see dbt-labs/dbt-fusion#410); threads: 1 is the
+          # documented mitigation.
+          PROFILE_ARGS=()
+          if { [ "$DBT_VERSION" = "fusion" ] || [[ "$DBT_VERSION" == 2* ]]; } && [ "$WAREHOUSE_TYPE" = "snowflake" ]; then
+            PROFILE_ARGS+=(--var snowflake_threads=1)
+          fi
+
           python "${{ github.workspace }}/elementary/tests/profiles/generate_profiles.py" \
             --template "${{ github.workspace }}/elementary/tests/profiles/profiles.yml.j2" \
             --output ~/.dbt/profiles.yml \
-            --schema-name "$SCHEMA_NAME"
+            --schema-name "$SCHEMA_NAME" \
+            "${PROFILE_ARGS[@]}"
 
       - name: Run Python package unit tests
         run: pytest -vv tests/unit --warehouse-type "$WAREHOUSE_TYPE"
@@ -375,23 +451,28 @@ jobs:
           if [ "$WAREHOUSE_TYPE" = "dremio" ]; then
             EXTRA_ARGS+=(--threads 1)
           fi
+          # The dbt 2.x Snowflake driver hangs with concurrent connections
+          # (dbt-labs/dbt-fusion#410); pass --threads 1 explicitly on top of
+          # the profile-level setting as an extra safeguard.
+          if { [ "$DBT_VERSION" = "fusion" ] || [[ "$DBT_VERSION" == 2* ]]; } &&
+             [ "$WAREHOUSE_TYPE" = "snowflake" ]; then
+            EXTRA_ARGS+=(--threads 1)
+          fi
           dbt run --target "$WAREHOUSE_TYPE" "${EXTRA_ARGS[@]}" || true
 
-          # Validate run_results.json: only error_model should be non-success
-          jq -e '
-            [.results[] | select(.status != "success") | .unique_id]
-            | length == 1 and .[0] == "model.elementary_integration_tests.error_model"
-          ' target/run_results.json > /dev/null
-          jq_exit=$?
-
-          if [ $jq_exit -eq 0 ]; then
+          # Validate run_results.json: only error_model should fail (statuses like
+          # "skipped" or dbt 2.0's "no-op" for ephemeral models are not failures)
+          if jq -e '
+            [.results[] | select(.status == "error" or .status == "fail") | .unique_id]
+            == ["model.elementary_integration_tests.error_model"]
+          ' target/run_results.json > /dev/null; then
             echo "✅ Validation passed: only error_model failed."
           else
+            jq_exit=$?
             echo "❌ Validation failed. Unexpected failures:"
-            jq '[.results[] | select(.status != "success") | .unique_id] | join(", ")' target/run_results.json
+            jq '[.results[] | select(.status == "error" or .status == "fail") | .unique_id] | join(", ")' target/run_results.json
+            exit $jq_exit
           fi
-
-          exit $jq_exit
 
       - name: Test e2e dbt project
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
@@ -401,6 +482,13 @@ jobs:
           EXTRA_ARGS=()
           if [ "$WAREHOUSE_TYPE" = "dremio" ]; then
             EXTRA_ARGS+=(--threads 1 --exclude tag:ephemeral_model)
+          fi
+          # The dbt 2.x Snowflake driver hangs with concurrent connections
+          # (dbt-labs/dbt-fusion#410); pass --threads 1 explicitly on top of
+          # the profile-level setting as an extra safeguard.
+          if { [ "$DBT_VERSION" = "fusion" ] || [[ "$DBT_VERSION" == 2* ]]; } &&
+             [ "$WAREHOUSE_TYPE" = "snowflake" ]; then
+            EXTRA_ARGS+=(--threads 1)
           fi
           dbt test --target "$WAREHOUSE_TYPE" "${EXTRA_ARGS[@]}"
 

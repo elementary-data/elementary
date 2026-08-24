@@ -20,7 +20,9 @@ snapshot-paths: ["snapshots"]
 
 packages-install-path: "{{ env_var('DBT_PACKAGES_FOLDER', 'dbt_packages') }}"
 
-target-path: "{{ env_var('EDR_INTERNAL_TARGET_PATH', 'target') }}" # directory which will store compiled SQL files
+# NOTE: 'target-path' is intentionally not set here since dbt 2.0 (Fusion) rejects it.
+# The EDR_INTERNAL_TARGET_PATH env var is instead translated to DBT_TARGET_PATH by the CLI
+# when running this project.
 clean-targets: # directories to be removed by `dbt clean`
   - "{{ env_var('EDR_INTERNAL_TARGET_PATH', 'target') }}"
   - "{{ env_var('DBT_PACKAGES_FOLDER', 'dbt_packages') }}"

@@ -112,7 +112,7 @@ elementary_tests:
       database: {{ snowflake_database | toyaml }}
       warehouse: {{ snowflake_warehouse | toyaml }}
       schema: {{ schema_name }}
-      threads: 4
+      threads: {{ snowflake_threads | default(4) }}
 
     bigquery: &bigquery
       type: bigquery

@@ -37,10 +37,10 @@ def main(adapter: str, schema_name: str, data_dir: str) -> None:
     \b
     ADAPTER      Target warehouse adapter (dremio | spark).
     SCHEMA_NAME  Target schema / namespace for the seed tables.
-                 NOTE: Spark ignores this value and always uses the fixed
-                 schema defined in SparkExternalSeeder.SEED_SCHEMA (currently
-                 "test_seeds") because the generate_schema_name macro returns
-                 that name verbatim.
+                 NOTE: Spark ignores this value and uses the seeds schema
+                 (the TEST_SEEDS_SCHEMA env var, defaulting to "test_seeds")
+                 because the generate_schema_name macro returns that name
+                 verbatim.
     DATA_DIR     Path to the directory containing training/ and validation/ CSVs.
     """
     seeder_cls = SEEDERS[adapter]

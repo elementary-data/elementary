@@ -10,7 +10,6 @@ seed-paths: ["data"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
 
-target-path: "target" # directory which will store compiled SQL files
 clean-targets: # directories to be removed by `dbt clean`
   - "target"
   - "dbt_packages"
@@ -19,12 +18,15 @@ clean-targets: # directories to be removed by `dbt clean`
 vars:
   days_back: 30
   debug_logs: "{{ env_var('DBT_EDR_DEBUG', False) }}"
-  custom_run_started_at: "{{ modules.datetime.datetime.utcfromtimestamp(0) }}"
+  custom_run_started_at: "1970-01-01 00:00:00"
   clean_elementary_temp_tables: false
   disable_dbt_artifacts_autoupload: true
 
 seeds:
-  +schema: test_seeds
+  # The seeds schema is shared between CI jobs on the same warehouse (the
+  # generate_schema_name macro doesn't prefix it with the target schema), so
+  # jobs that may run concurrently must use a distinct name.
+  +schema: "{{ env_var('TEST_SEEDS_SCHEMA', 'test_seeds') }}"
 
 models:
   elementary_integration_tests:
@@ -32,5 +34,12 @@ models:
 
   elementary:
     +schema: elementary
-    +root_path: elementary
     +file_format: "{{ 'delta' if target.type == 'spark' else none }}"
+    # dbt-dremio config; rejected by dbt 2.0 (Fusion), which doesn't support
+    # Dremio - the CI strips it for dbt 2.x targets.
+    +root_path: elementary
+# This flag and the 'arguments:' syntax in the schema files require
+# dbt-core >= 1.10.5 (or dbt 2.x), so that's the minimum for running the E2E
+# project (the elementary package itself still supports dbt-core >= 1.8).
+flags:
+  require_generic_test_arguments_property: true

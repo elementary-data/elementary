@@ -17,11 +17,19 @@ from elementary.clients.dbt.base_dbt_runner import BaseDbtRunner
 from elementary.clients.dbt.dbt_log import parse_dbt_output
 from elementary.clients.dbt.transient_errors import is_transient_error
 from elementary.exceptions.exceptions import DbtCommandError, DbtLsCommandError
-from elementary.monitor.dbt_project_utils import is_dbt_package_up_to_date
+from elementary.monitor.dbt_project_utils import (
+    CLI_DBT_PROJECT_PATH,
+    is_dbt_package_up_to_date,
+)
 from elementary.utils.env_vars import is_debug
 from elementary.utils.log import get_logger
 
 logger = get_logger(__name__)
+
+# Directory for the internal dbt project's compiled SQL and run artifacts.
+# Translated to dbt's standard DBT_TARGET_PATH when running the internal project
+# (it can't be set via 'target-path' in dbt_project.yml, which dbt 2.0 rejects).
+EDR_INTERNAL_TARGET_PATH_ENV_VAR = "EDR_INTERNAL_TARGET_PATH"
 
 # Retry configuration for transient errors.
 _TRANSIENT_MAX_RETRIES = 3
@@ -86,11 +94,21 @@ class CommandLineDbtRunner(BaseDbtRunner):
         )
         self.adapter_type = self._get_adapter_type()
         self.raise_on_failure = raise_on_failure
-        self.env_vars = env_vars
+        self.env_vars = self._add_internal_target_path_env_var(env_vars)
         if force_dbt_deps:
             self.deps()
         elif run_deps_if_needed:
             self._run_deps_if_needed()
+
+    def _add_internal_target_path_env_var(
+        self, env_vars: Optional[Dict[str, str]]
+    ) -> Optional[Dict[str, str]]:
+        internal_target_path = os.getenv(EDR_INTERNAL_TARGET_PATH_ENV_VAR)
+        if internal_target_path and os.path.abspath(
+            self.project_dir
+        ) == os.path.abspath(CLI_DBT_PROJECT_PATH):
+            return {**(env_vars or {}), "DBT_TARGET_PATH": internal_target_path}
+        return env_vars
 
     def _get_adapter_type(self) -> Optional[str]:
         """Resolve the adapter type from ``profiles.yml``.
