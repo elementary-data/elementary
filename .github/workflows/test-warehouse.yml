@@ -316,10 +316,13 @@ jobs:
           # Remove dbt-core (pulled in as a dependency of elementary) so the
           # environment matches a binary-only Fusion installation, then install
           # the Fusion binary from the 'dbt' package.
-          # Note: without --pre, 'pip install dbt' resolves to the unrelated legacy
-          # dbt Cloud CLI package, hence the explicit >=2 prerelease spec.
+          # Note: without a version pin, 'pip install dbt' resolves to the
+          # unrelated legacy dbt Cloud CLI package, hence the explicit 2.x spec.
           pip uninstall -y dbt-core
-          pip install --pre "dbt>=2.0.0rc1"
+          # Pinned: 2.0.0-preview.212 (rc212) hangs indefinitely on Snowflake at
+          # arbitrary commands; rc205 is the last version validated against
+          # Snowflake in dbt-data-reliability's CI.
+          pip install "dbt==2.0.0rc205"
           dbt --version
 
       - name: Write dbt profiles
