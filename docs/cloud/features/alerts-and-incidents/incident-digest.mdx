@@ -4,7 +4,7 @@ sidebarTitle: "Incidents digest"
 badge: "Elementary Cloud"
 ---
 
-**Incidents Digest** lets you send a scheduled summary of incidents to your team in addition to real-time alerts. Your team receives a consolidated digest on a daily or weekly cadence covering all relevant incidents in that period.
+**Incidents Digest** lets you send a scheduled summary of incidents to your team in addition to real-time alerts. Your team receives a consolidated digest on a daily or weekly cadence covering the incidents that matter for that period — either only what changed since the last send, or a snapshot of still-open incidents over a lookback window.
 
 This is useful for reducing noise, providing management-level visibility, or keeping stakeholders informed without overwhelming them with individual alerts.
 
@@ -17,10 +17,11 @@ This is useful for reducing noise, providing management-level visibility, or kee
 Digest rules are configured under **Alert Rules → Incidents Digest** tab. Each rule defines:
 
 - **When** to send the digest (cadence: daily or weekly, at a specific hour)
-- **What** incidents to include (filters by tag, owner, status, model, or category)
+- **Which** incidents match (filters by tag, owner, status, model, or category)
+- **What to include** (only what changed since the last send, or full incident status over a lookback window)
 - **Where** to send it (one or more destinations such as a Slack channel or email)
 
-At the scheduled time, Elementary collects all incidents that match the rule's filters since the last digest was sent, and delivers them as a single message.
+At the scheduled time, Elementary collects the incidents that match the rule and delivers them as a single message.
 
 <Frame>
   <img src="/pics/cloud/incident_digest_email.png" alt="Incidents digest email" />
@@ -30,7 +31,7 @@ At the scheduled time, Elementary collects all incidents that match the rule's f
 
 Navigate to **Alert Rules** in the left sidebar and select the **Incidents Digest** tab. Click **Create digest rule** to open the configuration drawer.
 
-The filters, categories, and destinations are configured the same way as in [Alert Rules](/cloud/features/alerts-and-incidents/alert-rules). The one addition unique to digest rules is **cadence**.
+The filters, categories, and destinations are configured the same way as in [Alert Rules](/cloud/features/alerts-and-incidents/alert-rules). Unique to digest rules are **cadence** and **what to include**.
 
 ### Cadence
 
@@ -41,9 +42,38 @@ Choose how often the digest should be sent:
 
 The time is in UTC.
 
+### What to include
+
+Under **What to include**, choose how the digest selects incidents:
+
+- **Only what changed** — incidents that opened, were acknowledged, or resolved since the previous report. Already-open incidents that failed again are not included.
+- **Full incident status** — a snapshot of still-active incidents over a lookback window, plus anything that changed since the last report.
+
+New rules default to **Full incident status** with a **3 day** lookback. Existing rules stay on **Only what changed** until you edit them.
+
 <Frame>
-  <img src="/pics/cloud/incident_digest_cadence.png" alt="Digest cadence selector" />
+  <img
+    src="/pics/cloud/incident_digest_lookback.png"
+    alt="Digest schedule, what to include, and lookback"
+    width="280"
+  />
 </Frame>
+
+#### Full incident status
+
+When **Full incident status** is selected, set **Look back** to 1, 3, 7, 14, or 30 days. The digest then includes:
+
+- **Open** — incidents that are still open and whose last failure is within the lookback window, including ones that opened earlier. This matches the [incidents page](/cloud/features/alerts-and-incidents/incidents) for the same window.
+- **Acknowledged** — the same, for incidents you have already acknowledged.
+- **Resolved since last report** — incidents that closed since the previous digest, so the report shows what got done without repeating everything resolved in the last N days.
+
+Open and acknowledged incidents that are also new since the last report are marked with a **New** indicator.
+
+Incidents that are still open but have not failed inside the lookback window are omitted. Cadence still controls when the digest is sent; lookback controls which open incidents appear in it.
+
+<Note>
+To get a daily reminder of still-open incidents, edit the digest rule, select **Full incident status**, and set a lookback (for example 7 days). Leaving the rule on **Only what changed** continues to send only activity since the last report.
+</Note>
 
 ## Managing digest rules
 
