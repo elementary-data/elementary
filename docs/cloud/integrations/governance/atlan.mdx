@@ -4,7 +4,7 @@ badge: "Context Engine"
 ---
 
 Elementary aims to meet business users where they live, so we believe it's important to allow anyone who uses data to
- know whether the data is healthy quickly, easily and without any technical knowledge required. This is why we integrated with Atlan.
+know whether the data is healthy quickly, easily and without any technical knowledge required. This is why we integrated with Atlan.
 
 The integration works by pushing key insights to Atlan assets as custom metadata.
 This metadata includes data health scores and open incidents, providing visibility into the quality and status of your
@@ -19,19 +19,46 @@ data.
   </div>
 </Frame>
 
-### Atlan API Key
-To generate an API key, follow these steps:
-1. Create a new Persona in Atlan, with the following permissions:
-   - Assets: Read, Update
-   - Governance: Update custom metadata values
+## How it works
 
-### Atlan Base Url
-Your Atlan base URL, for example `https://my-company.atlan.com`
+1. You connect an Atlan tenant to an Elementary environment with a base URL and API token.
+2. A regular sync writes health scores, incident links, and badges onto matching Atlan tables.
 
-### Elementary Account Token (required for connecting through the Atlan app)
-You can generate tokens directly from the Elementary UI: go to [Account → Account Tokens](https://app.elementary-data.com/settings/account-tokens).
+## Enabling Atlan
 
-Quick steps:
-1. Open the **Account → Account Tokens** page and click **Generate token**.
-2. (Optional) Add a name/description.
-3. Copy the token and store it securely — it is shown once. Manage (revoke/rotate) anytime from the same page.
+<Info>
+  Connecting Atlan requires permission to edit integrations in Elementary.
+</Info>
+
+<Steps>
+  <Step title="Create an Atlan API token">
+    In Atlan, create a persona (or reuse one) and generate an API token for Elementary.
+
+    Grant that persona:
+
+    - Assets: Read (search)
+    - Assets: Update
+    - Governance: Update custom metadata values
+    - Permission to create and update badges
+
+    Without write access to custom metadata and badges, the connection can succeed and the export will still fail.
+  </Step>
+  <Step title="Add the connection in Elementary">
+    Go to **Settings → Environments**, select the environment, and click **Connect** on the **Data catalog** card.
+
+    <Frame caption="Data catalog integration in environment settings">
+      <img
+        src="/pics/cloud/atlan-data-catalog-connect.png"
+        alt="Data catalog integration in environment settings"
+      />
+    </Frame>
+
+    In **Connect Atlan**, paste the **Atlan base URL** (for example `https://your-company.atlan.com`) and **API token**. Click **Test connection**, then **Connect**.
+
+    Each environment can have one Atlan connection.
+  </Step>
+</Steps>
+
+To replace an expired token, open **Edit Atlan connection**, paste the new token, test, and save. Disconnecting is not required.
+
+If you install Elementary from the Atlan marketplace, generate an [account token](https://app.elementary-data.com/settings/account-tokens) and use that in Atlan. The token is shown once; revoke or rotate it from the same page.
