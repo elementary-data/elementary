@@ -34,7 +34,7 @@ Let's get you set up.
 [ ] [Integrate with your BI tool (optional)](/cloud/integrations/bi/connect-bi-tool)   
       Enable column-level lineage and full context for BI assets, including the health of upstream sources and models.  
 [ ] Connect to your external Catalog (Optional)  
-      Present Elementary data health context in another catalog. Connect [Atlan](/cloud/integrations/governance/atlan) from **Settings → Environments → Integrations → Data catalog**.   
+      Present Elementary data health context in another catalog, we support [Atlan](/cloud/integrations/governance/atlan).   
 [ ] Non-dbt tables (optional)
       Elementary has a Python SDK for python-based transformations. If you need Elementary to monitor non-dbt tables, reach out to the Elementary team with a list of relevant schemas / datasets / databases. This is a beta feature, the team will guide you through the next steps.
 
