@@ -3,12 +3,12 @@ title: "Atlan"
 badge: "Context Engine"
 ---
 
-Elementary aims to meet business users where they live, so we believe it's important to allow anyone who uses data to
- know whether the data is healthy quickly, easily and without any technical knowledge required. This is why we integrated with Atlan.
+Elementary pushes data health scores and open incidents onto matching Atlan assets as custom metadata.
+Anyone who works in Atlan can see whether a table is healthy without leaving the catalog.
 
-The integration works by pushing key insights to Atlan assets as custom metadata.
-This metadata includes data health scores and open incidents, providing visibility into the quality and status of your
-data.
+<Note>
+  Atlan is an **outbound catalog export**, configured per environment. It is separate from **Metadata Layer** (Glue / BigLake), which pulls warehouse metadata into Elementary.
+</Note>
 
 <Frame>
   <div className="dark:bg-white rounded-md p-1">
@@ -19,19 +19,62 @@ data.
   </div>
 </Frame>
 
-### Atlan API Key
-To generate an API key, follow these steps:
-1. Create a new Persona in Atlan, with the following permissions:
-   - Assets: Read, Update
-   - Governance: Update custom metadata values
+## How it works
 
-### Atlan Base Url
-Your Atlan base URL, for example `https://my-company.atlan.com`
+1. You connect one Atlan tenant to an Elementary environment with a base URL and API token.
+2. Elementary tests the credentials, then stores them for that environment only.
+3. A regular sync writes health scores, incident links, and badges onto matching Atlan tables.
 
-### Elementary Account Token (required for connecting through the Atlan app)
-You can generate tokens directly from the Elementary UI: go to [Account → Account Tokens](https://app.elementary-data.com/settings/account-tokens).
+## Connect Atlan
 
-Quick steps:
-1. Open the **Account → Account Tokens** page and click **Generate token**.
-2. (Optional) Add a name/description.
-3. Copy the token and store it securely — it is shown once. Manage (revoke/rotate) anytime from the same page.
+<Info>
+  Connecting Atlan requires permission to edit integrations in Elementary.
+</Info>
+
+<Steps>
+  <Step title="Create an Atlan API token">
+    In Atlan, create a persona (or reuse one) and generate an API token for Elementary.
+
+    Grant that persona:
+
+    - Assets: Read (search)
+    - Assets: Update
+    - Governance: Update custom metadata values
+    - Permission to create and update badges
+
+    Without write access to custom metadata and badges, the connection can test successfully and the export will still fail.
+  </Step>
+  <Step title="Note your Atlan base URL">
+    Use the HTTPS URL of your Atlan tenant, for example `https://your-company.atlan.com`. Do not include a trailing path.
+  </Step>
+  <Step title="Open Data catalog in Elementary">
+    Go to **Settings → Environments** and select the environment you want to connect. Under **Integrations**, open **Data catalog**.
+  </Step>
+  <Step title="Enter credentials, test, and connect">
+    In **Connect Atlan**, paste the **Atlan base URL** and **API token**. Click **Test connection**, then **Connect**.
+
+    Elementary validates the token against Atlan before saving. Each environment can have one Atlan connection.
+  </Step>
+</Steps>
+
+## Update or rotate the API token
+
+When a token expires, do not disconnect.
+
+1. Open the same **Data catalog** card and choose **Edit Atlan connection**.
+2. Paste the new API token. Leave the base URL as-is unless it also changed.
+3. Click **Test connection**, then **Save changes**.
+
+The stored token is never shown. The token field stays empty until you enter a replacement.
+
+## Disconnect
+
+**Disconnect Atlan** removes the connection for that environment and stops the export. Other environments are unchanged.
+
+## Connecting through the Atlan app
+
+If you install Elementary from the Atlan marketplace, Atlan calls Elementary with an **account token** instead of using the Settings dialog.
+
+Generate that token in Elementary: [Account → Account Tokens](https://app.elementary-data.com/settings/account-tokens). It is shown once. Revoke or rotate it from the same page.
+
+For token rotation in Elementary itself, use **Edit Atlan connection** above. You do not need an account token for that flow.
