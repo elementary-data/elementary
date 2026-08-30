@@ -9,6 +9,12 @@ When a test fails, the failing rows are returned together with the columns you c
 If `context_columns` is omitted, **all columns** are returned alongside failing rows.
 
 <Note>
+  No extra packages are required. These tests ship with the Elementary dbt
+  package and do not depend on `dbt_utils` or `dbt_expectations` being installed,
+  even where they mirror a test from one of those packages.
+</Note>
+
+<Note>
   If a column listed in `context_columns` does not exist on the model, a warning
   is logged and that column is skipped. The test continues and will not error.
 </Note>
@@ -53,47 +59,86 @@ models:
 
 ---
 
-## accepted_range_with_context
+## expression_is_true_with_context
 
-`elementary.accepted_range_with_context`
+`elementary.expression_is_true_with_context`
 
-Validates that column values fall within an accepted range. Extends `dbt_utils.accepted_range`.
+Validates that a SQL expression holds for every row. Extends `dbt_utils.expression_is_true`.
+
+This is the most flexible test in the set: any condition you can write in SQL, including range checks and comparisons across columns.
+
+<Note>
+  This test is table-level, so it has no tested column of its own. List every
+  column you want in the sample under `context_columns`, including the ones your
+  expression references.
+</Note>
 
 ### Parameters
 
-| Parameter         | Required | Default | Description                                                                          |
-| ----------------- | -------- | ------- | ------------------------------------------------------------------------------------ |
-| `column_name`     | Yes      | —       | The column to test.                                                                  |
-| `min_value`       | No*      | `none`  | Minimum accepted value (inclusive by default). At least one bound must be provided. |
-| `max_value`       | No*      | `none`  | Maximum accepted value (inclusive by default). At least one bound must be provided. |
-| `inclusive`       | No       | `true`  | Whether the bounds are inclusive.                                                    |
-| `context_columns` | No       | `none`  | List of additional columns to return with failing rows. Omit to return all columns.  |
+| Parameter         | Required | Default | Description                                                                     |
+| ----------------- | -------- | ------- | ------------------------------------------------------------------------------- |
+| `expression`      | Yes      | —       | SQL condition that must hold for every row. Rows where it is false are returned. |
+| `column_name`     | No       | `none`  | Apply the expression to a single column, as in `column_name: amount` with `expression: "> 0"`. |
+| `context_columns` | No       | `none`  | List of additional columns to return with failing rows. Omit to return all columns. |
 
-\* At least one of `min_value` or `max_value` must be provided.
+<RequestExample>
+
+```yml Range check
+models:
+  - name: orders
+    data_tests:
+      - elementary.expression_is_true_with_context:
+          expression: "amount >= 0 and amount <= 10000"
+          context_columns: [amount, order_id, customer_id]
+```
+
+```yml Comparison across columns
+models:
+  - name: subscriptions
+    data_tests:
+      - elementary.expression_is_true_with_context:
+          expression: "end_date > start_date"
+          context_columns: [subscription_id, start_date, end_date]
+```
+
+</RequestExample>
+
+---
+
+## not_empty_string_with_context
+
+`elementary.not_empty_string_with_context`
+
+Validates that a column contains no empty strings. Extends `dbt_utils.not_empty_string`.
+
+### Parameters
+
+| Parameter          | Required | Default | Description                                                                     |
+| ------------------ | -------- | ------- | ------------------------------------------------------------------------------- |
+| `column_name`      | Yes      | —       | The column to test.                                                             |
+| `trim_whitespace`  | No       | `true`  | Whether to trim the value before testing, so whitespace-only values also fail.  |
+| `context_columns`  | No       | `none`  | List of additional columns to return with failing rows. Omit to return all columns. |
 
 <RequestExample>
 
 ```yml With context columns
 models:
-  - name: orders
+  - name: customers
     columns:
-      - name: amount
+      - name: name
         data_tests:
-          - elementary.accepted_range_with_context:
-              min_value: 0
-              max_value: 10000
-              context_columns: [order_id, customer_id, order_date]
+          - elementary.not_empty_string_with_context:
+              context_columns: [customer_id, email, created_at]
 ```
 
-```yml Min bound only
+```yml Treat whitespace-only values as valid
 models:
-  - name: orders
+  - name: customers
     columns:
-      - name: amount
+      - name: notes
         data_tests:
-          - elementary.accepted_range_with_context:
-              min_value: 0
-              inclusive: false
+          - elementary.not_empty_string_with_context:
+              trim_whitespace: false
 ```
 
 </RequestExample>
@@ -161,15 +206,83 @@ models:
 
 ---
 
+## expect_compound_columns_to_be_unique_with_context
+
+`elementary.expect_compound_columns_to_be_unique_with_context`
+
+Expects a combination of columns to be unique. Returns every duplicate row, so you can see the full context of each collision. Extends `dbt_expectations.expect_compound_columns_to_be_unique`.
+
+Use this when no single column identifies a row, for example when uniqueness is on a customer and date pair.
+
+### Parameters
+
+| Parameter         | Required | Default | Description                                                                     |
+| ----------------- | -------- | ------- | ------------------------------------------------------------------------------- |
+| `column_list`     | Yes      | —       | List of columns whose combination must be unique.                               |
+| `row_condition`   | No       | `none`  | Optional SQL filter applied before testing.                                     |
+| `context_columns` | No       | `none`  | List of additional columns to return with failing rows. Omit to return all columns. |
+
+<RequestExample>
+
+```yml With context columns
+models:
+  - name: daily_metrics
+    data_tests:
+      - elementary.expect_compound_columns_to_be_unique_with_context:
+          column_list: [customer_id, metric_date]
+          context_columns: [metric_value, loaded_at]
+```
+
+</RequestExample>
+
+---
+
+## expect_column_pair_values_A_to_be_greater_than_B_with_context
+
+`elementary.expect_column_pair_values_A_to_be_greater_than_B_with_context`
+
+Expects the values of one column to be greater than another. Extends `dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B`.
+
+Both compared columns are always returned with failing rows, before any `context_columns`.
+
+### Parameters
+
+| Parameter         | Required | Default | Description                                                                     |
+| ----------------- | -------- | ------- | ------------------------------------------------------------------------------- |
+| `column_A`        | Yes      | —       | The column expected to hold the greater value.                                  |
+| `column_B`        | Yes      | —       | The column compared against.                                                    |
+| `or_equal`        | No       | `false` | Whether equal values pass.                                                      |
+| `row_condition`   | No       | `none`  | Optional SQL filter applied before testing.                                     |
+| `context_columns` | No       | `none`  | List of additional columns to return with failing rows. Omit to return all columns. |
+
+<RequestExample>
+
+```yml With context columns
+models:
+  - name: orders
+    data_tests:
+      - elementary.expect_column_pair_values_A_to_be_greater_than_B_with_context:
+          column_A: total_amount
+          column_B: discount_amount
+          or_equal: true
+          context_columns: [order_id, customer_id]
+```
+
+</RequestExample>
+
+---
+
 ## expect_column_values_to_match_regex_with_context
 
 `elementary.expect_column_values_to_match_regex_with_context`
 
 Expects column values to match a given regular expression. Extends `dbt_expectations.expect_column_values_to_match_regex`.
 
-<Info>
-  Requires `dbt_expectations` to be installed in your project.
-</Info>
+<Warning>
+  Not supported on SQL Server or Microsoft Fabric. T-SQL has no regular
+  expression functions, so this test raises a clear compilation error on those
+  platforms rather than running.
+</Warning>
 
 ### Parameters
 
@@ -193,6 +306,61 @@ models:
           - elementary.expect_column_values_to_match_regex_with_context:
               regex: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
               context_columns: [customer_id, name, created_at]
+```
+
+</RequestExample>
+
+---
+
+## expect_column_values_to_match_regex_list_with_context
+
+`elementary.expect_column_values_to_match_regex_list_with_context`
+
+Expects column values to match any or all of a list of regular expressions. Extends `dbt_expectations.expect_column_values_to_match_regex_list`.
+
+<Warning>
+  Not supported on SQL Server or Microsoft Fabric. T-SQL has no regular
+  expression functions, so this test raises a clear compilation error on those
+  platforms rather than running.
+</Warning>
+
+### Parameters
+
+| Parameter         | Required | Default | Description                                                                     |
+| ----------------- | -------- | ------- | ------------------------------------------------------------------------------- |
+| `regex_list`      | Yes      | —       | List of regular expression patterns.                                            |
+| `match_on`        | No       | `"any"` | `"any"` passes a row that matches at least one pattern, `"all"` requires every pattern. Any other value raises an error. |
+| `row_condition`   | No       | `none`  | Optional SQL filter applied before testing.                                     |
+| `is_raw`          | No       | `false` | Whether the patterns are raw strings. Only affects Snowflake and BigQuery.      |
+| `flags`           | No       | `""`    | Optional regex flags. Flags the platform does not support are dropped with a warning. |
+| `context_columns` | No       | `none`  | List of additional columns to return with failing rows. Omit to return all columns. |
+
+<RequestExample>
+
+```yml Match any pattern
+models:
+  - name: contacts
+    columns:
+      - name: phone
+        data_tests:
+          - elementary.expect_column_values_to_match_regex_list_with_context:
+              regex_list:
+                - "^\\+1[0-9]{10}$"
+                - "^\\+44[0-9]{10}$"
+              match_on: any
+              context_columns: [contact_id, country]
+```
+
+```yml Require every pattern
+models:
+  - name: products
+    columns:
+      - name: sku
+        data_tests:
+          - elementary.expect_column_values_to_match_regex_list_with_context:
+              regex_list: ["^SKU-", "-[0-9]+$"]
+              match_on: all
+              context_columns: [product_id, name]
 ```
 
 </RequestExample>
