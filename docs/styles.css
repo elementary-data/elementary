@@ -770,6 +770,10 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     text-align: center;
   }
+
+  .home__hero-buttons {
+    justify-content: center;
+  }
 }
 
 @media (max-width: 700px) {
