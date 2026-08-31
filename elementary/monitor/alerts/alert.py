@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone as dt_timezone
 from typing import Dict, List, Optional
 
 from dateutil import tz
@@ -58,8 +58,16 @@ class AlertModel:
         self.detected_at = None
         if detected_at is not None:
             try:
-                self.detected_at_utc = detected_at
-                self.detected_at = detected_at.astimezone(
+                # Timestamps from the DB are stored as UTC but arrive as naive
+                # datetimes.  Python's astimezone() interprets a naive datetime
+                # as *local* time, so we must attach UTC tzinfo first.
+                detected_at_utc_aware = (
+                    detected_at.replace(tzinfo=dt_timezone.utc)
+                    if detected_at.tzinfo is None
+                    else detected_at
+                )
+                self.detected_at_utc = detected_at_utc_aware
+                self.detected_at = detected_at_utc_aware.astimezone(
                     tz.gettz(timezone) if timezone else tz.tzlocal()
                 )
             except Exception:
