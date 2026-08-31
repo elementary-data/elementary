@@ -687,7 +687,7 @@ h1, h2, h3, h4, h5, h6 {
   flex-direction: row;
   gap: 24px;
   margin-top: 8px;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
 }
 
