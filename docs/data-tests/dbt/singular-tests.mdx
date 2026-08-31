@@ -72,7 +72,13 @@ This ensures that:
 
 ## Creating Singular Tests in Elementary Cloud
 
-In Elementary Cloud, when creating tests from the UI, you can add singular tests simply through the visual interface. The UI guides you through the process of:
+In Elementary Cloud, you can add singular tests through the visual interface.
+
+<Note>
+This workflow creates a test in your dbt project and runs it with your dbt jobs. To run SQL on an Elementary-managed schedule without creating dbt code, use a [custom SQL cloud test](/cloud/features/data-tests/custom-sql-tests).
+</Note>
+
+The UI guides you through:
 
 1. Writing your SQL query
 2. Configuring the primary model (if your query involves multiple tables)

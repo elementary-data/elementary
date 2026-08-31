@@ -8,32 +8,32 @@ import AllAnomaliesConfiguration from '/snippets/cloud/features/anomaly-detectio
 import VolumeConfiguration from '/snippets/cloud/features/anomaly-detection/volume-configuration.mdx';
 import FreshnessConfiguration from '/snippets/cloud/features/anomaly-detection/freshness-configuration.mdx';
 
-Cloud tests run in Elementary Cloud, outside your dbt pipeline. They don't require configuration in your dbt project — Elementary activates them automatically once your data warehouse is connected.
+Cloud tests run in Elementary Cloud, outside your dbt pipeline. They are managed in the Elementary UI and do not require configuration in your dbt project.
 
-There are three Cloud tests:
+Cloud test types include:
 
 | Test | What it detects |
 |---|---|
 | [Cloud freshness test](/cloud/features/anomaly-detection/automated-freshness) | Tables that haven't been updated within their expected window |
 | [Cloud volume test](/cloud/features/anomaly-detection/automated-volume) | Unexpected drops or spikes in row count |
 | [Data contract test](/cloud/features/data-tests/data-contract-test) | Schema mismatches against a defined contract — column names, types, nullability |
+| [Custom SQL test](/cloud/features/data-tests/custom-sql-tests) | Rows that violate a business rule defined in a SQL query |
 
-Cloud tests use warehouse metadata only — not the data itself — so they add no compute cost and run continuously without pipeline dependencies.
+Freshness, volume, and data contract tests use warehouse metadata collected by Elementary. Custom SQL tests execute against table data and consume compute in your data warehouse.
 
 ## Adding cloud tests
 
 Cloud freshness and volume tests are activated automatically on all your sources. You can add additional tests from the UI or via the [Test Recommendation Agent](/cloud/ai-agents/test-recommendation-agent):
 
-1. Navigate to the **Test Configuration** page, or select assets in the Catalog
-2. Click **Add Test** and choose a **Table Test**
-3. Select one or more tables to test
-4. Filter on **Elementary Cloud** and choose your test — freshness, volume, or data contract
-5. Configure the test parameters and add metadata if needed
-6. Submit — no PR required
+1. Navigate to the **Test Configuration** page and click **Add Test**. For asset-based tests, you can also start by selecting assets in the Catalog.
+2. Filter on **Elementary Cloud** and choose a test.
+3. Select the assets to test. For a custom SQL test, enter the query instead; Elementary derives its referenced assets from the SQL.
+4. Configure the test parameters, schedule, and metadata.
+5. Submit — no pull request is required.
 
 ## Editing cloud tests
 
-Open any test result and use **Anomaly settings** to tune the detection. For freshness and volume tests, you can:
+Open any test result and go to its configuration. The available settings depend on the test type. For freshness and volume tests, you can:
 
 - Adjust **sensitivity** (Low / Medium / High) to reduce noise or increase detection precision
 - Switch between **automatic** (ML-based) and **manual** (SLA threshold) modes for freshness
@@ -108,4 +108,4 @@ For false positives, select a reason:
 
 Collect and monitor custom metrics using the [`elementary.collect_metrics`](/cloud/features/anomaly-detection/metrics) dbt test. Metrics are synced to Elementary Cloud and can have anomaly detection applied automatically.
 
-<Note>For dbt tests and custom SQL tests, see the [dbt Package and Tests](/data-tests/introduction) tab.</Note>
+<Note>For tests that run in your dbt pipeline, including dbt singular tests written in SQL, see the [dbt Package and Tests](/data-tests/introduction) tab.</Note>

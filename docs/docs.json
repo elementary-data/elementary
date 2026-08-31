@@ -69,6 +69,7 @@
                   "cloud/features/anomaly-detection/automated-volume",
                   "cloud/features/anomaly-detection/cloud-pipeline-task-performance",
                   "cloud/features/data-tests/data-contract-test",
+                  "cloud/features/data-tests/custom-sql-tests",
                   "cloud/features/anomaly-detection/metrics",
                   "cloud/features/anomaly-detection/monitor-dwh-assets"
                 ]
@@ -77,8 +78,7 @@
                 "group": "dbt Tests",
                 "pages": [
                   "cloud/features/data-tests/dbt-tests",
-                  "cloud/features/data-tests/schema-validation-test",
-                  "cloud/features/data-tests/custom-sql-tests"
+                  "cloud/features/data-tests/schema-validation-test"
                 ]
               },
               "cloud/features/data-tests/test-coverage-screen"
