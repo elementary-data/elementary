@@ -1,70 +1,143 @@
 ---
-title: Custom SQL Tests
-sidebarTitle: Custom SQL test
+title: Custom SQL test
+sidebarTitle: Custom SQL
 badge: "Elementary Cloud"
 ---
 
-Custom SQL queries enable you to create tailored tests that align with your specific business needs. 
-These tests can be executed against any of the tables in your connected data warehouse. 
+Custom SQL tests validate business rules that are specific to your data. They run as [cloud tests](/cloud/features/data-tests/cloud-tests-overview) directly against your data warehouse, without requiring a pull request or dbt job.
 
-### When to use custom SQL tests?
+<Note>
+Custom SQL cloud tests are available on request. Contact the Elementary team to enable them for your account.
+</Note>
 
-A custom SQL test is easier to write than a new generic dbt test, but it can't be leveraged across different data sets.
-On the other hand, writing custom SQL tests enables testing complex custom calculation logic, relationships between many tables and more.
+Use them for checks that are difficult to express with an existing generic test, such as validating calculations or relationships across multiple tables.
 
-This is why most Elementary users write custom SQL tests when the behavior to be tested is complex, specific and doesn’t exist in any out of the box test.
-A common use case is for data analysts to add validations as custom SQL tests. 
+## How it works
 
-As non-technical users are often not familiar with dbt, 
-Elementary has an interface for adding custom SQL test that converts it to a pull request adding a singular dbt test.
+Write a query that returns the rows that violate your expectation. For example:
 
-### Adding a custom SQL test
+```sql
+select
+  order_id,
+  customer_id,
+  total_amount
+from analytics.finance.orders
+where total_amount < 0
+```
 
-1. In `Test Configuration` choose `New test` → `custom query test`.
-2. Add your query, it can be a regular SQL query on any tables in your environment. The query should only return results if something is wrong, meaning the test will pass on no results and fail on any results. Please be sure to use the full name of the table, including the db and schema. The query will then be validated and formatted, table names will be replaced with dbt model references. This can take a few seconds.
+On each run, Elementary executes the query using the environment's existing warehouse connection and evaluates the number of rows returned:
 
-<Frame>
-  <div className="dark:bg-white rounded-md p-1">
-    <img
-      src="https://res.cloudinary.com/diuctyblm/image/upload/v1721140505/custom_SQL_uudno6.png"
-    />
-  </div>
-</Frame>
+| Result | Behavior |
+| --- | --- |
+| Pass | The returned row count does not exceed a configured threshold |
+| Warning | The row count exceeds the optional warning threshold |
+| Failure | The row count exceeds the failure threshold, which defaults to `0` |
+| Error | The query is invalid, times out, or cannot be executed |
 
-3. Add your test configuration:
+By default, Elementary stores a limited sample of the returned rows with the test result. You can turn off row samples or change the sample limit.
 
-- Test name (should be a valid file name- this will use as the name of your Singular test).
-- Description (recommended).
-- Location - this will be the directory in your dbt project where the test will be stored.
-- Severity - Failure or Warning.
-- Tested table (optional) - Adding the table the test is checking will link this test to that table, showing it in the table’s lineage, catalog page and more.
-- Tags and Owners (Optional)
-    - Some users use dbt tags to help with scheduling. Creating a “daily”, “hourly”, and having scheduled jobs for those tags can help determine the test’s schedule at the time of creation.
-    - It is recommended to add a tag that will be used to later route the alert on failure to the right recipient.
+<Note>
+Disable row samples if the query could return sensitive values that should not be stored with test results.
+</Note>
 
-4. Review & Submit. In this stage you’ll be able to see the translated test query and configuration.
+<Warning>
+Custom SQL tests query table data and consume compute in your data warehouse. Choose a schedule, timeout, and query scope that are appropriate for your warehouse.
+</Warning>
 
-<Frame>
-  <div className="dark:bg-white rounded-md p-1">
-    <img
-      src="https://res.cloudinary.com/diuctyblm/image/upload/v1721140505/review_custom_SQL_m8ddoo.png"
-    />
-  </div>
-</Frame>
+## Cloud test behavior
 
-5. Clicking “Submit” will go on to create a pull request.
-6. After the pull requests is merged to production, tests should run on a `dbt test` job.
+Like other cloud tests, custom SQL tests:
 
-### Custom SQL test results
+- Are created and configured in the Elementary UI
+- Run independently of your dbt pipeline
+- Can run on a recurring schedule or on demand
+- Appear alongside dbt tests and other monitors in test results, incidents, and coverage views
 
-The results of all custom SQL tests can be found under a `tests` folder in the test results sidebar. 
-Additionally, if you configured a `tested table`, `tag` or `owner`, the test result will be visible under the relevant path. 
+Elementary uses the warehouse credentials already configured for the environment. The connection must be able to read every table referenced by the query.
 
-### Alerts on custom SQL tests
+## SQL requirements
 
-It's recommended to use tags and owners create an [alert rule](/cloud/features/alerts-and-incidents/alert-rules) that will route these tests to the relevant recipient.  
+A custom SQL test must:
 
-### Scheduling custom SQL tests
+- Contain exactly one read-only query
+- Use a `SELECT` statement, including queries built with CTEs or `UNION`
+- Reference tables by their fully qualified names
+- Reference only tables that exist as assets in the Elementary Catalog
 
-It's a common practice not to want these tests to run as part of your main job, or at the same frequency.
-We recommend to use a tag for all these tests, use dbt tags as selectors to exclude from the main job, and run a dedicated test job that includes these tests only in the required frequency.  
+Elementary validates the SQL before saving the test and again before every execution. A validation run can also check the query against your warehouse and preview its result columns without reading result rows.
+
+<Warning>
+If any referenced table has not been synced to the Elementary Catalog, the test cannot be created. The validation result lists unresolved tables so you can sync them or update the query.
+</Warning>
+
+## Asset linkage and permissions
+
+Elementary derives asset linkage from the tables referenced in the SQL:
+
+- If the query references one asset, Elementary links it automatically.
+- If it references multiple assets, choose a primary asset during configuration.
+
+The primary asset determines where the test appears in the Catalog and how Elementary groups its incidents. It does not limit which tables the query can read.
+
+To create or edit the test, you need permission to edit tests in the environment, view every referenced asset, and create tests on the primary asset.
+
+## Create a custom SQL test
+
+<Steps>
+  <Step title="Add a custom SQL test">
+    Go to **Test Configuration**, click **Add Test**, and choose **Custom SQL** under Elementary Cloud tests.
+  </Step>
+  <Step title="Write and validate the query">
+    Enter a name, an optional description, and a query that returns failing rows. Validate the query to check its SQL, warehouse compatibility, and referenced assets.
+  </Step>
+  <Step title="Choose the primary asset">
+    If the query references multiple assets, select the asset that the test primarily represents.
+  </Step>
+  <Step title="Configure the result behavior">
+    Set failure and optional warning thresholds. Choose whether to store a sample of failing rows, then configure the row-sample limit and query timeout.
+  </Step>
+  <Step title="Set the schedule and ownership">
+    Choose a schedule, severity, owners, and tags, then submit the test. No pull request is required.
+  </Step>
+</Steps>
+
+## Scheduling
+
+Set the test to run hourly, every few hours, daily, or weekly.
+
+You can also run the test immediately with **Test now**.
+
+## Edit configuration
+
+Open the test from test results or an incident and go to the **Configuration** tab. You can update the SQL, thresholds, row-sample settings, timeout, schedule, severity, owners, and tags.
+
+When you save an updated query, Elementary validates it again and re-derives its referenced assets. If the query now references multiple assets or no longer references the current primary asset, you must choose a new primary asset.
+
+Saving changes re-runs the test with the updated configuration.
+
+## Test results
+
+Each execution shows its status and the number of failing rows returned. When row samples are enabled, the execution details also show the sampled rows and whether the sample was truncated.
+
+Execution errors, such as invalid SQL or a query timeout, are shown separately from failures caused by returned rows.
+
+## Alerts
+
+Custom SQL test failures map to the **Custom SQL tests** category in [alert rules](/cloud/features/alerts-and-incidents/alert-rules). Include this category in a rule's test-type filters to receive alerts.
+
+By default, the catch-all alert rule may not include every cloud test category. Review your alert rules if you want custom SQL cloud test failures to notify your team.
+
+## Comparison with dbt singular tests
+
+dbt singular tests also use SQL queries that return failing rows, but they are managed and executed through your dbt project.
+
+| | Custom SQL cloud test | dbt singular test |
+| --- | --- | --- |
+| Where it runs | Elementary Cloud, against your warehouse | dbt pipeline |
+| Configuration | Elementary UI | SQL file in your dbt project |
+| Scheduling | Per-test schedule in Elementary | dbt job schedule and selectors |
+| Pull request required | No | Yes |
+| Asset linkage | Derived from referenced Catalog assets | Derived from dbt metadata |
+| Failing-row sample | Configurable in Elementary | Depends on dbt test configuration |
+
+Choose a custom SQL cloud test when you want Elementary to manage the configuration and schedule. Choose a [dbt singular test](/data-tests/dbt/singular-tests) when the validation should live in version-controlled project code and run with your dbt jobs.
