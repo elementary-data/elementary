@@ -21,7 +21,6 @@
             "group": "Getting Started",
             "pages": [
               "cloud/introduction",
-              "cloud/quickstart",
               "cloud/features",
               "cloud/features/integrations",
               "cloud/general/security-and-privacy",
