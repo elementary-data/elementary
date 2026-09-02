@@ -22,6 +22,7 @@ class Status(str, Enum):
     ERROR = "error"
     RUNTIME_ERROR = "runtime error"
     PARTIAL_SUCCESS = "partial success"
+    REUSED = "reused"
 
 
 class ResourceType(str, Enum):
