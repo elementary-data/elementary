@@ -408,3 +408,48 @@ models:
 ```
 
 </RequestExample>
+
+
+---
+
+## accepted_range_with_context
+
+`elementary.accepted_range_with_context`
+
+<Warning>
+  Deprecated, and scheduled for removal in the next release. Use
+  `dbt_utils.accepted_range` instead. Running it logs a warning.
+</Warning>
+
+`dbt_utils.accepted_range` selects every column already, so unlike the other
+tests on this page this one cannot add context to a stored sample. The only
+thing it can do is narrow the sample to a chosen subset, which is not what
+`context_columns` is for.
+
+If you were using it to keep columns out of a stored sample, there is no direct
+replacement. Use the sampling controls instead: the `show_sample_rows` and PII
+tags, `disable_test_samples`, or `test_sample_row_count`.
+
+### Migration
+
+```yml Before
+models:
+  - name: orders
+    columns:
+      - name: amount
+        data_tests:
+          - elementary.accepted_range_with_context:
+              min_value: 0
+              max_value: 10000
+```
+
+```yml After
+models:
+  - name: orders
+    columns:
+      - name: amount
+        data_tests:
+          - dbt_utils.accepted_range:
+              min_value: 0
+              max_value: 10000
+```
