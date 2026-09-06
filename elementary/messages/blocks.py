@@ -22,6 +22,7 @@ class Icon(Enum):
     GEM = "gem"
     SPARKLES = "sparkles"
     LINK = "link"
+    NEW = "new"
 
 
 class TextStyle(Enum):
