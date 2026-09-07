@@ -7,6 +7,7 @@ A set of generic tests that extend common dbt, dbt-utils, and dbt-expectations t
 When a test fails, the failing rows are returned together with the columns you care about — making it much easier to investigate the root cause directly from the test results.
 
 If `context_columns` is omitted, **all columns** are returned alongside failing rows.
+A single column can be given as a plain string instead of a list.
 
 <Note>
   No extra packages are required. These tests ship with the Elementary dbt
@@ -17,6 +18,14 @@ If `context_columns` is omitted, **all columns** are returned alongside failing 
 <Note>
   If a column listed in `context_columns` does not exist on the model, a warning
   is logged and that column is skipped. The test continues and will not error.
+</Note>
+
+<Note>
+  To test only some of the rows, use dbt's
+  [`where` config](https://docs.getdbt.com/reference/resource-configs/where).
+  Earlier versions of some of these tests took a `row_condition` argument
+  instead; it was removed in favour of `where`, which does the same thing and
+  works on every dbt test.
 </Note>
 
 ---
@@ -156,19 +165,19 @@ Expects column values to not be null. Extends `dbt_expectations.expect_column_va
 | Parameter         | Required | Default | Description                                                                     |
 | ----------------- | -------- | ------- | ------------------------------------------------------------------------------- |
 | `column_name`     | Yes      | —       | The column to test for null values.                                             |
-| `row_condition`   | No       | `none`  | Optional SQL filter applied before testing (e.g. `"status = 'active'"`).       |
 | `context_columns` | No       | `none`  | List of additional columns to return with failing rows. Omit to return all columns. |
 
 <RequestExample>
 
-```yml With row condition and context columns
+```yml With a row filter and context columns
 models:
   - name: subscriptions
     columns:
       - name: end_date
         data_tests:
           - elementary.expect_column_values_to_not_be_null_with_context:
-              row_condition: "status = 'active'"
+              config:
+                where: "status = 'active'"
               context_columns: [subscription_id, customer_id, start_date]
 ```
 
@@ -182,12 +191,13 @@ models:
 
 Expects column values to be unique. Returns all duplicate rows (not just a count), so you can see the full context of each duplicate. Extends `dbt_expectations.expect_column_values_to_be_unique`.
 
+Null values are ignored rather than treated as duplicates of one another, matching dbt's built-in `unique` test.
+
 ### Parameters
 
 | Parameter         | Required | Default | Description                                                                     |
 | ----------------- | -------- | ------- | ------------------------------------------------------------------------------- |
 | `column_name`     | Yes      | —       | The column to test for uniqueness.                                              |
-| `row_condition`   | No       | `none`  | Optional SQL filter applied before testing.                                     |
 | `context_columns` | No       | `none`  | List of additional columns to return with failing rows. Omit to return all columns. |
 
 <RequestExample>
@@ -212,6 +222,8 @@ models:
 
 Expects a combination of columns to be unique. Returns every duplicate row, so you can see the full context of each collision. Extends `dbt_expectations.expect_compound_columns_to_be_unique`.
 
+Rows where every listed column is null are ignored rather than treated as duplicates of one another.
+
 Use this when no single column identifies a row, for example when uniqueness is on a customer and date pair.
 
 ### Parameters
@@ -219,7 +231,6 @@ Use this when no single column identifies a row, for example when uniqueness is 
 | Parameter         | Required | Default | Description                                                                     |
 | ----------------- | -------- | ------- | ------------------------------------------------------------------------------- |
 | `column_list`     | Yes      | —       | List of columns whose combination must be unique.                               |
-| `row_condition`   | No       | `none`  | Optional SQL filter applied before testing.                                     |
 | `context_columns` | No       | `none`  | List of additional columns to return with failing rows. Omit to return all columns. |
 
 <RequestExample>
@@ -252,7 +263,6 @@ Both compared columns are always returned with failing rows, before any `context
 | `column_A`        | Yes      | —       | The column expected to hold the greater value.                                  |
 | `column_B`        | Yes      | —       | The column compared against.                                                    |
 | `or_equal`        | No       | `false` | Whether equal values pass.                                                      |
-| `row_condition`   | No       | `none`  | Optional SQL filter applied before testing.                                     |
 | `context_columns` | No       | `none`  | List of additional columns to return with failing rows. Omit to return all columns. |
 
 <RequestExample>
@@ -290,8 +300,7 @@ Expects column values to match a given regular expression. Extends `dbt_expectat
 | ----------------- | -------- | ------- | ------------------------------------------------------------------------------- |
 | `column_name`     | Yes      | —       | The column to test.                                                             |
 | `regex`           | Yes      | —       | The regular expression pattern to match.                                        |
-| `row_condition`   | No       | `none`  | Optional SQL filter applied before testing.                                     |
-| `is_raw`          | No       | `false` | Whether the regex is a raw string.                                              |
+| `is_raw`          | No       | `false` | Whether the regex is a raw string. Honored on Snowflake, BigQuery, Spark and Databricks; ignored elsewhere. |
 | `flags`           | No       | `""`    | Optional regex flags (adapter-dependent).                                       |
 | `context_columns` | No       | `none`  | List of additional columns to return with failing rows. Omit to return all columns. |
 
@@ -330,8 +339,7 @@ Expects column values to match any or all of a list of regular expressions. Exte
 | ----------------- | -------- | ------- | ------------------------------------------------------------------------------- |
 | `regex_list`      | Yes      | —       | List of regular expression patterns.                                            |
 | `match_on`        | No       | `"any"` | `"any"` passes a row that matches at least one pattern, `"all"` requires every pattern. Any other value raises an error. |
-| `row_condition`   | No       | `none`  | Optional SQL filter applied before testing.                                     |
-| `is_raw`          | No       | `false` | Whether the patterns are raw strings. Only affects Snowflake and BigQuery.      |
+| `is_raw`          | No       | `false` | Whether the patterns are raw strings. Honored on Snowflake, BigQuery, Spark and Databricks; ignored elsewhere. |
 | `flags`           | No       | `""`    | Optional regex flags. Flags the platform does not support are dropped with a warning. |
 | `context_columns` | No       | `none`  | List of additional columns to return with failing rows. Omit to return all columns. |
 
