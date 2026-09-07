@@ -1,10 +1,12 @@
 import time
 from datetime import datetime
+from typing import Optional
 
 import pytest
 from dateutil import tz
 
 from elementary.monitor.alerts.alert import AlertModel
+from elementary.monitor.alerts.alerts_groups import AlertsGroup
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
@@ -20,7 +22,9 @@ def tokyo_local_timezone(monkeypatch):
 
 
 def _make_test_alert(
-    test_sub_type: str = "generic", test_short_name: str = "my_test"
+    test_sub_type: str = "generic",
+    test_short_name: str = "my_test",
+    detected_at: Optional[datetime] = None,
 ) -> TestAlertModel:
     return TestAlertModel(
         id="id",
@@ -32,6 +36,7 @@ def _make_test_alert(
         test_sub_type=test_sub_type,
         test_short_name=test_short_name,
         alert_class_id="acid",
+        detected_at=detected_at,
     )
 
 
@@ -180,3 +185,11 @@ class TestAlertModelDetectedAtTimezone:
             "the most recent record found in the table was 1 day 0h 11m 41s earlier "
             "(2026-07-21 17:55:10 JST)."
         )
+
+    def test_alerts_group_detected_at_with_missing_timestamp(
+        self, tokyo_local_timezone
+    ) -> None:
+        with_time = _make_test_alert(detected_at=datetime(2026, 7, 22, 9, 8, 22))
+        without_time = _make_test_alert()
+        group = AlertsGroup(alerts=[with_time, without_time])
+        assert group.detected_at == with_time.detected_at
