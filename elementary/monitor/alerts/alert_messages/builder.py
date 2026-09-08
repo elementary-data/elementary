@@ -57,6 +57,7 @@ AlertType = Union[AlertModel, BaseAlertsGroup]
 class MessageBuilderConfig(BaseModel):
     alert_groups_subscribers: bool = False
     maximum_columns_in_alert_samples: int = 4
+    maximum_rows_in_alert_samples: int = 25
 
 
 class AlertMessageBuilder:
@@ -377,9 +378,31 @@ class AlertMessageBuilder:
                     and len(result_sample[0].keys())
                     <= self.config.maximum_columns_in_alert_samples
                 ):
+                    rows_to_render = result_sample
+                    omitted_rows_count = 0
+                    if len(result_sample) > self.config.maximum_rows_in_alert_samples:
+                        rows_to_render = result_sample[
+                            : self.config.maximum_rows_in_alert_samples
+                        ]
+                        omitted_rows_count = len(result_sample) - len(rows_to_render)
                     result_blocks.append(
-                        TableBlock.from_dicts(result_sample),
+                        TableBlock.from_dicts(rows_to_render),
                     )
+                    if omitted_rows_count:
+                        result_blocks.append(
+                            LinesBlock(
+                                lines=[
+                                    ItalicTextLineBlock(
+                                        text=(
+                                            f"Showing {len(rows_to_render)} of "
+                                            f"{len(result_sample)} rows "
+                                            f"({omitted_rows_count} omitted to keep "
+                                            "the alert size manageable)."
+                                        )
+                                    ),
+                                ]
+                            )
+                        )
                 else:
                     result_blocks.append(
                         JsonCodeBlock(content=result_sample),

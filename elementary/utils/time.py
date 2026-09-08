@@ -91,15 +91,33 @@ def datetime_strftime(datetime: datetime, include_timezone: bool = False) -> str
 
 
 _ABBREVIATED_TZ_OFFSET_PATTERN = re.compile(r"(:\d{2}(?:\.\d+)?)([+-])(\d{2})$")
+_FRACTIONAL_SECONDS_PATTERN = re.compile(r"(\d{2}\.)(\d+)")
 
 
 def _normalize_timezone_offset(time_string: str) -> str:
     return _ABBREVIATED_TZ_OFFSET_PATTERN.sub(r"\1\2\3:00", time_string)
 
 
+def _normalize_fractional_seconds(time_string: str) -> str:
+    # datetime.fromisoformat() only guarantees support for the fractional-second
+    # widths that datetime.isoformat() itself produces: none, 3 digits (ms), or
+    # 6 digits (us). On Python versions before 3.11, any other width (e.g. the
+    # nanosecond precision some environments emit) raises ValueError instead of
+    # being parsed. Rather than depending on that platform/version-specific
+    # leniency, always coerce the fractional part to exactly 6 digits
+    # (microseconds) ourselves before parsing, truncating extra precision or
+    # right-padding a shorter one.
+    def _pad_or_truncate(match: "re.Match[str]") -> str:
+        prefix, fractional = match.group(1), match.group(2)
+        return prefix + (fractional + "000000")[:6]
+
+    return _FRACTIONAL_SECONDS_PATTERN.sub(_pad_or_truncate, time_string, count=1)
+
+
 def convert_partial_iso_format_to_full_iso_format(partial_iso_format_time: str) -> str:
     try:
         normalized = _normalize_timezone_offset(partial_iso_format_time)
+        normalized = _normalize_fractional_seconds(normalized)
         date = datetime.fromisoformat(normalized)
         time_zone_name = date.strftime("%Z")
         time_zone = tz.gettz(time_zone_name) if time_zone_name else tz.UTC

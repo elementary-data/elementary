@@ -1,4 +1,6 @@
+import re
 from datetime import datetime
+from unittest.mock import patch
 
 import pytest
 from dateutil import tz
@@ -115,3 +117,73 @@ def test_convert_partial_iso_format_to_full_iso_format(
     input_time: str, expected_output: str
 ) -> None:
     assert convert_partial_iso_format_to_full_iso_format(input_time) == expected_output
+
+
+class _StrictLegacyDatetime(datetime):
+    """
+    A ``datetime`` subclass whose ``fromisoformat`` reproduces CPython's
+    pre-3.11 parser: it only accepts a fractional-seconds component of
+    exactly 0, 3 or 6 digits (the only widths ``datetime.isoformat()``
+    itself ever produces) and raises ``ValueError`` for anything else, such
+    as the 9-digit/nanosecond-precision timestamps reported in
+    https://github.com/elementary-data/elementary/issues/2221.
+
+    Python 3.11 relaxed ``fromisoformat`` to tolerate (and truncate) any
+    number of fractional digits, so the very same input that fails on 3.9/3.10
+    parses silently on 3.11+. That made the bug look "platform dependent"
+    (it showed up in a Docker image pinned to an older Python while the
+    reporter's local machine happened to run a newer one) when it is really a
+    Python-version-dependent parsing difference. Subclassing here lets the
+    test force that legacy behavior deterministically, regardless of which
+    Python actually runs the test suite.
+    """
+
+    @classmethod
+    def fromisoformat(cls, date_string):
+        match = re.search(r"\.(\d+)", date_string)
+        if match and len(match.group(1)) not in (3, 6):
+            raise ValueError(f"Invalid isoformat string: {date_string!r}")
+        return datetime.fromisoformat(date_string)
+
+
+@pytest.mark.parametrize(
+    "input_time, expected_output",
+    [
+        pytest.param(
+            "2026-04-27T14:34:33.609083964Z",
+            "2026-04-27T14:34:33+00:00",
+            id="nanosecond_precision_utc_z_suffix",
+        ),
+        pytest.param(
+            "2026-04-27T14:34:33.609083964+00:00",
+            "2026-04-27T14:34:33+00:00",
+            id="nanosecond_precision_full_offset",
+        ),
+        pytest.param(
+            "2026-04-27T14:34:33.6+00:00",
+            "2026-04-27T14:34:33+00:00",
+            id="single_digit_fraction",
+        ),
+        pytest.param(
+            "2026-04-27T14:34:33.60908+00:00",
+            "2026-04-27T14:34:33+00:00",
+            id="five_digit_fraction",
+        ),
+    ],
+)
+def test_convert_partial_iso_format_to_full_iso_format_handles_any_fractional_precision(
+    input_time: str, expected_output: str
+) -> None:
+    """
+    Reproduces the bug from issue #2221: a timestamp whose fractional-seconds
+    component isn't exactly 3 or 6 digits (e.g. the nanosecond-precision
+    values some environments emit) must still normalize correctly, instead of
+    depending on the interpreter's ``datetime.fromisoformat`` leniency. We
+    patch the module's ``datetime`` with a subclass that enforces the strict,
+    pre-3.11 CPython behavior so the test's outcome does not depend on which
+    Python version happens to run it.
+    """
+    with patch("elementary.utils.time.datetime", _StrictLegacyDatetime):
+        assert (
+            convert_partial_iso_format_to_full_iso_format(input_time) == expected_output
+        )
