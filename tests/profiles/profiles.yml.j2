@@ -94,7 +94,7 @@ elementary_tests:
       port: 1433
       database: {{ fabric_database | toyaml }}
       schema: {{ schema_name }}
-      authentication: ActiveDirectoryServicePrincipal
+      authentication: ServicePrincipal
       tenant_id: {{ fabric_tenant_id | toyaml }}
       client_id: {{ fabric_client_id | toyaml }}
       client_secret: {{ fabric_client_secret | toyaml }}
