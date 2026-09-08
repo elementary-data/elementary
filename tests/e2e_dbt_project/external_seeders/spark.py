@@ -10,12 +10,6 @@ from external_seeders.base import ExternalSeeder
 class SparkExternalSeeder(ExternalSeeder):
     """Load seeds into Spark via PyHive from CSV files mounted in the container."""
 
-    # dbt_project.yml sets ``+schema`` for seeds (TEST_SEEDS_SCHEMA env var,
-    # defaulting to ``test_seeds``) and the ``generate_schema_name`` macro
-    # returns that verbatim, so the actual seed schema matches it regardless
-    # of the target schema name.
-    DEFAULT_SEED_SCHEMA = "test_seeds"
-
     @staticmethod
     def _q(name: str) -> str:
         """Quote a Spark SQL identifier, escaping any embedded backticks."""
@@ -24,7 +18,7 @@ class SparkExternalSeeder(ExternalSeeder):
     def load(self) -> None:
         failures: list[str] = []
         q = self._q
-        seed_schema = os.environ.get("TEST_SEEDS_SCHEMA", self.DEFAULT_SEED_SCHEMA)
+        seed_schema = self.schema_name
         print(
             f"\n=== Loading Spark seeds via external CSV tables "
             f"(schema={seed_schema}) ==="
