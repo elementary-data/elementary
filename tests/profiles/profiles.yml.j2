@@ -1,3 +1,5 @@
+{%- set dbt_version = dbt_version | default('') %}
+{%- set is_dbt2 = dbt_version == 'fusion' or dbt_version.startswith('2') %}
 elementary_tests:
   target: postgres
   outputs:
@@ -112,7 +114,10 @@ elementary_tests:
       database: {{ snowflake_database | toyaml }}
       warehouse: {{ snowflake_warehouse | toyaml }}
       schema: {{ schema_name }}
-      threads: {{ snowflake_threads | default(4) }}
+      {#- The dbt 2.x (Fusion) Snowflake driver can hang with concurrent
+          connections (see dbt-labs/dbt-fusion#410); threads: 1 is the
+          documented mitigation. #}
+      threads: {{ 1 if is_dbt2 else 4 }}
 
     bigquery: &bigquery
       type: bigquery
