@@ -95,6 +95,9 @@ _FRACTIONAL_SECONDS_PATTERN = re.compile(r"(\d{2}\.)(\d+)")
 
 
 def _normalize_timezone_offset(time_string: str) -> str:
+    # Python < 3.11 fromisoformat() rejects a trailing "Z"; spell it out as an offset.
+    if time_string.endswith("Z"):
+        time_string = time_string[:-1] + "+00:00"
     return _ABBREVIATED_TZ_OFFSET_PATTERN.sub(r"\1\2\3:00", time_string)
 
 
