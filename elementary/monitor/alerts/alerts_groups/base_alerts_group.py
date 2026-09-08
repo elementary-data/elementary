@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Dict, List, Optional, Sequence
 
+from dateutil import tz
+
 from elementary.monitor.alerts.alert import AlertModel
 
 
@@ -20,7 +22,10 @@ class BaseAlertsGroup(ABC):
 
     @property
     def detected_at(self) -> datetime:
-        return min(alert.detected_at or datetime.max for alert in self.alerts)
+        return min(
+            alert.detected_at or datetime.max.replace(tzinfo=tz.tzutc())
+            for alert in self.alerts
+        )
 
     @property
     @abstractmethod
