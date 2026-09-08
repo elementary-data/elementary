@@ -299,6 +299,10 @@ jobs:
             databricks_catalog) DBT_ADAPTER="databricks" ;;
             athena) DBT_ADAPTER="athena-community" ;;
             spark) DBT_ADAPTER_EXTRA="[PyHive]" ;;
+            # dbt-fabric 1.11 (requires Python >=3.11) switched pyodbc ->
+            # mssql-python, and its service-principal connection string
+            # ("Authority Id=...") is rejected by the driver.
+            fabric) DBT_ADAPTER_VERSION_SPEC="<1.11" ;;
           esac
 
           if [ -n "$DBT_VERSION" ]; then
