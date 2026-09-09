@@ -14,6 +14,7 @@ from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
 
 
 class RunnerMethod(Enum):
+    # SUBPROCESS and API drive dbt-core 1.x (API requires dbt-core >= 1.5.0).
     SUBPROCESS = "subprocess"
     API = "api"
     DBT2 = "dbt2"
