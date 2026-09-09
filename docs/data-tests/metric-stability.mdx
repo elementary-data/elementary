@@ -1,0 +1,183 @@
+---
+title: "metric_stability"
+sidebarTitle: "Metric Stability"
+---
+
+import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+
+
+<AiGenerateTest />
+
+`elementary.metric_stability`
+
+Detects changes to a time bucket's own previously measured aggregates after the bucket has settled.
+
+Use it for historical revenue, costs, or other measures that should stop changing once late data has arrived. Anomaly detection compares different periods against each other; it may notice some effects of a restatement, but it does not directly enforce the expectation that settled history stays put.
+
+### Use Case
+
+"Alert me if last month's revenue changes after the books are closed."
+
+### Test Logic
+
+1. Measure the selected column metrics per time bucket, reusing Elementary's metric caching
+2. Ignore any bucket younger than `min_bucket_age`, and any measurement taken before the bucket reached that age
+3. For each remaining bucket, compare the newest measurement against its own earlier measurements: the previous one (`last_check`), the earliest retained one (`first_check`), or both
+4. If the change exceeds `max_change_percent` → **FAIL** (`change_type: value_changed`)
+5. If a previously measured bucket or dimension has no current metric in a window the test actually rescanned → **FAIL** (`change_type: missing_bucket`)
+6. Otherwise → **PASS**
+
+### Test configuration
+
+_Required configuration: `columns`, `metrics`, `timestamp_column`, `min_bucket_age`_
+
+{/* prettier-ignore */}
+<pre>
+ <code>
+  data_tests:
+    &nbsp;&nbsp;-- elementary.metric_stability:
+      &nbsp;&nbsp;&nbsp;&nbsp;arguments:
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">columns: [column name]</font> # Required
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">metrics: [metric name]</font> # Required
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/timestamp-column"><font color="#CD7D55">timestamp_column: column name</font></a> # Required
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">min_bucket_age:</font> # Required
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">period: [second | minute | hour | day | week]</font>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">count: int</font>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">change_since: [last_check | first_check]</font> # Optional - default: [last_check]
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">max_change_percent: int</font> # Optional - default: 0
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">time_bucket:</font></a> # Optional
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">period: [hour | day | week | month]</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/time-bucket"><font color="#CD7D55">count: 1</font></a>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/dimensions"><font color="#CD7D55">dimensions: [sql expression]</font></a> # Optional
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="/data-tests/anomaly-detection-configuration/where-expression"><font color="#CD7D55">where_expression: sql expression</font></a> # Optional
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">days_back: int</font> # Optional - derived from min_bucket_age
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#CD7D55">backfill_days: int</font> # Optional - default: days_back
+ </code>
+</pre>
+
+<RequestExample>
+
+```yml Models
+models:
+  - name: < model name >
+    data_tests:
+      - elementary.metric_stability:
+          arguments:
+            columns: [< column name >] # Required
+            metrics: [< metric name >] # Required
+            timestamp_column: < column name > # Required
+            min_bucket_age: # Required
+              period: < second | minute | hour | day | week >
+              count: < int >
+```
+
+```yml Any change to a settled day fails
+models:
+  - name: daily_revenue
+    data_tests:
+      - elementary.metric_stability:
+          arguments:
+            columns: [revenue_amount]
+            metrics: [sum]
+            timestamp_column: order_ts
+            min_bucket_age:
+              count: 4
+              period: week
+          config:
+            tags: ["elementary"]
+```
+
+```yml Catch cumulative drift with a tolerance
+models:
+  - name: orders
+    data_tests:
+      - elementary.metric_stability:
+          arguments:
+            columns: [cost_amount, revenue_amount]
+            metrics: [sum]
+            timestamp_column: order_ts
+            time_bucket: { count: 1, period: day }
+            min_bucket_age: { count: 4, period: week }
+            days_back: 90
+            change_since: [first_check]
+            max_change_percent: 1
+          config:
+            tags: ["elementary"]
+```
+
+```yml Per-dimension history
+models:
+  - name: orders
+    data_tests:
+      - elementary.metric_stability:
+          arguments:
+            columns: [revenue_amount]
+            metrics: [sum]
+            timestamp_column: order_ts
+            min_bucket_age: { count: 1, period: week }
+            dimensions: [region]
+            where_expression: "status = 'settled'"
+          config:
+            tags: ["elementary"]
+```
+
+</RequestExample>
+
+### Parameters
+
+| Parameter            | Required | Default        | Description                                                                          |
+| -------------------- | -------- | -------------- | ------------------------------------------------------------------------------------ |
+| `columns`            | Yes      | -              | Columns to monitor                                                                   |
+| `metrics`            | Yes      | -              | Column metrics to monitor per column, for example `sum`, `average`, `min`, `max`, `null_count`. Only metrics that apply to the column's data type are collected |
+| `timestamp_column`   | Yes      | -              | Column that buckets the data into periods                                            |
+| `min_bucket_age`     | Yes      | -              | How old a bucket must be before it is checked                                        |
+| `change_since`       | No       | `[last_check]` | Baselines to compare against: `last_check`, `first_check`, or both                   |
+| `max_change_percent` | No       | 0              | Permitted change before failing. `1` means 1%                                        |
+| `time_bucket`        | No       | `{period: day, count: 1}` | Time bucket configuration. `count` must be 1                              |
+| `dimensions`         | No       | -              | SQL expressions to split each bucket by                                              |
+| `where_expression`   | No       | -              | SQL expression to filter the data                                                    |
+| `days_back`          | No       | Derived from `min_bucket_age` | Observation window                                                     |
+| `backfill_days`      | No       | `days_back`    | Days re-measured on each run, for incremental models and sources                      |
+
+### Choosing a timestamp column
+
+Choose a business or event timestamp whose historical periods you want to protect. A row's ingestion or last-modified timestamp can move it between buckets when the row is updated, which answers a different question.
+
+### Coverage and cost
+
+`min_bucket_age` measures time since the bucket ended. Measurements taken before that age are excluded from both baselines, because a bucket's own settling would otherwise become its baseline. The first eligible measurement only establishes a baseline; a pass at that point does not yet verify historical stability.
+
+`days_back` bounds the observation window. The drift example above protects daily buckets roughly 28 to 90 days old, not all historical data, and corrections outside that window are not detected. Incremental models and sources also use `backfill_days` to control re-measurement; it defaults to `days_back`, and an explicitly shorter backfill window reduces coverage to the buckets actually scanned on that run.
+
+Without an explicit window, the test derives one from the settling age (roughly twice the age, with room for whole buckets). That is a convenience default, not a business retention policy. Set the window to cover the corrections you care about, and run often enough to measure each eligible bucket more than once. Longer windows increase rescanning and metric-history storage costs.
+
+### Baselines and legitimate corrections
+
+- `last_check` compares against the previous eligible measurement. With zero tolerance, 100 → 120 fails, and a subsequent 120 passes. New measurements become the baseline automatically, including measurements from failing runs.
+- `first_check` compares against the earliest retained eligible measurement. It catches cumulative drift: 100 → 110 → 120 exceeds a 15% threshold overall even though each step is smaller. A corrected 120 keeps failing against 100 until it returns within tolerance or the bucket leaves coverage.
+- Selecting both fails if either comparison exceeds the threshold.
+
+Choose `last_check` when a change should be reported once and then accepted automatically. Choose `first_check` when continued deviation should remain a failure.
+
+<Warning>
+There is no explicit accept-or-reset-baseline operation. Switching to `last_check` changes the policy; it does not reset `first_check`. The `first_check` baseline is the earliest *retained* measurement, not an immutable approved snapshot, so history retention and cleanup affect it. Do not use this test as a substitute for an auditable financial close or an immutable snapshot.
+</Warning>
+
+### Dimensions
+
+Each bucket and dimension combination is a separate metric with its own history and baseline. A restatement confined to one dimension value is still reported, and a dimension value that stops appearing is reported as a missing bucket. Every extra combination is another measurement to store and compare.
+
+### Failure details
+
+With [test result samples](/data-tests/test-result-samples) enabled, stored samples include the bucket, column, metric, dimensions, current and baseline values, measurement timestamps, and absolute and percentage deltas. Normal Elementary sample limits and privacy controls apply.
+
+`change_type: value_changed` reports numeric movement above the configured percentage threshold. `max_change_percent: 1` means 1%, not 100%. The default is zero with a tiny relative floor that suppresses floating-point aggregation noise. Movement away from a zero baseline always fails, because relative change is undefined there.
+
+`change_type: missing_bucket` means a previously measured bucket or dimension has no current metric in a window the test actually rescanned. It fails regardless of the percentage tolerance, reports a NULL current value alongside the last observed value, and remains a failure while the bucket is missing and within coverage. It does not invent a zero for aggregates such as average or minimum.
+
+### Notes
+
+- `time_bucket.count` must be 1. A multi-step bucket cannot be measured on a stable grid across runs, so the test would never report a change
+- `min_bucket_age` accepts `second`, `minute`, `hour`, `day` and `week`. Express an age over longer calendar periods in days, for example `{count: 60, period: day}`
+- A `days_back` too small to leave room for whole buckets past `min_bucket_age` raises an error rather than passing without ever comparing anything
+- Stable aggregates do not guarantee unchanged source rows. Offsetting changes can cancel in a sum, so pair this test with row-level checks when record immutability is the requirement
