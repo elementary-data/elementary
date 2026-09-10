@@ -1004,3 +1004,49 @@ def test_multi_filters():
         "test_alert_1",
         "test_alert_2",
     ]
+
+
+def test_reused_status_does_not_crash_filter_alerts():
+    """Regression test for dbt State 'reused' status crashing filter_alerts.
+
+    dbt State (v1.11+) introduces a 'reused' run status for models skipped
+    because their state hasn't changed. When such an alert reached
+    filter_alerts the call to Status('reused') raised ValueError because
+    'reused' was not a member of the Status enum.
+    """
+    reused_alert = PendingAlertSchema(
+        id="reused_model_alert",
+        alert_class_id="elementary.model_id_reused",
+        type=AlertTypes.MODEL,
+        detected_at=datetime(2022, 10, 10, 10, 0, 0),
+        created_at=datetime(2022, 10, 10, 10, 0, 0),
+        updated_at=datetime(2022, 10, 10, 10, 0, 0),
+        status=AlertStatus.PENDING,
+        data=ModelAlertDataSchema(
+            id="reused_1",
+            alert_class_id="elementary.model_id_reused",
+            model_unique_id="elementary.model_id_reused",
+            alias="reused_model",
+            path="my/path",
+            original_path="",
+            materialization="table",
+            message="",
+            full_refresh=False,
+            detected_at=datetime(2022, 10, 10, 10, 0, 0),
+            tags=[],
+            model_meta={},
+            status="reused",
+            database_name="test_db",
+            schema_name="test_schema",
+            resource_type=ResourceType.MODEL,
+        ),
+    )
+
+    # Must not raise ValueError("'reused' is not a valid Status").
+    # The alert is correctly filtered out by the default status filter (which
+    # only surfaces FAIL / ERROR / RUNTIME_ERROR / WARN).
+    result = filter_alerts([reused_alert], FiltersSchema())
+    assert len(result) == 0
+
+    # Status enum must include REUSED
+    assert Status("reused") is Status.REUSED
