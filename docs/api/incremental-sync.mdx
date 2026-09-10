@@ -37,6 +37,17 @@ curl -H "Authorization: Bearer $ELEMENTARY_TOKEN" \
 
 Timestamps are UTC ISO-8601.
 
+<Note>
+  **What `synced_at` means.** `synced_at` marks when an object was **created or
+  last changed** in Elementary — not when it was last *seen*. Unchanged objects
+  keep their existing `synced_at`, and some objects that predate this field may
+  show a `1970-01-01T00:00:00` placeholder. This is expected and safe for
+  incremental loading: every object is returned by the initial full scan
+  (regardless of `synced_at`), and any later change gives it a fresh `synced_at`,
+  so it reappears in the `synced_since` feed. Treat `synced_at` as a change
+  marker for driving upserts, not as an absolute "last refreshed" timestamp.
+</Note>
+
 ## Recommended loop
 
 1. Store the wall-clock time `T` when you start a sync.
