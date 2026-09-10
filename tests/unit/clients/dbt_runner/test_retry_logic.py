@@ -8,6 +8,15 @@ import pytest
 from elementary.clients.dbt.command_line_dbt_runner import _TRANSIENT_MAX_RETRIES
 from elementary.exceptions.exceptions import DbtCommandError
 
+# The dbt Python API only exists in dbt-core 1.x; with dbt-core 2.x or a
+# binary-only Fusion installation the api_dbt_runner module can't be imported.
+try:
+    import elementary.clients.dbt.api_dbt_runner  # noqa: F401
+
+    HAS_DBT_PYTHON_API = True
+except ImportError:
+    HAS_DBT_PYTHON_API = False
+
 # Patch tenacity wait to zero so tests don't block on exponential backoff.
 _ZERO_WAIT = mock.patch(
     "elementary.clients.dbt.command_line_dbt_runner._TRANSIENT_WAIT_MULTIPLIER", 0
@@ -219,6 +228,9 @@ def _make_api_runner(**kwargs):
         return APIDbtRunner(**defaults)
 
 
+@pytest.mark.skipif(
+    not HAS_DBT_PYTHON_API, reason="The dbt Python API is not available"
+)
 @_ZERO_WAIT
 class TestAPIDbtRunnerTransientDetection:
     """Test that APIDbtRunner surfaces exception text for transient error detection.
