@@ -18,6 +18,10 @@ Specific monitors are detailed in the table below and can be configured using th
 The test checks the data type of each column and only executes monitors that are relevant to it.
 You can use `column_anomalies` param to override the default monitors, and `exclude_prefix` / `exclude_regexp` to exclude columns from the test.
 
+<Note>
+  **BigQuery: nested STRUCT fields.** `all_columns_anomalies` monitors top-level columns and does not automatically expand nested STRUCT fields. To monitor a nested field, add a [`column_anomalies`](/data-tests/anomaly-detection-tests/column-anomalies) test that references it by its dotted path, for example `user.address.city`. Fields under a `REPEATED` (array) ancestor are not supported.
+</Note>
+
 <ColumnMetrics />
 
 ### Test configuration

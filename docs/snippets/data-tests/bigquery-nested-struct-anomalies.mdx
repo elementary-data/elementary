@@ -1,0 +1,5 @@
+<Note>
+  **BigQuery: nested STRUCT fields.** On BigQuery you can reference nested STRUCT leaf fields by their dotted path, for example `user.address.city`, wherever you name a column or dimension in this test. There is no need to flatten them into their own columns first, and the full dotted path is preserved in alerts.
+
+  Fields under a `REPEATED` (array) ancestor are not supported.
+</Note>
