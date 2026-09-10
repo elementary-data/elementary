@@ -10,11 +10,6 @@ from external_seeders.base import ExternalSeeder
 class SparkExternalSeeder(ExternalSeeder):
     """Load seeds into Spark via PyHive from CSV files mounted in the container."""
 
-    # dbt_project.yml sets ``+schema: test_seeds`` for seeds and the default
-    # ``generate_schema_name`` macro returns that verbatim, so the actual seed
-    # schema is always ``test_seeds`` regardless of the target schema name.
-    SEED_SCHEMA = "test_seeds"
-
     @staticmethod
     def _q(name: str) -> str:
         """Quote a Spark SQL identifier, escaping any embedded backticks."""
@@ -23,7 +18,7 @@ class SparkExternalSeeder(ExternalSeeder):
     def load(self) -> None:
         failures: list[str] = []
         q = self._q
-        seed_schema = self.SEED_SCHEMA
+        seed_schema = self.schema_name
         print(
             f"\n=== Loading Spark seeds via external CSV tables "
             f"(schema={seed_schema}) ==="
@@ -39,14 +34,14 @@ class SparkExternalSeeder(ExternalSeeder):
         host = os.environ.get("SPARK_HOST", "127.0.0.1")
         port = int(os.environ.get("SPARK_PORT", "10000"))
 
-        print(f"Connecting to Spark Thrift at {host}:{port}...")
+        print(f"Connecting to Spark Thrift at {host}:{port}...")  # noqa: E231
         conn = None
         cursor = None
         try:
             conn = hive.Connection(host=host, port=port, username="dbt")
             cursor = conn.cursor()
             print(f"Creating schema '{seed_schema}'...")
-            cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{seed_schema}`")
+            cursor.execute(f"CREATE DATABASE IF NOT EXISTS {q(seed_schema)}")
 
             for subdir, csv_path, table_name in self.iter_seed_csvs():
                 fname = os.path.basename(csv_path)

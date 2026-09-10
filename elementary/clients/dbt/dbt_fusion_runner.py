@@ -1,14 +1,11 @@
-import os
+import warnings
 
-from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
+from elementary.clients.dbt.dbt2_runner import Dbt2Runner as DbtFusionRunner
 
-DBT_FUSION_PATH = os.getenv("DBT_FUSION_PATH", "~/.local/bin/dbt")
+warnings.warn(
+    "DbtFusionRunner is deprecated, use Dbt2Runner instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
-
-class DbtFusionRunner(SubprocessDbtRunner):
-    def _get_dbt_command_name(self) -> str:
-        return os.path.expanduser(DBT_FUSION_PATH)
-
-    def _run_deps_if_needed(self):
-        # Currently we don't support auto-updating deps for dbt fusion
-        return
+__all__ = ["DbtFusionRunner"]
