@@ -37,7 +37,7 @@ def run_operation():
     type=click.Path(exists=True),
     default=None,
     help="Which directory to look in for the profiles.yml file. "
-    "If not set, edr will look in the current working directory first, then HOME/.dbt/",
+    "If not set, edr will look in HOME/.dbt/",
 )
 @click.option(
     "--target-path",
