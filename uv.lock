@@ -19,6 +19,7 @@ constraints = [
     { name = "cryptography", specifier = ">=50.0.0" },
     { name = "idna", specifier = ">=3.15" },
     { name = "pyasn1", specifier = ">=0.6.4" },
+    { name = "sqlparse", specifier = ">=0.6.0" },
     { name = "urllib3", specifier = ">=2.7.0" },
 ]
 
@@ -891,7 +892,7 @@ wheels = [
 
 [[package]]
 name = "dbt-core"
-version = "1.12.2"
+version = "1.12.4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agate" },
@@ -920,9 +921,9 @@ dependencies = [
     { name = "sqlparse" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/08/58/b5ba1961d9fd7ec502f3d0790a9fb4e1b951a4828c3af243264e786b4391/dbt_core-1.12.2.tar.gz", hash = "sha256:9c4d60c58ed759ceff3cc20c065420abc4d26cb092b0e142b39b8747ee43c79b", size = 1032794, upload-time = "2026-08-12T19:28:39.548Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/00/75/a9e29001e7a759ab9c656102c16576729fc27a4980be450fb0a532e24086/dbt_core-1.12.4.tar.gz", hash = "sha256:cf869cac339eb9d108181fc5b9bce0a467917e0515b48498e9d49311c82375b8", size = 1036040, upload-time = "2026-09-08T10:01:41.303Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/08/c5/24ce8e3ef4b72c20b5780c78ff1ce8357913ef746cebb009b94150991336/dbt_core-1.12.2-py3-none-any.whl", hash = "sha256:ecc5bc66eb09de0411658d159e973cf503bb1605589a7c2b3fb82a1637e31d32", size = 1129546, upload-time = "2026-08-12T19:28:37.791Z" },
+    { url = "https://files.pythonhosted.org/packages/bb/c4/bf8dbcce1811964b2daad4abfa35577d35431ae634975599f317ccf227c6/dbt_core-1.12.4-py3-none-any.whl", hash = "sha256:a5d567a54f7ed44c5f08da86f7c01d5ca42f6756e69a9183b514fd37a2e89e1d", size = 1132392, upload-time = "2026-09-08T10:01:39.779Z" },
 ]
 
 [[package]]
@@ -1082,7 +1083,7 @@ wheels = [
 
 [[package]]
 name = "dbt-redshift"
-version = "1.11.0"
+version = "1.11.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agate" },
@@ -1094,9 +1095,9 @@ dependencies = [
     { name = "requests" },
     { name = "sqlparse" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/5e/23/e4ab04b3ea2c6084983e6d914d346ddd9a7f26ec4eec243a3c5afb209cc1/dbt_redshift-1.11.0.tar.gz", hash = "sha256:95366ac6bdfca931ff0b4943637b7515dd7421018ec7fbb508ddd7271163c9fc", size = 108919, upload-time = "2026-07-16T17:03:31.203Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/23/da/a96de8541a4684e5ca2584fb5cff389b7bae3fb2f47e77de44e1e8902045/dbt_redshift-1.11.1.tar.gz", hash = "sha256:9921457b139efa694e74c6c6c316daa56bb2034e65c1699faada8ae8297ab800", size = 109170, upload-time = "2026-08-21T07:25:23.894Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/37/6c/35f19be88d864db294658bc14868b93a8a910585e5a5ca19b164c68cd56a/dbt_redshift-1.11.0-py3-none-any.whl", hash = "sha256:e1484063b3728394d1a79da8e86aac2b847bf9fc7101061c3cca719b7b951625", size = 63278, upload-time = "2026-07-16T17:03:29.891Z" },
+    { url = "https://files.pythonhosted.org/packages/26/d7/f5e667584ae72ee88622efc05f6dfa619a1daf3faf8359a99d2b90e588fc/dbt_redshift-1.11.1-py3-none-any.whl", hash = "sha256:a1066a5818e6004500995790037c23aa740296fc852fb3b6278df1f358581d3b", size = 63277, upload-time = "2026-08-21T07:25:22.273Z" },
 ]
 
 [[package]]
@@ -4184,11 +4185,11 @@ wheels = [
 
 [[package]]
 name = "sqlparse"
-version = "0.5.5"
+version = "0.6.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/90/76/437d71068094df0726366574cf3432a4ed754217b436eb7429415cf2d480/sqlparse-0.5.5.tar.gz", hash = "sha256:e20d4a9b0b8585fdf63b10d30066c7c94c5d7a7ec47c889a2d83a3caa93ff28e", size = 120815, upload-time = "2025-12-19T07:17:45.073Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5f/d3/3f06a1006f2261d1342aefb3c71eed02f5d4ca5bdbecd86ebc12ad38306e/sqlparse-0.6.0.tar.gz", hash = "sha256:113c35c75365ab9cc9c7231d68c6428fb11c085fc8e9eb1ad659b7ddbf6cd2b9", size = 178477, upload-time = "2026-08-13T19:16:06.396Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/49/4b/359f28a903c13438ef59ebeee215fb25da53066db67b305c125f1c6d2a25/sqlparse-0.5.5-py3-none-any.whl", hash = "sha256:12a08b3bf3eec877c519589833aed092e2444e68240a3577e8e26148acc7b1ba", size = 46138, upload-time = "2025-12-19T07:17:46.573Z" },
+    { url = "https://files.pythonhosted.org/packages/d9/50/f00935da0ec7cbf325f8dc4f772ae46fbc7b672dd62876e73f0a94adda57/sqlparse-0.6.0-py3-none-any.whl", hash = "sha256:b861c0288ce2fa56209a9a6412d2e066ac664b3873b89c26c9d8415e8e32996f", size = 50070, upload-time = "2026-08-13T19:16:04.062Z" },
 ]
 
 [[package]]
