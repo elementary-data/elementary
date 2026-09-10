@@ -4,6 +4,7 @@ title: "dimension_anomalies"
 ---
 
 import AiGenerateTest from '/snippets/ai-generate-test.mdx';
+import BigQueryNestedStruct from '/snippets/data-tests/bigquery-nested-struct-anomalies.mdx';
 
 
 <AiGenerateTest />
@@ -12,6 +13,8 @@ import AiGenerateTest from '/snippets/ai-generate-test.mdx';
 `elementary.dimension_anomalies`
 
 The test counts rows grouped by given `dimensions` (columns/expressions).
+
+<BigQueryNestedStruct />
 
 This test practically monitors the frequency of values in the configured dimension over time, and alerts on unexpected changes in the distribution.
 It is best to configure it on low-cardinality fields.
