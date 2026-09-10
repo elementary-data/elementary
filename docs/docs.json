@@ -418,8 +418,13 @@
               "data-tests/anomaly-detection-tests/volume-anomalies",
               "data-tests/anomaly-detection-tests/freshness-anomalies",
               "data-tests/anomaly-detection-tests/event-freshness-anomalies",
-              "data-tests/anomaly-detection-tests/dimension-anomalies",
-              "data-tests/anomaly-detection-tests/understanding-dimension-anomalies",
+              {
+                "group": "Dimension anomalies",
+                "pages": [
+                  "data-tests/anomaly-detection-tests/dimension-anomalies",
+                  "data-tests/anomaly-detection-tests/understanding-dimension-anomalies"
+                ]
+              },
               "data-tests/anomaly-detection-tests/all-columns-anomalies",
               "data-tests/anomaly-detection-tests/column-anomalies",
               "data-tests/anomaly-detection-tests/Anomaly-troubleshooting-guide"
