@@ -1,0 +1,73 @@
+---
+title: "Frequently asked questions"
+sidebarTitle: "FAQ"
+description: "Common questions about Elementary: dbt, cloud tests, Cloud vs OSS, AI agents, credits, security, and supported data warehouses."
+icon: "circle-question"
+---
+
+<AccordionGroup>
+  <Accordion title="Does Elementary require dbt?">
+    No. You connect your data warehouse to get started - Elementary reads warehouse metadata and runs cloud tests (freshness, volume, data contracts, custom SQL) without a dbt project. Elementary is native to the modern data stack and works with any supported warehouse; dbt is one popular integration, not a prerequisite. If you do use dbt, the Elementary dbt package adds automatic collection of your dbt test and run results on top.
+  </Accordion>
+
+  <Accordion title="Do Elementary tests run in code or in the UI?">
+    Both - you choose. dbt and Elementary tests defined in your dbt project run in your pipeline as code (edit them in the UI and Elementary opens a pull request, so code stays the source of truth). [Cloud tests](/cloud/features/data-tests/cloud-tests-overview) are configured in the UI and run in Elementary Cloud, with no dbt project and no pull request required.
+  </Accordion>
+
+  <Accordion title="Is Elementary only used by data engineers?">
+    No. Data engineers set up tests and monitors in code, but Elementary is a shared platform where the whole team collaborates on data quality. Analysts and analytics engineers add and edit tests from the UI without writing code, business stakeholders follow [data health scores](/cloud/features/collaboration-and-communication/data-health) and catalog documentation, and on-call responders manage incidents and alerts. Everyone works from the same view of what's trusted and what's broken.
+  </Accordion>
+
+  <Accordion title="How do I know if I need Cloud or OSS?">
+    Short answer: choose **OSS** for free, self-hosted observability on a single dbt project; choose **Cloud** to cover your entire data stack with automation, governance, AI agents, and enterprise security - and Cloud works with your warehouse directly, so dbt isn't required to start.
+
+    **Elementary OSS** is a free, open-source dbt package and CLI you host yourself. It covers one dbt project: dbt test and run results, table-level lineage, anomaly detection tests for freshness and volume, and basic Slack or Teams alerts, all in a self-hosted report. Your data and metadata stay entirely in your environment.
+
+    **Elementary Cloud** is a fully managed platform for data observability, quality, and governance. It covers many projects end to end and connects to your warehouse directly. On top of everything in OSS, it adds:
+    - **ML-powered anomaly detection** and no-code **cloud tests** (data contracts, custom SQL, schema validation)
+    - **Column-level lineage across systems** - from source systems through the warehouse and dbt to BI dashboards and AI consumption
+    - **Incident management** with alert rules and routing
+    - **Governance**: catalog, metadata management, AI-generated descriptions, critical assets
+    - **Performance and cost monitoring**
+    - A team of **AI agents** and an **MCP server**, backed by a Context Engine that knows your whole stack
+    - **Enterprise security**: RBAC, SSO, audit logs, PrivateLink, SOC 2 Type II and HIPAA
+
+    If you're not sure, [talk to the team](https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs) and they'll help you decide. See the full [Cloud vs OSS comparison](/cloud/cloud-vs-oss).
+  </Accordion>
+
+  <Accordion title="What are the Elementary AI agents?">
+    A team of specialized agents - [governance](/cloud/ai-agents/governance-agent), [triage & resolution](/cloud/ai-agents/triage-resolution-agent), [test recommendation](/cloud/ai-agents/test-recommendation-agent), [catalog](/cloud/ai-agents/catalog-agent), [performance & cost](/cloud/ai-agents/performance-cost-agent), and [code review](/cloud/features/ci) - backed by a [Context Engine](/cloud/ai-agents/context-engine) built from every integration you connect. Every action goes through a pull request or explicit confirmation, so your team stays in control of what gets merged. Available on Elementary Cloud.
+  </Accordion>
+
+  <Accordion title="Is data quality and health exposed to agents?">
+    Yes. Through the [MCP server](/cloud/mcp/overview) and the [Context Engine](/cloud/ai-agents/context-engine), Elementary exposes data health, quality dimensions, test results, and lineage to your AI agents and copilots - so an agent can check whether a table is trusted and fresh before it acts on it. This is how Elementary helps make your data ready for AI.
+  </Accordion>
+
+  <Accordion title="What are AI credits, and what uses them?">
+    [AI credits](/cloud/ai-agents/ai-credits) are consumed only when Elementary's AI does the reasoning - incident investigation, data discovery, test generation, and CI PR review. Things that use no credits: all MCP tool calls (the connected LLM reasons and bills to its own provider), anomaly detection and monitors (statistical, not LLM), Slack alerts, and lineage or catalog browsing. You can also [bring your own LLM key (BYOK)](/cloud/ai-agents/byok) so reasoning bills to your Anthropic or OpenAI account instead of Elementary credits.
+  </Accordion>
+
+  <Accordion title="Does Elementary access my data? Is it secure?">
+    No. Elementary Cloud has no read access to the raw data in your warehouse - it extracts and stores only metadata, logs, and aggregated metrics, encrypted in transit and at rest. It's SOC 2 Type II certified and HIPAA compliant, uses service accounts with granular and minimal permissions, and offers deployment options with no direct access to your warehouse. Read more about [security and privacy](/cloud/general/security-and-privacy).
+  </Accordion>
+
+  <Accordion title="Which data warehouses does Elementary support?">
+    Elementary supports Snowflake, BigQuery, Redshift, Databricks, Athena, ClickHouse, Postgres, Dremio, DuckDB, Microsoft Fabric, Spark, SQL Server, Trino, and Vertica. You connect your warehouse directly to get started. See the [data warehouse integrations](/cloud/integrations/elementary-integrations).
+  </Accordion>
+
+  <Accordion title="Can I connect Elementary to Cursor, Claude, or other AI tools?">
+    Yes. The [Elementary MCP server](/cloud/mcp/overview) connects your environment to any MCP-compatible client - Cursor, Claude, and others - so your AI tools query and act on live context from your stack. MCP tool calls use no Elementary AI credits; the connected LLM handles reasoning and bills to its own provider.
+  </Accordion>
+
+  <Accordion title="How much does Elementary cost?">
+    Elementary OSS is open source and free to use. For Elementary Cloud pricing, see the [pricing page](https://www.elementary-data.com/pricing) or [talk to the team](https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs) and they'll walk you through the options for your setup.
+  </Accordion>
+
+  <Accordion title="How should I get started?">
+    We recommend [talking to the team](https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs) - they'll help set up Elementary and open an account for you. To explore on your own first, see [what Elementary is](/cloud/what-is-elementary) and the [Cloud vs OSS comparison](/cloud/cloud-vs-oss).
+  </Accordion>
+
+  <Accordion title="Where can I learn from other teams and stay in touch?">
+    Join the Elementary community on Slack - it's where data teams share how they set up tests, monitors, and governance, ask questions, and hear about new features. [Join the community](https://elementary-data.com/community). You can also [book a call with the team](https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs) for hands-on help.
+  </Accordion>
+</AccordionGroup>
