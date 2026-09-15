@@ -164,6 +164,30 @@
         "title": "Asset",
         "type": "object"
       },
+      "AssetHealthScore": {
+        "properties": {
+          "asset_id": {
+            "description": "ID of the asset (matches `Asset.id`).",
+            "title": "Asset Id",
+            "type": "string"
+          },
+          "dimensions": {
+            "description": "Latest score per dimension. Dimensions with no results in the last 7 days are omitted.",
+            "items": {
+              "$ref": "#/components/schemas/DimensionHealthScore"
+            },
+            "title": "Dimensions",
+            "type": "array"
+          },
+          "total": {
+            "$ref": "#/components/schemas/HealthScoreBucket",
+            "description": "Weighted score across all dimensions, using the environment's configured dimension weights."
+          }
+        },
+        "required": ["asset_id", "total", "dimensions"],
+        "title": "AssetHealthScore",
+        "type": "object"
+      },
       "AssetLineage": {
         "properties": {
           "downstream_asset_id": {
@@ -424,6 +448,42 @@
         "title": "ColumnLineage",
         "type": "object"
       },
+      "DimensionHealthScore": {
+        "properties": {
+          "bucket_at": {
+            "description": "Start of the hourly bucket this score was computed for.",
+            "format": "date-time",
+            "title": "Bucket At",
+            "type": "string"
+          },
+          "dimension": {
+            "description": "Extensible enum. Data-quality dimension this score covers. New values may be added over time.",
+            "examples": [
+              "completeness",
+              "uniqueness",
+              "freshness",
+              "validity",
+              "accuracy",
+              "consistency"
+            ],
+            "title": "Dimension",
+            "type": "string"
+          },
+          "score": {
+            "description": "Health score in the range 0-1 for the most recent hourly bucket.",
+            "title": "Score",
+            "type": "number"
+          },
+          "test_count": {
+            "description": "Number of test results that contributed to this score.",
+            "title": "Test Count",
+            "type": "integer"
+          }
+        },
+        "required": ["score", "test_count", "bucket_at", "dimension"],
+        "title": "DimensionHealthScore",
+        "type": "object"
+      },
       "Direction": {
         "enum": ["asc", "desc"],
         "title": "Direction",
@@ -503,6 +563,29 @@
         "title": "Environment",
         "type": "object"
       },
+      "HealthScoreBucket": {
+        "properties": {
+          "bucket_at": {
+            "description": "Start of the hourly bucket this score was computed for.",
+            "format": "date-time",
+            "title": "Bucket At",
+            "type": "string"
+          },
+          "score": {
+            "description": "Health score in the range 0-1 for the most recent hourly bucket.",
+            "title": "Score",
+            "type": "number"
+          },
+          "test_count": {
+            "description": "Number of test results that contributed to this score.",
+            "title": "Test Count",
+            "type": "integer"
+          }
+        },
+        "required": ["score", "test_count", "bucket_at"],
+        "title": "HealthScoreBucket",
+        "type": "object"
+      },
       "HistoryOrderBy": {
         "enum": ["start_time", "id"],
         "title": "HistoryOrderBy",
@@ -512,6 +595,39 @@
         "enum": ["id", "synced_at"],
         "title": "OrderBy",
         "type": "string"
+      },
+      "PaginatedResponse_AssetHealthScore_": {
+        "properties": {
+          "has_more": {
+            "default": false,
+            "description": "The only signal to continue pagination; a short page may still have more items because permission filtering can trim rows.",
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "description": "Objects returned in the current page.",
+            "items": {
+              "$ref": "#/components/schemas/AssetHealthScore"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Opaque cursor for the next page, valid only with identical query parameters.",
+            "title": "Next Cursor"
+          }
+        },
+        "required": ["items"],
+        "title": "PaginatedResponse[AssetHealthScore]",
+        "type": "object"
       },
       "PaginatedResponse_AssetLineage_": {
         "properties": {
@@ -1188,9 +1304,16 @@
             "title": "Exception"
           },
           "failure_count": {
-            "description": "Number of failed rows or detected issues.",
-            "title": "Failure Count",
-            "type": "integer"
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Number of failed rows or detected issues. Null when the execution does not produce a failing-row count (for example volume, freshness, or anomaly cloud tests).",
+            "title": "Failure Count"
           },
           "id": {
             "description": "Identifier of this execution.",
@@ -1294,7 +1417,7 @@
     }
   },
   "info": {
-    "description": "The Elementary Public API is a REST interface for programmatically reading\nElementary's assets, columns, lineage, tests, and test results for one\nenvironment.\n\n**Authentication.** Send a bearer token (personal or account token) in the\n`Authorization` header. The token resolves to an account; results are scoped to\nthe environments that token may view.\n\n**Environment scope.** Every resource lives under `/{env_id}`. Call\n`GET /environments` first to discover the ids you can access.\n\n**Pagination.** List endpoints are keyset-paginated: pass `limit` (default 500,\nmax 2000) and follow `next_cursor` until `has_more` is `false`. Cursors are opaque\nand bound to the filters that produced them \u2014 reusing a cursor with different\nfilters returns `400`.\n\n**Incremental sync.** Every dataset supports a full scan (default). Assets,\ncolumns, and tests also expose two incremental feeds: `synced_since` (upserts)\nand `deleted_since` (soft-delete tombstones). A test's `synced_at` tracks its\ndefinition \u2014 new executions do not bump it.\n\nLatest test executions and per-test execution history are **not** incremental.\nLatest executions are a full snapshot replaced in place: re-read it. Execution\nhistory is append-only and scoped to one test, filtered by `start_time_from` /\n`start_time_to` (last 30 days by default).\n\n**Rate limiting.** Requests are rate-limited per account; responses carry\n`RateLimit-*` headers and `429` responses include `Retry-After`.\n\n_Beta: the shape may change while we co-design with early adopters._\n",
+    "description": "The Elementary Public API is a REST interface for programmatically reading\nElementary's assets, columns, lineage, tests, and test results for one\nenvironment.\n\n**Authentication.** Send a bearer token (personal or account token) in the\n`Authorization` header. The token resolves to an account; results are scoped to\nthe environments that token may view.\n\n**Environment scope.** Every resource lives under `/{env_id}`. Call\n`GET /environments` first to discover the ids you can access.\n\n**Pagination.** List endpoints are keyset-paginated: pass `limit` (default 500,\nmax 2000) and follow `next_cursor` until `has_more` is `false`. Cursors are opaque\nand bound to the filters that produced them \u2014 reusing a cursor with different\nfilters returns `400`.\n\n**Incremental sync.** Every dataset supports a full scan (default). Assets,\ncolumns, and tests also expose two incremental feeds: `synced_since` (upserts)\nand `deleted_since` (soft-delete tombstones). A test's `synced_at` tracks its\ndefinition \u2014 new executions do not bump it.\n\nLatest test executions and per-test execution history are **not** incremental.\nLatest executions are a full snapshot replaced in place: re-read it. Execution\nhistory is append-only and scoped to one test, filtered by `start_time_from` /\n`start_time_to` (last 30 days by default).\n\n**Lookback limit.** Explicit lower bounds (`synced_since`, `deleted_since`,\n`start_time_from`) reach back at most 90 days; an older timestamp is treated as\n90 days ago rather than rejected. Omitting the filter still returns the full\ncurrent snapshot.\n\n**Rate limiting.** Requests are rate-limited per account; responses carry\n`RateLimit-*` headers and `429` responses include `Retry-After`.\n\n_Beta: the shape may change while we co-design with early adopters._\n",
     "title": "Elementary Public API",
     "version": "beta"
   },
@@ -1418,6 +1541,329 @@
         },
         "summary": "List environments",
         "tags": ["Environments"]
+      }
+    },
+    "/public/beta/{env_id}/asset-health-scores": {
+      "get": {
+        "description": "Lists the current health score of every asset that has test results in the last 7 days \u2014 a full snapshot, recomputed hourly. Not an incremental feed: re-read the snapshot instead of tracking changes. Ordered by `asset_id`.",
+        "operationId": "list_asset_health_scores_public_beta__env_id__asset_health_scores_get",
+        "parameters": [
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Opaque cursor from a previous response's `next_cursor`. Reuse it only with the identical query parameters that produced it.",
+              "title": "Cursor"
+            }
+          },
+          {
+            "description": "Maximum items to return per page (1-2000).",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "description": "Maximum items to return per page (1-2000).",
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return only the health scores of these asset ids.",
+            "in": "query",
+            "name": "asset_ids",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only the health scores of these asset ids.",
+              "title": "Asset Ids"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_AssetHealthScore_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "List asset health scores",
+        "tags": ["Asset health scores"]
+      }
+    },
+    "/public/beta/{env_id}/asset-health-scores/{asset_id}": {
+      "get": {
+        "description": "Fetches the current health score of a single asset. Returns 404 if the asset doesn't exist in this environment or has no test results in the last 7 days.",
+        "operationId": "get_asset_health_score_public_beta__env_id__asset_health_scores__asset_id__get",
+        "parameters": [
+          {
+            "description": "Asset identifier (`Asset.id`).",
+            "in": "path",
+            "name": "asset_id",
+            "required": true,
+            "schema": {
+              "description": "Asset identifier (`Asset.id`).",
+              "title": "Asset Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssetHealthScore"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "Get an asset health score",
+        "tags": ["Asset health scores"]
       }
     },
     "/public/beta/{env_id}/asset-lineage": {
@@ -1686,7 +2132,7 @@
             }
           },
           {
-            "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+            "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
             "in": "query",
             "name": "synced_since",
             "required": false,
@@ -1700,12 +2146,12 @@
                   "type": "null"
                 }
               ],
-              "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+              "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
               "title": "Synced Since"
             }
           },
           {
-            "description": "Tombstones feed: assets whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+            "description": "Tombstones feed: assets whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
             "in": "query",
             "name": "deleted_since",
             "required": false,
@@ -1719,7 +2165,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Tombstones feed: assets whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+              "description": "Tombstones feed: assets whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
               "title": "Deleted Since"
             }
           },
@@ -1995,7 +2441,7 @@
             }
           },
           {
-            "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+            "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
             "in": "query",
             "name": "synced_since",
             "required": false,
@@ -2009,12 +2455,12 @@
                   "type": "null"
                 }
               ],
-              "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+              "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
               "title": "Synced Since"
             }
           },
           {
-            "description": "Tombstones feed: assets whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+            "description": "Tombstones feed: assets whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
             "in": "query",
             "name": "deleted_since",
             "required": false,
@@ -2028,7 +2474,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Tombstones feed: assets whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+              "description": "Tombstones feed: assets whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
               "title": "Deleted Since"
             }
           },
@@ -2488,7 +2934,7 @@
             }
           },
           {
-            "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+            "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
             "in": "query",
             "name": "synced_since",
             "required": false,
@@ -2502,12 +2948,12 @@
                   "type": "null"
                 }
               ],
-              "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+              "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
               "title": "Synced Since"
             }
           },
           {
-            "description": "Tombstones feed: assets whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+            "description": "Tombstones feed: assets whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
             "in": "query",
             "name": "deleted_since",
             "required": false,
@@ -2521,7 +2967,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Tombstones feed: assets whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+              "description": "Tombstones feed: assets whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
               "title": "Deleted Since"
             }
           },
@@ -3033,7 +3479,7 @@
             }
           },
           {
-            "description": "Upserts feed: edges whose downstream column `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+            "description": "Upserts feed: edges whose downstream column `synced_at` >= this time (inclusive). Orders by `synced_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
             "in": "query",
             "name": "synced_since",
             "required": false,
@@ -3047,12 +3493,12 @@
                   "type": "null"
                 }
               ],
-              "description": "Upserts feed: edges whose downstream column `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+              "description": "Upserts feed: edges whose downstream column `synced_at` >= this time (inclusive). Orders by `synced_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
               "title": "Synced Since"
             }
           },
           {
-            "description": "Tombstones feed: edges whose downstream column `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+            "description": "Tombstones feed: edges whose downstream column `deleted_at` >= this time (inclusive). Orders by `deleted_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
             "in": "query",
             "name": "deleted_since",
             "required": false,
@@ -3066,7 +3512,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Tombstones feed: edges whose downstream column `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+              "description": "Tombstones feed: edges whose downstream column `deleted_at` >= this time (inclusive). Orders by `deleted_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
               "title": "Deleted Since"
             }
           },
@@ -3320,7 +3766,7 @@
             }
           },
           {
-            "description": "Upserts feed: columns whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+            "description": "Upserts feed: columns whose `synced_at` >= this time (inclusive). Orders by `synced_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
             "in": "query",
             "name": "synced_since",
             "required": false,
@@ -3334,12 +3780,12 @@
                   "type": "null"
                 }
               ],
-              "description": "Upserts feed: columns whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+              "description": "Upserts feed: columns whose `synced_at` >= this time (inclusive). Orders by `synced_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
               "title": "Synced Since"
             }
           },
           {
-            "description": "Tombstones feed: columns whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+            "description": "Tombstones feed: columns whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
             "in": "query",
             "name": "deleted_since",
             "required": false,
@@ -3353,7 +3799,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Tombstones feed: columns whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+              "description": "Tombstones feed: columns whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
               "title": "Deleted Since"
             }
           },
@@ -4326,7 +4772,7 @@
             }
           },
           {
-            "description": "Upserts feed: tests whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+            "description": "Upserts feed: tests whose `synced_at` >= this time (inclusive). Orders by `synced_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
             "in": "query",
             "name": "synced_since",
             "required": false,
@@ -4340,12 +4786,12 @@
                   "type": "null"
                 }
               ],
-              "description": "Upserts feed: tests whose `synced_at` >= this time (inclusive). Orders by `synced_at`.",
+              "description": "Upserts feed: tests whose `synced_at` >= this time (inclusive). Orders by `synced_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
               "title": "Synced Since"
             }
           },
           {
-            "description": "Tombstones feed: tests whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+            "description": "Tombstones feed: tests whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
             "in": "query",
             "name": "deleted_since",
             "required": false,
@@ -4359,7 +4805,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Tombstones feed: tests whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`.",
+              "description": "Tombstones feed: tests whose `deleted_at` >= this time (inclusive). Orders by `deleted_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
               "title": "Deleted Since"
             }
           },
@@ -4742,7 +5188,7 @@
             }
           },
           {
-            "description": "Return only executions that started at or after this time. Defaults to 30 days ago.",
+            "description": "Return only executions that started at or after this time. Defaults to 30 days ago, and is clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
             "in": "query",
             "name": "start_time_from",
             "required": false,
@@ -4756,7 +5202,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Return only executions that started at or after this time. Defaults to 30 days ago.",
+              "description": "Return only executions that started at or after this time. Defaults to 30 days ago, and is clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
               "title": "Start Time From"
             }
           },
@@ -5140,6 +5586,10 @@
     {
       "description": "Execution history of a single test.",
       "name": "Test executions"
+    },
+    {
+      "description": "Current data health score per asset.",
+      "name": "Asset health scores"
     }
   ]
 }
