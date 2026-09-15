@@ -13,14 +13,14 @@ A self-maintained, open-source CLI that integrates with your dbt project and the
 
 <Icon icon="cloud" iconType="solid" /> **Elementary Cloud**
 
-A fully managed platform for data observability, quality, and governance, with no infrastructure to maintain. It covers many dbt projects end to end, from ingestion to BI and AI consumption, with column-level lineage, ML-powered detection, governance, and enterprise security built in.
+A fully managed platform for data observability, quality, and governance, with no infrastructure to maintain. It connects directly to your data warehouse and covers your whole stack end to end - from ingestion through the warehouse and dbt to BI and AI consumption - across multiple projects, with column-level lineage, ML-powered detection, governance, and enterprise security built in.
 
 All of these signals feed the context engine that powers the Elementary AI agents and MCP. The agents work in the background while you supervise, and help you work at scale: they recommend tests, triage and resolve incidents, enrich governance metadata, and optimize costly models and tests.
 
 Through the MCP, the Elementary context is provided to other agents, like analytics and code agents, so they return more accurate results on trustworthy data.
 
 <Note>
-  Elementary is code-first. Tests, monitors, and configuration live in your dbt project and code repository, not locked inside a vendor UI. OSS and Cloud share the same foundation, so there is no vendor lock-in.
+  No lock-in. Any dbt tests and configuration stay in your dbt project and code repository, and Cloud lets you manage tests and monitors from the UI or as code. OSS and Cloud share the same foundation, so you can move between them freely.
 </Note>
 
 <Card title="Not sure which one fits?" icon="calendar" horizontal href="https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs">
@@ -32,7 +32,7 @@ Below is a detailed comparison between the OSS and Cloud features:
 | Feature                | **OSS**                                  | **Cloud**                                                                                          |
 |------------------------|------------------------------------------|---------------------------------------------------------------------------------------------------|
 | **AI agents & MCP**    | <ul><li>No AI</li></ul>                  | <ul><li>A [team of AI agents](/cloud/ai-agents/overview) you put to work at scale while you supervise (governance, triage, test recommendation, catalog, performance & cost)</li><li>[Context engine](/cloud/ai-agents/context-engine) across your stack</li><li>[MCP server](/cloud/mcp/overview) for your own AI tools</li></ul> |
-| **Coverage**           | <ul><li>Single dbt project and its warehouse</li></ul> | <ul><li>Multiple dbt projects</li><li>End to end, from [ingestion](/cloud/integrations/pipeline/fivetran) (Fivetran, SAP, and more) through the warehouse and dbt to [BI](/cloud/features/data-lineage/exposures-lineage) and [AI consumption](/cloud/mcp/overview)</li></ul> |
+| **Coverage**           | <ul><li>Single dbt project and its warehouse</li></ul> | <ul><li>Multiple projects, connected directly to your warehouse</li><li>End to end, from [ingestion](/cloud/integrations/pipeline/fivetran) (Fivetran, SAP, and more) through the warehouse and dbt to [BI](/cloud/features/data-lineage/exposures-lineage) and [AI consumption](/cloud/mcp/overview)</li></ul> |
 | **Data lineage**       | <ul><li>Table-level lineage</li></ul>    | <ul><li>[Column-level lineage up to BI](/cloud/features/data-lineage/column-level-lineage)</li><li>[Downstream exposures](/cloud/features/data-lineage/exposures-lineage)</li></ul> |
 | **Detection**          | <ul><li>dbt tests and anomaly detection tests (freshness, volume)</li></ul> | <ul><li>[ML-powered anomaly detection](/cloud/features/anomaly-detection/monitors-overview)</li><li>[No-code cloud tests](/cloud/features/data-tests/cloud-tests-overview), including [data contracts](/cloud/features/data-tests/data-contract-test) and [custom SQL tests](/cloud/features/data-tests/custom-sql-tests)</li><li>[Schema validation](/cloud/features/data-tests/schema-validation-test)</li><li>Bulk add/edit for tests</li></ul> |
 | **Test coverage**      | <ul><li>Test results in the self-hosted report</li></ul> | <ul><li>[Test coverage screen](/cloud/features/data-tests/test-coverage-screen)</li><li>Automated coverage recommendations</li></ul> |
@@ -46,22 +46,22 @@ Below is a detailed comparison between the OSS and Cloud features:
 
 <AccordionGroup>
   <Accordion title="What is the difference between Elementary OSS and Elementary Cloud?">
-    Elementary OSS is an open-source CLI and dbt package that you host yourself. It covers a single dbt project with dbt test results, table-level lineage, test coverage, and basic alerting. Elementary Cloud is a fully managed platform that adds ML-powered anomaly detection, column-level lineage up to BI, incident management, governance, enterprise security, and a team of AI agents you put to work at scale, across multiple dbt projects, with no infrastructure to maintain.
+    Elementary OSS is an open-source CLI and dbt package that you host yourself. It covers a single dbt project with dbt test results, table-level lineage, test coverage, and basic alerting. Elementary Cloud is a fully managed platform that adds ML-powered anomaly detection, column-level lineage up to BI, incident management, governance, enterprise security, and a team of AI agents you put to work at scale, across your whole stack, with no infrastructure to maintain.
   </Accordion>
   <Accordion title="Is Elementary OSS free?">
     Yes. Elementary OSS is open source and free to use. You install the dbt package and CLI in your own environment and run the observability report yourself.
   </Accordion>
-  <Accordion title="Can I try Elementary Cloud for free?">
-    Yes. You can start a free Elementary Cloud trial at [app.elementary-data.com](https://app.elementary-data.com/). If you're not sure whether OSS or Cloud fits your setup, you can also [talk to the team](https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs).
+  <Accordion title="How do I get started with Elementary Cloud?">
+    [Talk to the team](https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs) and they'll help set up Elementary and open an account for you. If you're not sure whether OSS or Cloud fits your setup, they can help you decide too.
   </Accordion>
   <Accordion title="Does Elementary Cloud include everything in OSS?">
     Yes. Cloud builds on the same open-source foundation and includes the OSS capabilities, then adds automated detection, lineage, governance, security, and AI agents on top.
   </Accordion>
   <Accordion title="Can I move from Elementary OSS to Elementary Cloud?">
-    Yes. Cloud uses the same Elementary dbt package, so moving from OSS to Cloud means connecting your existing dbt project rather than starting over. See the [dbt package quickstart](/cloud/onboarding/quickstart-dbt-package).
+    Yes. If you use dbt, Cloud uses the same Elementary dbt package, so moving from OSS to Cloud means connecting your existing dbt project rather than starting over. You can also connect your data warehouse directly. See the [dbt package quickstart](/cloud/onboarding/quickstart-dbt-package).
   </Accordion>
   <Accordion title="Does Elementary lock me into a vendor?">
-    No. Elementary is code-first. Your tests, monitors, and configuration live in your dbt project and code repository, not inside a vendor UI, so you keep full ownership and can move between OSS and Cloud freely.
+    No. Any dbt tests, monitors, and configuration stay in your dbt project and code repository, and Cloud lets you manage tests from the UI or as code. You keep full ownership and can move between OSS and Cloud freely.
   </Accordion>
   <Accordion title="Is Elementary Cloud secure, and does it access my data?">
     Elementary Cloud is SOC 2 Type II certified and HIPAA compliant. It collects metadata, logs, and aggregated metrics only, with no read access to raw data in your warehouse. It supports [RBAC](/cloud/features/roles-and-permissions), SSO, audit logs, and [PrivateLink](/cloud/integrations/security-and-connectivity/aws-privatelink-integration). See [security and privacy](/cloud/general/security-and-privacy) for details.
@@ -73,10 +73,7 @@ Below is a detailed comparison between the OSS and Cloud features:
 
 ### Want to know more?
 
-<CardGroup cols={2}>
-  <Card title="Start free" icon="rocket" href="https://app.elementary-data.com/">
-    Get started with a free Elementary Cloud trial.
-  </Card>
+<CardGroup cols={1}>
   <Card title="Want to know if it's what you need?" icon="calendar" href="https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs">
     Book some time with our team.
   </Card>
