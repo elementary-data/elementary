@@ -181,7 +181,7 @@
           },
           "total": {
             "$ref": "#/components/schemas/HealthScoreBucket",
-            "description": "Weighted score across all dimensions, using the environment's configured dimension weights."
+            "description": "Weighted score across all dimensions, using the environment's configured dimension weights. Computed per hourly bucket, where a dimension with no newer result keeps its last known score, so `total.bucket_at` can be later than some `dimensions[].bucket_at`. It is not the latest of the nested dimension scores."
           }
         },
         "required": ["asset_id", "total", "dimensions"],
