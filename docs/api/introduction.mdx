@@ -65,11 +65,12 @@ Follow `next_cursor` until `has_more` is `false` — see [Pagination](/api/pagin
 | Tests                   | `GET /{env_id}/tests`                             | Test definitions                                |
 | Latest test executions  | `GET /{env_id}/latest-test-executions`            | Current run per sub-test                        |
 | Test execution history  | `GET /{env_id}/tests/{test_id}/executions`        | History for one test                            |
+| Asset health scores     | `GET /{env_id}/asset-health-scores`               | Current health score per asset                  |
 
 Every list endpoint supports a full scan and keyset pagination. Assets,
 columns, and tests also expose incremental feeds — see
-[Incremental sync](/api/incremental-sync). Latest test executions are a full
-snapshot; per-test history is a time window.
+[Incremental sync](/api/incremental-sync). Latest test executions and asset
+health scores are full snapshots; per-test history is a time window.
 
 ## Assets: one base endpoint, plus typed endpoints
 
@@ -117,12 +118,44 @@ Table / relation name is a join to [table assets](/api/reference/assets/list-tab
 on `asset_id`, not a field on the test. Metric numbers behind a freshness/volume
 verdict are not in this cut.
 
+## Asset health scores
+
+**[`GET /asset-health-scores`](/api/reference/asset-health-scores/list-asset-health-scores)**
+returns the current data health score of every monitored asset, the same number
+shown in the Elementary data health dashboard when looking at a single asset.
+Use it to feed scorecards or nightly quality reports.
+
+Each item has a `total` score and one entry per quality `dimension`
+(`completeness`, `uniqueness`, `freshness`, `validity`, `accuracy`,
+`consistency`):
+
+```json
+{
+  "asset_id": "model.analytics.orders",
+  "total": { "score": 0.91, "test_count": 12, "bucket_at": "2026-09-14T08:00:00" },
+  "dimensions": [
+    { "dimension": "freshness", "score": 0.99, "test_count": 3, "bucket_at": "2026-09-14T08:00:00" }
+  ]
+}
+```
+
+- Scores are in the range `0`–`1`. `total` is the weighted combination of the
+  dimensions using the environment's configured weights.
+- Scores are computed from test results in the **last 7 days**, in hourly
+  buckets; `bucket_at` is the start of the most recent bucket with results.
+  Dimensions with no results in that window are omitted, and assets with no
+  results at all are not returned.
+- Full snapshot, replaced in place — re-read it; there is no incremental feed.
+  The only filter is `asset_ids`. Join to
+  [assets](/api/reference/assets/list-assets) on `asset_id`.
+- `dimension` is an extensible enum (see below).
+
 ## Forward compatibility
 
 Some string fields are **extensible enums**: they carry a value from a small,
 known set today (e.g. `kind`, `source_type`, `data_platform`, `materialization`,
 `bi_platform`, `bi_type`, `warehouse_type`, `last_sync_status`, `test_type`,
-`definition_type`, `status`), but that set
+`definition_type`, `status`, `dimension`), but that set
 grows as Elementary adds integrations and asset types. In the schema these
 fields are typed as plain strings with an `Extensible enum.` note and their
 currently-known values listed under `examples` — they are **not** a closed

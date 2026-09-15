@@ -572,6 +572,13 @@
                   "api/reference/test-executions/list-test-executions",
                   "api/reference/test-executions/get-a-test-execution"
                 ]
+              },
+              {
+                "group": "Asset health scores",
+                "pages": [
+                  "api/reference/asset-health-scores/list-asset-health-scores",
+                  "api/reference/asset-health-scores/get-an-asset-health-score"
+                ]
               }
             ]
           }
