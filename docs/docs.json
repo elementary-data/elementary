@@ -24,6 +24,7 @@
               "cloud/features",
               "cloud/features/integrations",
               "cloud/general/security-and-privacy",
+              "cloud/features/elementary-runtime",
               "cloud/ai-agents/ai-credits"
             ]
           },
