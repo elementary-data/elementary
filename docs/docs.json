@@ -150,6 +150,14 @@
             "group": "Config & Administration",
             "pages": [
               {
+                "group": "Environments",
+                "pages": [
+                  "cloud/environments",
+                  "cloud/guides/sync-scheduling",
+                  "cloud/guides/dev-prod-configuration"
+                ]
+              },
+              {
                 "group": "Config-as-Code",
                 "pages": [
                   "cloud/features/config-as-code",
@@ -211,13 +219,10 @@
                       {
                         "group": "dbt setup guides",
                         "pages": [
-                          "cloud/guides/sync-scheduling",
-                          "cloud/guides/dev-prod-configuration",
                           "cloud/guides/collect-job-data",
                           "cloud/guides/collect-source-freshness",
                           "cloud/guides/reduce-on-run-end-time",
-                          "cloud/guides/microbatch-compiled-code",
-                          "cloud/features/multi-env"
+                          "cloud/guides/microbatch-compiled-code"
                         ]
                       }
                     ]
@@ -900,6 +905,22 @@
     {
       "source": "/features/data-governance/critical_assets",
       "destination": "/cloud/features/data-governance/critical_assets"
+    },
+    {
+      "source": "/cloud/features/multi-env",
+      "destination": "/cloud/environments"
+    },
+    {
+      "source": "/cloud/onboarding/signup",
+      "destination": "/cloud/guides/set-up-elementary"
+    },
+    {
+      "source": "/cloud/onboarding/connect-data-warehouse",
+      "destination": "/cloud/integrations/elementary-integrations"
+    },
+    {
+      "source": "/cloud/onboarding/quickstart-dbt-package",
+      "destination": "/data-tests/dbt/quickstart-package"
     }
   ]
 }

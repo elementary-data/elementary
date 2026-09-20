@@ -9,11 +9,11 @@ Elementary comes in two offerings: an open-source package you host yourself, and
 
 <Icon icon="github" iconType="solid" /> **Elementary OSS**
 
-A self-maintained, open-source CLI that integrates with your dbt project and the Elementary dbt package. It covers a single dbt project with dbt test results, table-level lineage, test coverage, and basic alerting, all through the self-hosted Elementary observability report.
+A self-maintained, open-source CLI for teams running dbt. It requires a dbt project, and integrates with it through the Elementary dbt package. It covers a single dbt project with dbt test results, table-level lineage, test coverage, and basic alerting, all through the self-hosted Elementary observability report.
 
 <Icon icon="cloud" iconType="solid" /> **Elementary Cloud**
 
-A fully managed platform for data observability, quality, and governance, with no infrastructure to maintain. It connects directly to your data warehouse and covers your whole stack end to end - from ingestion through the warehouse and dbt to BI and AI consumption - across multiple projects, with column-level lineage, ML-powered detection, governance, and enterprise security built in.
+A fully managed platform for data observability, quality, and governance, with no infrastructure to maintain. It connects directly to your data warehouse and does not require dbt, and covers your whole stack end to end - from ingestion through the warehouse and dbt to BI and AI consumption - across multiple projects, with column-level lineage, ML-powered detection, governance, and enterprise security built in.
 
 All of these signals feed the context engine that powers the Elementary AI agents and MCP. The agents work in the background while you supervise, and help you work at scale: they recommend tests, triage and resolve incidents, enrich governance metadata, and optimize costly models and tests.
 
@@ -58,7 +58,7 @@ Below is a detailed comparison between the OSS and Cloud features:
     Yes. Cloud builds on the same open-source foundation and includes the OSS capabilities, then adds automated detection, lineage, governance, security, and AI agents on top.
   </Accordion>
   <Accordion title="Can I move from Elementary OSS to Elementary Cloud?">
-    Yes. If you use dbt, Cloud uses the same Elementary dbt package, so moving from OSS to Cloud means connecting your existing dbt project rather than starting over. You can also connect your data warehouse directly. See the [dbt package quickstart](/cloud/onboarding/quickstart-dbt-package).
+    Yes. If you use dbt, Cloud uses the same Elementary dbt package, so moving from OSS to Cloud means connecting your existing dbt project rather than starting over. You can also connect your data warehouse directly. See the [dbt package quickstart](/data-tests/dbt/quickstart-package).
   </Accordion>
   <Accordion title="Does Elementary lock me into a vendor?">
     No. Any dbt tests, monitors, and configuration stay in your dbt project and code repository, and Cloud lets you manage tests from the UI or as code. You keep full ownership and can move between OSS and Cloud freely.
