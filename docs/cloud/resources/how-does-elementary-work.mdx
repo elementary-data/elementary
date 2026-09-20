@@ -18,7 +18,7 @@ You can also connect your code repository, so Elementary understands how your pr
 
 
 ## How it works?
-1. You connect an [environment](/cloud/environments) to your data warehouse, and choose the asset sources it contains — asset groups of databases and schemas, dbt projects, or both.
+1. You connect an [environment](/cloud/environments) to your data warehouse, and choose the asset sources it contains — databases and schemas from the warehouse, dbt projects, or both.
 2. The cloud service reads metadata for those assets over an encrypted connection, and begins a backfill so monitors have a historical baseline.
 3. If you use dbt, you install the Elementary dbt package and configure it to write to its own schema, the Elementary schema. The package writes test results, run results, logs and metadata there, and the cloud service syncs that schema.
 4. All syncs run over an **encrypted connection** from a **static IP address** that you will need to add to your allowlist.

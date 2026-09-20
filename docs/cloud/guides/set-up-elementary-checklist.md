@@ -27,7 +27,7 @@ Let's get you set up.
 [ ] [Create an environment and connect your data warehouse](/cloud/environments)   
       Elementary reads metadata (information schema, query history, and dbt artifacts if you use dbt) to power test results, run history, automated freshness/volume monitors, and column-level lineage.  
 [ ] [Choose the assets the environment monitors](/cloud/environments#what-an-environment-can-contain)   
-      Add asset groups of warehouse databases and schemas, dbt projects, or both — dbt is optional.  
+      Add asset sources: warehouse databases and schemas, dbt projects, or both — dbt is optional.  
 [ ] [Install Elementary dbt package (optional)](/data-tests/dbt/quickstart-package)   
       Only if you use dbt. Collects dbt artifacts and enables Elementary's built-in tests (anomaly detection, schema change detection). If you already have the package deployed in the relevant environment you want to monitor, make sure it's up to date to the latest version, and upgrade it if not.  
 [ ] [Invite team members](/cloud/features/roles-and-permissions)  
@@ -61,7 +61,7 @@ Let's get you set up.
 [ ] Contact the Elementary team to enable [Okta SSO](/cloud/integrations/security-and-connectivity/okta), [AWS PrivateLink](/cloud/integrations/security-and-connectivity/aws-privatelink-integration), or [Microsoft Entra ID](/cloud/integrations/security-and-connectivity/ms-entra).  
 [ ] [Configuring Elementary for Development and Production](/cloud/guides/dev-prod-configuration)  
 [ ]  [Manage environments](/cloud/environments)
-      Separate environments per target (dev, staging, prod), and group several dbt projects or asset groups into one environment for unified lineage.  
+      Separate environments per target (dev, staging, prod), and group several asset sources into one environment for unified lineage.  
 [ ] [Collect job information from orchestrator](/cloud/guides/collect-job-data)  
       Elementary can collect metadata about your jobs from the orchestrator you are using, and enrich the Elementary UI with this information.
 
