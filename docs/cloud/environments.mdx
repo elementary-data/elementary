@@ -23,19 +23,30 @@ All asset sources in an environment currently share a single data warehouse conn
 
 ## Use cases
 
-### Development, staging and production
+<Columns cols={2}>
+  <Card title="Separate environments" icon="arrows-split-up-and-left">
+    Stacks you keep apart, each with its own lineage, dashboard, alerts, and health history:
 
-The most common case. If you have a single dbt project with three targets — prod, staging and dev — create three environments in Elementary, so each target has its own dashboard, alert routing, and health history.
+    - Development, staging and production targets
+    - Anonymized and non-anonymized copies of the same data
+    - Separate sites, regions, or tenants
+    - Separate products or business units
+  </Card>
 
-### Separate data stacks
+  <Card title="One environment" icon="arrows-to-dot">
+    One production pipeline spanning several projects or tools, in a single lineage graph:
 
-Some stacks are kept apart by design rather than by lifecycle stage, for example:
+    - Layered architectures (bronze, silver, gold)
+    - Domain-based modeling (finance, marketing, operations)
+    - Multiple dbt projects built on the same raw data
+    - Pipelines stored in separate repositories
+    - Tables loaded by ETL tools or scripts alongside dbt models
+  </Card>
+</Columns>
 
-- Anonymized and non-anonymized copies of the same data
-- Separate sites, regions, or tenants
-- Separate products or business units
+### Separate environments
 
-Give each one its own environment. Keeping them apart in Elementary mirrors how they are kept apart in your warehouse, so health, incidents, and lineage stay attributable to the right stack.
+Give each stack its own environment. Keeping them apart in Elementary mirrors how they are kept apart in your warehouse, so health, incidents, and lineage stay attributable to the right stack. Each environment is managed independently, and you monitor all of them from a single interface.
 
 <Frame>
   <div className="dark:bg-white rounded-md p-4">
@@ -45,15 +56,7 @@ Give each one its own environment. Keeping them apart in Elementary mirrors how 
   </div>
 </Frame>
 
-### One pipeline spanning several projects or tools
-
-When your production pipeline spans more than one project or tool, put all of it in one environment to get a single lineage graph over the whole thing. Common shapes:
-
-- Layered architectures (bronze, silver, gold)
-- Domain-based modeling (finance, marketing, operations and others)
-- Multiple dbt projects built on the same raw data
-- Pipelines stored in separate repositories
-- Tables loaded by ETL tools or scripts alongside dbt models
+### One environment across several asset sources
 
 Elementary identifies assets by their full relation name, so lineage spans every asset source in the environment. Each dbt project keeps its own models, sources, repository, and Elementary schema, and Elementary handles the unification at the environment level. Where the same relation is a model in one project and a source in another, lineage shows both nodes with a link between them, so the dependency stays explicit and you can trace issues further upstream.
 
