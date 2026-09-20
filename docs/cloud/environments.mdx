@@ -13,9 +13,11 @@ Everything Elementary computes — lineage, monitors, incidents, alerts, and hea
 An environment is built from one or more asset sources. Each one tells Elementary which assets to sync:
 
 - **dbt projects** — Elementary syncs models, sources, tests, and run results collected by the [Elementary dbt package](/cloud/integrations/transformation-and-orchestration/dbt-core).
-- **Asset groups** — databases and schemas you select directly in the warehouse. Use these for tables and views created outside dbt, by ETL tools, orchestrators, or SQL scripts.
+- **Asset groups** — databases and schemas you select directly in the warehouse. Use these for tables and views built by ETL tools, orchestrators, or SQL scripts.
 
 An environment can hold several of either kind, and can mix them. An environment built entirely from asset groups works on its own, monitored from warehouse metadata — dbt is optional.
+
+Assets can also be reported into an environment by the [Elementary Python SDK](/cloud/python-sdk/overview), for pipelines that run in Python before, inside, or after the warehouse.
 
 <Note>
 All asset sources in an environment currently share a single data warehouse connection. Support for several warehouse connections in one environment is coming.

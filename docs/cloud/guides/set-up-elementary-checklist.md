@@ -37,8 +37,8 @@ Let's get you set up.
       Enable column-level lineage and full context for BI assets, including the health of upstream sources and models.  
 [ ] Connect to your external Catalog (Optional)  
       Present Elementary data health context in another catalog, we support [Atlan](/cloud/integrations/governance/atlan).   
-[ ] Python pipelines (optional)
-      Elementary has a [Python SDK](/cloud/python-sdk/overview) for reporting assets and test results from python-based transformations.
+[ ] [Report assets from Python (optional)](/cloud/python-sdk/overview)
+      For transformations that run in Python, the Elementary Python SDK reports assets and test results into the environment, alongside the assets synced from the warehouse.
 
 ### Alerts & Incidents
 
