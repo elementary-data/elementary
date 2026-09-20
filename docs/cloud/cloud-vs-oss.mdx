@@ -31,6 +31,7 @@ Below is a detailed comparison between the OSS and Cloud features:
 
 | Feature                | **OSS**                                  | **Cloud**                                                                                          |
 |------------------------|------------------------------------------|---------------------------------------------------------------------------------------------------|
+| **Requirements**       | <ul><li>A dbt project, with the [Elementary dbt package](/data-tests/dbt/quickstart-package) installed</li><li>Your own environment to host the CLI and the report</li></ul> | <ul><li>A [data warehouse connection](/cloud/integrations/elementary-integrations)</li><li>dbt is optional — connect a dbt project to also collect its models, tests, and run results</li></ul> |
 | **AI agents & MCP**    | <ul><li>No AI</li></ul>                  | <ul><li>A [team of AI agents](/cloud/ai-agents/overview) you put to work at scale while you supervise (governance, triage, test recommendation, catalog, performance & cost)</li><li>[Context engine](/cloud/ai-agents/context-engine) across your stack</li><li>[MCP server](/cloud/mcp/overview) for your own AI tools</li></ul> |
 | **Coverage**           | <ul><li>Single dbt project and its warehouse</li></ul> | <ul><li>Multiple projects, connected directly to your warehouse</li><li>End to end, from [ingestion](/cloud/integrations/pipeline/fivetran) (Fivetran, SAP, and more) through the warehouse and dbt to [BI](/cloud/features/data-lineage/exposures-lineage) and [AI consumption](/cloud/mcp/overview)</li></ul> |
 | **Data lineage**       | <ul><li>Table-level lineage</li></ul>    | <ul><li>[Column-level lineage up to BI](/cloud/features/data-lineage/column-level-lineage)</li><li>[Downstream exposures](/cloud/features/data-lineage/exposures-lineage)</li></ul> |
@@ -47,6 +48,11 @@ Below is a detailed comparison between the OSS and Cloud features:
 <AccordionGroup>
   <Accordion title="What is the difference between Elementary OSS and Elementary Cloud?">
     Elementary OSS is an open-source CLI and dbt package that you host yourself. It covers a single dbt project with dbt test results, table-level lineage, test coverage, and basic alerting. Elementary Cloud is a fully managed platform that adds ML-powered anomaly detection, column-level lineage up to BI, incident management, governance, enterprise security, and a team of AI agents you put to work at scale, across your whole stack, with no infrastructure to maintain.
+  </Accordion>
+  <Accordion title="Do I need dbt to use Elementary?">
+    For Elementary Cloud, no. You connect your data warehouse to get started, and Elementary monitors the databases and schemas you select. dbt is one popular integration, not a prerequisite — if you do use it, the Elementary dbt package adds automatic collection of your dbt test and run results on top.
+
+    Elementary OSS does require dbt. It installs as a dbt package, and the CLI reads the schema that package creates in your warehouse.
   </Accordion>
   <Accordion title="Is Elementary OSS free?">
     Yes. Elementary OSS is open source and free to use. You install the dbt package and CLI in your own environment and run the observability report yourself.
