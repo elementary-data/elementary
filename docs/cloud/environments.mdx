@@ -6,7 +6,7 @@ badge: "Elementary Cloud"
 
 An environment is a shared-lineage container: the group of assets you want to see together in one lineage graph, because they share a production pipeline.
 
-Everything Elementary computes — lineage, monitors, incidents, alerts, and health scores — is scoped to an environment. Assets in two different environments are never connected in the same lineage graph, even if they live in the same data warehouse.
+Everything Elementary computes — lineage, monitors, incidents, alerts, and health scores — is scoped to an environment. Each environment has its own lineage graph, spanning exactly the assets it contains, so grouping assets into one environment is what connects them.
 
 ## What an environment can contain
 
@@ -15,7 +15,7 @@ An environment is built from one or more asset sources. Each one tells Elementar
 - **dbt projects** — Elementary syncs models, sources, tests, and run results collected by the [Elementary dbt package](/cloud/integrations/transformation-and-orchestration/dbt-core).
 - **Asset groups** — databases and schemas you select directly in the warehouse. Use these for tables and views created outside dbt, by ETL tools, orchestrators, or SQL scripts.
 
-An environment can hold several of either kind, and can mix them. A dbt project is not required: an environment made only of asset groups is monitored from warehouse metadata alone.
+An environment can hold several of either kind, and can mix them. An environment built entirely from asset groups works on its own, monitored from warehouse metadata — dbt is optional.
 
 <Note>
 All asset sources in an environment currently share a single data warehouse connection. Support for several warehouse connections in one environment is coming.
@@ -64,7 +64,7 @@ This is designed for teams whose production pipeline spans more than one project
 - Tables loaded by ETL tools or scripts alongside dbt models
 
 <Note>
-Each dbt project added to an environment must use a different Elementary schema, and the Elementary dbt package must be installed in each project. Asset groups have no Elementary schema and no package requirement.
+Each dbt project added to an environment must use a different Elementary schema, and the Elementary dbt package must be installed in each project. Asset groups work straight from warehouse metadata, so they need neither.
 </Note>
 
 ## Setting up an environment
