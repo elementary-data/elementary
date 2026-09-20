@@ -21,19 +21,15 @@ An environment can hold several of either kind, and can mix them. An environment
 All asset sources in an environment currently share a single data warehouse connection. Support for several warehouse connections in one environment is coming.
 </Note>
 
-## Choosing what belongs in one environment
-
-Put assets in the same environment when they are built by the same production pipeline, and you want to trace an issue in one through to the others.
-
-Use separate environments when the assets belong to stacks you keep apart on purpose. Each environment is managed independently, with its own monitoring, alerts, and configuration, and you monitor all of them from a single interface.
+## Use cases
 
 ### Development, staging and production
 
 The most common case. If you have a single dbt project with three targets — prod, staging and dev — create three environments in Elementary, so each target has its own dashboard, alert routing, and health history.
 
-### Intentionally segregated stacks
+### Separate data stacks
 
-Some stacks are separated by design rather than by lifecycle stage, for example:
+Some stacks are kept apart by design rather than by lifecycle stage, for example:
 
 - Anonymized and non-anonymized copies of the same data
 - Separate sites, regions, or tenants
@@ -49,27 +45,17 @@ Give each one its own environment. Keeping them apart in Elementary mirrors how 
   </div>
 </Frame>
 
-## Several asset sources in one environment
+### One pipeline spanning several projects or tools
 
-Connecting more than one asset source to a single environment gives teams the flexibility to organize their code by layers, domains, or separate repositories, while still getting one unified view of data health, lineage, and reliability.
-
-Once connected, Elementary combines lineage and context across all of them, so you have a complete picture of how data flows through your stack.
-
-### Key capabilities
-
-- **Unified lineage across sources.** Elementary identifies assets by their full relation name, so lineage spans multiple dbt projects and asset groups with complete accuracy.
-- **No changes to your dbt structure.** Each dbt project keeps its own models, sources, repository, and Elementary schema. Elementary handles the unification at the environment level.
-- **Automatic linking between sources and models.** If the same relation appears as a model in one project and a source in another, Elementary displays two nodes in lineage with a clear link between them. This makes dependencies explicit and helps you trace issues further upstream.
-
-### When to use several asset sources
-
-This is designed for teams whose production pipeline spans more than one project or tool, such as:
+When your production pipeline spans more than one project or tool, put all of it in one environment to get a single lineage graph over the whole thing. Common shapes:
 
 - Layered architectures (bronze, silver, gold)
 - Domain-based modeling (finance, marketing, operations and others)
 - Multiple dbt projects built on the same raw data
 - Pipelines stored in separate repositories
 - Tables loaded by ETL tools or scripts alongside dbt models
+
+Elementary identifies assets by their full relation name, so lineage spans every asset source in the environment. Each dbt project keeps its own models, sources, repository, and Elementary schema, and Elementary handles the unification at the environment level. Where the same relation is a model in one project and a source in another, lineage shows both nodes with a link between them, so the dependency stays explicit and you can trace issues further upstream.
 
 <Note>
 Each dbt project added to an environment must use a different Elementary schema, and the Elementary dbt package must be installed in each project. Asset groups work straight from warehouse metadata, so they need neither.
