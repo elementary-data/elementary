@@ -907,10 +907,6 @@
       "destination": "/cloud/features/data-governance/critical_assets"
     },
     {
-      "source": "/cloud/features/multi-env",
-      "destination": "/cloud/environments"
-    },
-    {
       "source": "/cloud/onboarding/signup",
       "destination": "/cloud/guides/set-up-elementary"
     },
