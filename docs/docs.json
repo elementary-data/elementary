@@ -905,6 +905,18 @@
     {
       "source": "/features/data-governance/critical_assets",
       "destination": "/cloud/features/data-governance/critical_assets"
+    },
+    {
+      "source": "/cloud/onboarding/signup",
+      "destination": "/cloud/guides/set-up-elementary"
+    },
+    {
+      "source": "/cloud/onboarding/connect-data-warehouse",
+      "destination": "/cloud/environments"
+    },
+    {
+      "source": "/cloud/onboarding/quickstart-dbt-package",
+      "destination": "/data-tests/dbt/quickstart-package"
     }
   ]
 }
