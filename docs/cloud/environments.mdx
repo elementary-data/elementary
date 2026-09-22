@@ -71,8 +71,12 @@ Each dbt project added to an environment must use a different Elementary schema,
 1. Go to **Account settings > Environments** and click **Create environment**.
 2. Give the environment a name.
 3. Connect the [data warehouse](/cloud/integrations/elementary-integrations) the environment reads from.
-4. Click **Continue** to reach the environment content section, and add the asset sources this environment contains — dbt projects, selections of warehouse databases and schemas, or both.
-5. Save. Elementary begins syncing, and a backfill collects historical metadata so monitors have a baseline.
+4. Click **Continue** to reach **Environment content**, then **Add asset source**.
+5. Choose the asset source type:
+   - **dbt project** — uses dbt models, tests and run results. Requires the [Elementary dbt package](/data-tests/dbt/quickstart-package).
+   - **Warehouse schemas** — monitors tables directly in your warehouse.
+6. Name the asset source. For warehouse schemas, give the database name and, optionally, the schemas within it. Leave the schemas empty to monitor every schema in that database, and use **Add database** to cover more than one.
+7. Click **Save changes**. Elementary begins syncing, and a backfill collects historical metadata so monitors have a baseline.
 
 You can add, rename, and remove asset sources later from the same screen.
 
