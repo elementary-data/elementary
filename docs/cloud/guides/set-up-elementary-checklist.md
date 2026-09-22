@@ -24,19 +24,21 @@ Let's get you set up.
 ### Setup and integrations
 
 [ ] [Create Elementary cloud account](/cloud/quickstart) (quick-start guide)  
-[ ] [Install Elementary dbt package](/cloud/onboarding/quickstart-dbt-package)   
-      Collect dbt artifacts and enable Elementary's built-in tests (anomaly detection, schema change detection). If you already have the package deployed in the relevant environment you want to monitor, make sure it's up to date to the latest version, and upgrade it if not.  
-[ ] [Connect your data warehouse](/cloud/onboarding/connect-data-warehouse)   
-      Elementary reads metadata (dbt artifacts, information schema, query history) to power test results, run history, automated freshness/volume monitors, and column-level lineage.  
-[ ] [Invite team members](/cloud/manage-team)  
+[ ] [Create an environment and connect your data warehouse](/cloud/environments)   
+      Elementary reads metadata (information schema, query history, and dbt artifacts if you use dbt) to power test results, run history, automated freshness/volume monitors, and column-level lineage.  
+[ ] [Choose the assets the environment monitors](/cloud/environments#what-an-environment-can-contain)   
+      Add asset sources: warehouse databases and schemas, dbt projects, or both — dbt is optional.  
+[ ] [Install Elementary dbt package (optional)](/data-tests/dbt/quickstart-package)   
+      Only if you use dbt. Collects dbt artifacts and enables Elementary's built-in tests (anomaly detection, schema change detection). If you already have the package deployed in the relevant environment you want to monitor, make sure it's up to date to the latest version, and upgrade it if not.  
+[ ] [Invite team members](/cloud/features/roles-and-permissions)  
 [ ] [Code repository connection (optional)](/cloud/integrations/code-repo/connect-code-repo)   
       Allow users and AI agents to open PRs and manage changes through your CI/CD process.  
 [ ] [Integrate with your BI tool (optional)](/cloud/integrations/bi/connect-bi-tool)   
       Enable column-level lineage and full context for BI assets, including the health of upstream sources and models.  
 [ ] Connect to your external Catalog (Optional)  
       Present Elementary data health context in another catalog, we support [Atlan](/cloud/integrations/governance/atlan).   
-[ ] Non-dbt tables (optional)
-      Elementary has a Python SDK for python-based transformations. If you need Elementary to monitor non-dbt tables, reach out to the Elementary team with a list of relevant schemas / datasets / databases. This is a beta feature, the team will guide you through the next steps.
+[ ] [Report assets from Python (optional)](/cloud/python-sdk/overview)
+      For transformations that run in Python, the Elementary Python SDK reports assets and test results into the environment, alongside the assets synced from the warehouse.
 
 ### Alerts & Incidents
 
@@ -58,15 +60,14 @@ Let's get you set up.
 [ ] [Schedule Elementary syncs](/cloud/guides/sync-scheduling) with your data warehouse.  
 [ ] Contact the Elementary team to enable [Okta SSO](/cloud/integrations/security-and-connectivity/okta), [AWS PrivateLink](/cloud/integrations/security-and-connectivity/aws-privatelink-integration), or [Microsoft Entra ID](/cloud/integrations/security-and-connectivity/ms-entra).  
 [ ] [Configuring Elementary for Development and Production](/cloud/guides/dev-prod-configuration)  
-[ ]  [Manage multiple environments](/cloud/features/multi-env)
-      Use multiple dbt projects and targets (dev, staging, prod) through the multi-env feature.
-      If you wish to monitor multiple environments in a single environment view (including unified lineage), reach out to the Elementary team.  
+[ ]  [Manage environments](/cloud/environments)
+      Separate environments per target (dev, staging, prod), and group several asset sources into one environment for unified lineage.  
 [ ] [Collect job information from orchestrator](/cloud/guides/collect-job-data)  
       Elementary can collect metadata about your jobs from the orchestrator you are using, and enrich the Elementary UI with this information.
 
 ## Security and permissions
 
-[ ] Configure [roles and permissions](/cloud/manage-team) in Elementary (optional).  
+[ ] Configure [roles and permissions](/cloud/features/roles-and-permissions) in Elementary (optional).  
 [ ] Add SSO authentication with [Okta](/cloud/integrations/security-and-connectivity/okta) or [Azure AD](/cloud/integrations/security-and-connectivity/ms-entra) (optional).  
 [ ] Connect using [AWS private link](/cloud/integrations/security-and-connectivity/aws-privatelink-integration) (optional)   
 [ ] Export [user activity logs](/cloud/features/collaboration-and-communication/audit_logs/user-activity-logs) (optional).

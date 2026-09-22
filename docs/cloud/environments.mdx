@@ -1,0 +1,100 @@
+---
+title: "Environments"
+sidebarTitle: "Environments"
+badge: "Elementary Cloud"
+---
+
+An environment is a shared-lineage container: the group of assets you want to see together in one lineage graph, because they share a production pipeline.
+
+Everything Elementary computes — lineage, monitors, incidents, alerts, and health scores — is scoped to an environment. Each environment has its own lineage graph, built from the dependencies between the assets it contains.
+
+## What an environment can contain
+
+An environment is built from one or more asset sources. Each one tells Elementary which assets to sync. An asset source is either:
+
+- **A dbt project** — Elementary syncs models, sources, tests, and run results collected by the [Elementary dbt package](/cloud/integrations/transformation-and-orchestration/dbt-core).
+- **A selection of warehouse databases and schemas** — picked directly in the warehouse. Use this for tables and views built by ETL tools, orchestrators, or SQL scripts. Once synced, they appear in the side tree under the **DWH view**, alongside your dbt models and sources.
+
+An environment can hold several of either kind, and can mix them.
+
+Assets can also be reported into an environment by the [Elementary Python SDK](/cloud/python-sdk/overview), for pipelines that run in Python before, inside, or after the warehouse.
+
+<Note>
+All asset sources in an environment currently share a single data warehouse connection. Support for several warehouse connections in one environment is coming.
+</Note>
+
+## Use cases
+
+<Columns cols={2}>
+  <Card title="Separate environments" icon="arrows-split-up-and-left">
+    Stacks you keep apart, each with its own lineage, dashboard, alerts, and health history:
+
+    - Development, staging and production targets
+    - Anonymized and non-anonymized copies of the same data
+    - Separate sites, regions, or tenants
+    - Separate products or business units
+  </Card>
+
+  <Card title="One environment" icon="arrows-to-dot">
+    One production pipeline spanning several projects or tools, in a single lineage graph:
+
+    - Layered architectures (bronze, silver, gold)
+    - Domain-based modeling (finance, marketing, operations)
+    - Multiple dbt projects built on the same raw data
+    - Pipelines stored in separate repositories
+    - Tables loaded by ETL tools or scripts alongside dbt models
+  </Card>
+</Columns>
+
+### Separate environments
+
+Give each stack its own environment. Keeping them apart in Elementary mirrors how they are kept apart in your warehouse, so health, incidents, and lineage stay attributable to the right stack. Each environment is managed independently, and you monitor all of them from a single interface.
+
+<Frame caption="Separate environments listed in Account settings">
+  <div className="dark:bg-white rounded-md p-4">
+    <img
+      src="https://res.cloudinary.com/do5hrgokq/image/upload/v1763375225/Screenshot_2025-11-17_at_12.24.03_yrt9co.png"
+      alt="Separate environments listed in Account settings"
+    />
+  </div>
+</Frame>
+
+### One environment across several asset sources
+
+Elementary identifies assets by their full relation name, so lineage spans every asset source in the environment. Each dbt project keeps its own models, sources, repository, and Elementary schema, and Elementary handles the unification at the environment level. Where the same relation is a model in one project and a source in another, lineage shows both nodes with a link between them, so the dependency stays explicit and you can trace issues further upstream.
+
+<Note>
+Each dbt project added to an environment must use a different Elementary schema, and the Elementary dbt package must be installed in each project. Warehouse asset sources work straight from warehouse metadata, so they need neither.
+</Note>
+
+## Setting up an environment
+
+1. Go to **Account settings > Environments** and click **Create environment**.
+2. Give the environment a name.
+3. Connect the [data warehouse](/cloud/integrations/elementary-integrations) the environment reads from.
+4. Click **Continue** to reach **Environment content**, then **Add asset source**.
+5. Choose the asset source type:
+   - **dbt project** — uses dbt models, tests and run results. Requires the [Elementary dbt package](/data-tests/dbt/quickstart-package).
+   - **Warehouse schemas** — monitors tables directly in your warehouse.
+6. Name the asset source. For warehouse schemas, give the database name and, optionally, the schemas within it. Leave the schemas empty to monitor every schema in that database, and use **Add database** to cover more than one.
+7. Click **Save changes**. Elementary begins syncing, and a backfill collects historical metadata so monitors have a baseline.
+
+<Frame caption="Adding a warehouse schemas asset source in Environment content">
+  <img
+    src="/pics/environment-content-asset-sources.png"
+    alt="Adding a warehouse schemas asset source in Environment content"
+  />
+</Frame>
+
+You can add, rename, and remove asset sources later from the same screen.
+
+## Managing an environment
+
+<CardGroup cols={2}>
+  <Card title="Sync scheduling" href="/cloud/guides/sync-scheduling">
+    Control how often an environment refreshes, including webhook-triggered syncs.
+  </Card>
+  <Card title="Dev / prod configuration" href="/cloud/guides/dev-prod-configuration">
+    Separate development and production monitoring.
+  </Card>
+</CardGroup>

@@ -70,8 +70,7 @@
                   "cloud/features/anomaly-detection/cloud-pipeline-task-performance",
                   "cloud/features/data-tests/data-contract-test",
                   "cloud/features/data-tests/custom-sql-tests",
-                  "cloud/features/anomaly-detection/metrics",
-                  "cloud/features/anomaly-detection/monitor-dwh-assets"
+                  "cloud/features/anomaly-detection/metrics"
                 ]
               },
               {
@@ -150,6 +149,14 @@
             "group": "Config & Administration",
             "pages": [
               {
+                "group": "Environments",
+                "pages": [
+                  "cloud/environments",
+                  "cloud/guides/sync-scheduling",
+                  "cloud/guides/dev-prod-configuration"
+                ]
+              },
+              {
                 "group": "Config-as-Code",
                 "pages": [
                   "cloud/features/config-as-code",
@@ -211,13 +218,10 @@
                       {
                         "group": "dbt setup guides",
                         "pages": [
-                          "cloud/guides/sync-scheduling",
-                          "cloud/guides/dev-prod-configuration",
                           "cloud/guides/collect-job-data",
                           "cloud/guides/collect-source-freshness",
                           "cloud/guides/reduce-on-run-end-time",
-                          "cloud/guides/microbatch-compiled-code",
-                          "cloud/features/multi-env"
+                          "cloud/guides/microbatch-compiled-code"
                         ]
                       }
                     ]
@@ -760,7 +764,7 @@
     }
   },
   "banner": {
-    "content": "[Monitor Python pipelines alongside dbt. Explore the Python SDK.](https://www.elementary-data.com/post/data-quality-in-python-pipelines)",
+    "content": "Not using dbt? You can now use Elementary too. Connect directly to your warehouse to monitor data quality. [Learn more →](/cloud/environments)",
     "dismissible": false
   },
   "search": {
@@ -900,6 +904,26 @@
     {
       "source": "/features/data-governance/critical_assets",
       "destination": "/cloud/features/data-governance/critical_assets"
+    },
+    {
+      "source": "/cloud/onboarding/signup",
+      "destination": "/cloud/guides/set-up-elementary"
+    },
+    {
+      "source": "/cloud/onboarding/connect-data-warehouse",
+      "destination": "/cloud/environments"
+    },
+    {
+      "source": "/cloud/onboarding/quickstart-dbt-package",
+      "destination": "/data-tests/dbt/quickstart-package"
+    },
+    {
+      "source": "/cloud/features/multi-env",
+      "destination": "/cloud/environments"
+    },
+    {
+      "source": "/cloud/features/anomaly-detection/monitor-dwh-assets",
+      "destination": "/cloud/environments"
     }
   ]
 }

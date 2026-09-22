@@ -7,6 +7,8 @@ Elementary integrates with dbt Cloud for the supported data warehouses.
 
 [Install the Elementary dbt package](/data-tests/dbt/quickstart-package) in your monitored project. It collects results and artifacts at runtime using on-run-end hooks, saving them to a dedicated schema. Elementary syncs through the DWH connection.
 
+Connecting a dbt project is optional. Elementary syncs assets from the warehouse on its own, and a dbt project is one of the [asset sources an environment can contain](/cloud/environments) — it adds your models, sources, tests, and run results on top. Because the package collects results inside your own dbt run and writes them to a schema you own, Elementary reads everything through the warehouse connection it already has. That is why the integration behaves the same on dbt Core, dbt Cloud, and dbt Fusion, and why it needs no access to a dbt Cloud account.
+
 ## Jobs information
 
 Elementary automatically collects jobs data from dbt Cloud, including `job run url` and `job id`. These are presented in the lineage node info tab.
@@ -38,7 +40,7 @@ For near-real-time results, it is recommended to change the sync configuration f
   <Card title="Dev / prod configuration" href="/cloud/guides/dev-prod-configuration">
     Set up separate environments for development and production.
   </Card>
-  <Card title="Multiple environments" href="/cloud/features/multi-env">
-    Connect and manage multiple dbt environments in Elementary.
+  <Card title="Multiple environments" href="/cloud/environments">
+    How environments group assets, and how to add this project to one.
   </Card>
 </CardGroup>

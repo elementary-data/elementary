@@ -2,14 +2,14 @@
   <Step title="Create an account">
     [Sign up to Elementary](https://elementary-data.frontegg.com/oauth/account/sign-up) using Google SSO or email.
   </Step>
-  <Step title="Install the Elementary dbt package">
-    [Add the Elementary dbt package](/data-tests/dbt/quickstart-package) to your dbt project. It collects test results, run metadata, and dbt artifacts automatically at runtime using on-run-end hooks.
-  </Step>
   <Step title="Connect your data warehouse">
-    In Elementary, create your first environment and [connect it to your data warehouse](/cloud/integrations/elementary-integrations). Elementary only needs access to the Elementary schema, not your underlying data.
+    [Create your first environment](/cloud/environments) and connect it to your [data warehouse](/cloud/integrations/elementary-integrations).
+  </Step>
+  <Step title="Choose which assets to monitor">
+    Add the asset sources the environment contains — warehouse databases and schemas, [dbt projects](/cloud/integrations/transformation-and-orchestration/dbt-core), or both.
   </Step>
   <Step title="Connect your stack">
-    Connect your [code repository](/cloud/integrations/code-repo/connect-code-repo), [Slack or other alert channels](/cloud/integrations/alerts/slack), and [BI tools](/cloud/integrations/bi/connect-bi-tool) to get full visibility across your data workflows.
+    Connect [Slack or other alert channels](/cloud/integrations/alerts/slack) and your [BI tools](/cloud/integrations/bi/connect-bi-tool) to get full visibility across your data workflows. If you use dbt, connect your [code repository](/cloud/integrations/code-repo/connect-code-repo) so Elementary can open pull requests with configuration changes.
   </Step>
   <Step title="Invite your team" icon="party-horn">
     [Invite team members](/cloud/features/roles-and-permissions) and assign roles so everyone has access to what they need.

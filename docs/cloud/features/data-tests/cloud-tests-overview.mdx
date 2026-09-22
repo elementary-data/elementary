@@ -11,6 +11,8 @@ import FreshnessConfiguration from '/snippets/cloud/features/anomaly-detection/f
 
 Cloud tests run in Elementary Cloud, outside your dbt pipeline. They are managed in the Elementary UI and do not require configuration in your dbt project.
 
+They run on every asset in the [environment](/cloud/environments), whether it came from a dbt project or from warehouse schemas selected directly in the warehouse.
+
 Cloud test types include:
 
 | Test | What it detects |
