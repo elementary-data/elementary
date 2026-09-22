@@ -70,8 +70,7 @@
                   "cloud/features/anomaly-detection/cloud-pipeline-task-performance",
                   "cloud/features/data-tests/data-contract-test",
                   "cloud/features/data-tests/custom-sql-tests",
-                  "cloud/features/anomaly-detection/metrics",
-                  "cloud/features/anomaly-detection/monitor-dwh-assets"
+                  "cloud/features/anomaly-detection/metrics"
                 ]
               },
               {
@@ -765,7 +764,7 @@
     }
   },
   "banner": {
-    "content": "Not using dbt? You can now use Elementary too. Connect directly to your warehouse to monitor data quality. [Learn more →](/cloud/features/anomaly-detection/monitor-dwh-assets)",
+    "content": "Not using dbt? You can now use Elementary too. Connect directly to your warehouse to monitor data quality. [Learn more →](/cloud/environments)",
     "dismissible": false
   },
   "search": {
@@ -920,6 +919,10 @@
     },
     {
       "source": "/cloud/features/multi-env",
+      "destination": "/cloud/environments"
+    },
+    {
+      "source": "/cloud/features/anomaly-detection/monitor-dwh-assets",
       "destination": "/cloud/environments"
     }
   ]
