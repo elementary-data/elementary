@@ -917,6 +917,10 @@
     {
       "source": "/cloud/onboarding/quickstart-dbt-package",
       "destination": "/data-tests/dbt/quickstart-package"
+    },
+    {
+      "source": "/cloud/features/multi-env",
+      "destination": "/cloud/environments"
     }
   ]
 }
