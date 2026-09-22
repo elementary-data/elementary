@@ -6,7 +6,7 @@ badge: "Elementary Cloud"
 
 Elementary monitors all assets in your data stack, whether or not they were built by dbt. You select databases and schemas directly in your data warehouse, and Elementary syncs the tables and views in them — including those built by ETL tools, orchestrators, or SQL scripts.
 
-Synced warehouse assets appear in the [lineage graph](/cloud/features/data-lineage/lineage) alongside your dbt models and sources, and support freshness and volume Cloud tests.
+Synced warehouse assets appear in the [lineage graph](/cloud/features/data-lineage/lineage) alongside your dbt models and sources, and support the same [cloud tests](/cloud/features/data-tests/cloud-tests-overview).
 
 <Note>
 Warehouse schemas are one of the [asset sources an environment can contain](/cloud/environments). A dbt project is the other, and an environment can hold either or both.
@@ -27,15 +27,36 @@ Supported for **BigQuery**, **Snowflake**, and **Databricks**.
 
 ## Configuring tests on warehouse assets
 
-Configure freshness and volume tests on synced assets from the **test configuration menu**. The process is the same as configuring tests on dbt models:
+Configure tests on synced assets from the **test configuration menu**. The process is the same as configuring tests on dbt models:
 
 1. Navigate to the test configuration page
 2. Select the warehouse asset you want to monitor
-3. Choose either a **freshness** or **volume** test
+3. Choose the test type
 4. Configure the test parameters as needed
 5. Submit the test configuration
 
-These tests run alongside your dbt tests, with the same alerting. Freshness and volume are available today, and more test types are coming.
+These tests run alongside your dbt tests, with the same alerting.
+
+### Available tests
+
+- [Freshness](/cloud/features/anomaly-detection/automated-freshness) — detect tables that stop updating on time
+- [Volume](/cloud/features/anomaly-detection/automated-volume) — detect unexpected changes in row counts
+- [Data contract](/cloud/features/data-tests/data-contract-test) — validate that a table's schema matches an expected baseline
+- [Custom SQL](/cloud/features/data-tests/custom-sql-tests) — validate anything you can express as a query
+
+### Coming soon
+
+More test types:
+
+- Column-level validations such as null ratios, uniqueness, and relationships
+- JSON schema validation, extending the schema validation tests
+- Metrics monitoring, with anomaly detection, percentages, or thresholds
+
+And more capabilities on warehouse assets:
+
+- Table and column profiling
+- Test auto-suggestions
+- Table monitor coverage tracking
 
 ## Lineage integration
 
