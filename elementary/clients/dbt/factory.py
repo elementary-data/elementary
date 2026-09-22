@@ -1,4 +1,5 @@
 import os
+import shutil
 from enum import Enum
 from typing import Any, Dict, Optional, Type
 
@@ -11,6 +12,10 @@ from elementary.clients.dbt.dbt_installation import (
     is_dbt2_binary_available,
 )
 from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
+from elementary.exceptions.exceptions import NoDbtInstallationError
+from elementary.utils.log import get_logger
+
+logger = get_logger(__name__)
 
 
 class RunnerMethod(Enum):
@@ -60,6 +65,13 @@ def get_dbt_runner_method() -> RunnerMethod:
     if dbt_core_version is not None:
         if dbt_core_version.major >= 2:
             return RunnerMethod.DBT2
+        if is_dbt2_binary_available():
+            logger.info(
+                f"Both dbt-core {dbt_core_version} and a dbt v2 installation were "
+                "detected - using dbt-core. To use dbt v2 instead, uninstall "
+                "dbt-core (and the elementary-data adapter extra) or set "
+                "DBT_RUNNER_METHOD=dbt2."
+            )
         if dbt_core_version >= version.Version("1.5.0"):
             return RunnerMethod.API
         return RunnerMethod.SUBPROCESS
@@ -67,7 +79,12 @@ def get_dbt_runner_method() -> RunnerMethod:
     if is_dbt2_binary_available():
         return RunnerMethod.DBT2
 
-    return RunnerMethod.SUBPROCESS
+    # dbt may be installed without pip package metadata (e.g. a system-wide or
+    # pipx-managed dbt 1.x) - fall back to running it as a subprocess.
+    if shutil.which("dbt"):
+        return RunnerMethod.SUBPROCESS
+
+    raise NoDbtInstallationError()
 
 
 def get_dbt_runner_class(runner_method: RunnerMethod) -> Type[CommandLineDbtRunner]:
