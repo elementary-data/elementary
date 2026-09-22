@@ -44,20 +44,6 @@ These tests run alongside your dbt tests, with the same alerting.
 - [Data contract](/cloud/features/data-tests/data-contract-test) — validate that a table's schema matches an expected baseline
 - [Custom SQL](/cloud/features/data-tests/custom-sql-tests) — validate anything you can express as a query
 
-### Coming soon
-
-More test types:
-
-- Column-level validations such as null ratios, uniqueness, and relationships
-- JSON schema validation, extending the schema validation tests
-- Metrics monitoring, with anomaly detection, percentages, or thresholds
-
-And more capabilities on warehouse assets:
-
-- Table and column profiling
-- Test auto-suggestions
-- Table monitor coverage tracking
-
 ## Lineage integration
 
 Synced warehouse assets appear in the lineage view with their dependencies, including dependencies on assets in your dbt projects. Currently, **views** are fully supported in the lineage visualization, and **tables** support is coming soon.
