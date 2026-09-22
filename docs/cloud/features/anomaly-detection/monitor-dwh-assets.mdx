@@ -4,41 +4,44 @@ sidebarTitle: "Monitor DWH assets"
 badge: "Elementary Cloud"
 ---
 
-Elementary monitors all assets in your data stack — not just dbt models and sources. You can sync any schema directly from your data warehouse to extend observability to tables and views that exist outside your dbt project: tables created by ETL tools, direct SQL scripts, or other pipelines.
+Elementary monitors all assets in your data stack, whether or not they were built by dbt. You select databases and schemas directly in your data warehouse, and Elementary syncs the tables and views in them — including those built by ETL tools, orchestrators, or SQL scripts.
 
-Synced DWH assets appear in the [lineage graph](/cloud/features/data-lineage/lineage) alongside your dbt models and sources, and support the same freshness and volume Cloud tests.
+Synced warehouse assets appear in the [lineage graph](/cloud/features/data-lineage/lineage) alongside your dbt models and sources, and support freshness and volume Cloud tests.
+
+<Note>
+Warehouse schemas are one of the [asset sources an environment can contain](/cloud/environments). A dbt project is the other, and an environment can hold either or both.
+</Note>
+
+## Syncing warehouse schemas
+
+Add the databases and schemas you want to monitor as an asset source on the environment, in **Account settings > Environments**. Once synced, these assets appear in the side tree under the **DWH view**, alongside your dbt models and sources.
+
+This lets you:
+- Monitor tables built by ETL tools, orchestrators, or SQL scripts
+- Gain visibility into your entire data warehouse inventory
+- Apply the same monitoring and testing capabilities across every asset in the environment
 
 <Warning>
-This feature is currently in **beta** and is only supported for **BigQuery**, **Snowflake**, and **Databricks**. Self-serve schema syncing will be available soon. Until then, to sync additional assets to Elementary, please contact support.
+Supported for **BigQuery**, **Snowflake**, and **Databricks**.
 </Warning>
 
-## Syncing DWH schemas
+## Configuring tests on warehouse assets
 
-You can sync schemas directly from your data warehouse to Elementary. Once synced, these assets will appear in the side tree under the **DWH view**, making them easily accessible alongside your dbt models and sources.
-
-This feature allows you to:
-- Monitor assets that are created outside of dbt (e.g., tables created by other tools, ETL processes, or direct SQL scripts)
-- Gain visibility into your entire data warehouse inventory
-- Apply the same monitoring and testing capabilities to non-dbt assets
-
-## Configuring tests on DWH assets
-
-After syncing your DWH schemas, you can configure freshness and volume tests on these assets directly from the **test configuration menu**. The process is the same as configuring tests on dbt models:
+Configure freshness and volume tests on synced assets from the **test configuration menu**. The process is the same as configuring tests on dbt models:
 
 1. Navigate to the test configuration page
-2. Select the DWH asset you want to monitor
+2. Select the warehouse asset you want to monitor
 3. Choose either a **freshness** or **volume** test
 4. Configure the test parameters as needed
 5. Submit the test configuration
 
-These tests will run alongside your dbt tests and provide the same level of monitoring and alerting capabilities.
+These tests run alongside your dbt tests, with the same alerting. Freshness and volume are available today, and more test types are coming.
 
 ## Lineage integration
 
-DWH assets that have dependencies within your dbt projects will appear in the lineage view. Currently, **views** are fully supported in the lineage visualization, and **tables** support is coming soon.
+Synced warehouse assets appear in the lineage view with their dependencies, including dependencies on assets in your dbt projects. Currently, **views** are fully supported in the lineage visualization, and **tables** support is coming soon.
 
-This integration helps you:
-- Understand how your dbt models depend on or are used by non-dbt assets
+This helps you:
+- Understand how your dbt models depend on, or feed, assets built elsewhere
 - Visualize the complete data flow across your warehouse
 - Identify dependencies and impacts across your entire data ecosystem
-

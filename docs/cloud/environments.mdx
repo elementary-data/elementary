@@ -13,7 +13,7 @@ Everything Elementary computes — lineage, monitors, incidents, alerts, and hea
 An environment is built from one or more asset sources. Each one tells Elementary which assets to sync. An asset source is either:
 
 - **A dbt project** — Elementary syncs models, sources, tests, and run results collected by the [Elementary dbt package](/cloud/integrations/transformation-and-orchestration/dbt-core).
-- **A selection of warehouse databases and schemas** — picked directly in the warehouse. Use this for tables and views built by ETL tools, orchestrators, or SQL scripts.
+- **A selection of warehouse databases and schemas** — picked directly in the warehouse. Use this for tables and views built by ETL tools, orchestrators, or SQL scripts. See [monitoring DWH assets](/cloud/features/anomaly-detection/monitor-dwh-assets).
 
 An environment can hold several of either kind, and can mix them. An environment built entirely from warehouse asset sources works on its own, monitored from warehouse metadata — dbt is optional.
 
