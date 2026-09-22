@@ -42,13 +42,14 @@ def _mock_installation(
 @pytest.mark.parametrize(
     "dbt_core_version,dbt2_binary_available,dbt_on_path,expected_method",
     [
-        ("1.8.0", False, True, RunnerMethod.API),
-        ("1.10.5", True, True, RunnerMethod.API),
-        ("1.4.0", False, True, RunnerMethod.SUBPROCESS),
+        ("1.8.0", False, True, RunnerMethod.DBT1_API),
+        # dbt v2 takes precedence when installed alongside dbt-core 1.x
+        ("1.10.5", True, True, RunnerMethod.DBT2),
+        ("1.4.0", False, True, RunnerMethod.DBT1_SUBPROCESS),
         ("2.0.0b2", False, True, RunnerMethod.DBT2),
         (None, True, True, RunnerMethod.DBT2),
         # dbt installed without pip metadata (e.g. system-wide dbt 1.x)
-        (None, False, True, RunnerMethod.SUBPROCESS),
+        (None, False, True, RunnerMethod.DBT1_SUBPROCESS),
     ],
 )
 def test_get_dbt_runner_method_auto_detection(
@@ -76,15 +77,15 @@ def test_get_dbt_runner_method_hints_when_dbt_core_and_dbt2_coexist(
         monkeypatch, dbt_core_version="1.10.0", dbt2_binary_available=True
     )
     with caplog.at_level("INFO"):
-        assert get_dbt_runner_method() == RunnerMethod.API
-    assert any("using dbt-core" in record.message for record in caplog.records)
+        assert get_dbt_runner_method() == RunnerMethod.DBT2
+    assert any("using dbt v2" in record.message for record in caplog.records)
 
 
 @pytest.mark.parametrize(
     "env_value,expected_method",
     [
-        ("subprocess", RunnerMethod.SUBPROCESS),
-        ("api", RunnerMethod.API),
+        ("subprocess", RunnerMethod.DBT1_SUBPROCESS),
+        ("api", RunnerMethod.DBT1_API),
         ("dbt2", RunnerMethod.DBT2),
         ("fusion", RunnerMethod.FUSION),
     ],
@@ -95,9 +96,14 @@ def test_get_dbt_runner_method_env_override(monkeypatch, env_value, expected_met
 
 
 def test_get_dbt_runner_class():
-    assert get_dbt_runner_class(RunnerMethod.SUBPROCESS) is SubprocessDbtRunner
+    assert get_dbt_runner_class(RunnerMethod.DBT1_SUBPROCESS) is SubprocessDbtRunner
     assert get_dbt_runner_class(RunnerMethod.DBT2) is Dbt2Runner
     assert get_dbt_runner_class(RunnerMethod.FUSION) is Dbt2Runner
+
+
+def test_runner_method_legacy_aliases():
+    assert RunnerMethod.API is RunnerMethod.DBT1_API
+    assert RunnerMethod.SUBPROCESS is RunnerMethod.DBT1_SUBPROCESS
 
 
 @mock.patch("elementary.clients.dbt.dbt_installation.shutil.which")

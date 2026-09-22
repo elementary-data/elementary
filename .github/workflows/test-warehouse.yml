@@ -303,6 +303,10 @@ jobs:
             # mssql-python, and its service-principal connection string
             # ("Authority Id=...") is rejected by the driver.
             fabric) DBT_ADAPTER_VERSION_SPEC="<1.11" ;;
+            # dbt-clickhouse 1.10.3 fails to create the target database
+            # ("Failed to create ... database due to ClickHouse exception");
+            # 1.10.2 works with the same server version.
+            clickhouse) DBT_ADAPTER_VERSION_SPEC="<1.10.3" ;;
           esac
 
           if [ -n "$DBT_VERSION" ]; then
