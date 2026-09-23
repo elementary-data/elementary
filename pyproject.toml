@@ -50,10 +50,12 @@ tabulate = ">= 0.9.0"
 tenacity = ">=8.0,<10.0"
 pytz = ">= 2025.1"
 
-# There is intentionally no direct dbt dependency: dbt v2 ships as the `dbt` /
+# There is intentionally no mandatory dbt dependency: dbt v2 ships as the `dbt` /
 # `dbt-oss` packages (dbt-core stays on 1.x) and requires no extra alongside
-# elementary-data, while dbt-core 1.x (>=1.8) comes through the adapter extras
-# below - every dbt-<adapter> package depends on it.
+# elementary-data, while dbt-core 1.x comes through the adapter extras below.
+# dbt-core is explicitly constrained in the extras so they can never resolve a
+# dbt-core 2.x release (the adapters themselves only lower-bound dbt-core).
+dbt-core = {version = ">=1.8,<2.0.0", optional = true}
 dbt-snowflake = {version = ">=1.8,<2.0.0", optional = true}
 dbt-bigquery = {version = ">=1.8,<2.0.0", optional = true}
 dbt-redshift = {version = ">=1.8,<2.0.0", optional = true}
@@ -74,38 +76,38 @@ dbt-sqlserver = {version = ">=1.8,<2.0.0", optional = true}
 # They are not needed with dbt v2 (`pip install dbt` / `dbt-oss`), which has the
 # adapters built in. The dbt1-* names are the documented ones; the plain
 # warehouse names are kept as aliases for backward compatibility.
-dbt1-snowflake = ["dbt-snowflake"]
-dbt1-bigquery = ["dbt-bigquery"]
-dbt1-redshift = ["dbt-redshift"]
-dbt1-postgres = ["dbt-postgres"]
-dbt1-databricks = ["dbt-databricks"]
-dbt1-spark = ["dbt-spark"]
-dbt1-athena = ["dbt-athena-community", "pyathena"]
-dbt1-clickhouse = ["dbt-clickhouse"]
-dbt1-trino = ["dbt-trino"]
-dbt1-duckdb = ["dbt-duckdb"]
-dbt1-dremio = ["dbt-dremio"]
-dbt1-fabric = ["dbt-fabric"]
-dbt1-sqlserver = ["dbt-sqlserver"]
-snowflake = ["dbt-snowflake"]
-bigquery = ["dbt-bigquery"]
-redshift = ["dbt-redshift"]
-postgres = ["dbt-postgres"]
-databricks = ["dbt-databricks"]
-spark = ["dbt-spark"]
-athena = ["dbt-athena-community", "pyathena"]
-clickhouse = ["dbt-clickhouse"]
-trino = ["dbt-trino"]
-duckdb = ["dbt-duckdb"]
-dremio = ["dbt-dremio"]
-fabric = ["dbt-fabric"]
-sqlserver = ["dbt-sqlserver"]
+dbt1-snowflake = ["dbt-core", "dbt-snowflake"]
+dbt1-bigquery = ["dbt-core", "dbt-bigquery"]
+dbt1-redshift = ["dbt-core", "dbt-redshift"]
+dbt1-postgres = ["dbt-core", "dbt-postgres"]
+dbt1-databricks = ["dbt-core", "dbt-databricks"]
+dbt1-spark = ["dbt-core", "dbt-spark"]
+dbt1-athena = ["dbt-core", "dbt-athena-community", "pyathena"]
+dbt1-clickhouse = ["dbt-core", "dbt-clickhouse"]
+dbt1-trino = ["dbt-core", "dbt-trino"]
+dbt1-duckdb = ["dbt-core", "dbt-duckdb"]
+dbt1-dremio = ["dbt-core", "dbt-dremio"]
+dbt1-fabric = ["dbt-core", "dbt-fabric"]
+dbt1-sqlserver = ["dbt-core", "dbt-sqlserver"]
+snowflake = ["dbt-core", "dbt-snowflake"]
+bigquery = ["dbt-core", "dbt-bigquery"]
+redshift = ["dbt-core", "dbt-redshift"]
+postgres = ["dbt-core", "dbt-postgres"]
+databricks = ["dbt-core", "dbt-databricks"]
+spark = ["dbt-core", "dbt-spark"]
+athena = ["dbt-core", "dbt-athena-community", "pyathena"]
+clickhouse = ["dbt-core", "dbt-clickhouse"]
+trino = ["dbt-core", "dbt-trino"]
+duckdb = ["dbt-core", "dbt-duckdb"]
+dremio = ["dbt-core", "dbt-dremio"]
+fabric = ["dbt-core", "dbt-fabric"]
+sqlserver = ["dbt-core", "dbt-sqlserver"]
 # dbt-fabricspark and dbt-vertica are removed from the lockfile resolution because they pin
 # outdated transitive dependencies (dbt-core==1.8.5, azure-cli pre-release) that block
 # security patches for deepdiff, protobuf, and pyopenssl. Users who need these adapters
 # can still install them directly (e.g. pip install dbt-fabricspark dbt-vertica).
-dbt1-all = ["dbt-snowflake", "dbt-bigquery", "dbt-redshift", "dbt-postgres", "dbt-databricks", "dbt-spark", "dbt-athena-community", "pyathena", "dbt-trino", "dbt-clickhouse", "dbt-duckdb", "dbt-dremio", "dbt-fabric", "dbt-sqlserver"]
-all = ["dbt-snowflake", "dbt-bigquery", "dbt-redshift", "dbt-postgres", "dbt-databricks", "dbt-spark", "dbt-athena-community", "pyathena", "dbt-trino", "dbt-clickhouse", "dbt-duckdb", "dbt-dremio", "dbt-fabric", "dbt-sqlserver"]
+dbt1-all = ["dbt-core", "dbt-snowflake", "dbt-bigquery", "dbt-redshift", "dbt-postgres", "dbt-databricks", "dbt-spark", "dbt-athena-community", "pyathena", "dbt-trino", "dbt-clickhouse", "dbt-duckdb", "dbt-dremio", "dbt-fabric", "dbt-sqlserver"]
+all = ["dbt-core", "dbt-snowflake", "dbt-bigquery", "dbt-redshift", "dbt-postgres", "dbt-databricks", "dbt-spark", "dbt-athena-community", "pyathena", "dbt-trino", "dbt-clickhouse", "dbt-duckdb", "dbt-dremio", "dbt-fabric", "dbt-sqlserver"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
