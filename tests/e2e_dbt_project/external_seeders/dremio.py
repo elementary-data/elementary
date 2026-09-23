@@ -175,7 +175,7 @@ class DremioExternalSeeder(ExternalSeeder):
     def _upload_csvs_to_minio(self) -> None:
         """Upload seed CSVs to the Dremio MinIO bucket.
 
-        Mounts the local ``data_dir`` into a temporary ``minio/mc`` container
+        Mounts the local ``data_dir`` into a temporary ``mc`` container
         and copies files directly into the MinIO bucket.
         """
         import shlex
@@ -204,7 +204,7 @@ class DremioExternalSeeder(ExternalSeeder):
                 f"{self.data_dir}:/seed-data:ro",
                 "--entrypoint",
                 "/bin/sh",
-                "minio/mc",
+                "quay.io/minio/mc:RELEASE.2024-01-18T07-03-39Z",
                 "-c",
                 mc_cmds,
             ]
