@@ -129,7 +129,7 @@
     on results.unique_id = sources.unique_id
     left join dbt_run_results on results.source_freshness_execution_id = dbt_run_results.model_execution_id
     left join dbt_invocations as invocations on dbt_run_results.invocation_id = invocations.invocation_id
-    where lower(results.status) != 'pass'
+    where lower(results.status) not in ('pass', 'reused')
     and {{ elementary.edr_cast_as_timestamp('results.generated_at') }} > {{ elementary.edr_timeadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
   )
 
