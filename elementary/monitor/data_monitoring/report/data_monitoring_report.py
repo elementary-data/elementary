@@ -8,7 +8,7 @@ from typing import Optional, Tuple
 from elementary.clients.azure.client import AzureClient
 from elementary.clients.gcs.client import GCSClient
 from elementary.clients.s3.client import S3Client
-from elementary.clients.slack.client import SlackClient
+from elementary.clients.slack.client import SlackClient, SlackWebhookClient
 from elementary.config.config import Config
 from elementary.monitor.api.invocations.invocations import InvocationsAPI
 from elementary.monitor.api.report.report import ReportAPI
@@ -227,7 +227,14 @@ class DataMonitoringReport(DataMonitoring):
             )
             if should_send_report_over_slack:
                 self.validate_report_selector()
-                self.send_report_attachment(local_html_path=local_html_path)
+                if isinstance(self.slack_client, SlackWebhookClient):
+                    # Slack webhooks can only post messages, not upload files.
+                    logger.warning(
+                        "Skipping the report attachment: a Slack webhook cannot upload files. "
+                        "Use a Slack token or a bucket website to share the report."
+                    )
+                else:
+                    self.send_report_attachment(local_html_path=local_html_path)
 
         return self.success
 
