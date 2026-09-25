@@ -77,7 +77,11 @@ def test_reply_retry_after_join_keeps_thread_and_reply_broadcast():
         destination=CHANNEL_NAME, message_context=context, body=_body()
     )
 
+    first_kwargs = client.chat_postMessage.call_args_list[0].kwargs
     retry_kwargs = client.chat_postMessage.call_args_list[1].kwargs
+    assert retry_kwargs["channel"] == first_kwargs["channel"] == CHANNEL_NAME
+    assert retry_kwargs["blocks"] == first_kwargs["blocks"]
+    assert retry_kwargs["attachments"] == first_kwargs["attachments"]
     assert retry_kwargs["thread_ts"] == "1690000000.000100"
     assert retry_kwargs["reply_broadcast"] is True
 
