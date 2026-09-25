@@ -102,6 +102,7 @@ class SlackWebMessagingIntegration(
         formatted_message: FormattedBlockKitMessage,
         thread_ts: Optional[str] = None,
         reply_broadcast: bool = False,
+        joined_channel: bool = False,
     ) -> MessageSendResult[SlackWebMessageContext]:
         try:
             response = self.client.chat_postMessage(
@@ -113,8 +114,15 @@ class SlackWebMessagingIntegration(
                 reply_broadcast=reply_broadcast,
             )
         except SlackApiError as e:
-            self._handle_send_err(e, destination)
-            return self._send_message(destination, formatted_message, thread_ts)
+            self._handle_send_err(e, destination, can_join=not joined_channel)
+            # The app has just joined the channel, so send the message again.
+            return self._send_message(
+                destination,
+                formatted_message,
+                thread_ts=thread_ts,
+                reply_broadcast=reply_broadcast,
+                joined_channel=True,
+            )
 
         return MessageSendResult(
             message_context=SlackWebMessageContext(
@@ -124,17 +132,20 @@ class SlackWebMessagingIntegration(
             message_format="block_kit",
         )
 
-    def _handle_send_err(self, err: SlackApiError, channel_name: str):
+    def _handle_send_err(
+        self, err: SlackApiError, channel_name: str, can_join: bool = True
+    ) -> None:
         if self.tracking:
             self.tracking.record_internal_exception(err)
         err_type = err.response.data["error"]
-        if err_type == "not_in_channel":
+        if err_type == "not_in_channel" and can_join:
             logger.info(
                 f'Elementary app is not in the channel "{channel_name}". Attempting to join.'
             )
             channel_id = self._get_channel_id(channel_name, only_public=True)
             self._join_channel(channel_id=channel_id)
             logger.info(f"Joined channel {channel_name}")
+            return
         elif err_type == "channel_not_found":
             raise MessagingIntegrationError(
                 f"Channel {channel_name} was not found by the Elementary app. Please add the app to the channel."
