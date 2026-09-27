@@ -22,11 +22,27 @@ where status is null
 
 This test will fail if there are any orders with a null status, and pass if all orders have a status value.
 
-## The Multiple Tables Challenge
+## Test shows "No assets linked to this test"
 
-In singular custom tests, the query can sometimes involve multiple tables. When this happens, there's no unique link between a test and a specific asset. The test may fail, but the incident isn't shown because Elementary doesn't know which asset the test is connected to.
+If a test in Elementary Cloud shows **No assets linked to this test**, Elementary couldn't work out which table the test belongs to. The test still runs and its results are still collected, but without a linked asset:
 
-For example, consider this test that joins multiple tables:
+- Its incidents don't show on any asset's page, lineage, or catalog entry
+- It doesn't inherit owners or tags from a model, so owner-based alert routing can't reach anyone
+
+### Why it happens
+
+When Elementary uploads your dbt artifacts, it picks the test's primary asset in this order:
+
+1. The `override_primary_test_model_id` setting, if the test has one (see below).
+2. The test's parent, if the test depends on **exactly one** model, source, or snapshot in your project.
+3. For generic tests, the `model` argument the test was applied to.
+
+Singular tests have no `model` argument, so they are only linked automatically when they reference exactly one node. A singular test ends up with no asset when:
+
+- It references **two or more** models or sources (a join, or a comparison between tables)
+- It references **nothing** in your project (for example, it only queries tables by their hardcoded name, or only refs models from another package)
+
+For example, this test joins two tables, so Elementary can't tell whether a failure is about `orders` or `payments`:
 
 ```sql
 select * 
@@ -35,15 +51,9 @@ join {{ ref('payments') }}
 where status is null
 ```
 
-When this test fails, Elementary can't determine whether the issue is with the `orders` table or the `payments` table, making it difficult to surface the incident in the right context.
+### How to fix it: set the primary model
 
-## Solution: Override Primary Test Model ID
-
-To handle this scenario, Elementary provides an option to explicitly define which table is actually being tested using the `override_primary_test_model_id` configuration. This ensures that test failures are properly linked to the correct asset.
-
-### Configuration
-
-You can configure the primary model like this:
+Tell Elementary which asset the test is about with `override_primary_test_model_id`. You can set it in the test's `config`:
 
 ```sql
 {{ 
@@ -59,11 +69,37 @@ join {{ ref('payments') }}
 where status is null
 ```
 
-In this example, even though both `orders` and `payments` are in the query, Elementary will link the test to the `orders` table since it's explicitly set as the primary model.
+Or in its `meta`:
 
-### Ownership Behavior
+```sql
+{{ config(meta={'override_primary_test_model_id': 'model.jaffle_shop_online.orders'}) }}
+```
 
-When you set `override_primary_test_model_id`, Elementary will use the owner from the specified primary model. In the example above, even though both orders and payments are in the query, Elementary will use the owner from the orders table, since it's explicitly set as the primary model and there is no meta section for this test.
+The value is the dbt **unique_id** of the node, not its name. It has the form `<resource_type>.<project_name>.<name>`, for example `model.jaffle_shop_online.orders` or `source.jaffle_shop_online.raw.payments`. To look it up:
+
+```sql
+select unique_id
+from <elementary_schema>.dbt_models
+where name = '<model_name>'
+```
+
+To avoid hardcoding the project name (useful when the same test is shared across projects), build the id from dbt's `project_name`:
+
+```sql
+{{ config(override_primary_test_model_id='model.' ~ project_name ~ '.orders') }}
+```
+
+Pick the asset that the failure is actually about. For a test that compares an upstream table to a downstream one, that is usually the downstream table, since that is where the bad data ends up.
+
+The link appears in Elementary Cloud after the next run uploads your dbt artifacts. You can confirm it by checking that `parent_model_unique_id` is set for the test in `<elementary_schema>.dbt_tests`.
+
+<Note>
+This setting works for any dbt test, not only singular tests. It's also the fix for a generic test that shows no asset, for example a custom generic test that references several models.
+</Note>
+
+### Ownership behavior
+
+When you set `override_primary_test_model_id`, Elementary uses the owner from the specified primary model. In the example above, even though both `orders` and `payments` are in the query, Elementary uses the owner of `orders`, as long as the test doesn't set its own owner in `meta`.
 
 This ensures that:
 - Test incidents are properly attributed to the correct asset

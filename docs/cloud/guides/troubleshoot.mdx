@@ -65,22 +65,15 @@ For more information on the permissions required by each data warehouse:
 
 </Accordion>
 
-<Accordion title="How do I set up the table name of my Singular test?">
+<Accordion title='A test shows "No assets linked to this test"'>
 
-Singular tests are sql queries that can reference more than one table, but are often intended to test a logic that is related to one table in particular.
-In order to have that table name appear in the UI in the test results, test execution and more screens, you can set it up by adding the following to the config block of your singular test file:
+Elementary couldn't tell which table the test belongs to. This usually happens with singular tests that reference more than one model or source (or none at all). Link the test to its asset by setting `override_primary_test_model_id` in the test's config:
 ```
 {{ config(
-    override_primary_test_model_id="model_unique_id"
+    override_primary_test_model_id="model.<project_name>.<model_name>"
 ) }}
 ```
 
-Note: Use the `model_unique_id`, not the model name.
-The `model_unique_id` is the unique identifier of the model in dbt, and can be found by running the query:
-```
-SELECT unique_id
-FROM <elementary-schema-name>.dbt_models
-WHERE name=<model-name>
-```
+Use the model's dbt `unique_id`, not its name. See [Test shows "No assets linked to this test"](/data-tests/dbt/singular-tests#test-shows-no-assets-linked-to-this-test) for the full explanation.
 
 </Accordion>
