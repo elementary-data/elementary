@@ -1777,7 +1777,7 @@
     },
     "/public/beta/{env_id}/asset-health-scores/aggregate": {
       "get": {
-        "description": "Returns one health score card for the set of table assets matching the filters \u2014 the same number the Data Health dashboard shows for a filter or folder. Filters match `GET /assets/tables` plus `path` and intersect. The score is aggregated across the matching assets' test results in the last 7 days, not averaged from per-asset scores. When no matching asset has test results in the window, returns a zero card (`score` 0, `test_count` 0, `bucket_at` null, no dimensions).",
+        "description": "Returns one health score card for the set of table assets matching the filters \u2014 the same number the Data Health dashboard shows for a filter or folder. Filters match `GET /assets/tables` plus `path` and intersect; with no filters, every scored asset you can view is included. The score is aggregated across the matching assets' test results in the last 7 days, not averaged from per-asset scores. When no matching asset has test results in the window, returns a zero card (`score` 0, `test_count` 0, `bucket_at` null, no dimensions).",
         "operationId": "aggregate_asset_health_scores_public_beta__env_id__asset_health_scores_aggregate_get",
         "parameters": [
           {
@@ -1924,7 +1924,7 @@
             }
           },
           {
-            "description": "Return only table assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`). Repeatable; assets without a `path` never match.",
+            "description": "Return only table assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`; a trailing `/` is ignored). Repeatable; assets without a `path` never match.",
             "in": "query",
             "name": "path",
             "required": false,
@@ -1941,7 +1941,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Return only table assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`). Repeatable; assets without a `path` never match.",
+              "description": "Return only table assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`; a trailing `/` is ignored). Repeatable; assets without a `path` never match.",
               "title": "Path"
             }
           }
@@ -2464,7 +2464,7 @@
             }
           },
           {
-            "description": "Return only assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`). Repeatable; assets without a `path` never match.",
+            "description": "Return only assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`; a trailing `/` is ignored). Repeatable; assets without a `path` never match.",
             "in": "query",
             "name": "path",
             "required": false,
@@ -2481,7 +2481,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Return only assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`). Repeatable; assets without a `path` never match.",
+              "description": "Return only assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`; a trailing `/` is ignored). Repeatable; assets without a `path` never match.",
               "title": "Path"
             }
           },
@@ -2795,7 +2795,7 @@
             }
           },
           {
-            "description": "Return only BI assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`). Repeatable; assets without a `path` never match.",
+            "description": "Return only BI assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`; a trailing `/` is ignored). Repeatable; assets without a `path` never match.",
             "in": "query",
             "name": "path",
             "required": false,
@@ -2812,7 +2812,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Return only BI assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`). Repeatable; assets without a `path` never match.",
+              "description": "Return only BI assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`; a trailing `/` is ignored). Repeatable; assets without a `path` never match.",
               "title": "Path"
             }
           },
@@ -3310,7 +3310,7 @@
             }
           },
           {
-            "description": "Return only table assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`). Repeatable; assets without a `path` never match.",
+            "description": "Return only table assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`; a trailing `/` is ignored). Repeatable; assets without a `path` never match.",
             "in": "query",
             "name": "path",
             "required": false,
@@ -3327,7 +3327,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Return only table assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`). Repeatable; assets without a `path` never match.",
+              "description": "Return only table assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`; a trailing `/` is ignored). Repeatable; assets without a `path` never match.",
               "title": "Path"
             }
           },

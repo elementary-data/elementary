@@ -176,14 +176,15 @@ curl -G "https://prod.api.elementary-data.com/public/beta/$ENV_ID/asset-health-s
 }
 ```
 
-- Only [table assets](/api/reference/assets/list-table-assets) are included.
-  Filter them with the same parameters as `GET /assets/tables`: `ids`,
+- Filters select [table assets](/api/reference/assets/list-table-assets),
+  using the same parameters as `GET /assets/tables`: `ids`,
   `source_types`, `tags`, `db_names`, `schema_names`, `materializations`, and
   `path`. Values within one parameter are OR-ed; different parameters are
-  AND-ed. With no filters, the score covers every monitored table you can see.
+  AND-ed. With no filters, the score covers every scored asset you can view.
 - `path` selects a folder: it matches assets whose `path` equals the value or is
   nested under it (`models/marts` matches `models/marts/orders.sql` but not
-  `models/marts_legacy/orders.sql`). Repeat it to combine folders. The same
+  `models/marts_legacy/orders.sql`). A trailing `/` is ignored, and `.sql` is
+  not stripped. Repeat it to combine folders. The same
   `path` filter is also available on `GET /assets`, `/assets/tables`, and
   `/assets/bi`.
 - Same scoring as above: scores are in the range `0`–`1`, computed from test
