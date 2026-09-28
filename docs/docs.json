@@ -583,7 +583,8 @@
                 "group": "Asset health scores",
                 "pages": [
                   "api/reference/asset-health-scores/list-asset-health-scores",
-                  "api/reference/asset-health-scores/get-an-asset-health-score"
+                  "api/reference/asset-health-scores/get-an-asset-health-score",
+                  "api/reference/asset-health-scores/aggregate-asset-health-scores"
                 ]
               }
             ]

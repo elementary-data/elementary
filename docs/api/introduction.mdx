@@ -66,6 +66,7 @@ Follow `next_cursor` until `has_more` is `false` — see [Pagination](/api/pagin
 | Latest test executions  | `GET /{env_id}/latest-test-executions`            | Current run per sub-test                        |
 | Test execution history  | `GET /{env_id}/tests/{test_id}/executions`        | History for one test                            |
 | Asset health scores     | `GET /{env_id}/asset-health-scores`               | Current health score per asset                  |
+| Aggregate health score  | `GET /{env_id}/asset-health-scores/aggregate`     | One health score for a filtered set of tables   |
 
 Every list endpoint supports a full scan and keyset pagination. Assets,
 columns, and tests also expose incremental feeds — see
@@ -149,6 +150,48 @@ Each item has a `total` score and one entry per quality `dimension`
   The only filter is `asset_ids`. Join to
   [assets](/api/reference/assets/list-assets) on `asset_id`.
 - `dimension` is an extensible enum (see below).
+
+### Aggregate health score for a set of assets
+
+**[`GET /asset-health-scores/aggregate`](/api/reference/asset-health-scores/aggregate-asset-health-scores)**
+returns a single health score for a group of table assets — for example a dbt
+folder, a schema, or everything with a tag — the same number the Elementary
+data health dashboard shows when you filter it to that group. It is computed
+over the matching assets' test results together, **not** as an average of
+their per-asset scores.
+
+```bash
+curl -G "https://prod.api.elementary-data.com/public/beta/$ENV_ID/asset-health-scores/aggregate" \
+  -H "Authorization: Bearer $ELEMENTARY_TOKEN" \
+  --data-urlencode "path=models/marts" \
+  --data-urlencode "tags=finance"
+```
+
+```json
+{
+  "total": { "score": 0.91, "test_count": 12, "bucket_at": "2026-09-14T08:00:00" },
+  "dimensions": [
+    { "dimension": "freshness", "score": 0.99, "test_count": 3, "bucket_at": "2026-09-14T08:00:00" }
+  ]
+}
+```
+
+- Only [table assets](/api/reference/assets/list-table-assets) are included.
+  Filter them with the same parameters as `GET /assets/tables`: `ids`,
+  `source_types`, `tags`, `db_names`, `schema_names`, `materializations`, and
+  `path`. Values within one parameter are OR-ed; different parameters are
+  AND-ed. With no filters, the score covers every monitored table you can see.
+- `path` selects a folder: it matches assets whose `path` equals the value or is
+  nested under it (`models/marts` matches `models/marts/orders.sql` but not
+  `models/marts_legacy/orders.sql`). Repeat it to combine folders. The same
+  `path` filter is also available on `GET /assets`, `/assets/tables`, and
+  `/assets/bi`.
+- Same scoring as above: scores are in the range `0`–`1`, computed from test
+  results in a fixed **last 7 days** window, and dimensions with no results are
+  omitted.
+- If no matching asset has test results in the window, the response is still
+  `200` with a zero score:
+  `{"total": {"score": 0, "test_count": 0, "bucket_at": null}, "dimensions": []}`.
 
 ## Forward compatibility
 
