@@ -51,6 +51,7 @@ class SlackWebMessagingIntegration(
         self.client = client
         self.tracking = tracking
         self._email_to_user_id_cache: Dict[str, str] = {}
+        self._handle_to_user_id_cache: Optional[Dict[str, str]] = None
         self.reply_broadcast = reply_broadcast
 
     @classmethod
@@ -77,7 +78,7 @@ class SlackWebMessagingIntegration(
     def send_message(
         self, destination: Channel, body: MessageBody
     ) -> MessageSendResult[SlackWebMessageContext]:
-        formatted_message = format_block_kit(body, self.get_user_id_from_email)
+        formatted_message = format_block_kit(body, self.resolve_user_id)
         return self._send_message(destination, formatted_message)
 
     def reply_to_message(
@@ -86,7 +87,7 @@ class SlackWebMessagingIntegration(
         message_context: SlackWebMessageContext,
         body: MessageBody,
     ) -> MessageSendResult[SlackWebMessageContext]:
-        formatted_message = format_block_kit(body, self.get_user_id_from_email)
+        formatted_message = format_block_kit(body, self.resolve_user_id)
         return self._send_message(
             destination,
             formatted_message,
@@ -186,6 +187,47 @@ class SlackWebMessagingIntegration(
             if self.tracking:
                 self.tracking.record_internal_exception(e)
             raise MessagingIntegrationError(f"Failed to join channel {channel_id}")
+
+    def resolve_user_id(self, user: str) -> Optional[str]:
+        if user.startswith("@"):
+            return self.get_user_id_from_handle(user[1:])
+        return self.get_user_id_from_email(user)
+
+    def get_user_id_from_handle(self, handle: str) -> Optional[str]:
+        if self._handle_to_user_id_cache is None:
+            self._handle_to_user_id_cache = self._build_handle_to_user_id_map()
+        return self._handle_to_user_id_cache.get(handle.lower())
+
+    def _build_handle_to_user_id_map(self) -> Dict[str, str]:
+        email_prefix_to_user_id: Dict[str, str] = {}
+        username_to_user_id: Dict[str, str] = {}
+        try:
+            for user in self._iter_users():
+                if user.get("deleted") or user.get("is_bot"):
+                    continue
+                email = (user.get("profile") or {}).get("email")
+                if email:
+                    email_prefix = email.split("@")[0].lower()
+                    email_prefix_to_user_id.setdefault(email_prefix, user["id"])
+                if user.get("name"):
+                    username_to_user_id.setdefault(user["name"].lower(), user["id"])
+        except SlackApiError as err:
+            if self.tracking:
+                self.tracking.record_internal_exception(err)
+            logger.error(f"Unable to list Slack users: {err}.")
+        return {**username_to_user_id, **email_prefix_to_user_id}
+
+    @sleep_and_retry
+    @limits(calls=20, period=ONE_MINUTE)
+    def _iter_users(self, cursor: Optional[str] = None) -> Iterator[dict]:
+        response = self.client.users_list(cursor=cursor, limit=200)
+        yield from response["members"]
+        response_metadata = response.get("response_metadata") or {}
+        next_cursor = response_metadata.get("next_cursor")
+        if next_cursor:
+            if not isinstance(next_cursor, str):
+                raise ValueError("Next cursor is not a string")
+            yield from self._iter_users(next_cursor)
 
     @sleep_and_retry
     @limits(calls=50, period=ONE_MINUTE)
