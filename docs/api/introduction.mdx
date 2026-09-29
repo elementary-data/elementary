@@ -182,10 +182,9 @@ curl -G "https://prod.api.elementary-data.com/public/beta/$ENV_ID/asset-health-s
 
 - `matched_count` is the number of table assets you can view that match the
   filters, including those with no test results in the window.
-- Filters select [table assets](/api/reference/assets/list-table-assets),
-  using the same parameters as `GET /assets/tables`: `ids`,
-  `source_types`, `tags`, `db_names`, `schema_names`, `materializations`, and
-  `path`. Values within one parameter are OR-ed; different parameters are
+- Filters select [table assets](/api/reference/assets/list-table-assets). The
+  supported filters are `ids`, `source_types`, `tags`, `db_names`,
+  `schema_names`, `materializations`, and `path`. Values within one parameter are OR-ed; different parameters are
   AND-ed. With no filters, the score covers every table asset you can view.
 - Every `ids` value must be a table asset; if any is a BI asset or unknown, the
   request fails with `400` and the error message lists the invalid ids.
