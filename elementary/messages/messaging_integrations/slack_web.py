@@ -211,7 +211,7 @@ class SlackWebMessagingIntegration(
                     email_prefix_to_user_id.setdefault(email_prefix, user["id"])
                 if user.get("name"):
                     username_to_user_id.setdefault(user["name"].lower(), user["id"])
-        except SlackApiError as err:
+        except (SlackApiError, ValueError) as err:
             if self.tracking:
                 self.tracking.record_internal_exception(err)
             logger.error(f"Unable to list Slack users: {err}.")
@@ -227,6 +227,8 @@ class SlackWebMessagingIntegration(
         if next_cursor:
             if not isinstance(next_cursor, str):
                 raise ValueError("Next cursor is not a string")
+            if next_cursor == cursor:
+                raise ValueError("Next cursor did not advance")
             yield from self._iter_users(next_cursor)
 
     @sleep_and_retry

@@ -101,3 +101,13 @@ def test_send_message_resolves_handle_mentions():
     integration.send_message("C1", body)
     sent = integration.client.chat_postMessage.call_args.kwargs
     assert "<@U_JESSICA>" in sent["blocks"] + sent["attachments"]
+
+
+def test_resolve_user_id_when_users_list_cursor_does_not_advance():
+    integration = _build_integration()
+    integration.client.users_list.side_effect = lambda cursor=None, limit=None: {
+        "members": USERS_PAGE_1["members"],
+        "response_metadata": {"next_cursor": "stuck"},
+    }
+    assert integration.resolve_user_id("@jessica.jones") == "U_JESSICA"
+    assert integration.client.users_list.call_count == 2
