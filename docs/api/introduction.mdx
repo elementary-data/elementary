@@ -122,7 +122,7 @@ verdict are not in this cut.
 ## Asset health scores
 
 **[`GET /asset-health-scores`](/api/reference/asset-health-scores/list-asset-health-scores)**
-returns the current data health score of every monitored asset, the same number
+returns the current data health score of every monitored table asset, the same number
 shown in the Elementary data health dashboard when looking at a single asset.
 Use it to feed scorecards or nightly quality reports.
 
@@ -146,6 +146,9 @@ Each item has a `total` score and one entry per quality `dimension`
   buckets; `bucket_at` is the start of the most recent bucket with results.
   Dimensions with no results in that window are omitted, and assets with no
   results at all are not returned.
+- Only [table assets](/api/reference/assets/list-table-assets) have health
+  scores. `GET /asset-health-scores/{asset_id}` returns `404` for a BI asset or
+  an id that is not a synced table.
 - Full snapshot, replaced in place — re-read it; there is no incremental feed.
   The only filter is `asset_ids`. Join to
   [assets](/api/reference/assets/list-assets) on `asset_id`.
@@ -169,6 +172,7 @@ curl -G "https://prod.api.elementary-data.com/public/beta/$ENV_ID/asset-health-s
 
 ```json
 {
+  "matched_count": 40,
   "total": { "score": 0.91, "test_count": 12, "bucket_at": "2026-09-14T08:00:00" },
   "dimensions": [
     { "dimension": "freshness", "score": 0.99, "test_count": 3, "bucket_at": "2026-09-14T08:00:00" }
@@ -176,11 +180,15 @@ curl -G "https://prod.api.elementary-data.com/public/beta/$ENV_ID/asset-health-s
 }
 ```
 
+- `matched_count` is the number of table assets you can view that match the
+  filters, including those with no test results in the window.
 - Filters select [table assets](/api/reference/assets/list-table-assets),
   using the same parameters as `GET /assets/tables`: `ids`,
   `source_types`, `tags`, `db_names`, `schema_names`, `materializations`, and
   `path`. Values within one parameter are OR-ed; different parameters are
-  AND-ed. With no filters, the score covers every scored asset you can view.
+  AND-ed. With no filters, the score covers every table asset you can view.
+- Every `ids` value must be a table asset; if any is a BI asset or unknown, the
+  request fails with `400` and the error message lists the invalid ids.
 - `path` selects a folder: it matches assets whose `path` equals the value or is
   nested under it (`models/marts` matches `models/marts/orders.sql` but not
   `models/marts_legacy/orders.sql`). A trailing `/` is ignored, and `.sql` is
@@ -191,8 +199,8 @@ curl -G "https://prod.api.elementary-data.com/public/beta/$ENV_ID/asset-health-s
   results in a fixed **last 7 days** window, and dimensions with no results are
   omitted.
 - If no matching asset has test results in the window, the response is still
-  `200` with a zero score:
-  `{"total": {"score": 0, "test_count": 0, "bucket_at": null}, "dimensions": []}`.
+  `200` with a zero score and the `matched_count` (`0` for an empty folder):
+  `{"matched_count": 0, "total": {"score": 0, "test_count": 0, "bucket_at": null}, "dimensions": []}`.
 
 ## Forward compatibility
 

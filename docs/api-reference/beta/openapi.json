@@ -11,12 +11,17 @@
             "title": "Dimensions",
             "type": "array"
           },
+          "matched_count": {
+            "description": "Number of table assets you can view that match the filters, whether or not they have test results in the window. `0` when nothing matches.",
+            "title": "Matched Count",
+            "type": "integer"
+          },
           "total": {
             "$ref": "#/components/schemas/AggregatedHealthScoreBucket",
             "description": "Weighted score across all dimensions for the whole matching asset set, using the environment's configured dimension weights. Aggregated across the assets' test results, not an average of per-asset scores."
           }
         },
-        "required": ["total", "dimensions"],
+        "required": ["matched_count", "total", "dimensions"],
         "title": "AggregatedHealthScore",
         "type": "object"
       },
@@ -1594,7 +1599,7 @@
     },
     "/public/beta/{env_id}/asset-health-scores": {
       "get": {
-        "description": "Lists the current health score of every asset that has test results in the last 7 days \u2014 a full snapshot, recomputed hourly. Not an incremental feed: re-read the snapshot instead of tracking changes. Ordered by `asset_id`.",
+        "description": "Lists the current health score of every table asset that has test results in the last 7 days \u2014 a full snapshot, recomputed hourly. Not an incremental feed: re-read the snapshot instead of tracking changes. Ordered by `asset_id`.",
         "operationId": "list_asset_health_scores_public_beta__env_id__asset_health_scores_get",
         "parameters": [
           {
@@ -1777,7 +1782,7 @@
     },
     "/public/beta/{env_id}/asset-health-scores/aggregate": {
       "get": {
-        "description": "Returns one health score card for a set of assets \u2014 the same number the Data Health dashboard shows for a filter or folder. Filters match `GET /assets/tables` plus `path`, intersect, and restrict the set to table assets; with no filters, every scored asset you can view is included, of any kind and including assets not yet synced. The score is aggregated across the matching assets' test results in the last 7 days, not averaged from per-asset scores. When no matching asset has test results in the window, returns a zero card (`score` 0, `test_count` 0, `bucket_at` null, no dimensions).",
+        "description": "Returns one health score card for a set of table assets \u2014 the same number the Data Health dashboard shows for a filter or folder. Filters match `GET /assets/tables` plus `path` and intersect; with no filters, every table asset you can view is included. Every `ids` value must be a table asset, otherwise the request fails with 400 listing the invalid ids. The score is aggregated across the matching assets' test results in the last 7 days, not averaged from per-asset scores. When no matching asset has test results in the window, returns a zero card (`score` 0, `test_count` 0, `bucket_at` null, no dimensions) alongside `matched_count`.",
         "operationId": "aggregate_asset_health_scores_public_beta__env_id__asset_health_scores_aggregate_get",
         "parameters": [
           {
@@ -2060,7 +2065,7 @@
     },
     "/public/beta/{env_id}/asset-health-scores/{asset_id}": {
       "get": {
-        "description": "Fetches the current health score of a single asset. Returns 404 if the asset doesn't exist in this environment or has no test results in the last 7 days.",
+        "description": "Fetches the current health score of a single table asset. Returns 404 if the id isn't a table asset in this environment or has no test results in the last 7 days.",
         "operationId": "get_asset_health_score_public_beta__env_id__asset_health_scores__asset_id__get",
         "parameters": [
           {
