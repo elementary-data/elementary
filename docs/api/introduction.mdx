@@ -65,7 +65,7 @@ Follow `next_cursor` until `has_more` is `false` — see [Pagination](/api/pagin
 | Tests                   | `GET /{env_id}/tests`                             | Test definitions                                |
 | Latest test executions  | `GET /{env_id}/latest-test-executions`            | Current run per sub-test                        |
 | Test execution history  | `GET /{env_id}/tests/{test_id}/executions`        | History for one test                            |
-| Asset health scores     | `GET /{env_id}/asset-health-scores`               | Current health score per asset                  |
+| Asset health scores     | `GET /{env_id}/asset-health-scores`               | Current health score per table asset            |
 | Aggregate health score  | `GET /{env_id}/asset-health-scores/aggregate`     | One health score for a filtered set of tables   |
 
 Every list endpoint supports a full scan and keyset pagination. Assets,
@@ -90,6 +90,10 @@ fields but each kind also has its own attributes, so the API splits them:
   `materialization`) for tables, and `bi_platform` / `bi_type` / `url` for BI
   assets. Kind-specific filters live here too (e.g. `db_names` on
   `/assets/tables`, `bi_platforms` on `/assets/bi`).
+- All three accept a **`path`** filter to select a folder: it matches assets
+  whose `path` equals the value or is nested under it (`models/marts` matches
+  `models/marts/orders.sql` but not `models/marts_legacy/orders.sql`). A
+  trailing `/` is ignored; repeat the parameter to combine folders.
 
 **Why the split?** A single asset shape would leave most fields null on any given
 row (a BI dashboard has no `db_name`; a table has no `bi_platform`). Keeping the
