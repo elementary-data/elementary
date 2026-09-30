@@ -1,6 +1,60 @@
 {
   "components": {
     "schemas": {
+      "AggregatedHealthScore": {
+        "properties": {
+          "dimensions": {
+            "description": "Latest aggregated score per dimension. Dimensions with no results in the last 7 days are omitted.",
+            "items": {
+              "$ref": "#/components/schemas/DimensionHealthScore"
+            },
+            "title": "Dimensions",
+            "type": "array"
+          },
+          "matched_count": {
+            "description": "Number of table assets you can view that match the filters, whether or not they have test results in the window. `0` when nothing matches.",
+            "title": "Matched Count",
+            "type": "integer"
+          },
+          "total": {
+            "$ref": "#/components/schemas/AggregatedHealthScoreBucket",
+            "description": "Weighted score across all dimensions for the whole matching asset set, using the environment's configured dimension weights. Aggregated across the assets' test results, not an average of per-asset scores."
+          }
+        },
+        "required": ["matched_count", "total", "dimensions"],
+        "title": "AggregatedHealthScore",
+        "type": "object"
+      },
+      "AggregatedHealthScoreBucket": {
+        "properties": {
+          "bucket_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Start of the hourly bucket this score was computed for. `null` when no matching asset has test results in the window.",
+            "title": "Bucket At"
+          },
+          "score": {
+            "description": "Health score in the range 0-1 for the most recent hourly bucket. `0` when no matching asset has test results in the window.",
+            "title": "Score",
+            "type": "number"
+          },
+          "test_count": {
+            "description": "Number of test results that contributed to this score.",
+            "title": "Test Count",
+            "type": "integer"
+          }
+        },
+        "required": ["score", "test_count", "bucket_at"],
+        "title": "AggregatedHealthScoreBucket",
+        "type": "object"
+      },
       "ApiError": {
         "properties": {
           "code": {
@@ -1545,7 +1599,7 @@
     },
     "/public/beta/{env_id}/asset-health-scores": {
       "get": {
-        "description": "Lists the current health score of every asset that has test results in the last 7 days \u2014 a full snapshot, recomputed hourly. Not an incremental feed: re-read the snapshot instead of tracking changes. Ordered by `asset_id`.",
+        "description": "Lists the current health score of every table asset that has test results in the last 7 days \u2014 a full snapshot, recomputed hourly. Not an incremental feed: re-read the snapshot instead of tracking changes. Ordered by `asset_id`.",
         "operationId": "list_asset_health_scores_public_beta__env_id__asset_health_scores_get",
         "parameters": [
           {
@@ -1726,9 +1780,292 @@
         "tags": ["Asset health scores"]
       }
     },
+    "/public/beta/{env_id}/asset-health-scores/aggregate": {
+      "get": {
+        "description": "Returns one health score card for a set of table assets \u2014 the same number the Data Health dashboard shows for a filter or folder. The `ids`, `source_types`, `tags`, `db_names`, `schema_names`, `materializations` and `path` filters intersect; with no filters, every table asset you can view is included. Every `ids` value must be a table asset, otherwise the request fails with 400 listing the invalid ids. The score is aggregated across the matching assets' test results in the last 7 days, not averaged from per-asset scores. When no matching asset has test results in the window, returns a zero card (`score` 0, `test_count` 0, `bucket_at` null, no dimensions) alongside `matched_count`.",
+        "operationId": "aggregate_asset_health_scores_public_beta__env_id__asset_health_scores_aggregate_get",
+        "parameters": [
+          {
+            "description": "Environment identifier that scopes the request.",
+            "in": "path",
+            "name": "env_id",
+            "required": true,
+            "schema": {
+              "description": "Environment identifier that scopes the request.",
+              "title": "Env Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Aggregate only table assets with these ids.",
+            "in": "query",
+            "name": "ids",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Aggregate only table assets with these ids.",
+              "title": "Ids"
+            }
+          },
+          {
+            "description": "Aggregate only table assets from these source types (e.g. `dbt`, `fivetran`).",
+            "in": "query",
+            "name": "source_types",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Aggregate only table assets from these source types (e.g. `dbt`, `fivetran`).",
+              "title": "Source Types"
+            }
+          },
+          {
+            "description": "Aggregate only table assets tagged with any of these tags.",
+            "in": "query",
+            "name": "tags",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Aggregate only table assets tagged with any of these tags.",
+              "title": "Tags"
+            }
+          },
+          {
+            "description": "Aggregate only table assets in these databases.",
+            "in": "query",
+            "name": "db_names",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Aggregate only table assets in these databases.",
+              "title": "Db Names"
+            }
+          },
+          {
+            "description": "Aggregate only table assets in these schemas.",
+            "in": "query",
+            "name": "schema_names",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Aggregate only table assets in these schemas.",
+              "title": "Schema Names"
+            }
+          },
+          {
+            "description": "Aggregate only table assets with these materializations (e.g. `table`, `view`, `incremental`).",
+            "in": "query",
+            "name": "materializations",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Aggregate only table assets with these materializations (e.g. `table`, `view`, `incremental`).",
+              "title": "Materializations"
+            }
+          },
+          {
+            "description": "Return only table assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`; a trailing `/` is ignored). Repeatable; assets without a `path` never match.",
+            "in": "query",
+            "name": "path",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only table assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`; a trailing `/` is ignored). Repeatable; assets without a `path` never match.",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AggregatedHealthScore"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Invalid cursor or request parameters."
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Authentication is required."
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The token does not have permission to access the resource."
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "The requested resource was not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Request validation failed."
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "Rate limit exceeded.",
+            "headers": {
+              "RateLimit-Limit": {
+                "description": "Maximum requests allowed in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Remaining": {
+                "description": "Requests remaining in the current window.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "RateLimit-Reset": {
+                "description": "Seconds until the current rate-limit window resets.",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "Retry-After": {
+                "description": "Seconds to wait before retrying.",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorResponse"
+                }
+              }
+            },
+            "description": "An unexpected server error occurred."
+          }
+        },
+        "summary": "Aggregate asset health scores",
+        "tags": ["Asset health scores"]
+      }
+    },
     "/public/beta/{env_id}/asset-health-scores/{asset_id}": {
       "get": {
-        "description": "Fetches the current health score of a single asset. Returns 404 if the asset doesn't exist in this environment or has no test results in the last 7 days.",
+        "description": "Fetches the current health score of a single table asset. Returns 404 if the id isn't a table asset in this environment or has no test results in the last 7 days.",
         "operationId": "get_asset_health_score_public_beta__env_id__asset_health_scores__asset_id__get",
         "parameters": [
           {
@@ -2132,6 +2469,28 @@
             }
           },
           {
+            "description": "Return only assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`; a trailing `/` is ignored). Repeatable; assets without a `path` never match.",
+            "in": "query",
+            "name": "path",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`; a trailing `/` is ignored). Repeatable; assets without a `path` never match.",
+              "title": "Path"
+            }
+          },
+          {
             "description": "Upserts feed: assets whose `synced_at` >= this time (inclusive). Orders by `synced_at`. Clamped to the last 90 days \u2014 an older time is treated as 90 days ago.",
             "in": "query",
             "name": "synced_since",
@@ -2438,6 +2797,28 @@
               ],
               "description": "Return only BI assets on these platforms (e.g. `looker`, `sigma`, `tableau`).",
               "title": "Bi Platforms"
+            }
+          },
+          {
+            "description": "Return only BI assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`; a trailing `/` is ignored). Repeatable; assets without a `path` never match.",
+            "in": "query",
+            "name": "path",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only BI assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`; a trailing `/` is ignored). Repeatable; assets without a `path` never match.",
+              "title": "Path"
             }
           },
           {
@@ -2931,6 +3312,28 @@
               ],
               "description": "Return only table assets with these materializations (e.g. `table`, `view`, `incremental`).",
               "title": "Materializations"
+            }
+          },
+          {
+            "description": "Return only table assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`; a trailing `/` is ignored). Repeatable; assets without a `path` never match.",
+            "in": "query",
+            "name": "path",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "maxItems": 1000,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Return only table assets whose `path` equals one of these paths or is nested under one of them (`/`-separated, e.g. `models/marts` matches `models/marts/orders.sql`; a trailing `/` is ignored). Repeatable; assets without a `path` never match.",
+              "title": "Path"
             }
           },
           {

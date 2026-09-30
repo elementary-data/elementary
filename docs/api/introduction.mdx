@@ -65,7 +65,8 @@ Follow `next_cursor` until `has_more` is `false` — see [Pagination](/api/pagin
 | Tests                   | `GET /{env_id}/tests`                             | Test definitions                                |
 | Latest test executions  | `GET /{env_id}/latest-test-executions`            | Current run per sub-test                        |
 | Test execution history  | `GET /{env_id}/tests/{test_id}/executions`        | History for one test                            |
-| Asset health scores     | `GET /{env_id}/asset-health-scores`               | Current health score per asset                  |
+| Asset health scores     | `GET /{env_id}/asset-health-scores`               | Current health score per table asset            |
+| Aggregate health score  | `GET /{env_id}/asset-health-scores/aggregate`     | One health score for a filtered set of tables   |
 
 Every list endpoint supports a full scan and keyset pagination. Assets,
 columns, and tests also expose incremental feeds — see
@@ -89,6 +90,10 @@ fields but each kind also has its own attributes, so the API splits them:
   `materialization`) for tables, and `bi_platform` / `bi_type` / `url` for BI
   assets. Kind-specific filters live here too (e.g. `db_names` on
   `/assets/tables`, `bi_platforms` on `/assets/bi`).
+- All three accept a **`path`** filter to select a folder: it matches assets
+  whose `path` equals the value or is nested under it (`models/marts` matches
+  `models/marts/orders.sql` but not `models/marts_legacy/orders.sql`). A
+  trailing `/` is ignored; repeat the parameter to combine folders.
 
 **Why the split?** A single asset shape would leave most fields null on any given
 row (a BI dashboard has no `db_name`; a table has no `bi_platform`). Keeping the
@@ -121,7 +126,7 @@ verdict are not in this cut.
 ## Asset health scores
 
 **[`GET /asset-health-scores`](/api/reference/asset-health-scores/list-asset-health-scores)**
-returns the current data health score of every monitored asset, the same number
+returns the current data health score of every monitored table asset, the same number
 shown in the Elementary data health dashboard when looking at a single asset.
 Use it to feed scorecards or nightly quality reports.
 
@@ -145,10 +150,64 @@ Each item has a `total` score and one entry per quality `dimension`
   buckets; `bucket_at` is the start of the most recent bucket with results.
   Dimensions with no results in that window are omitted, and assets with no
   results at all are not returned.
+- Only [table assets](/api/reference/assets/list-table-assets) have health
+  scores. `GET /asset-health-scores/{asset_id}` returns `404` for a BI asset or
+  an id that is not a synced table.
 - Full snapshot, replaced in place — re-read it; there is no incremental feed.
   The only filter is `asset_ids`. Join to
   [assets](/api/reference/assets/list-assets) on `asset_id`.
 - `dimension` is an extensible enum (see below).
+
+### Aggregate health score for a set of assets
+
+**[`GET /asset-health-scores/aggregate`](/api/reference/asset-health-scores/aggregate-asset-health-scores)**
+returns a single health score for a group of table assets — for example a dbt
+folder, a schema, or everything with a tag — the same number the Elementary
+data health dashboard shows when you filter it to that group. It is computed
+over the matching assets' test results together, **not** as an average of
+their per-asset scores.
+
+```bash
+curl -G "https://prod.api.elementary-data.com/public/beta/$ENV_ID/asset-health-scores/aggregate" \
+  -H "Authorization: Bearer $ELEMENTARY_TOKEN" \
+  --data-urlencode "path=models/marts" \
+  --data-urlencode "tags=finance"
+```
+
+```json
+{
+  "matched_count": 40,
+  "total": { "score": 0.91, "test_count": 12, "bucket_at": "2026-09-14T08:00:00" },
+  "dimensions": [
+    { "dimension": "freshness", "score": 0.99, "test_count": 3, "bucket_at": "2026-09-14T08:00:00" }
+  ]
+}
+```
+
+- `matched_count` is the number of table assets you can view that match the
+  filters, including those with no test results in the window.
+- Filters select [table assets](/api/reference/assets/list-table-assets). The
+  supported filters are `ids`, `source_types`, `tags`, `db_names`,
+  `schema_names`, `materializations`, and `path`. Values within one parameter
+  are OR-ed; different parameters are AND-ed. With no filters, the call covers
+  every table asset in the environment that you can view.
+- `total` and `dimensions` are computed only from matching tables that have test
+  results in the window; tables without results count toward `matched_count`
+  but not toward the score.
+- Every `ids` value must be a table asset; if any is a BI asset or unknown, the
+  request fails with `400` and the error message lists the invalid ids.
+- `path` selects a folder: it matches assets whose `path` equals the value or is
+  nested under it (`models/marts` matches `models/marts/orders.sql` but not
+  `models/marts_legacy/orders.sql`). A trailing `/` is ignored, and `.sql` is
+  not stripped. Repeat it to combine folders. The same
+  `path` filter is also available on `GET /assets`, `/assets/tables`, and
+  `/assets/bi`.
+- Same scoring as above: scores are in the range `0`–`1`, computed from test
+  results in a fixed **last 7 days** window, and dimensions with no results are
+  omitted.
+- If no matching asset has test results in the window, the response is still
+  `200` with a zero score and the `matched_count` (`0` for an empty folder):
+  `{"matched_count": 0, "total": {"score": 0, "test_count": 0, "bucket_at": null}, "dimensions": []}`.
 
 ## Forward compatibility
 
