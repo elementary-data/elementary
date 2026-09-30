@@ -1,10 +1,12 @@
 from unittest.mock import MagicMock
 
+import pytest
 from slack_sdk.errors import SlackApiError
 
 from elementary.messages.blocks import LineBlock, LinesBlock, MentionBlock
 from elementary.messages.message_body import MessageBody
 from elementary.messages.messaging_integrations.slack_web import (
+    SlackWebMessageContext,
     SlackWebMessagingIntegration,
 )
 
@@ -87,20 +89,65 @@ def test_resolve_user_id_when_users_list_fails():
     assert integration.resolve_user_id("@jessica.jones") is None
 
 
-def test_send_message_resolves_handle_mentions():
-    integration = _build_integration()
+HANDLE_MENTION_BODY = MessageBody(
+    blocks=[
+        LinesBlock(lines=[LineBlock(inlines=[MentionBlock(user="@jessica.jones")])])
+    ]
+)
+
+
+def _send(integration: SlackWebMessagingIntegration, reply: bool) -> str:
     integration.client.chat_postMessage.return_value = {
         "ts": "123.456",
         "channel": "C1",
     }
-    body = MessageBody(
-        blocks=[
-            LinesBlock(lines=[LineBlock(inlines=[MentionBlock(user="@jessica.jones")])])
-        ]
-    )
-    integration.send_message("C1", body)
+    if reply:
+        context = SlackWebMessageContext(id="111.222", channel="C1")
+        integration.reply_to_message("C1", context, HANDLE_MENTION_BODY)
+    else:
+        integration.send_message("C1", HANDLE_MENTION_BODY)
     sent = integration.client.chat_postMessage.call_args.kwargs
-    assert "<@U_JESSICA>" in sent["blocks"] + sent["attachments"]
+    return sent["blocks"] + sent["attachments"]
+
+
+@pytest.mark.parametrize("reply", [False, True])
+def test_send_resolves_handle_mentions(reply):
+    integration = _build_integration()
+    assert "<@U_JESSICA>" in _send(integration, reply)
+
+
+@pytest.mark.parametrize("reply", [False, True])
+def test_send_keeps_plain_handle_when_users_list_raises(reply):
+    integration = _build_integration()
+    integration.client.users_list.side_effect = ConnectionError("connection reset")
+    sent = _send(integration, reply)
+    assert "@jessica.jones" in sent
+    assert "<@" not in sent
+
+
+def test_resolve_user_id_collisions():
+    integration = _build_integration()
+    integration.client.users_list.side_effect = lambda cursor=None, limit=None: {
+        "members": [
+            {
+                "id": "U_GUEST",
+                "name": "john",
+                "is_restricted": True,
+                "profile": {"email": "john@partner.com"},
+            },
+            {"id": "U_JOHN", "name": "jdoe", "profile": {"email": "john@company.com"}},
+            {"id": "U_JOHN_2", "name": "jd", "profile": {"email": "john@other.com"}},
+            {
+                "id": "U_JANE",
+                "name": "jane.doe",
+                "profile": {"email": "jd@company.com"},
+            },
+        ],
+    }
+    # Full members win over guests, then the first listed user wins.
+    assert integration.resolve_user_id("@john") == "U_JOHN"
+    # Email prefix matches win over username matches.
+    assert integration.resolve_user_id("@jd") == "U_JANE"
 
 
 def test_resolve_user_id_when_users_list_cursor_does_not_advance():

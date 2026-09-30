@@ -1,7 +1,7 @@
 import json
 import ssl
 import time
-from typing import Any, Dict, Iterator, Optional
+from typing import Any, Dict, Iterator, List, Optional
 
 from ratelimit import limits, sleep_and_retry
 from slack_sdk import WebClient
@@ -52,6 +52,9 @@ class SlackWebMessagingIntegration(
         self.tracking = tracking
         self._email_to_user_id_cache: Dict[str, str] = {}
         self._handle_to_user_id_cache: Optional[Dict[str, str]] = None
+        self._list_users_page = sleep_and_retry(
+            limits(calls=20, period=ONE_MINUTE)(self._request_users_page)
+        )
         self.reply_broadcast = reply_broadcast
 
     @classmethod
@@ -199,37 +202,55 @@ class SlackWebMessagingIntegration(
         return self._handle_to_user_id_cache.get(handle.lower())
 
     def _build_handle_to_user_id_map(self) -> Dict[str, str]:
-        email_prefix_to_user_id: Dict[str, str] = {}
-        username_to_user_id: Dict[str, str] = {}
+        members: List[dict] = []
+        guests: List[dict] = []
+        # Never block an alert on mention resolution. On failure, the users listed
+        # so far are still cached so a failing workspace isn't re-crawled per mention.
         try:
             for user in self._iter_users():
                 if user.get("deleted") or user.get("is_bot"):
                     continue
-                email = (user.get("profile") or {}).get("email")
-                if email:
-                    email_prefix = email.split("@")[0].lower()
-                    email_prefix_to_user_id.setdefault(email_prefix, user["id"])
-                if user.get("name"):
-                    username_to_user_id.setdefault(user["name"].lower(), user["id"])
-        except (SlackApiError, ValueError) as err:
+                if user.get("is_restricted") or user.get("is_ultra_restricted"):
+                    guests.append(user)
+                else:
+                    members.append(user)
+        except Exception as err:
             if self.tracking:
                 self.tracking.record_internal_exception(err)
             logger.error(f"Unable to list Slack users: {err}.")
+
+        email_prefix_to_user_id: Dict[str, str] = {}
+        username_to_user_id: Dict[str, str] = {}
+        for user in members + guests:
+            email = (user.get("profile") or {}).get("email")
+            if email:
+                email_prefix = email.split("@")[0].lower()
+                email_prefix_to_user_id.setdefault(email_prefix, user["id"])
+            if user.get("name"):
+                username_to_user_id.setdefault(user["name"].lower(), user["id"])
+        if (members or guests) and not email_prefix_to_user_id:
+            logger.warning(
+                "No Slack user emails are visible, so @<email prefix> mentions can't "
+                "be resolved. Make sure the Slack app has the users:read.email scope."
+            )
         return {**username_to_user_id, **email_prefix_to_user_id}
 
-    @sleep_and_retry
-    @limits(calls=20, period=ONE_MINUTE)
-    def _iter_users(self, cursor: Optional[str] = None) -> Iterator[dict]:
-        response = self.client.users_list(cursor=cursor, limit=200)
-        yield from response["members"]
-        response_metadata = response.get("response_metadata") or {}
-        next_cursor = response_metadata.get("next_cursor")
-        if next_cursor:
+    def _iter_users(self) -> Iterator[dict]:
+        cursor: Optional[str] = None
+        while True:
+            response = self._list_users_page(cursor)
+            yield from response["members"]
+            next_cursor = (response.get("response_metadata") or {}).get("next_cursor")
+            if not next_cursor:
+                return
             if not isinstance(next_cursor, str):
                 raise ValueError("Next cursor is not a string")
             if next_cursor == cursor:
                 raise ValueError("Next cursor did not advance")
-            yield from self._iter_users(next_cursor)
+            cursor = next_cursor
+
+    def _request_users_page(self, cursor: Optional[str]) -> Any:
+        return self.client.users_list(cursor=cursor, limit=200)
 
     @sleep_and_retry
     @limits(calls=50, period=ONE_MINUTE)
