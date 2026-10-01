@@ -1,7 +1,7 @@
 import json
 from collections import defaultdict
 from datetime import datetime, timezone
-from typing import DefaultDict, Dict, List, Optional, Union
+from typing import Any, DefaultDict, Dict, List, Optional, Union
 
 from alive_progress import alive_bar
 
@@ -146,10 +146,9 @@ class DataMonitoringAlerts(DataMonitoring):
         self,
         days_back: Optional[int] = None,
         dbt_full_refresh: bool = False,
-        dbt_vars: Optional[dict] = None,
     ) -> bool:
         logger.info("Running internal dbt run to populate alerts")
-        vars = dbt_vars or dict()
+        vars: Dict[str, Any] = {}
         if days_back:
             vars.update(days_back=days_back)
         success = self.internal_dbt_runner.run(
@@ -426,14 +425,12 @@ class DataMonitoringAlerts(DataMonitoring):
         self,
         days_back: int,
         dbt_full_refresh: bool = False,
-        dbt_vars: Optional[dict] = None,
     ) -> bool:
         # Populate data
         if self.should_populate_data:
             popopulated_data_successfully = self._populate_data(
                 days_back=days_back,
                 dbt_full_refresh=dbt_full_refresh,
-                dbt_vars=dbt_vars,
             )
             if not popopulated_data_successfully:
                 self.success = False

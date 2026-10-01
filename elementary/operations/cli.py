@@ -1,5 +1,6 @@
 import click
 
+from elementary.cli.options import dbt_vars_option
 from elementary.config.config import Config
 from elementary.operations.upload_source_freshness import UploadSourceFreshnessOperation
 from elementary.tracking.anonymous_tracking import AnonymousCommandLineTracking
@@ -51,6 +52,7 @@ def run_operation():
     default=25,
     help="Amount of rows to insert per insert statement.",
 )
+@dbt_vars_option
 @click.pass_context
 def upload_source_freshness(ctx, rows_per_insert: int, **conf):
     """

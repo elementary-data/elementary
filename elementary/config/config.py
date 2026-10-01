@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import google.auth  # type: ignore[import]
 from dateutil import tz
@@ -77,6 +77,7 @@ class Config:
         project_name: Optional[str] = None,
         quiet_logs: Optional[bool] = None,
         ssl_ca_bundle: Optional[str] = None,
+        dbt_vars: Optional[Dict[str, Any]] = None,
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
@@ -89,6 +90,9 @@ class Config:
         # Additional env vars supplied to dbt invocations
         self.env_vars = dict()
         self.env_vars.update(self._parse_dbt_quoting_to_env_vars(dbt_quoting))
+
+        # Vars supplied to every invocation of the internal dbt project
+        self.dbt_vars: Dict[str, Any] = dict(dbt_vars or {})
 
         config = self._load_configuration()
 
