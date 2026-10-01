@@ -27,12 +27,30 @@ This helps ensure that alerts are only triggered when truly important assets are
 <Note>Downstream impact is currently determined based on table-level lineage.</Note>
 
 ### Rule order matters
-The order of your rules is important. Here’s how it works:
-- When an alert is generated, it's evaluated in order, from top to bottom.
-- As soon as a rule matches, the alert is routed to that rule’s destination.
-- No further rules are checked after the first match.
+Elementary evaluates alert rules in one of two modes for each environment:
 
-If you want alerts to be routed based on all applicable rules (not just the first match), we’re testing a Beta feature that enables this. Reach out if you’d like early access!
+- **Ordered matching** - Rules are checked from top to bottom. The first rule that matches sends the alert, and no further rules are checked. A rule only receives alerts that none of the rules above it matched.
+- **Multi-rule matching** - Every rule that matches sends the alert, so the order of the rules does not matter.
+
+If the `Alert Rules` page shows a number and a drag handle next to each rule, your environment uses ordered matching. To change the matching mode of your environment, contact Elementary support.
+
+<Note>Changing the matching mode changes which rules send each alert. Review your rules before switching modes.</Note>
+
+#### Changing the order of rules
+
+In environments with ordered matching, you can change the priority of an alert rule at any time:
+
+1. Open the `Alert Rules` page.
+2. Drag the rule by its handle to a new position. Alternatively, open the rule's actions menu and select `Move up` or `Move down`.
+
+The number next to each rule shows its position. The new order is used the next time an alert is evaluated. Reordering requires permission to edit alert rules (see [roles and permissions](/cloud/features/roles-and-permissions)).
+
+- Put your most specific rules first. A broad rule near the top catches every alert it matches, so the rules below it never see those alerts.
+- The default rule, which sends all failures to the channel you connected, can be moved like any other rule. If you move it to the top, the rules below it will not receive alerts.
+- New rules are added at the bottom of the list.
+- Reordering applies to alert rules, not to digest rules.
+
+You can also review and reorder alert rules with the [Elementary MCP server](/cloud/mcp/mcp-tools), for example by asking your AI client to move one rule above another.
 
 <video
   autoPlay
