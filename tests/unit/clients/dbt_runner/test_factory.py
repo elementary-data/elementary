@@ -1,3 +1,4 @@
+import json
 from typing import Optional
 from unittest import mock
 
@@ -16,6 +17,8 @@ from elementary.clients.dbt.factory import (
     get_dbt_runner_method,
 )
 from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
+from elementary.config.config import Config
+from elementary.monitor.dbt_project_utils import CLI_DBT_PROJECT_PATH
 
 
 def _mock_installation(
@@ -140,3 +143,47 @@ def test_dbt2_binary_not_available_when_nothing_installed(
     mock_exists.return_value = False
 
     assert not is_dbt2_binary_available()
+
+
+def test_create_internal_dbt_runner_passes_config(monkeypatch, tmp_path):
+    mock_create_dbt_runner = mock.MagicMock()
+    monkeypatch.setattr(factory, "create_dbt_runner", mock_create_dbt_runner)
+    config = Config(
+        config_dir=str(tmp_path),
+        target_path=str(tmp_path),
+        profiles_dir="profiles",
+        profile_target="target",
+        dbt_quoting="none",
+        run_dbt_deps_if_needed=False,
+        dbt_vars={"query_max_size": 1000},
+    )
+    factory.create_internal_dbt_runner(config, force_dbt_deps=True)
+    mock_create_dbt_runner.assert_called_once_with(
+        CLI_DBT_PROJECT_PATH,
+        "profiles",
+        "target",
+        env_vars=config.env_vars,
+        vars={"query_max_size": 1000},
+        run_deps_if_needed=False,
+        force_dbt_deps=True,
+    )
+
+
+@mock.patch("subprocess.run")
+def test_internal_dbt_runner_merges_config_and_call_vars(
+    mock_subprocess_run, monkeypatch, tmp_path
+):
+    monkeypatch.setenv("DBT_RUNNER_METHOD", RunnerMethod.SUBPROCESS.value)
+    config = Config(
+        config_dir=str(tmp_path),
+        target_path=str(tmp_path),
+        run_dbt_deps_if_needed=False,
+        dbt_vars={"query_max_size": 1000, "days_back": 30},
+    )
+    runner = factory.create_internal_dbt_runner(config)
+    runner.run(select="model", vars={"days_back": 3})
+    command = mock_subprocess_run.call_args[0][0]
+    assert json.loads(command[command.index("--vars") + 1]) == {
+        "query_max_size": 1000,
+        "days_back": 3,
+    }

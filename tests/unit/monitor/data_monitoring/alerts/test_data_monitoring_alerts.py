@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from unittest import mock
 
 import pytest
 
@@ -240,3 +241,17 @@ def test_format_alerts(data_monitoring_alerts_mock: DataMonitoringAlertsMock):
 @pytest.fixture
 def data_monitoring_alerts_mock() -> DataMonitoringAlertsMock:
     return DataMonitoringAlertsMock()
+
+
+def test_populate_data_passes_only_days_back_as_call_vars(
+    data_monitoring_alerts_mock: DataMonitoringAlertsMock,
+):
+    with mock.patch.object(
+        data_monitoring_alerts_mock.internal_dbt_runner, "run", return_value=True
+    ) as mock_run:
+        assert data_monitoring_alerts_mock._populate_data(days_back=3)
+    mock_run.assert_called_once_with(
+        select="elementary_cli.alerts.alerts_v2",
+        full_refresh=False,
+        vars={"days_back": 3},
+    )

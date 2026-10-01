@@ -5,9 +5,8 @@ from pathlib import Path
 import click
 from alive_progress import alive_it
 
-from elementary.clients.dbt.factory import create_dbt_runner
+from elementary.clients.dbt.factory import create_internal_dbt_runner
 from elementary.config.config import Config
-from elementary.monitor import dbt_project_utils
 from elementary.utils.ordered_yaml import OrderedYaml
 
 
@@ -36,12 +35,7 @@ class UploadSourceFreshnessOperation:
         return json.loads(source_path.read_text())
 
     def upload_results(self, results: dict, metadata: dict, rows_per_insert: int):
-        dbt_runner = create_dbt_runner(
-            dbt_project_utils.CLI_DBT_PROJECT_PATH,
-            self.config.profiles_dir,
-            self.config.profile_target,
-            run_deps_if_needed=self.config.run_dbt_deps_if_needed,
-        )
+        dbt_runner = create_internal_dbt_runner(self.config)
 
         invocation_id = metadata.get("invocation_id")
         if not invocation_id:
