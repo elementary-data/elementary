@@ -14,7 +14,7 @@ The user activity logs capture a wide range of user actions across your workspac
 - **Failed login attempts** (when applicable)
 - **Creation, modification, or deletion of configuration**, including:
     - Adding, editing, or deleting tests
-    - Adding, editing, deleting, or archiving alert rules
+    - Adding, editing, deleting, archiving, or reordering alert rules
     - Acknowledging, resolving, or assigning incidents
     - Adding, editing, or deleting metadata (owners, descriptions, tags, critical assets)
     - Adding, editing, or deleting integrations
@@ -35,7 +35,7 @@ The exported CSV file for user activity logs includes the following fields:
   - *Example:* `"John Doe"`
 
 - **Event Name** - The specific action that was performed
-  - *Examples:* `"user_login"`, `"create_test"`, `"edit_alert_rule"`, `"assign_incident"`, `"create_alert_rule"`, `"edit_metadata"`, `"delete_test"`, `"invite_team_member"`, `"change_user_role"`
+  - *Examples:* `"user_login"`, `"create_test"`, `"edit_alert_rule"`, `"assign_incident"`, `"create_alert_rule"`, `"reorder_alert_rules"`, `"edit_metadata"`, `"delete_test"`, `"invite_team_member"`, `"change_user_role"`
   - *Example:* `"user_login"` or `"create_test"`
 
 - **Success** - Whether the action completed successfully
@@ -47,6 +47,7 @@ The exported CSV file for user activity logs includes the following fields:
     - For incident actions: `{"incident_id": "inc_123", "incident_summary": "Test failure detected"}`
     - For test actions: `{"test_id": "test_456", "test_name": "assert_no_null_values"}`
     - For alert rule actions: `{"alert_routing_rule_id": "rule_789", "alert_routing_rule": {...}}`
+    - For alert rule reordering: `{"ordered_rule_ids": ["rule_789", "rule_790"], "new_order": ["rule_790", "rule_789"]}`
     - For metadata actions: `{"asset_id": "asset_123", "metadata_type": "owner"}`
   - *Example:* `{"incident_id": "inc_123", "incident_summary": "Test failure detected"}`
 
