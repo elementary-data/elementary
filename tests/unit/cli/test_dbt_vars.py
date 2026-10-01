@@ -107,6 +107,20 @@ def test_invalid_dbt_vars(mock_debug, invalid_dbt_vars):
     mock_debug.assert_not_called()
 
 
+@mock.patch.object(monitor_cli, "Debug")
+def test_dbt_vars_dates_become_strings(mock_debug):
+    mock_debug.return_value.run.return_value = True
+    result = CliRunner().invoke(
+        monitor_cli.debug,
+        ["--dbt-vars", "{start: 2026-01-01, nested: {at: 2026-01-02 10:00:00}}"],
+    )
+    assert result.exit_code == 0, result.output
+    assert mock_debug.call_args.args[0].dbt_vars == {
+        "start": "2026-01-01",
+        "nested": {"at": "2026-01-02 10:00:00"},
+    }
+
+
 @mock.patch("elementary.monitor.debug.create_internal_dbt_runner")
 def test_debug_uses_internal_dbt_runner(mock_create_runner, tmp_path):
     config = Config(config_dir=str(tmp_path), target_path=str(tmp_path))

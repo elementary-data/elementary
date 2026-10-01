@@ -1,3 +1,4 @@
+import json
 from typing import Any, Dict, Optional
 
 import click
@@ -18,7 +19,8 @@ def _parse_dbt_vars(
         return None
     if not isinstance(parsed, dict):
         raise click.BadParameter("Must be a YAML mapping of variable names to values.")
-    return dict(parsed)
+    # YAML dates/timestamps aren't JSON serializable; pass them to dbt as ISO strings.
+    return json.loads(json.dumps(parsed, default=str))
 
 
 def dbt_vars_option(func):
