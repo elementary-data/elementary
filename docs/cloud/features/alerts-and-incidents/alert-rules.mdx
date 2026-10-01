@@ -26,7 +26,7 @@ This helps ensure that alerts are only triggered when truly important assets are
 
 <Note>Downstream impact is currently determined based on table-level lineage.</Note>
 
-### Rule order matters
+### Matching modes and rule order
 Elementary evaluates alert rules in one of two modes for each environment:
 
 - **Ordered matching** - Rules are checked from top to bottom. The first rule that matches sends the alert, and no further rules are checked. A rule only receives alerts that none of the rules above it matched.
