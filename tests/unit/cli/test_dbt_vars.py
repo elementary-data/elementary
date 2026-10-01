@@ -99,7 +99,8 @@ def test_upload_source_freshness_dbt_vars(mock_operation, tmp_path):
 
 
 @pytest.mark.parametrize(
-    "invalid_dbt_vars", ["[1, 2]", "a: [b", "just-a-string", "{2026-10-01: value}"]
+    "invalid_dbt_vars",
+    ["[1, 2]", "a: [b", "just-a-string", "{2026-10-01: value}", "&vars {self: *vars}"],
 )
 @mock.patch.object(monitor_cli, "Debug")
 def test_invalid_dbt_vars(mock_debug, invalid_dbt_vars):
