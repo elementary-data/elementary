@@ -20,7 +20,10 @@ def _parse_dbt_vars(
     if not isinstance(parsed, dict):
         raise click.BadParameter("Must be a YAML mapping of variable names to values.")
     # YAML dates/timestamps aren't JSON serializable; pass them to dbt as ISO strings.
-    return json.loads(json.dumps(parsed, default=str))
+    try:
+        return json.loads(json.dumps(parsed, default=str))
+    except TypeError as exc:
+        raise click.BadParameter(f"Unsupported value: {exc}") from exc
 
 
 def dbt_vars_option(func):
