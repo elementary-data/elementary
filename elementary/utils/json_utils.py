@@ -33,7 +33,10 @@ def unpack_and_flatten_str_to_list(list_as_str: str) -> List[str]:
 
     if isinstance(list_unpacked, list):
         return list_unpacked
-    return []  # edge case of a string of an empty dict or IDK
+    if isinstance(list_unpacked, dict):
+        return []  # edge case of a string of an empty dict or IDK
+    # A JSON scalar such as 12345 or true is just a plain token.
+    return [list_as_str.strip()]
 
 
 def sum_lists(list_of_lists: List[List]) -> List:
