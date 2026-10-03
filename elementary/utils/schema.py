@@ -25,6 +25,7 @@ class ExtendedBaseModel(BaseModel):
             loaded_var = try_load_json(var)
             if isinstance(loaded_var, dict):
                 loaded_var = [json.dumps(loaded_var)]
-            if loaded_var is None:
+            if loaded_var is None or not isinstance(loaded_var, list):
+                # Not JSON, or a JSON scalar such as 12345 or true. Keep it as a plain string.
                 loaded_var = [var]
             return loaded_var
