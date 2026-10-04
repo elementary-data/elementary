@@ -1,14 +1,13 @@
 ---
 title: "Elementary Runtime"
-sidebarTitle: "Elementary Runtime"
+sidebarTitle: "Overview"
 description: "Run supported warehouse queries inside your environment while Elementary Cloud manages scheduling, results, and incidents."
-icon: "server"
 badge: "Private Beta"
 ---
 
-<Warning>
-  Elementary Runtime is in private beta. [Reach out to the team](https://www.elementary-data.com/schedule-a-call) to learn more.
-</Warning>
+import RuntimePrivateBeta from '/snippets/cloud/features/elementary-runtime/private-beta.mdx';
+
+<RuntimePrivateBeta />
 
 Elementary Runtime lets Elementary Cloud run supported data-quality queries inside your environment. You keep the warehouse credentials that can read your business data, while Elementary Cloud continues to manage tests, schedules, results, and incidents.
 
@@ -36,5 +35,16 @@ Elementary Cloud remains the control plane. It decides what should run, prepares
   </Card>
   <Card title="Keep the managed Cloud experience" icon="cloud">
     Elementary Cloud continues to handle scheduling, test results, health visibility, incidents, and alerts.
+  </Card>
+</CardGroup>
+
+## Set up Elementary Runtime
+
+<CardGroup cols={2}>
+  <Card title="Configuration" icon="sliders" href="/cloud/features/elementary-runtime/configuration">
+    Configuration file reference, local limits, secrets, and least-privilege warehouse roles.
+  </Card>
+  <Card title="Deployment" icon="rocket" href="/cloud/features/elementary-runtime/deployment">
+    Run the runtime as a Docker service or on Kubernetes with the Helm chart.
   </Card>
 </CardGroup>

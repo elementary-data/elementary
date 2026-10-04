@@ -1,0 +1,426 @@
+---
+title: "Elementary Runtime configuration"
+sidebarTitle: "Configuration"
+description: "Configuration reference for Elementary Runtime: Cloud connection, local limits, secrets, warehouse connections, and least-privilege database roles."
+badge: "Private Beta"
+---
+
+import RuntimePrivateBeta from '/snippets/cloud/features/elementary-runtime/private-beta.mdx';
+
+<RuntimePrivateBeta />
+
+Elementary Runtime reads a single versioned YAML file at startup. The file defines how the runtime reaches Elementary Cloud, the local limits that cap what every task can do, and the warehouse connections the runtime is allowed to use.
+
+Only this file decides which warehouses the runtime can query and which credentials it uses. Elementary Cloud can only send tasks to connections defined here. It cannot add connections, change credentials, or raise local limits.
+
+## Example
+
+```yaml filename="config.yaml"
+version: 1
+
+cloud:
+  token_file: /run/secrets/elementary/cloud-token
+
+instance:
+  id_prefix: prod-eu
+  display_name: Production runtime (eu-central-1)
+
+limits:
+  max_query_timeout_seconds: 300
+  max_sample_rows_returned: 1000
+  max_result_bytes: 10485760
+
+concurrency:
+  max_concurrent_tasks: 8
+  heartbeat_interval_seconds: 30
+
+connections:
+  - warehouse_connection_id: ${SNOWFLAKE_CONNECTION_ID}
+    type: snowflake
+    account: ab12345.eu-central-1
+    user: ELEMENTARY_RUNTIME
+    role: ELEMENTARY_RUNTIME
+    warehouse: ELEMENTARY_RUNTIME_WH
+    database: ANALYTICS
+    private_key_file: /run/secrets/elementary/snowflake-private-key
+    private_key_passphrase_file: /run/secrets/elementary/snowflake-private-key-passphrase
+```
+
+## Validation
+
+The runtime validates the whole file at startup and exits with a non-zero code on any error. It never starts with a partially valid configuration.
+
+- Unknown keys are rejected, so a misspelled key such as `max_sample_row_returned` fails startup. It is not silently ignored.
+- Numeric values outside their allowed range are rejected. The runtime does not clamp them.
+- Error messages name the invalid field.
+
+Configuration and secret files are read once, at startup. Restart the runtime to apply changes or rotated credentials.
+
+## Environment variables
+
+Any string value can reference environment variables with `${VAR}` syntax. Substitution runs before validation and applies to values only, not keys.
+
+| Syntax | Behavior |
+| --- | --- |
+| `${VAR}` | Replaced with the value of `VAR`. Startup fails if `VAR` is not set. |
+| `${VAR:-default}` | Replaced with `default` if `VAR` is unset or empty. |
+| `${VAR:?message}` | Startup fails with `message` if `VAR` is unset or empty. |
+| `$VAR` | Not expanded. The value is kept as-is. |
+
+## Secrets
+
+Every secret field accepts either an inline value or a path to a file that holds the value. Add `_file` to the key to read the value from a file, for example `password_file` instead of `password`.
+
+```yaml
+password_file: /run/secrets/elementary/postgres-password
+```
+
+- Setting both `password` and `password_file` is a validation error.
+- The file is read as UTF-8, and leading and trailing whitespace is stripped. An empty file is rejected.
+- Secret values are held in memory only. They are never written to logs or telemetry, or sent to Elementary Cloud.
+
+<Warning>
+  Use `_file` keys for every secret in production. Inline values, including `${VAR}` references to environment variables, are visible to anyone who can read the configuration file or inspect the process environment.
+</Warning>
+
+Mount secret files read-only and readable only by the runtime user, for example from a Kubernetes Secret, Docker secret, or your secret manager's file-based integration. See [Deployment](/cloud/features/elementary-runtime/deployment).
+
+The secret fields are:
+
+| Section | Fields |
+| --- | --- |
+| `cloud` | `token` |
+| Snowflake connection | `password`, `private_key`, `private_key_passphrase` |
+| Databricks connection | `token`, `client_secret` |
+| Postgres and Redshift connections | `password` |
+
+## Configuration reference
+
+### Top level
+
+| Key | Required | Description |
+| --- | --- | --- |
+| `version` | Yes | Configuration format version. Must be `1`. |
+| `cloud` | Yes | Connection to Elementary Cloud. |
+| `instance` | No | How this runtime instance identifies itself. |
+| `limits` | No | Local limits applied to every task. |
+| `concurrency` | No | Task parallelism and heartbeat interval. |
+| `connections` | Yes | Warehouse connections. At least one is required, and each `warehouse_connection_id` must be unique. |
+
+### `cloud`
+
+| Key | Default | Description |
+| --- | --- | --- |
+| `api_url` | `https://app.elementary-data.com/runtime/v1` | Elementary Cloud runtime API. Change it only if Elementary tells you to. |
+| `token` | Required | Runtime token issued by Elementary Cloud, sent as a bearer token on every request. Use `token_file`. |
+
+### `instance`
+
+| Key | Default | Description |
+| --- | --- | --- |
+| `id_prefix` | None | Prefix added to the instance ID the runtime generates at startup. 1–128 characters: letters, digits, and `.` `_` `:` `/` `-`, starting with a letter or digit. Use it to tell replicas and clusters apart. |
+| `display_name` | None | Name shown for this instance in Elementary Cloud. Up to 255 characters. |
+
+### `limits`
+
+See [Local limits](#local-limits).
+
+| Key | Default | Allowed range |
+| --- | --- | --- |
+| `max_query_timeout_seconds` | `300` | `1`–`86400` |
+| `max_sample_rows_returned` | `1000` | `0`–`100000` |
+| `max_result_bytes` | `10485760` (10 MiB) | `1`–`1073741824` (1 GiB) |
+
+### `concurrency`
+
+| Key | Default | Allowed range | Description |
+| --- | --- | --- | --- |
+| `max_concurrent_tasks` | `8` | `1`–`256` | Maximum tasks running at once on this instance. Each running task uses one warehouse session at a time. |
+| `heartbeat_interval_seconds` | `30` | `1`–`3600` | How often the runtime reports running tasks to Elementary Cloud. |
+
+### `connections`
+
+Each entry needs `warehouse_connection_id`, the ID of the matching warehouse connection in Elementary Cloud, and `type`. The other fields depend on the type.
+
+<Tabs>
+  <Tab title="Snowflake">
+    | Key | Required | Description |
+    | --- | --- | --- |
+    | `type` | Yes | `snowflake` |
+    | `account` | Yes | Account identifier, for example `ab12345.eu-central-1`. A `.snowflakecomputing.com` suffix is accepted. |
+    | `user` | Yes | Login name. |
+    | `role` | No | Role for the session. If omitted, the user's default role is used. |
+    | `warehouse` | Yes | Compute warehouse that runs the queries. |
+    | `database` | Yes | Default database. |
+    | `schema` | No | Default schema. |
+    | `private_key` | One of | Private key for key-pair authentication, PEM or base64-encoded DER. |
+    | `private_key_passphrase` | With `private_key` | Passphrase of the private key. |
+    | `password` | One of | Password authentication. |
+
+    Set exactly one of `private_key` or `password`. Key-pair authentication requires an encrypted private key, so `private_key_passphrase` is mandatory with `private_key`.
+
+    ```yaml
+    - warehouse_connection_id: ${SNOWFLAKE_CONNECTION_ID}
+      type: snowflake
+      account: ab12345.eu-central-1
+      user: ELEMENTARY_RUNTIME
+      role: ELEMENTARY_RUNTIME
+      warehouse: ELEMENTARY_RUNTIME_WH
+      database: ANALYTICS
+      private_key_file: /run/secrets/elementary/snowflake-private-key
+      private_key_passphrase_file: /run/secrets/elementary/snowflake-private-key-passphrase
+    ```
+  </Tab>
+  <Tab title="Databricks">
+    | Key | Required | Description |
+    | --- | --- | --- |
+    | `type` | Yes | `databricks` |
+    | `host` | Yes | Workspace hostname, for example `dbc-a1b2c3d4-e5f6.cloud.databricks.com`. |
+    | `http_path` | Yes | HTTP path of the SQL warehouse. |
+    | `catalog` | No | Default catalog. |
+    | `schema` | No | Default schema. |
+    | `client_id` | One of | OAuth machine-to-machine client ID of a service principal. Requires `client_secret`. |
+    | `client_secret` | With `client_id` | OAuth secret of the service principal. |
+    | `token` | One of | Personal access token. |
+
+    Set either `token` or both `client_id` and `client_secret`. Prefer a service principal with OAuth over a personal access token.
+
+    ```yaml
+    - warehouse_connection_id: ${DATABRICKS_CONNECTION_ID}
+      type: databricks
+      host: dbc-a1b2c3d4-e5f6.cloud.databricks.com
+      http_path: /sql/1.0/warehouses/1234567890abcdef
+      catalog: analytics
+      client_id: 6f1e2d3c-4b5a-6978-8a9b-0c1d2e3f4a5b
+      client_secret_file: /run/secrets/elementary/databricks-client-secret
+    ```
+  </Tab>
+  <Tab title="Postgres">
+    | Key | Required | Description |
+    | --- | --- | --- |
+    | `type` | Yes | `postgres` |
+    | `host` | Yes | Hostname. |
+    | `port` | No | Defaults to `5432`. |
+    | `user` | Yes | Login role. |
+    | `password` | Yes | Password. |
+    | `database` | Yes | Database name. |
+    | `schema` | No | Schema name. |
+    | `sslmode` | No | `disable`, `allow`, `prefer`, `require`, `verify-ca`, or `verify-full`. If omitted, the driver default (`prefer`) applies. |
+
+    <Warning>
+      The default `sslmode` allows unencrypted connections. Set `sslmode: verify-full` for any connection that leaves the host.
+    </Warning>
+
+    ```yaml
+    - warehouse_connection_id: ${POSTGRES_CONNECTION_ID}
+      type: postgres
+      host: analytics-db.internal.example.com
+      user: elementary_runtime
+      password_file: /run/secrets/elementary/postgres-password
+      database: analytics
+      sslmode: verify-full
+    ```
+  </Tab>
+  <Tab title="Redshift">
+    | Key | Required | Description |
+    | --- | --- | --- |
+    | `type` | Yes | `redshift` |
+    | `host` | Yes | Cluster or workgroup endpoint. |
+    | `port` | No | Defaults to `5439`. |
+    | `user` | Yes | Database user. |
+    | `password` | Yes | Password. |
+    | `database` | Yes | Database name. |
+    | `schema` | No | Schema name. |
+    | `sslmode` | No | Defaults to `verify-ca`. Accepts the same values as Postgres. |
+
+    ```yaml
+    - warehouse_connection_id: ${REDSHIFT_CONNECTION_ID}
+      type: redshift
+      host: analytics.123456789012.eu-central-1.redshift-serverless.amazonaws.com
+      user: elementary_runtime
+      password_file: /run/secrets/elementary/redshift-password
+      database: analytics
+    ```
+  </Tab>
+</Tabs>
+
+## Local limits
+
+Elementary Cloud sends a requested timeout and sample size with each task. The runtime applies the **lower** of the requested value and the local limit, so Cloud can tighten a limit for a single task but can never exceed the local limit.
+
+### Query timeout
+
+`max_query_timeout_seconds` caps how long a single query runs. The runtime sets it as a statement timeout on the warehouse session before each query, so the warehouse cancels the query when the limit is reached:
+
+| Warehouse | Session setting |
+| --- | --- |
+| Snowflake | `STATEMENT_TIMEOUT_IN_SECONDS` |
+| Databricks | `STATEMENT_TIMEOUT` |
+| Postgres, Redshift | `statement_timeout` |
+
+If a connection cannot enforce a statement timeout, the runtime refuses to run the query.
+
+<Note>
+  The session setting overrides user-level and role-level defaults for the same parameter. Snowflake is the exception: it enforces the lower of the session and warehouse `STATEMENT_TIMEOUT_IN_SECONDS`, so a warehouse-level timeout acts as a hard cap.
+</Note>
+
+### Sample rows
+
+`max_sample_rows_returned` caps how many result rows leave your network per query. This is the main control over which business data reaches Elementary Cloud.
+
+The runtime never fetches a full result. It wraps the query in a `LIMIT` of the sample size plus one row. If more rows exist, it runs a separate `count(*)` over the same query to get the total row count. Only the capped sample and the count are returned.
+
+<Tip>
+  Set `max_sample_rows_returned: 0` to keep all row values inside your network. The runtime then runs only a `count(*)` over the query, and Elementary Cloud receives the row count with no sample. Tests that pass or fail on row count keep working. Failed-row samples are not shown in Elementary Cloud.
+</Tip>
+
+### Result size
+
+`max_result_bytes` caps the JSON-encoded size of the sample sent for one query. When the sample exceeds the cap, the runtime drops whole rows from the end until it fits. Partial rows are never sent. Independently of this setting, samples are limited to the first 1,000 columns.
+
+### Concurrency
+
+`max_concurrent_tasks` caps parallel tasks on one instance. Each task runs its queries one after another, so it uses at most one warehouse session at a time. Use it to keep the runtime within warehouse concurrency and connection limits. With several replicas, the total is `max_concurrent_tasks` × replicas.
+
+## SQL validation
+
+Before running any query, the runtime parses it with a SQL parser for the connection's dialect and rejects it unless all of the following hold:
+
+- It contains exactly one statement.
+- The statement is a `SELECT`, `WITH`, `UNION`, `INTERSECT`, or `EXCEPT` query.
+- No part of it, including subqueries and CTEs, contains `INSERT`, `UPDATE`, `DELETE`, `MERGE`, `SELECT ... INTO`, `CREATE`, `DROP`, `ALTER`, `TRUNCATE`, `GRANT`, `COPY`, or any statement the parser cannot classify.
+
+Rejected queries are never sent to the warehouse. The task fails with a validation error.
+
+<Warning>
+  SQL validation is a second line of defense, not a replacement for warehouse permissions. Always run the runtime with a read-only role scoped to the data it needs to test. See [Database roles](#database-roles).
+</Warning>
+
+## What leaves your network
+
+The runtime sends Elementary Cloud only what it needs to report the result of each task.
+
+| Sent to Elementary Cloud | Never sent |
+| --- | --- |
+| Execution status, duration, and row count | Warehouse credentials and secrets |
+| A row sample, capped by the limits above | SQL text, in logs or telemetry |
+| A fixed, redacted error message, for example `Query failed because of insufficient permissions.` | Raw warehouse error messages |
+| Connection health and warehouse identity: type, account or host identifier, database | Rows beyond the sample |
+| Telemetry: start and stop events, task outcomes, exception types and code locations | Row values in logs or telemetry |
+
+Runtime logs never contain task SQL text, row values, or credentials.
+
+## Query auditing
+
+Every query the runtime runs is tagged with SQL comments, so you can find and attribute it in your warehouse query history:
+
+```sql
+/* elementary_task_id: 7f3c9a2e-... */
+/* elementary_cloud_test_id: 41b0d6e8-... */
+select * from (
+  ...
+) elementary_query limit 1001
+/* --ELEMENTARY-METADATA-- {"elementary_component": "runtime"} --END-ELEMENTARY-METADATA-- */
+```
+
+`elementary_cloud_test_id` is added to queries that run a test. Elementary Cloud can add more tags in the same format. Snowflake sessions also report `elementary` as the client application.
+
+## Database roles
+
+The warehouse role is the main security boundary. Give the runtime its own user and role, with read-only access to only the data it needs to test. Use separate connections, each with its own role, to keep data domains apart.
+
+<Tabs>
+  <Tab title="Snowflake">
+    ```sql
+    CREATE ROLE ELEMENTARY_RUNTIME;
+
+    -- Dedicated warehouse: isolates cost and adds a warehouse-level timeout backstop
+    CREATE WAREHOUSE ELEMENTARY_RUNTIME_WH
+      WAREHOUSE_SIZE = XSMALL
+      AUTO_SUSPEND = 60
+      AUTO_RESUME = TRUE
+      INITIALLY_SUSPENDED = TRUE
+      STATEMENT_TIMEOUT_IN_SECONDS = 600;
+    GRANT USAGE ON WAREHOUSE ELEMENTARY_RUNTIME_WH TO ROLE ELEMENTARY_RUNTIME;
+
+    -- Read-only access, scoped to one database
+    GRANT USAGE ON DATABASE ANALYTICS TO ROLE ELEMENTARY_RUNTIME;
+    GRANT USAGE ON ALL SCHEMAS IN DATABASE ANALYTICS TO ROLE ELEMENTARY_RUNTIME;
+    GRANT USAGE ON FUTURE SCHEMAS IN DATABASE ANALYTICS TO ROLE ELEMENTARY_RUNTIME;
+    GRANT SELECT ON ALL TABLES IN DATABASE ANALYTICS TO ROLE ELEMENTARY_RUNTIME;
+    GRANT SELECT ON FUTURE TABLES IN DATABASE ANALYTICS TO ROLE ELEMENTARY_RUNTIME;
+    GRANT SELECT ON ALL VIEWS IN DATABASE ANALYTICS TO ROLE ELEMENTARY_RUNTIME;
+    GRANT SELECT ON FUTURE VIEWS IN DATABASE ANALYTICS TO ROLE ELEMENTARY_RUNTIME;
+
+    -- Service user with key-pair authentication
+    CREATE USER ELEMENTARY_RUNTIME
+      TYPE = SERVICE
+      DEFAULT_ROLE = ELEMENTARY_RUNTIME
+      DEFAULT_WAREHOUSE = ELEMENTARY_RUNTIME_WH
+      RSA_PUBLIC_KEY = '<public key>';
+    GRANT ROLE ELEMENTARY_RUNTIME TO USER ELEMENTARY_RUNTIME;
+    ```
+
+    - Snowflake enforces the lower of the session and warehouse statement timeouts, so the warehouse setting caps queries even if the runtime configuration changes.
+    - Masking policies and row access policies apply to the runtime role like any other role. Use them to hide sensitive columns and rows from samples.
+    - Attach a [network policy](https://docs.snowflake.com/en/user-guide/network-policies) to the user to accept logins only from the runtime's egress IPs.
+    - Add a resource monitor on the warehouse to cap credit usage.
+  </Tab>
+  <Tab title="Databricks">
+    Create a service principal for the runtime, generate an OAuth secret for it, and grant it **CAN USE** on the SQL warehouse. Then grant read-only Unity Catalog privileges:
+
+    ```sql
+    GRANT USE CATALOG ON CATALOG analytics TO `<service-principal-application-id>`;
+    GRANT USE SCHEMA ON CATALOG analytics TO `<service-principal-application-id>`;
+    GRANT SELECT ON CATALOG analytics TO `<service-principal-application-id>`;
+    ```
+
+    - Privileges granted on the catalog are inherited by all current and future schemas and tables in it. Grant on individual schemas instead to narrow the scope.
+    - Use a dedicated SQL warehouse to isolate cost and concurrency from other workloads.
+    - Column masks and row filters apply to the service principal. Use them to hide sensitive columns and rows from samples.
+  </Tab>
+  <Tab title="Postgres">
+    ```sql
+    CREATE ROLE elementary_runtime WITH LOGIN PASSWORD '<password>';
+
+    -- Every transaction opened by this role is read-only
+    ALTER ROLE elementary_runtime SET default_transaction_read_only = on;
+
+    GRANT CONNECT ON DATABASE analytics TO elementary_runtime;
+    GRANT USAGE ON SCHEMA marts TO elementary_runtime;
+    GRANT SELECT ON ALL TABLES IN SCHEMA marts TO elementary_runtime;
+
+    -- Grant SELECT on tables created later by the owning role
+    ALTER DEFAULT PRIVILEGES FOR ROLE <table_owner> IN SCHEMA marts
+      GRANT SELECT ON TABLES TO elementary_runtime;
+    ```
+
+    Repeat the schema grants for every schema the runtime needs. Restrict the role in `pg_hba.conf` to the runtime's source addresses and to `hostssl` connections.
+  </Tab>
+  <Tab title="Redshift">
+    ```sql
+    CREATE USER elementary_runtime PASSWORD '<password>';
+
+    GRANT USAGE ON SCHEMA marts TO elementary_runtime;
+    GRANT SELECT ON ALL TABLES IN SCHEMA marts TO elementary_runtime;
+
+    -- Grant SELECT on tables created later by the owning user
+    ALTER DEFAULT PRIVILEGES FOR USER <table_owner> IN SCHEMA marts
+      GRANT SELECT ON TABLES TO elementary_runtime;
+    ```
+
+    Repeat the schema grants for every schema the runtime needs. Use a dedicated WLM queue or workgroup with query monitoring rules to cap query runtime and resource usage.
+  </Tab>
+</Tabs>
+
+## Recommended baseline for sensitive data
+
+For environments where no business data may leave the network, combine a read-only scoped role with these limits:
+
+```yaml
+limits:
+  max_query_timeout_seconds: 300
+  max_sample_rows_returned: 0
+```
+
+Elementary Cloud then receives only the test status and row count for each query, plus connection health and redacted error messages.
