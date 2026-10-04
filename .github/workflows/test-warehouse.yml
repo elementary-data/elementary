@@ -213,7 +213,7 @@ jobs:
       - name: Start Clickhouse
         if: inputs.warehouse-type == 'clickhouse'
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        run: docker compose up -d clickhouse
+        run: docker compose up -d --wait clickhouse
 
       - name: Start Trino
         if: inputs.warehouse-type == 'trino'
