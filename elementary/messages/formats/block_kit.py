@@ -46,6 +46,10 @@ class FormattedBlockKitMessage(BaseModel):
 ResolveMentionCallback = Callable[[str], Optional[str]]
 
 
+def _is_group_id(resolved_id: str) -> bool:
+    return resolved_id.startswith("S")
+
+
 class BlockKitBuilder:
     _SECONDARY_FACT_CHUNK_SIZE = 2
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3  # length of markdown's code suffix (```)
@@ -96,8 +100,7 @@ class BlockKitBuilder:
 
     @staticmethod
     def _format_mention(resolved_id: str) -> str:
-        # Slack user-group ids start with S and use a different mention token.
-        if resolved_id.startswith("S"):
+        if _is_group_id(resolved_id): 
             return f"<!subteam^{resolved_id}>"
         return f"<@{resolved_id}>"
 
@@ -181,7 +184,7 @@ class BlockKitBuilder:
         if block.initial_user:
             resolved_user = self._resolve_mention(block.initial_user)
             # users_select only accepts a user id, not a user-group id.
-            if resolved_user and not resolved_user.startswith("S"):
+            if resolved_user and not _is_group_id(resolved_user):
                 formatted_block["initial_user"] = resolved_user
         if block.action_id:
             formatted_block["action_id"] = block.action_id
