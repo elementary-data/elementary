@@ -16,18 +16,9 @@ Elementary Runtime lets Elementary Cloud run supported data-quality queries insi
 
 Elementary Runtime is a small service that runs in your network. It uses an outbound HTTPS connection to request work from Elementary Cloud, validates each query locally, and runs approved queries with customer-managed warehouse credentials.
 
-```mermaid
-flowchart LR
-    cloud["Elementary Cloud<br/>Plans and schedules work"]
-    runtime["Elementary Runtime<br/>Validates and runs queries"]
-    warehouse[("Your data warehouse")]
-
-    runtime -->|"Outbound HTTPS: request work"| cloud
-    cloud -->|"Approved query tasks"| runtime
-    runtime -->|"Customer-managed credentials"| warehouse
-    warehouse -->|"Bounded query result"| runtime
-    runtime -->|"Limited results and health"| cloud
-```
+<Frame>
+  <img src="/pics/cloud/elementary-runtime-architecture.webp" alt="Elementary Runtime architecture: the runtime pulls pre-approved tasks from Elementary Cloud over outbound HTTPS, runs them locally against data systems in the customer environment, and returns bounded results to Cloud" />
+</Frame>
 
 Elementary Cloud remains the control plane. It decides what should run, prepares the SQL, schedules tests, interprets results, and manages incidents. Elementary Runtime is the data plane for supported operations. It checks and executes the SQL, then returns only the result needed by the Cloud workflow.
 
