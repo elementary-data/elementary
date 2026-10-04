@@ -81,11 +81,18 @@ class DremioExternalSeeder(ExternalSeeder):
         self.dremio_pass = os.environ.get(
             "DREMIO_PASS", _defaults.get("DREMIO_PASS", "")
         )
+        # DREMIO_RUSTFS_* are the overrides docker-compose.yml applies to RustFS.
         self.s3_access_key = os.environ.get(
-            "RUSTFS_ACCESS_KEY", _defaults.get("RUSTFS_ACCESS_KEY", "")
+            "RUSTFS_ACCESS_KEY",
+            os.environ.get(
+                "DREMIO_RUSTFS_ACCESS_KEY", _defaults.get("RUSTFS_ACCESS_KEY", "")
+            ),
         )
         self.s3_secret_key = os.environ.get(
-            "RUSTFS_SECRET_KEY", _defaults.get("RUSTFS_SECRET_KEY", "")
+            "RUSTFS_SECRET_KEY",
+            os.environ.get(
+                "DREMIO_RUSTFS_SECRET_KEY", _defaults.get("RUSTFS_SECRET_KEY", "")
+            ),
         )
 
     # ------------------------------------------------------------------
@@ -170,13 +177,42 @@ class DremioExternalSeeder(ExternalSeeder):
     # RustFS upload
     # ------------------------------------------------------------------
 
+    @staticmethod
+    def _storage_network() -> str:
+        """Return the Docker network of the ``dremio-storage`` container.
+
+        The network name is prefixed with the Compose project name, which
+        depends on the checkout directory or ``-p``, so look it up instead
+        of assuming ``e2e_dbt_project_dremio-lakehouse``.
+        """
+        import subprocess
+
+        result = subprocess.run(
+            [
+                "docker",
+                "inspect",
+                "-f",
+                "{{range $name, $_ := .NetworkSettings.Networks}}{{println $name}}{{end}}",
+                "dremio-storage",
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        networks = [n for n in result.stdout.split() if n.endswith("dremio-lakehouse")]
+        if len(networks) != 1:
+            raise RuntimeError(
+                f"Expected one dremio-lakehouse network on dremio-storage, got: {result.stdout.split()}"
+            )
+        return networks[0]
+
     def _upload_csvs_to_rustfs(self) -> None:
         """Upload seed CSVs to the Dremio RustFS bucket.
 
         Mounts the local ``data_dir`` into a temporary ``rustfs/rc`` container
         and copies files directly into the RustFS bucket.
         """
-        network = os.environ.get("DREMIO_NETWORK", "e2e_dbt_project_dremio-lakehouse")
+        network = os.environ.get("DREMIO_NETWORK") or self._storage_network()
         # Credentials go through the environment (`-e NAME` without a value)
         # so they don't show up in the command that run() prints.
         rc_cmds = " && ".join(
