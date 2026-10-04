@@ -20,7 +20,7 @@ Use it for historical revenue, costs, or other measures that should stop changin
 
 ### Test Logic
 
-1. Measure the selected column metrics per time bucket, reusing Elementary's metric caching
+1. Measure the selected column metrics per time bucket and store them in Elementary's `data_monitoring_metrics` table. This history is kept separately from anomaly tests' metrics, so running both tests on the same column scans the table for each
 2. Ignore any bucket younger than `min_bucket_age`, and any measurement taken before the bucket reached that age
 3. For each remaining bucket, compare the newest measurement against its own earlier measurements: the previous one (`last_check`), the earliest retained one (`first_check`), or both
 4. If the change exceeds `max_change_percent` → **FAIL** (`change_type: value_changed`)
@@ -29,7 +29,7 @@ Use it for historical revenue, costs, or other measures that should stop changin
 
 ### Test configuration
 
-_Required configuration: `columns`, `metrics`, `timestamp_column`, `min_bucket_age`_
+_Required configuration: `columns`, `metrics`, `timestamp_column`, `min_bucket_age`. `timestamp_column` can be set on the test or inherited from the model's Elementary config._
 
 {/* prettier-ignore */}
 <pre>
@@ -129,7 +129,7 @@ models:
 | -------------------- | -------- | -------------- | ------------------------------------------------------------------------------------ |
 | `columns`            | Yes      | -              | Columns to monitor                                                                   |
 | `metrics`            | Yes      | -              | Column metrics to monitor per column, for example `sum`, `average`, `min`, `max`, `null_count`. Only metrics that apply to the column's data type are collected |
-| `timestamp_column`   | Yes      | -              | Column that buckets the data into periods                                            |
+| `timestamp_column`   | Yes      | -              | Column that buckets the data into periods. Set it on the test or in the model's Elementary config |
 | `min_bucket_age`     | Yes      | -              | How old a bucket must be before it is checked                                        |
 | `change_since`       | No       | `[last_check]` | Baselines to compare against: `last_check`, `first_check`, or both                   |
 | `max_change_percent` | No       | 0              | Permitted change before failing. `1` means 1%                                        |
@@ -137,7 +137,7 @@ models:
 | `dimensions`         | No       | -              | SQL expressions to split each bucket by                                              |
 | `where_expression`   | No       | -              | SQL expression to filter the data                                                    |
 | `days_back`          | No       | Derived from `min_bucket_age` | Observation window                                                     |
-| `backfill_days`      | No       | `days_back`    | Days re-measured on each run, for incremental models and sources                      |
+| `backfill_days`      | No       | `days_back`    | Days re-measured on each run, for incremental models and sources. Must be at least the derived minimum window |
 
 ### Choosing a timestamp column
 
@@ -147,7 +147,7 @@ Choose a business or event timestamp whose historical periods you want to protec
 
 `min_bucket_age` measures time since the bucket ended. Measurements taken before that age are excluded from both baselines, because a bucket's own settling would otherwise become its baseline. The first eligible measurement only establishes a baseline; a pass at that point does not yet verify historical stability.
 
-`days_back` bounds the observation window. The drift example above protects daily buckets roughly 28 to 90 days old, not all historical data, and corrections outside that window are not detected. Incremental models and sources also use `backfill_days` to control re-measurement; it defaults to `days_back`, and an explicitly shorter backfill window reduces coverage to the buckets actually scanned on that run.
+`days_back` bounds the observation window. The drift example above protects daily buckets roughly 28 to 90 days old, not all historical data, and corrections outside that window are not detected. Incremental models and sources also use `backfill_days` to control re-measurement; it defaults to `days_back`. A `backfill_days` below the minimum window derived from `min_bucket_age` raises an error, because those buckets would stop being re-measured before they become eligible to check. A value between that minimum and `days_back` is allowed, and reduces coverage to the buckets actually scanned on that run. Setting the `force_metrics_backfill` var re-measures the full `days_back` window on every run regardless of `backfill_days`.
 
 Without an explicit window, the test derives one from the settling age (roughly twice the age, with room for whole buckets). That is a convenience default, not a business retention policy. Set the window to cover the corrections you care about, and run often enough to measure each eligible bucket more than once. Longer windows increase rescanning and metric-history storage costs.
 
