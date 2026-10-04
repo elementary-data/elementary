@@ -39,7 +39,7 @@ services:
       timeout: 5s
       retries: 10
 
-  # ── Trino (with Iceberg + Hive Metastore + MinIO) ──────────────────
+  # ── Trino (with Iceberg + Hive Metastore + RustFS) ─────────────────
   trino:
     image: "trinodb/trino:439"
     ports:
@@ -50,7 +50,7 @@ services:
     depends_on:
       hive-metastore:
         condition: service_healthy
-      trino-mc-job:
+      trino-rustfs-setup:
         condition: service_completed_successfully
     healthcheck:
       test:
@@ -87,9 +87,9 @@ services:
       HIVE_METASTORE_USER: ${HIVE_METASTORE_USER:-hive}
       HIVE_METASTORE_PASSWORD: ${HIVE_METASTORE_PASSWORD:-hive}
       HIVE_METASTORE_WAREHOUSE_DIR: s3://datalake/
-      S3_ENDPOINT: http://trino-minio:9000
-      S3_ACCESS_KEY: ${TRINO_MINIO_ACCESS_KEY:-minio}
-      S3_SECRET_KEY: ${TRINO_MINIO_SECRET_KEY:-minio123}
+      S3_ENDPOINT: http://rustfs:9000
+      S3_ACCESS_KEY: ${TRINO_RUSTFS_ACCESS_KEY:-rustfs}
+      S3_SECRET_KEY: ${TRINO_RUSTFS_SECRET_KEY:-rustfs123}
       S3_PATH_STYLE_ACCESS: "true"
       REGION: ""
       GOOGLE_CLOUD_KEY_FILE_PATH: ""
@@ -109,7 +109,7 @@ services:
     depends_on:
       trino-metastore-db:
         condition: service_healthy
-      trino-minio:
+      trino-rustfs:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/9083'"]
@@ -118,36 +118,36 @@ services:
       retries: 60
       start_period: 60s
 
-  trino-minio:
-    hostname: minio
-    image: "minio/minio:RELEASE.2022-05-26T05-48-41Z"
+  trino-rustfs:
+    hostname: rustfs
+    image: "rustfs/rustfs:1.0.0"
     ports:
       - "9002:9000"
       - "9003:9001"
     environment:
-      MINIO_ACCESS_KEY: ${TRINO_MINIO_ACCESS_KEY:-minio}
-      MINIO_SECRET_KEY: ${TRINO_MINIO_SECRET_KEY:-minio123}
-    command: server /data --console-address ":9001"
+      RUSTFS_ACCESS_KEY: ${TRINO_RUSTFS_ACCESS_KEY:-rustfs}
+      RUSTFS_SECRET_KEY: ${TRINO_RUSTFS_SECRET_KEY:-rustfs123}
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:9000/minio/health/live"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/health || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 10
+      start_period: 5s
 
-  trino-mc-job:
-    image: "minio/mc:RELEASE.2022-05-09T04-08-26Z"
+  # Creates the "datalake" bucket on RustFS
+  trino-rustfs-setup:
+    image: "rustfs/rc:v0.1.36"
     entrypoint: |
-      /bin/bash -c "
-      until /usr/bin/mc config --quiet host add myminio http://minio:9000 $${TRINO_MINIO_ACCESS_KEY:-minio} $${TRINO_MINIO_SECRET_KEY:-minio123}; do
-        sleep 2;
-      done;
-      /usr/bin/mc mb --quiet --ignore-existing myminio/datalake
+      /bin/sh -c "
+      set -e;
+      rc alias set local http://rustfs:9000 $${TRINO_RUSTFS_ACCESS_KEY:-rustfs} $${TRINO_RUSTFS_SECRET_KEY:-rustfs123};
+      rc bucket create --ignore-existing local/datalake
       "
     depends_on:
-      trino-minio:
+      trino-rustfs:
         condition: service_healthy
 
-  # ── Dremio (with Nessie + MinIO) ───────────────────────────────────
+  # ── Dremio (with Nessie + RustFS) ──────────────────────────────────
   nessie:
     image: ghcr.io/projectnessie/nessie:0.80.0
     container_name: catalog
@@ -162,40 +162,38 @@ services:
       timeout: 5s
       retries: 10
 
-  dremio-minio:
-    image: minio/minio:RELEASE.2024-01-18T22-51-28Z
+  dremio-rustfs:
+    image: rustfs/rustfs:1.0.0
     container_name: dremio-storage
     environment:
-      - MINIO_ROOT_USER=${DREMIO_MINIO_ROOT_USER:-admin}
-      - MINIO_ROOT_PASSWORD=${DREMIO_MINIO_ROOT_PASSWORD:-password}
-      - MINIO_DOMAIN=storage
-      - MINIO_REGION_NAME=us-east-1
-      - MINIO_REGION=us-east-1
+      - RUSTFS_ACCESS_KEY=${DREMIO_RUSTFS_ACCESS_KEY:-admin}
+      - RUSTFS_SECRET_KEY=${DREMIO_RUSTFS_SECRET_KEY:-password}
     networks:
       - dremio-lakehouse
     ports:
       - "9004:9000"
       - "9005:9001"
-    command: ["server", "/data", "--console-address", ":9001"]
     volumes:
-      - dremio-minio-data:/data
+      - dremio-rustfs-data:/data
     healthcheck:
-      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/localhost/9000'"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/health || exit 1"]
       interval: 5s
       timeout: 5s
       retries: 10
+      start_period: 5s
 
-  dremio-minio-setup:
-    image: minio/mc:RELEASE.2024-01-18T07-03-39Z
-    container_name: dremio-minio-setup
+  dremio-rustfs-setup:
+    image: rustfs/rc:v0.1.36
+    container_name: dremio-rustfs-setup
     depends_on:
-      dremio-minio:
+      dremio-rustfs:
         condition: service_healthy
     entrypoint: >
       /bin/sh -c "
-      mc alias set myminio http://dremio-storage:9000 $${DREMIO_MINIO_ROOT_USER:-admin} $${DREMIO_MINIO_ROOT_PASSWORD:-password};
-      mc mb --ignore-existing myminio/datalake;
-      mc ls myminio;
+      set -e;
+      rc alias set local http://dremio-storage:9000 $${DREMIO_RUSTFS_ACCESS_KEY:-admin} $${DREMIO_RUSTFS_SECRET_KEY:-password};
+      rc bucket create --ignore-existing local/datalake;
+      rc ls local;
       "
     networks:
       - dremio-lakehouse
@@ -233,13 +231,13 @@ services:
         condition: service_healthy
       nessie:
         condition: service_healthy
-      dremio-minio-setup:
+      dremio-rustfs-setup:
         condition: service_completed_successfully
     environment:
       DREMIO_USER: ${DREMIO_USER:-dremio}
       DREMIO_PASS: ${DREMIO_PASS:-dremio123}
-      MINIO_ROOT_USER: ${DREMIO_MINIO_ROOT_USER:-admin}
-      MINIO_ROOT_PASSWORD: ${DREMIO_MINIO_ROOT_PASSWORD:-password}
+      RUSTFS_ACCESS_KEY: ${DREMIO_RUSTFS_ACCESS_KEY:-admin}
+      RUSTFS_SECRET_KEY: ${DREMIO_RUSTFS_SECRET_KEY:-password}
     volumes:
       - ./docker/dremio/dremio-setup.sh:/dremio-setup.sh
     command: sh /dremio-setup.sh
@@ -343,7 +341,7 @@ volumes:
   postgres:
   clickhouse-data:
   dremio-data:
-  dremio-minio-data:
+  dremio-rustfs-data:
   spark-warehouse:
   spark-hive-metastore:
   vertica-data:

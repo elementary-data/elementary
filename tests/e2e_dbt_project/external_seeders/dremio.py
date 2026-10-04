@@ -1,4 +1,4 @@
-"""Dremio external seed loader – uploads CSVs to MinIO and creates Iceberg tables."""
+"""Dremio external seed loader – uploads CSVs to RustFS and creates Iceberg tables."""
 
 from __future__ import annotations
 
@@ -18,24 +18,22 @@ def _docker_defaults() -> dict[str, str]:
     project_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     defaults: dict[str, str] = {}
 
-    # --- docker-compose.yml: MinIO credentials ---
+    # --- docker-compose.yml: RustFS credentials ---
     compose_path = os.path.join(project_dir, "docker-compose.yml")
     try:
         _yaml = YAML()
         with open(compose_path) as fh:
             cfg = _yaml.load(fh)
         services = cfg.get("services", {})
-        for item in services.get("dremio-minio", {}).get("environment", []):
+        for item in services.get("dremio-rustfs", {}).get("environment", []):
             if isinstance(item, str) and "=" in item:
                 k, v = item.split("=", 1)
                 # Resolve ${VAR:-default} patterns to just the default value
                 m = re.match(r"\$\{[^:}]+:-([^}]+)\}", v)
                 if m:
                     v = m.group(1)
-                if k == "MINIO_ROOT_USER":
-                    defaults["MINIO_ACCESS_KEY"] = v
-                elif k == "MINIO_ROOT_PASSWORD":
-                    defaults["MINIO_SECRET_KEY"] = v
+                if k in ("RUSTFS_ACCESS_KEY", "RUSTFS_SECRET_KEY"):
+                    defaults[k] = v
     except FileNotFoundError:
         pass
     except Exception as e:
@@ -63,7 +61,7 @@ def _docker_defaults() -> dict[str, str]:
 
 
 class DremioExternalSeeder(ExternalSeeder):
-    """Load seeds into Dremio via MinIO S3 + Nessie Iceberg tables.
+    """Load seeds into Dremio via RustFS S3 + Nessie Iceberg tables.
 
     Credentials are read from environment variables.  If not set, defaults
     are extracted from the sibling ``docker-compose.yml`` file so the script
@@ -83,11 +81,11 @@ class DremioExternalSeeder(ExternalSeeder):
         self.dremio_pass = os.environ.get(
             "DREMIO_PASS", _defaults.get("DREMIO_PASS", "")
         )
-        self.minio_access_key = os.environ.get(
-            "MINIO_ACCESS_KEY", _defaults.get("MINIO_ACCESS_KEY", "")
+        self.s3_access_key = os.environ.get(
+            "RUSTFS_ACCESS_KEY", _defaults.get("RUSTFS_ACCESS_KEY", "")
         )
-        self.minio_secret_key = os.environ.get(
-            "MINIO_SECRET_KEY", _defaults.get("MINIO_SECRET_KEY", "")
+        self.s3_secret_key = os.environ.get(
+            "RUSTFS_SECRET_KEY", _defaults.get("RUSTFS_SECRET_KEY", "")
         )
 
     # ------------------------------------------------------------------
@@ -169,27 +167,26 @@ class DremioExternalSeeder(ExternalSeeder):
             print(f"  Warning: CREATE FOLDER failed ({e}), continuing...")
 
     # ------------------------------------------------------------------
-    # MinIO upload
+    # RustFS upload
     # ------------------------------------------------------------------
 
-    def _upload_csvs_to_minio(self) -> None:
-        """Upload seed CSVs to the Dremio MinIO bucket.
+    def _upload_csvs_to_rustfs(self) -> None:
+        """Upload seed CSVs to the Dremio RustFS bucket.
 
-        Mounts the local ``data_dir`` into a temporary ``minio/mc`` container
-        and copies files directly into the MinIO bucket.
+        Mounts the local ``data_dir`` into a temporary ``rustfs/rc`` container
+        and copies files directly into the RustFS bucket.
         """
         import shlex
 
         network = os.environ.get("DREMIO_NETWORK", "e2e_dbt_project_dremio-lakehouse")
-        mc_cmds = " && ".join(
+        rc_cmds = " && ".join(
             [
-                "mc alias set myminio http://dremio-storage:9000"
-                f" {shlex.quote(self.minio_access_key)}"
-                f" {shlex.quote(self.minio_secret_key)}",
-                "mc mb --ignore-existing myminio/datalake/seeds/training",
-                "mc mb --ignore-existing myminio/datalake/seeds/validation",
-                "mc cp --recursive /seed-data/training/ myminio/datalake/seeds/training/",
-                "mc cp --recursive /seed-data/validation/ myminio/datalake/seeds/validation/",
+                "rc alias set local http://dremio-storage:9000"
+                f" {shlex.quote(self.s3_access_key)}"
+                f" {shlex.quote(self.s3_secret_key)}",
+                "rc bucket create --ignore-existing local/datalake",
+                "rc object copy --recursive /seed-data/training/ local/datalake/seeds/training/",
+                "rc object copy --recursive /seed-data/validation/ local/datalake/seeds/validation/",
                 "echo Upload complete",
             ]
         )
@@ -204,9 +201,9 @@ class DremioExternalSeeder(ExternalSeeder):
                 f"{self.data_dir}:/seed-data:ro",
                 "--entrypoint",
                 "/bin/sh",
-                "minio/mc",
+                "rustfs/rc:v0.1.36",
                 "-c",
-                mc_cmds,
+                rc_cmds,
             ]
         )
 
@@ -219,15 +216,15 @@ class DremioExternalSeeder(ExternalSeeder):
 
         headers = self._headers(token)
         # Dremio OSS uses the Catalog API (v3) for source management.
-        # For MinIO compatibility we must set compatibilityMode, path-style
+        # For RustFS compatibility we must set compatibilityMode, path-style
         # access, and point the endpoint at the Docker-internal hostname.
         payload = {
             "entityType": "source",
             "name": "SeedFiles",
             "config": {
                 "credentialType": "ACCESS_KEY",
-                "accessKey": self.minio_access_key,
-                "accessSecret": self.minio_secret_key,
+                "accessKey": self.s3_access_key,
+                "accessSecret": self.s3_secret_key,
                 "secure": False,
                 "externalBucketList": ["datalake"],
                 "rootPath": "/",
@@ -324,7 +321,7 @@ class DremioExternalSeeder(ExternalSeeder):
     def load(self) -> None:
         """Load seeds using COPY INTO (no fragile CSV promotion needed).
 
-        1. Upload CSVs to MinIO.
+        1. Upload CSVs to RustFS.
         2. Create an S3 source so Dremio can read those files.
         3. Create Nessie namespace via CREATE FOLDER.
         4. For each CSV, CREATE TABLE in Nessie + COPY INTO from S3.
@@ -342,10 +339,10 @@ class DremioExternalSeeder(ExternalSeeder):
         # self.schema_name is the target schema (e.g. "elementary_tests").
         seed_schema = self.schema_name
 
-        print("\n=== Loading Dremio seeds via MinIO + COPY INTO ===")
+        print("\n=== Loading Dremio seeds via RustFS + COPY INTO ===")
 
-        print("\nStep 1: Uploading CSVs to MinIO...")
-        self._upload_csvs_to_minio()
+        print("\nStep 1: Uploading CSVs to RustFS...")
+        self._upload_csvs_to_rustfs()
 
         print("\nStep 2: Creating SeedFiles S3 source...")
         token = self._get_token()
