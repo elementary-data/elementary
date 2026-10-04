@@ -176,14 +176,12 @@ class DremioExternalSeeder(ExternalSeeder):
         Mounts the local ``data_dir`` into a temporary ``rustfs/rc`` container
         and copies files directly into the RustFS bucket.
         """
-        import shlex
-
         network = os.environ.get("DREMIO_NETWORK", "e2e_dbt_project_dremio-lakehouse")
+        # Credentials go through the environment (`-e NAME` without a value)
+        # so they don't show up in the command that run() prints.
         rc_cmds = " && ".join(
             [
-                "rc alias set local http://dremio-storage:9000"
-                f" {shlex.quote(self.s3_access_key)}"
-                f" {shlex.quote(self.s3_secret_key)}",
+                'rc alias set local http://dremio-storage:9000 "$RC_ACCESS_KEY" "$RC_SECRET_KEY"',
                 "rc bucket create --ignore-existing local/datalake",
                 "rc object copy --recursive /seed-data/training/ local/datalake/seeds/training/",
                 "rc object copy --recursive /seed-data/validation/ local/datalake/seeds/validation/",
@@ -199,12 +197,21 @@ class DremioExternalSeeder(ExternalSeeder):
                 network,
                 "-v",
                 f"{self.data_dir}:/seed-data:ro",
+                "-e",
+                "RC_ACCESS_KEY",
+                "-e",
+                "RC_SECRET_KEY",
                 "--entrypoint",
                 "/bin/sh",
                 "rustfs/rc:v0.1.36",
                 "-c",
                 rc_cmds,
-            ]
+            ],
+            env={
+                **os.environ,
+                "RC_ACCESS_KEY": self.s3_access_key,
+                "RC_SECRET_KEY": self.s3_secret_key,
+            },
         )
 
     # ------------------------------------------------------------------
