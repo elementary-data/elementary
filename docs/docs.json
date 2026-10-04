@@ -24,7 +24,15 @@
               "cloud/features",
               "cloud/features/integrations",
               "cloud/general/security-and-privacy",
-              "cloud/features/elementary-runtime",
+              {
+                "group": "Elementary Runtime",
+                "icon": "server",
+                "pages": [
+                  "cloud/features/elementary-runtime",
+                  "cloud/features/elementary-runtime/configuration",
+                  "cloud/features/elementary-runtime/deployment"
+                ]
+              },
               "cloud/ai-agents/ai-credits"
             ]
           },

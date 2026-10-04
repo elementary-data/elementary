@@ -1,0 +1,281 @@
+---
+title: "Deploying Elementary Runtime"
+sidebarTitle: "Deployment"
+description: "Run Elementary Runtime as a Docker service or on Kubernetes with the Helm chart, with network, secret, and hardening requirements."
+badge: "Private Beta"
+---
+
+import RuntimePrivateBeta from '/snippets/cloud/features/elementary-runtime/private-beta.mdx';
+
+<RuntimePrivateBeta />
+
+Elementary Runtime ships as a container image. Run it as a Docker service on a single host, or on Kubernetes with the Helm chart. Both options use the same image, the same [configuration file](/cloud/features/elementary-runtime/configuration), and the same file-based secrets.
+
+## Requirements
+
+### Network
+
+The runtime only opens outbound connections. It exposes no ports and needs no inbound firewall rules.
+
+| Destination | Port | Purpose |
+| --- | --- | --- |
+| `app.elementary-data.com`, or the host of `cloud.api_url` | 443 | Register, receive tasks, send results and telemetry. |
+| Each warehouse in `connections` | Snowflake and Databricks: 443. Postgres: 5432. Redshift: 5439. | Run queries. |
+| DNS resolver | 53 | Name resolution. |
+
+To route Cloud traffic through a proxy, set the standard `HTTPS_PROXY` and `NO_PROXY` environment variables. Some warehouse drivers also read these variables, so add warehouse hosts to `NO_PROXY` if their traffic must bypass the proxy.
+
+### Resources
+
+Start with 0.5 vCPU and 1 GiB of memory for the default limits. Memory scales with `max_concurrent_tasks` and the sample size, because each running task holds its sample in memory until it is sent.
+
+### Container image
+
+| | |
+| --- | --- |
+| Image | `ghcr.io/elementary-data/elementary-runtime` |
+| Tags | Release version, for example `0.1.0`. Pin a version in production. |
+| Configuration path | `/etc/elementary-runtime/config.yaml` |
+| User | Non-root, UID and GID `10001` |
+| Writable paths | `/tmp` only |
+
+The image includes the drivers for all supported warehouses.
+
+## Behavior to plan for
+
+- **Instances.** Each running container registers with Elementary Cloud as a separate instance with a generated instance ID. Set `instance.id_prefix` to tell replicas apart. You can run more than one replica for availability.
+- **Configuration changes.** The configuration and secret files are read once, at startup. Restart the container to apply changes or rotated credentials.
+- **Startup failures.** An invalid configuration makes the container exit with a non-zero code. Let your orchestrator restart it, and check the logs for the failing field.
+- **Shutdown.** On `SIGTERM`, the runtime stops accepting new tasks and waits for running tasks to finish. Set the stop grace period to at least `max_query_timeout_seconds` plus 30 seconds.
+- **Health.** There is no health endpoint, because the runtime accepts no inbound connections. Instance status and per-connection health are reported to Elementary Cloud.
+- **Logs.** Logs go to stdout and stderr. They never contain task SQL text, row values, or credentials.
+
+## Install
+
+<Tabs>
+  <Tab title="Docker">
+    Use Docker Compose to run the runtime on a VM or a single container host.
+
+    <Steps>
+      <Step title="Create the configuration and secret files">
+        Lay out the files on the host:
+
+        ```text
+        /opt/elementary-runtime/
+          config.yaml
+          secrets/
+            cloud-token
+            snowflake-private-key
+            snowflake-private-key-passphrase
+        ```
+
+        Reference secrets by their path inside the container. Compose mounts each secret at `/run/secrets/<name>`:
+
+        ```yaml filename="/opt/elementary-runtime/config.yaml"
+        version: 1
+        cloud:
+          token_file: /run/secrets/cloud-token
+        instance:
+          id_prefix: vm-prod-1
+        connections:
+          - warehouse_connection_id: <warehouse connection ID>
+            type: snowflake
+            account: ab12345.eu-central-1
+            user: ELEMENTARY_RUNTIME
+            role: ELEMENTARY_RUNTIME
+            warehouse: ELEMENTARY_RUNTIME_WH
+            database: ANALYTICS
+            private_key_file: /run/secrets/snowflake-private-key
+            private_key_passphrase_file: /run/secrets/snowflake-private-key-passphrase
+        ```
+
+        Restrict the secret files to the container user:
+
+        ```bash
+        sudo chown -R 10001:10001 /opt/elementary-runtime/secrets
+        sudo chmod 0700 /opt/elementary-runtime/secrets
+        sudo chmod 0400 /opt/elementary-runtime/secrets/*
+        ```
+      </Step>
+      <Step title="Define the service">
+        ```yaml filename="/opt/elementary-runtime/compose.yaml"
+        services:
+          elementary-runtime:
+            image: ghcr.io/elementary-data/elementary-runtime:0.1.0
+            restart: unless-stopped
+            stop_grace_period: 330s
+            read_only: true
+            tmpfs:
+              - /tmp
+            cap_drop:
+              - ALL
+            security_opt:
+              - no-new-privileges:true
+            volumes:
+              - ./config.yaml:/etc/elementary-runtime/config.yaml:ro
+            secrets:
+              - cloud-token
+              - snowflake-private-key
+              - snowflake-private-key-passphrase
+            deploy:
+              resources:
+                limits:
+                  cpus: "1"
+                  memory: 2g
+
+        secrets:
+          cloud-token:
+            file: ./secrets/cloud-token
+          snowflake-private-key:
+            file: ./secrets/snowflake-private-key
+          snowflake-private-key-passphrase:
+            file: ./secrets/snowflake-private-key-passphrase
+        ```
+
+        `stop_grace_period` is set to the default `max_query_timeout_seconds` of 300 seconds, plus 30 seconds. Raise it if you raise the timeout.
+      </Step>
+      <Step title="Start the runtime">
+        ```bash
+        cd /opt/elementary-runtime
+        docker compose up -d
+        docker compose logs -f elementary-runtime
+        ```
+
+        The instance shows as connected in Elementary Cloud once it registers.
+      </Step>
+    </Steps>
+
+    To upgrade, change the image tag in `compose.yaml` and run `docker compose up -d`. To apply configuration or secret changes, run `docker compose restart elementary-runtime`.
+  </Tab>
+  <Tab title="Kubernetes (Helm)">
+    Use the Helm chart to run the runtime on Kubernetes. The chart creates a Deployment, a ConfigMap rendered from `config`, and optionally a ServiceAccount and a NetworkPolicy. It does not create a Service or an Ingress.
+
+    <Steps>
+      <Step title="Create the namespace and secrets">
+        The chart mounts every key of an existing Secret as a file under `/run/secrets/elementary/`. The file name is the key.
+
+        ```bash
+        kubectl create namespace elementary-runtime
+
+        kubectl create secret generic elementary-runtime-secrets \
+          --namespace elementary-runtime \
+          --from-file=cloud-token=./cloud-token \
+          --from-file=snowflake-private-key=./rsa_key.p8 \
+          --from-file=snowflake-private-key-passphrase=./rsa_key_passphrase
+        ```
+
+        To sync the Secret from a secret manager, create it with [External Secrets Operator](https://external-secrets.io/) and reference it the same way. To mount secrets with the [Secrets Store CSI Driver](https://secrets-store-csi-driver.sigs.k8s.io/) instead, use `extraVolumes` and `extraVolumeMounts`.
+      </Step>
+      <Step title="Write the values file">
+        ```yaml filename="values.yaml"
+        image:
+          tag: "0.1.0"
+
+        replicaCount: 2
+
+        existingSecret: elementary-runtime-secrets
+
+        config:
+          version: 1
+          cloud:
+            token_file: /run/secrets/elementary/cloud-token
+          instance:
+            id_prefix: k8s-prod-eu
+          limits:
+            max_query_timeout_seconds: 300
+            max_sample_rows_returned: 1000
+          connections:
+            - warehouse_connection_id: <warehouse connection ID>
+              type: snowflake
+              account: ab12345.eu-central-1
+              user: ELEMENTARY_RUNTIME
+              role: ELEMENTARY_RUNTIME
+              warehouse: ELEMENTARY_RUNTIME_WH
+              database: ANALYTICS
+              private_key_file: /run/secrets/elementary/snowflake-private-key
+              private_key_passphrase_file: /run/secrets/elementary/snowflake-private-key-passphrase
+
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            memory: 2Gi
+
+        terminationGracePeriodSeconds: 330
+
+        networkPolicy:
+          enabled: true
+          egress:
+            - ports:
+                - port: 443
+                  protocol: TCP
+        ```
+
+        Keep secrets out of `config`. Use `_file` keys that point to `/run/secrets/elementary/`.
+      </Step>
+      <Step title="Install the chart">
+        ```bash
+        helm install elementary-runtime \
+          oci://ghcr.io/elementary-data/charts/elementary-runtime \
+          --version 0.1.0 \
+          --namespace elementary-runtime \
+          --values values.yaml
+        ```
+      </Step>
+      <Step title="Verify">
+        ```bash
+        kubectl get pods --namespace elementary-runtime
+        kubectl logs --namespace elementary-runtime deployment/elementary-runtime
+        ```
+
+        Each replica shows as a connected instance in Elementary Cloud once it registers.
+      </Step>
+    </Steps>
+
+    **Updates and rotation**
+
+    - **Upgrade.** Run `helm upgrade` with a new `--version` and `image.tag`.
+    - **Configuration.** Changes to `config` roll the Deployment automatically, because the pod template carries a checksum of the ConfigMap.
+    - **Secret rotation.** Updating the Secret does not restart pods. Run `kubectl rollout restart deployment/elementary-runtime --namespace elementary-runtime` after rotating.
+
+    **Security defaults**
+
+    The chart applies these settings by default:
+
+    | Setting | Value |
+    | --- | --- |
+    | `podSecurityContext` | `runAsNonRoot: true`, `runAsUser: 10001`, `runAsGroup: 10001`, `fsGroup: 10001`, `seccompProfile.type: RuntimeDefault` |
+    | `securityContext` | `readOnlyRootFilesystem: true`, `allowPrivilegeEscalation: false`, `capabilities.drop: [ALL]` |
+    | Service account token | Not mounted (`automountServiceAccountToken: false`) |
+    | `/tmp` | `emptyDir` volume |
+    | Secret volume | Mounted read-only with mode `0400` |
+
+    With `networkPolicy.enabled: true`, the chart denies all ingress and allows egress only to DNS and to the destinations in `networkPolicy.egress`. NetworkPolicy matches IP ranges, not hostnames. Restrict `egress` to your warehouse and egress-proxy CIDRs where your network allows it.
+
+    **Values reference**
+
+    | Key | Default | Description |
+    | --- | --- | --- |
+    | `image.repository` | `ghcr.io/elementary-data/elementary-runtime` | Image repository. Override to pull from an internal registry mirror. |
+    | `image.tag` | Chart `appVersion` | Image tag. |
+    | `image.pullPolicy` | `IfNotPresent` | Image pull policy. |
+    | `imagePullSecrets` | `[]` | Pull secrets for a private registry. |
+    | `replicaCount` | `1` | Number of runtime instances. |
+    | `config` | Required | Runtime configuration, rendered to a ConfigMap and mounted at `/etc/elementary-runtime/config.yaml`. See [Configuration](/cloud/features/elementary-runtime/configuration). |
+    | `existingConfigMap` | `""` | Use an existing ConfigMap with a `config.yaml` key instead of `config`. |
+    | `existingSecret` | Required | Secret whose keys are mounted as files under `/run/secrets/elementary/`. |
+    | `extraEnv` | `[]` | Extra environment variables, for example `HTTPS_PROXY` or values referenced as `${VAR}` in `config`. |
+    | `extraVolumes`, `extraVolumeMounts` | `[]` | Additional volumes, for example a Secrets Store CSI Driver volume. |
+    | `resources` | `{}` | Container resource requests and limits. |
+    | `terminationGracePeriodSeconds` | `330` | Time allowed for running tasks to finish on shutdown. |
+    | `podSecurityContext`, `securityContext` | See security defaults above | Pod and container security context. |
+    | `serviceAccount.create` | `true` | Create a dedicated ServiceAccount. |
+    | `serviceAccount.name` | `""` | ServiceAccount name. Defaults to the release name. |
+    | `serviceAccount.annotations` | `{}` | ServiceAccount annotations. |
+    | `networkPolicy.enabled` | `false` | Create a NetworkPolicy. |
+    | `networkPolicy.egress` | `[]` | Egress rules added to the DNS rule, in NetworkPolicy `egress` format. |
+    | `podAnnotations`, `podLabels` | `{}` | Extra pod metadata. |
+    | `nodeSelector`, `tolerations`, `affinity`, `topologySpreadConstraints` | `{}`, `[]`, `{}`, `[]` | Pod scheduling. Spread replicas across nodes or zones for availability. |
+  </Tab>
+</Tabs>
