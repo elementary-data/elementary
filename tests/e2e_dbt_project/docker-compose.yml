@@ -122,8 +122,8 @@ services:
     hostname: rustfs
     image: "rustfs/rustfs:1.0.0"
     ports:
-      - "9002:9000"
-      - "9003:9001"
+      - "127.0.0.1:9002:9000"
+      - "127.0.0.1:9003:9001"
     # Keys are fixed to match docker/trino/catalog/iceberg.properties.
     environment:
       RUSTFS_ACCESS_KEY: rustfs
@@ -172,8 +172,8 @@ services:
     networks:
       - dremio-lakehouse
     ports:
-      - "9004:9000"
-      - "9005:9001"
+      - "127.0.0.1:9004:9000"
+      - "127.0.0.1:9005:9001"
     volumes:
       - dremio-rustfs-data:/data
     healthcheck:
