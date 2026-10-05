@@ -52,6 +52,7 @@ class SlackWebMessagingIntegration(
         self.tracking = tracking
         self._email_to_user_id_cache: Dict[str, str] = {}
         self._handle_to_user_id_cache: Optional[Dict[str, str]] = None
+        self._handle_to_usergroup_id_cache: Optional[Dict[str, str]] = None
         self._list_users_page = sleep_and_retry(
             limits(calls=20, period=ONE_MINUTE)(self._request_users_page)
         )
@@ -199,7 +200,36 @@ class SlackWebMessagingIntegration(
     def get_user_id_from_handle(self, handle: str) -> Optional[str]:
         if self._handle_to_user_id_cache is None:
             self._handle_to_user_id_cache = self._build_handle_to_user_id_map()
-        return self._handle_to_user_id_cache.get(handle.lower())
+        resolved = self._handle_to_user_id_cache.get(handle.lower())
+        if resolved is None:
+            resolved = self._get_usergroup_id_from_handle(handle)
+        if resolved is None:
+            logger.warning(f'Failed to resolve handle "{handle}" - not found')
+        return resolved
+
+    def _get_usergroup_id_from_handle(self, handle: str) -> Optional[str]:
+        if self._handle_to_usergroup_id_cache is None:
+            self._handle_to_usergroup_id_cache = (
+                self._build_handle_to_usergroup_id_map()
+            )
+        return self._handle_to_usergroup_id_cache.get(handle.lower())
+
+    def _build_handle_to_usergroup_id_map(self) -> Dict[str, str]:
+        handle_to_usergroup_id: Dict[str, str] = {}
+        # Never block an alert on mention resolution. Cache the result, including
+        # an empty map, so a failing workspace isn't re-listed per mention.
+        try:
+            response = self.client.usergroups_list()
+            for group in response.get("usergroups") or []:
+                group_handle = group.get("handle")
+                if not group_handle:
+                    continue
+                handle_to_usergroup_id.setdefault(group_handle.lower(), group["id"])
+        except Exception as err:
+            if self.tracking:
+                self.tracking.record_internal_exception(err)
+            logger.error(f"Unable to list Slack user groups: {err}.")
+        return handle_to_usergroup_id
 
     def _build_handle_to_user_id_map(self) -> Dict[str, str]:
         members: List[dict] = []
@@ -226,8 +256,9 @@ class SlackWebMessagingIntegration(
             if email:
                 email_prefix = email.split("@")[0].lower()
                 email_prefix_to_user_id.setdefault(email_prefix, user["id"])
-            if user.get("name"):
-                username_to_user_id.setdefault(user["name"].lower(), user["id"])
+            display_name = (user.get("profile") or {}).get("display_name")
+            if display_name:
+                username_to_user_id.setdefault(display_name.lower(), user["id"])
         if (members or guests) and not email_prefix_to_user_id:
             logger.warning(
                 "No Slack user emails are visible, so @<email prefix> mentions can't "

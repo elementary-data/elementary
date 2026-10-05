@@ -14,21 +14,33 @@ USERS_PAGE_1 = {
     "members": [
         {
             "id": "U_JESSICA",
-            "name": "jjones",
-            "profile": {"email": "jessica.jones@marvel.com"},
+            "name": "jessicajones",
+            "profile": {
+                "email": "jessica.jones@marvel.com",
+                "display_name": "jjones",
+            },
         },
-        {"id": "U_BOT", "name": "bot", "is_bot": True, "profile": {}},
+        {
+            "id": "U_BOT",
+            "name": "botuser",
+            "is_bot": True,
+            "profile": {"display_name": "bot"},
+        },
     ],
     "response_metadata": {"next_cursor": "page2"},
 }
 USERS_PAGE_2 = {
     "members": [
-        {"id": "U_LUKE", "name": "luke", "profile": {"email": "lcage@marvel.com"}},
+        {
+            "id": "U_LUKE",
+            "name": "lukecage",
+            "profile": {"email": "lcage@marvel.com", "display_name": "luke"},
+        },
         {
             "id": "U_DELETED",
-            "name": "deleted",
+            "name": "deleteduser",
             "deleted": True,
-            "profile": {"email": "deleted@marvel.com"},
+            "profile": {"email": "deleted@marvel.com", "display_name": "deleted"},
         },
     ],
     "response_metadata": {"next_cursor": ""},
@@ -43,6 +55,7 @@ def _build_integration() -> SlackWebMessagingIntegration:
     client.users_lookupByEmail.side_effect = lambda email: {
         "user": {"id": f"U_EMAIL_{email}"}
     }
+    client.usergroups_list.return_value = {"usergroups": []}
     return SlackWebMessagingIntegration(client)
 
 
@@ -55,7 +68,11 @@ def test_resolve_user_id_by_email_prefix_handle():
 def test_resolve_user_id_by_username_handle():
     integration = _build_integration()
     assert integration.resolve_user_id("@jjones") == "U_JESSICA"
+    assert integration.resolve_user_id("@JJones") == "U_JESSICA"
     assert integration.resolve_user_id("@luke") == "U_LUKE"
+    # Slack `name` is ignored; only profile.display_name resolves.
+    assert integration.resolve_user_id("@jessicajones") is None
+    assert integration.resolve_user_id("@lukecage") is None
 
 
 def test_resolve_user_id_skips_bots_deleted_and_unknown_handles():
@@ -131,16 +148,24 @@ def test_resolve_user_id_collisions():
         "members": [
             {
                 "id": "U_GUEST",
-                "name": "john",
+                "name": "guestjohn",
                 "is_restricted": True,
-                "profile": {"email": "john@partner.com"},
+                "profile": {"email": "john@partner.com", "display_name": "john"},
             },
-            {"id": "U_JOHN", "name": "jdoe", "profile": {"email": "john@company.com"}},
-            {"id": "U_JOHN_2", "name": "jd", "profile": {"email": "john@other.com"}},
+            {
+                "id": "U_JOHN",
+                "name": "johnuser",
+                "profile": {"email": "john@company.com", "display_name": "jdoe"},
+            },
+            {
+                "id": "U_JOHN_2",
+                "name": "jduser",
+                "profile": {"email": "john@other.com", "display_name": "jd"},
+            },
             {
                 "id": "U_JANE",
-                "name": "jane.doe",
-                "profile": {"email": "jd@company.com"},
+                "name": "janeuser",
+                "profile": {"email": "jd@company.com", "display_name": "jane.doe"},
             },
         ],
     }
@@ -148,6 +173,59 @@ def test_resolve_user_id_collisions():
     assert integration.resolve_user_id("@john") == "U_JOHN"
     # Email prefix matches win over username matches.
     assert integration.resolve_user_id("@jd") == "U_JANE"
+
+
+def test_resolve_user_id_by_usergroup_handle():
+    integration = _build_integration()
+    integration.client.usergroups_list.return_value = {
+        "usergroups": [
+            {"id": "S_NO_HANDLE"},
+            {"id": "S_DATA", "handle": "data"},
+            {"id": "S_DATA_LATER", "handle": "data"},
+        ]
+    }
+    assert integration.resolve_user_id("@data") == "S_DATA"
+    assert integration.resolve_user_id("@Data") == "S_DATA"
+    integration.resolve_user_id("@data")
+    assert integration.client.usergroups_list.call_count == 1
+
+
+def test_send_resolves_usergroup_mentions():
+    integration = _build_integration()
+    integration.client.usergroups_list.return_value = {
+        "usergroups": [{"id": "S_DATA", "handle": "data"}]
+    }
+    integration.client.chat_postMessage.return_value = {
+        "ts": "123.456",
+        "channel": "C1",
+    }
+    body = MessageBody(
+        blocks=[LinesBlock(lines=[LineBlock(inlines=[MentionBlock(user="@data")])])]
+    )
+    integration.send_message("C1", body)
+    sent = integration.client.chat_postMessage.call_args.kwargs
+    assert "<!subteam^S_DATA>" in sent["blocks"] + sent["attachments"]
+
+
+def test_user_handle_wins_over_usergroup():
+    integration = _build_integration()
+    integration.client.usergroups_list.return_value = {
+        "usergroups": [{"id": "S_JJONES", "handle": "jjones"}]
+    }
+    assert integration.resolve_user_id("@jjones") == "U_JESSICA"
+    integration.client.usergroups_list.assert_not_called()
+
+
+def test_usergroups_list_failure_does_not_break_user_resolution():
+    integration = _build_integration()
+    integration.client.usergroups_list.side_effect = SlackApiError(
+        "error", MagicMock(data={"error": "missing_scope"})
+    )
+    assert integration.resolve_user_id("@jessica.jones") == "U_JESSICA"
+    integration.client.usergroups_list.assert_not_called()
+    assert integration.resolve_user_id("@data") is None
+    assert integration.resolve_user_id("@data") is None
+    assert integration.client.usergroups_list.call_count == 1
 
 
 def test_resolve_user_id_when_users_list_cursor_does_not_advance():
