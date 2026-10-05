@@ -100,7 +100,7 @@ class BlockKitBuilder:
 
     @staticmethod
     def _format_mention(resolved_id: str) -> str:
-        if _is_group_id(resolved_id): 
+        if _is_group_id(resolved_id):
             return f"<!subteam^{resolved_id}>"
         return f"<@{resolved_id}>"
 
