@@ -121,7 +121,7 @@
             status,
             result_rows
         from elementary_test_results
-        where lower(elementary_test_results.status) != 'pass'
+        where lower(elementary_test_results.status) not in ('pass', 'reused')
         and {{ elementary.edr_cast_as_timestamp('detected_at') }} > {{ elementary.edr_timeadd('day', -1 * days_back, elementary.edr_current_timestamp()) }}
     )
 
