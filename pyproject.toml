@@ -67,7 +67,8 @@ dbt-clickhouse = {version = ">=1.8,<2.0.0", optional = true}
 dbt-duckdb = {version = ">=1.8,<2.0.0", optional = true}
 dbt-dremio = {version = ">=1.8,<2.0.0", optional = true}
 dbt-fabric = {version = ">=1.8,<2.0.0", optional = true}
-dbt-sqlserver = {version = ">=1.8,<2.0.0", optional = true}
+# dbt-sqlserver 1.12 moved pyodbc (still its default backend) to the [pyodbc] extra.
+dbt-sqlserver = {version = ">=1.8,<2.0.0", optional = true, extras = ["pyodbc"]}
 [tool.poetry.extras]
 snowflake = ["dbt-snowflake"]
 bigquery = ["dbt-bigquery"]
