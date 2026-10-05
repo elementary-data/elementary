@@ -299,6 +299,8 @@ jobs:
             databricks_catalog) DBT_ADAPTER="databricks" ;;
             athena) DBT_ADAPTER="athena-community" ;;
             spark) DBT_ADAPTER_EXTRA="[PyHive]" ;;
+            # dbt-sqlserver 1.12 moved pyodbc (still its default backend) to the [pyodbc] extra.
+            sqlserver) DBT_ADAPTER_EXTRA="[pyodbc]" ;;
             # dbt-fabric 1.11 (requires Python >=3.11) switched pyodbc ->
             # mssql-python, and its service-principal connection string
             # ("Authority Id=...") is rejected by the driver.
