@@ -229,7 +229,7 @@ jobs:
           # run the setup container separately.  Using --exit-code-from would
           # imply --abort-on-container-exit, killing all services when the
           # setup container finishes.
-          docker compose up -d --wait dremio dremio-minio nessie
+          docker compose up -d --wait dremio dremio-rustfs nessie
           docker compose run --rm dremio-setup
 
       - name: Start Spark
