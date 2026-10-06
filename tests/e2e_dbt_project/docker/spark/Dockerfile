@@ -14,7 +14,7 @@ ARG POSTGRES_JDBC_VERSION=42.7.13
 
 ENV PATH="${SPARK_HOME}/bin:${SPARK_HOME}/sbin:${PATH}"
 
-# Files ADDed from a URL are only readable by root, hence a+r.
+# ADD gives files downloaded from a URL mode 600 (root only), hence a+r.
 ADD --chmod=a+r \
     "https://repo1.maven.org/maven2/io/delta/${DELTA_ARTIFACT}/${DELTA_VERSION}/${DELTA_ARTIFACT}-${DELTA_VERSION}.jar" \
     "https://repo1.maven.org/maven2/io/delta/delta-storage/${DELTA_VERSION}/delta-storage-${DELTA_VERSION}.jar" \
