@@ -93,7 +93,8 @@ class Config:
         self.env_vars.update(self._parse_dbt_quoting_to_env_vars(dbt_quoting))
 
         self.dbt_vars = dbt_vars
-        if days_back is not None:
+        # alerts_v2 populates nothing with days_back=0, so 0 keeps its default of 1.
+        if days_back:
             self.dbt_vars = self.dbt_vars or {}
             self.dbt_vars["days_back"] = days_back
 

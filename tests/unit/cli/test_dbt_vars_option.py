@@ -34,15 +34,20 @@ def _invoke(cli, args: List[str]):
 
 
 @pytest.mark.parametrize(
-    "extra_args,expected_dbt_vars",
+    "extra_args,expected_dbt_vars,expected_days_back",
     [
-        ([], {"days_back": 1}),
-        (["--dbt-vars", DBT_VARS], {**EXPECTED_DBT_VARS, "days_back": 1}),
-        (["--days-back", "3"], {"days_back": 3}),
-        (["--dbt-vars", "{days_back: 10}", "--days-back", "3"], {"days_back": 3}),
+        ([], {"days_back": 1}, 1),
+        (["--dbt-vars", DBT_VARS], {**EXPECTED_DBT_VARS, "days_back": 1}, 1),
+        (["--days-back", "3"], {"days_back": 3}, 3),
+        (["--days-back", "0"], None, 0),
+        (
+            ["--dbt-vars", "{days_back: 10}", "--days-back", "3"],
+            {"days_back": 3},
+            3,
+        ),
     ],
 )
-def test_monitor_dbt_vars(tmp_path, extra_args, expected_dbt_vars):
+def test_monitor_dbt_vars(tmp_path, extra_args, expected_dbt_vars, expected_days_back):
     with mock.patch(
         "elementary.monitor.cli.DataMonitoringAlerts"
     ) as data_monitoring_alerts:
@@ -53,7 +58,7 @@ def test_monitor_dbt_vars(tmp_path, extra_args, expected_dbt_vars):
     config = data_monitoring_alerts.call_args.kwargs["config"]
     assert config.dbt_vars == expected_dbt_vars
     data_monitoring_alerts.return_value.run_alerts.assert_called_once_with(
-        expected_dbt_vars["days_back"], False
+        expected_days_back, False
     )
 
 
