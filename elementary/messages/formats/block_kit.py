@@ -46,6 +46,10 @@ class FormattedBlockKitMessage(BaseModel):
 ResolveMentionCallback = Callable[[str], Optional[str]]
 
 
+def _is_group_id(resolved_id: str) -> bool:
+    return resolved_id.startswith("S")
+
+
 class BlockKitBuilder:
     _SECONDARY_FACT_CHUNK_SIZE = 2
     _LONGEST_MARKDOWN_SUFFIX_LEN = 3  # length of markdown's code suffix (```)
@@ -84,7 +88,7 @@ class BlockKitBuilder:
         elif isinstance(block, MentionBlock):
             resolved_user = self._resolve_mention(block.user)
             if resolved_user:
-                return f"<@{resolved_user}>"
+                return self._format_mention(resolved_user)
             else:
                 return block.user
         elif isinstance(block, LineBlock):
@@ -93,6 +97,12 @@ class BlockKitBuilder:
             return " "
         else:
             raise ValueError(f"Unsupported inline block type: {type(block)}")
+
+    @staticmethod
+    def _format_mention(resolved_id: str) -> str:
+        if _is_group_id(resolved_id):
+            return f"<!subteam^{resolved_id}>"
+        return f"<@{resolved_id}>"
 
     def _format_line_block_text(self, block: LineBlock) -> str:
         return block.sep.join(
@@ -173,7 +183,8 @@ class BlockKitBuilder:
         }
         if block.initial_user:
             resolved_user = self._resolve_mention(block.initial_user)
-            if resolved_user:
+            # users_select only accepts a user id, not a user-group id.
+            if resolved_user and not _is_group_id(resolved_user):
                 formatted_block["initial_user"] = resolved_user
         if block.action_id:
             formatted_block["action_id"] = block.action_id
