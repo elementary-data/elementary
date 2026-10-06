@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 ARG SPARK_IMAGE=apache/spark:3.3.3
 FROM ${SPARK_IMAGE}
 
