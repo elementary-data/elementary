@@ -1,33 +1,54 @@
-ARG OPENJDK_VERSION=8
-FROM eclipse-temurin:${OPENJDK_VERSION}-jre
+# The official image ships the Spark distribution, so we don't download the
+# ~300MB tarball from archive.apache.org, which is heavily throttled and used
+# to take 40-70 minutes in CI.
+ARG SPARK_IMAGE=apache/spark:v3.3.2
 
-ARG SPARK_VERSION=3.3.2
-ARG HADOOP_VERSION=3
+FROM ${SPARK_IMAGE} AS spark
+
+# The Spark image has no wget/curl, so fetch the extra jars from Maven Central
+# in a separate stage.
+FROM alpine:3.22 AS jars
+ARG SCALA_BINARY_VERSION=2.12
 ARG DELTA_VERSION=2.2.0
+ARG POSTGRES_JDBC_VERSION=42.7.13
+RUN --mount=type=bind,from=spark,source=/opt/spark/jars,target=/spark-jars <<'EOF'
+set -eu
+# Delta 3.0 renamed the delta-core artifact to delta-spark.
+delta_artifact="delta-spark_${SCALA_BINARY_VERSION}"
+if [ "${DELTA_VERSION%%.*}" -lt 3 ]; then
+  delta_artifact="delta-core_${SCALA_BINARY_VERSION}"
+fi
+jars="io/delta/${delta_artifact}/${DELTA_VERSION}/${delta_artifact}-${DELTA_VERSION}.jar
+io/delta/delta-storage/${DELTA_VERSION}/delta-storage-${DELTA_VERSION}.jar
+org/postgresql/postgresql/${POSTGRES_JDBC_VERSION}/postgresql-${POSTGRES_JDBC_VERSION}.jar"
+if [ "${DELTA_VERSION%%.*}" -ge 4 ]; then
+  # Delta 4 also depends on Delta Kernel. Spark already ships Kernel's other
+  # dependencies (Hadoop, Parquet, Jackson, RoaringBitmap) except
+  # jackson-datatype-jdk8, which we match to Spark's Jackson version.
+  jackson_version=$(ls /spark-jars | sed -n 's/^jackson-databind-\(.*\)\.jar$/\1/p')
+  for artifact in delta-kernel-api delta-kernel-defaults delta-kernel-unitycatalog; do
+    jars="$jars
+io/delta/${artifact}/${DELTA_VERSION}/${artifact}-${DELTA_VERSION}.jar"
+  done
+  jars="$jars
+com/fasterxml/jackson/datatype/jackson-datatype-jdk8/${jackson_version}/jackson-datatype-jdk8-${jackson_version}.jar"
+fi
+mkdir /jars
+for jar in $jars; do
+  wget -q -P /jars "https://repo1.maven.org/maven2/${jar}"
+done
+EOF
 
-ENV SPARK_HOME /usr/spark
-ENV PATH="/usr/spark/bin:/usr/spark/sbin:${PATH}"
+FROM spark
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends wget netcat-openbsd procps libpostgresql-jdbc-java && \
-    wget -q "https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" && \
-    tar xzf "spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" && \
-    rm "spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" && \
-    mv "spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}" /usr/spark && \
-    ln -s /usr/share/java/postgresql-jdbc4.jar /usr/spark/jars/postgresql-jdbc4.jar && \
-    wget -q "https://repo1.maven.org/maven2/io/delta/delta-core_2.12/${DELTA_VERSION}/delta-core_2.12-${DELTA_VERSION}.jar" \
-         -P /usr/spark/jars/ && \
-    wget -q "https://repo1.maven.org/maven2/io/delta/delta-storage/${DELTA_VERSION}/delta-storage-${DELTA_VERSION}.jar" \
-         -P /usr/spark/jars/ && \
-    apt-get remove -y wget && \
-    apt-get autoremove -y && \
-    apt-get clean
+ENV PATH="${SPARK_HOME}/bin:${SPARK_HOME}/sbin:${PATH}"
 
-COPY entrypoint.sh /scripts/
-RUN chmod +x /scripts/entrypoint.sh && \
-    groupadd -r spark && useradd -r -g spark -m spark && \
-    chown -R spark:spark /usr/spark /scripts
+COPY --from=jars --chmod=644 /jars/ ${SPARK_HOME}/jars/
+COPY --chmod=755 entrypoint.sh /scripts/entrypoint.sh
 
-USER spark
+# Spark's default warehouse dir is relative to the working directory; keep it
+# at /spark-warehouse, where docker-compose mounts its volume.
+WORKDIR /
+
 ENTRYPOINT ["/scripts/entrypoint.sh"]
 CMD ["--help"]

@@ -114,6 +114,7 @@ jobs:
             trino,
             dremio,
             spark,
+            spark4,
             fabric,
             sqlserver,
             vertica,

@@ -246,11 +246,20 @@ services:
       - dremio-lakehouse
 
   # ── Spark Thrift Server (with Delta Lake + Hive Metastore) ─────────
-  spark-thrift:
+  # spark-thrift and spark4-thrift share the port, metastore and warehouse, so
+  # run one at a time and `docker compose down -v` before switching.
+  spark-thrift: &spark-thrift
     container_name: spark-thrift
     build:
       context: ./docker/spark
       dockerfile: Dockerfile
+      # Not Spark 3.5 yet: its thrift server returns no row set for DDL/DML,
+      # which PyHive's fetchall() can't handle, and Elementary fetches the
+      # result of its CREATE TABLE AS statements.
+      args:
+        SPARK_IMAGE: apache/spark:v3.3.2
+        SCALA_BINARY_VERSION: "2.12"
+        DELTA_VERSION: 2.2.0
     ports:
       - "10000:10000"
       - "4040:4040"
@@ -261,7 +270,7 @@ services:
       --class org.apache.spark.sql.hive.thriftserver.HiveThriftServer2
       --name Thrift JDBC/ODBC Server
     healthcheck:
-      test: ["CMD-SHELL", "nc -z localhost 10000"]
+      test: ["CMD", "bash", "-c", "</dev/tcp/localhost/10000"]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -269,11 +278,22 @@ services:
     user: "0"
     volumes:
       - spark-warehouse:/spark-warehouse/
-      - ./docker/spark/hive-site.xml:/usr/spark/conf/hive-site.xml
-      - ./docker/spark/spark-defaults.conf:/usr/spark/conf/spark-defaults.conf
+      - ./docker/spark/hive-site.xml:/opt/spark/conf/hive-site.xml
+      - ./docker/spark/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
       - ./data:/seed-data:ro
     environment:
       - WAIT_FOR=spark-hive-metastore:5432
+
+  spark4-thrift:
+    <<: *spark-thrift
+    container_name: spark4-thrift
+    build:
+      context: ./docker/spark
+      dockerfile: Dockerfile
+      args:
+        SPARK_IMAGE: apache/spark:4.2.0
+        SCALA_BINARY_VERSION: "2.13"
+        DELTA_VERSION: 4.4.1
 
   spark-hive-metastore:
     image: postgres:15-alpine
