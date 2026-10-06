@@ -12,7 +12,6 @@ from elementary.clients.dbt.dbt_installation import (
 )
 from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
 from elementary.config.config import Config
-from elementary.monitor.dbt_project_utils import CLI_DBT_PROJECT_PATH
 
 
 class RunnerMethod(Enum):
@@ -53,12 +52,13 @@ def create_dbt_runner(
     )
 
 
-def create_internal_dbt_runner(
+def create_dbt_runner_from_config(
     config: Config,
+    project_dir: str,
     force_dbt_deps: bool = False,
 ) -> CommandLineDbtRunner:
     return create_dbt_runner(
-        CLI_DBT_PROJECT_PATH,
+        project_dir,
         config.profiles_dir,
         config.profile_target,
         env_vars=config.env_vars,

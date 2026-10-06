@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from elementary.clients.dbt.factory import create_internal_dbt_runner
+from elementary.clients.dbt.factory import create_dbt_runner_from_config
 from elementary.clients.dbt.subprocess_dbt_runner import SubprocessDbtRunner
 from elementary.config.config import Config
 from elementary.monitor.data_monitoring.data_monitoring import DataMonitoring
@@ -59,8 +59,10 @@ def test_config_dbt_vars_default(tmp_path, monkeypatch):
 
 
 @pytest.mark.parametrize("force_dbt_deps", [True, False])
-def test_create_internal_dbt_runner(config, mock_create_dbt_runner, force_dbt_deps):
-    runner = create_internal_dbt_runner(config, force_dbt_deps=force_dbt_deps)
+def test_create_dbt_runner_from_config(config, mock_create_dbt_runner, force_dbt_deps):
+    runner = create_dbt_runner_from_config(
+        config, CLI_DBT_PROJECT_PATH, force_dbt_deps=force_dbt_deps
+    )
     assert runner is mock_create_dbt_runner.return_value
     _assert_internal_runner_created(
         mock_create_dbt_runner, config, force_dbt_deps=force_dbt_deps
