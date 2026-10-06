@@ -39,7 +39,9 @@ def mock_create_dbt_runner():
         yield create_dbt_runner
 
 
-def _assert_internal_runner_created(mock_create_dbt_runner, config: Config, **kwargs):
+def _assert_internal_runner_created(
+    mock_create_dbt_runner, config: Config, force_dbt_deps: bool = False
+):
     mock_create_dbt_runner.assert_called_once_with(
         CLI_DBT_PROJECT_PATH,
         config.profiles_dir,
@@ -47,7 +49,7 @@ def _assert_internal_runner_created(mock_create_dbt_runner, config: Config, **kw
         env_vars=config.env_vars,
         vars=DBT_VARS,
         run_deps_if_needed=False,
-        force_dbt_deps=kwargs.get("force_dbt_deps", False),
+        force_dbt_deps=force_dbt_deps,
     )
 
 
@@ -101,7 +103,7 @@ def test_runner_vars_merged_with_per_call_vars(mock_subprocess_run):
     }
 
 
-@pytest.mark.parametrize("days_back,expected_vars", [(3, {"days_back": 3}), (0, {})])
+@pytest.mark.parametrize("days_back,expected_vars", [(3, {"days_back": 3}), (0, None)])
 def test_populate_alerts_per_call_vars(days_back, expected_vars):
     data_monitoring_alerts = DataMonitoringAlertsMock()
     with mock.patch.object(

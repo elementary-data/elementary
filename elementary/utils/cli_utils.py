@@ -36,16 +36,16 @@ class RequiredIf(click.Option):
 
 def _parse_dbt_vars(
     ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Optional[Dict[str, Any]]:
+) -> Dict[str, Any]:
     if not value:
-        return None
+        return {}
     try:
         dbt_vars = OrderedYaml().loads(value)
     except Exception as exc:
         raise click.BadParameter(f"Invalid YAML: {exc}") from exc
     if not isinstance(dbt_vars, dict):
         raise click.BadParameter(
-            "Must be a YAML mapping, for example '{query_max_size: 1000000}'."
+            "dbt vars must be a key-value mapping, for example '{query_max_size: 1000000}'."
         )
     return dbt_vars
 
@@ -55,6 +55,5 @@ dbt_vars_option = click.option(
     type=str,
     default=None,
     callback=_parse_dbt_vars,
-    help="Specify raw YAML string of your dbt variables. "
-    "Applied to every run of the edr internal dbt project.",
+    help="Specify raw YAML string of your dbt variables.",
 )

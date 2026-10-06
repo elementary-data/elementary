@@ -77,7 +77,7 @@ class Config:
         project_name: Optional[str] = None,
         quiet_logs: Optional[bool] = None,
         ssl_ca_bundle: Optional[str] = None,
-        dbt_vars: Optional[Dict[str, Any]] = None,
+        dbt_vars: Dict[str, Any] = {},
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
@@ -91,8 +91,7 @@ class Config:
         self.env_vars = dict()
         self.env_vars.update(self._parse_dbt_quoting_to_env_vars(dbt_quoting))
 
-        # Vars supplied to every run of the internal dbt project
-        self.dbt_vars: Dict[str, Any] = dict(dbt_vars or {})
+        self.dbt_vars = dict(dbt_vars)
 
         config = self._load_configuration()
 
