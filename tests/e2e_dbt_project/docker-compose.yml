@@ -260,7 +260,7 @@ services:
       # such as the GitHub runners, which makes Spark crash on startup.
       args:
         SPARK_IMAGE: apache/spark:3.3.3
-        SCALA_BINARY_VERSION: "2.12"
+        DELTA_ARTIFACT: delta-core_2.12
         DELTA_VERSION: 2.2.0
     ports:
       - "10000:10000"
@@ -271,8 +271,22 @@ services:
     command: >
       --class org.apache.spark.sql.hive.thriftserver.HiveThriftServer2
       --name Thrift JDBC/ODBC Server
+    # Run a query through the official image's beeline client, which checks
+    # that the thrift server opens sessions and answers queries, not only
+    # that the port is open.
     healthcheck:
-      test: ["CMD", "bash", "-c", "</dev/tcp/localhost/10000"]
+      test:
+        [
+          "CMD",
+          "beeline",
+          "-u",
+          "jdbc:hive2://localhost:10000",
+          "-n",
+          "dbt",
+          "--silent=true",
+          "-e",
+          "select 1",
+        ]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -292,7 +306,7 @@ services:
       dockerfile: Dockerfile
       args:
         SPARK_IMAGE: apache/spark:4.2.0
-        SCALA_BINARY_VERSION: "2.13"
+        DELTA_ARTIFACT: delta-spark_2.13
         DELTA_VERSION: 4.4.1
 
   spark-hive-metastore:

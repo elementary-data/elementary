@@ -238,11 +238,7 @@ jobs:
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: |
           # spark-thrift (Spark 3) or spark4-thrift (Spark 4)
-          SERVICE="${WAREHOUSE_TYPE}-thrift"
-          if ! docker compose up -d --build --wait "$SERVICE"; then
-            docker compose logs "$SERVICE"
-            exit 1
-          fi
+          docker compose up -d --build --wait "${WAREHOUSE_TYPE}-thrift"
 
       - name: Start SQL Server
         if: inputs.warehouse-type == 'sqlserver'
@@ -255,6 +251,13 @@ jobs:
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: |
           docker compose up -d --wait vertica
+
+      # `docker compose up --wait` only says that a container exited or is
+      # unhealthy, so print the containers' own logs when a start step fails.
+      - name: Show warehouse service logs
+        if: failure()
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        run: docker compose logs --no-color
 
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -304,10 +307,7 @@ jobs:
           case "$WAREHOUSE_TYPE" in
             databricks_catalog) DBT_ADAPTER="databricks" ;;
             athena) DBT_ADAPTER="athena-community" ;;
-            spark|spark4)
-              DBT_ADAPTER="spark"
-              DBT_ADAPTER_EXTRA="[PyHive]"
-              ;;
+            spark|spark4) DBT_ADAPTER="spark" DBT_ADAPTER_EXTRA="[PyHive]" ;;
             # dbt-sqlserver 1.12 moved pyodbc (still its default backend) to the [pyodbc] extra.
             sqlserver) DBT_ADAPTER_EXTRA="[pyodbc]" ;;
             # dbt-fabric 1.11 (requires Python >=3.11) switched pyodbc ->
