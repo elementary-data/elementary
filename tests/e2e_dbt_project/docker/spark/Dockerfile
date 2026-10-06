@@ -44,11 +44,10 @@ FROM spark
 ENV PATH="${SPARK_HOME}/bin:${SPARK_HOME}/sbin:${PATH}"
 
 COPY --from=jars --chmod=644 /jars/ ${SPARK_HOME}/jars/
-COPY --chmod=755 entrypoint.sh /scripts/entrypoint.sh
 
 # Spark's default warehouse dir is relative to the working directory; keep it
 # at /spark-warehouse, where docker-compose mounts its volume.
 WORKDIR /
 
-ENTRYPOINT ["/scripts/entrypoint.sh"]
+ENTRYPOINT ["spark-submit"]
 CMD ["--help"]
