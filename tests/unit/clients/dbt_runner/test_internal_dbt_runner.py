@@ -103,15 +103,13 @@ def test_runner_vars_merged_with_per_call_vars(mock_subprocess_run):
     }
 
 
-@pytest.mark.parametrize("days_back,expected_vars", [(3, {"days_back": 3}), (0, None)])
-def test_populate_alerts_per_call_vars(days_back, expected_vars):
+def test_populate_alerts_uses_runner_vars():
     data_monitoring_alerts = DataMonitoringAlertsMock()
     with mock.patch.object(
         data_monitoring_alerts.internal_dbt_runner, "run", return_value=True
     ) as run:
-        assert data_monitoring_alerts._populate_data(days_back=days_back)
+        assert data_monitoring_alerts._populate_data()
     run.assert_called_once_with(
         select="elementary_cli.alerts.alerts_v2",
         full_refresh=False,
-        vars=expected_vars,
     )

@@ -33,18 +33,28 @@ def _invoke(cli, args: List[str]):
     return result
 
 
-@pytest.mark.parametrize("dbt_vars_args", [[], ["--dbt-vars", DBT_VARS]])
-def test_monitor_dbt_vars(tmp_path, dbt_vars_args):
+@pytest.mark.parametrize(
+    "extra_args,expected_dbt_vars",
+    [
+        ([], {"days_back": 1}),
+        (["--dbt-vars", DBT_VARS], {**EXPECTED_DBT_VARS, "days_back": 1}),
+        (["--days-back", "3"], {"days_back": 3}),
+        (["--dbt-vars", "{days_back: 10}", "--days-back", "3"], {"days_back": 3}),
+    ],
+)
+def test_monitor_dbt_vars(tmp_path, extra_args, expected_dbt_vars):
     with mock.patch(
         "elementary.monitor.cli.DataMonitoringAlerts"
     ) as data_monitoring_alerts:
         _invoke(
             monitor,
-            [*_common_args(tmp_path), "--slack-webhook", "mock", *dbt_vars_args],
+            [*_common_args(tmp_path), "--slack-webhook", "mock", *extra_args],
         )
     config = data_monitoring_alerts.call_args.kwargs["config"]
-    assert config.dbt_vars == (EXPECTED_DBT_VARS if dbt_vars_args else None)
-    data_monitoring_alerts.return_value.run_alerts.assert_called_once_with(1, False)
+    assert config.dbt_vars == expected_dbt_vars
+    data_monitoring_alerts.return_value.run_alerts.assert_called_once_with(
+        expected_dbt_vars["days_back"], False
+    )
 
 
 @pytest.mark.parametrize("dbt_vars_args", [[], ["--dbt-vars", DBT_VARS]])
