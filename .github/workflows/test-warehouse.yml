@@ -238,7 +238,11 @@ jobs:
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         run: |
           # spark-thrift (Spark 3) or spark4-thrift (Spark 4)
-          docker compose up -d --build --wait "${WAREHOUSE_TYPE}-thrift"
+          SERVICE="${WAREHOUSE_TYPE}-thrift"
+          if ! docker compose up -d --build --wait "$SERVICE"; then
+            docker compose logs "$SERVICE"
+            exit 1
+          fi
 
       - name: Start SQL Server
         if: inputs.warehouse-type == 'sqlserver'
