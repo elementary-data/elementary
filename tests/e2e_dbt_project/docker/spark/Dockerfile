@@ -1,7 +1,7 @@
 # The official image ships the Spark distribution, so we don't download the
 # ~300MB tarball from archive.apache.org, which is heavily throttled and used
 # to take 40-70 minutes in CI.
-ARG SPARK_IMAGE=apache/spark:v3.3.2
+ARG SPARK_IMAGE=apache/spark:3.3.3
 
 FROM ${SPARK_IMAGE} AS spark
 

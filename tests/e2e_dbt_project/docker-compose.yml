@@ -255,9 +255,11 @@ services:
       dockerfile: Dockerfile
       # Not Spark 3.5 yet: its thrift server returns no row set for DDL/DML,
       # which PyHive's fetchall() can't handle, and Elementary fetches the
-      # result of its CREATE TABLE AS statements.
+      # result of its CREATE TABLE AS statements. Not apache/spark:v3.3.2
+      # either: its JDK 11.0.16 fails container detection on cgroup v2 hosts
+      # such as the GitHub runners, which makes Spark crash on startup.
       args:
-        SPARK_IMAGE: apache/spark:v3.3.2
+        SPARK_IMAGE: apache/spark:3.3.3
         SCALA_BINARY_VERSION: "2.12"
         DELTA_VERSION: 2.2.0
     ports:
