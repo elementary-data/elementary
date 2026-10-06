@@ -55,7 +55,7 @@ def _assert_internal_runner_created(
 
 def test_config_dbt_vars_default(tmp_path, monkeypatch):
     monkeypatch.setenv("DBT_LOG_PATH", str(tmp_path))
-    assert Config(config_dir=str(tmp_path), target_path=str(tmp_path)).dbt_vars == {}
+    assert Config(config_dir=str(tmp_path), target_path=str(tmp_path)).dbt_vars is None
 
 
 @pytest.mark.parametrize("force_dbt_deps", [True, False])

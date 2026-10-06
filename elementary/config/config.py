@@ -77,7 +77,7 @@ class Config:
         project_name: Optional[str] = None,
         quiet_logs: Optional[bool] = None,
         ssl_ca_bundle: Optional[str] = None,
-        dbt_vars: Dict[str, Any] = {},
+        dbt_vars: Optional[Dict[str, Any]] = None,
     ):
         self.config_dir = config_dir
         self.profiles_dir = profiles_dir
@@ -91,7 +91,7 @@ class Config:
         self.env_vars = dict()
         self.env_vars.update(self._parse_dbt_quoting_to_env_vars(dbt_quoting))
 
-        self.dbt_vars = dict(dbt_vars)
+        self.dbt_vars = dbt_vars
 
         config = self._load_configuration()
 

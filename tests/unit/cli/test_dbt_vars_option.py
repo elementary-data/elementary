@@ -43,7 +43,7 @@ def test_monitor_dbt_vars(tmp_path, dbt_vars_args):
             [*_common_args(tmp_path), "--slack-webhook", "mock", *dbt_vars_args],
         )
     config = data_monitoring_alerts.call_args.kwargs["config"]
-    assert config.dbt_vars == (EXPECTED_DBT_VARS if dbt_vars_args else {})
+    assert config.dbt_vars == (EXPECTED_DBT_VARS if dbt_vars_args else None)
     data_monitoring_alerts.return_value.run_alerts.assert_called_once_with(1, False)
 
 
@@ -58,7 +58,7 @@ def test_report_dbt_vars(tmp_path, dbt_vars_args):
         )
         _invoke(monitor, ["report", *_common_args(tmp_path), *dbt_vars_args])
     config = data_monitoring_report.call_args.kwargs["config"]
-    assert config.dbt_vars == (EXPECTED_DBT_VARS if dbt_vars_args else {})
+    assert config.dbt_vars == (EXPECTED_DBT_VARS if dbt_vars_args else None)
 
 
 @pytest.mark.parametrize("dbt_vars_args", [[], ["--dbt-vars", DBT_VARS]])
@@ -79,7 +79,7 @@ def test_send_report_dbt_vars(tmp_path, dbt_vars_args):
             ],
         )
     config = data_monitoring_report.call_args.kwargs["config"]
-    assert config.dbt_vars == (EXPECTED_DBT_VARS if dbt_vars_args else {})
+    assert config.dbt_vars == (EXPECTED_DBT_VARS if dbt_vars_args else None)
 
 
 @pytest.mark.parametrize("dbt_vars_args", [[], ["--dbt-vars", DBT_VARS]])
@@ -87,7 +87,7 @@ def test_debug_dbt_vars(dbt_vars_args):
     with mock.patch("elementary.monitor.cli.Debug") as debug:
         _invoke(monitor, ["debug", *dbt_vars_args])
     config = debug.call_args.args[0]
-    assert config.dbt_vars == (EXPECTED_DBT_VARS if dbt_vars_args else {})
+    assert config.dbt_vars == (EXPECTED_DBT_VARS if dbt_vars_args else None)
 
 
 @pytest.mark.parametrize("dbt_vars_args", [[], ["--dbt-vars", DBT_VARS]])
@@ -105,7 +105,7 @@ def test_upload_source_freshness_dbt_vars(tmp_path, dbt_vars_args):
             ],
         )
     config = operation.call_args.args[0]
-    assert config.dbt_vars == (EXPECTED_DBT_VARS if dbt_vars_args else {})
+    assert config.dbt_vars == (EXPECTED_DBT_VARS if dbt_vars_args else None)
 
 
 @pytest.mark.parametrize(

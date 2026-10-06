@@ -36,9 +36,9 @@ class RequiredIf(click.Option):
 
 def _parse_dbt_vars(
     ctx: click.Context, param: click.Parameter, value: Optional[str]
-) -> Dict[str, Any]:
+) -> Optional[Dict[str, Any]]:
     if not value:
-        return {}
+        return None
     try:
         dbt_vars = OrderedYaml().loads(value)
     except Exception as exc:
