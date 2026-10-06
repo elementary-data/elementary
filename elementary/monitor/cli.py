@@ -368,9 +368,8 @@ def monitor(
         maximum_columns_in_alert_samples=maximum_columns_in_alert_samples,
         quiet_logs=quiet_logs,
         ssl_ca_bundle=ssl_ca_bundle,
-        dbt_vars={**(dbt_vars or {}), "days_back": days_back}
-        if days_back
-        else dbt_vars,
+        dbt_vars=dbt_vars,
+        days_back=days_back,
     )
     anonymous_tracking = AnonymousCommandLineTracking(config)
     anonymous_tracking.set_env("use_select", bool(select))

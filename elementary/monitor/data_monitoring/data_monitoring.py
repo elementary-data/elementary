@@ -58,11 +58,12 @@ class DataMonitoring:
         self.selector_filter = selector_filter
 
     def _init_internal_dbt_runner(self):
-        return create_dbt_runner_from_config(
+        internal_dbt_runner = create_dbt_runner_from_config(
             self.config,
             CLI_DBT_PROJECT_PATH,
             force_dbt_deps=self.force_update_dbt_package,
         )
+        return internal_dbt_runner
 
     def properties(self):
         data_monitoring_properties = {
