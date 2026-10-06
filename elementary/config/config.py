@@ -92,9 +92,10 @@ class Config:
         self.env_vars = dict()
         self.env_vars.update(self._parse_dbt_quoting_to_env_vars(dbt_quoting))
 
-        self.dbt_vars = (
-            {**(dbt_vars or {}), "days_back": days_back} if days_back else dbt_vars
-        )
+        self.dbt_vars = dbt_vars
+        if days_back is not None:
+            self.dbt_vars = self.dbt_vars or {}
+            self.dbt_vars["days_back"] = days_back
 
         config = self._load_configuration()
 
