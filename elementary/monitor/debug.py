@@ -1,9 +1,9 @@
 import click
 
-from elementary.clients.dbt.factory import create_dbt_runner
+from elementary.clients.dbt.factory import create_dbt_runner_from_config
 from elementary.config.config import Config
 from elementary.exceptions.exceptions import DbtCommandError
-from elementary.monitor import dbt_project_utils
+from elementary.monitor.dbt_project_utils import CLI_DBT_PROJECT_PATH
 
 
 class Debug:
@@ -11,12 +11,7 @@ class Debug:
         self.config = config
 
     def run(self) -> bool:
-        dbt_runner = create_dbt_runner(
-            dbt_project_utils.CLI_DBT_PROJECT_PATH,
-            self.config.profiles_dir,
-            self.config.profile_target,
-            run_deps_if_needed=self.config.run_dbt_deps_if_needed,
-        )
+        dbt_runner = create_dbt_runner_from_config(self.config, CLI_DBT_PROJECT_PATH)
 
         try:
             dbt_runner.run_operation("elementary_cli.test_conn", quiet=True)
