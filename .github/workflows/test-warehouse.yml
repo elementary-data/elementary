@@ -213,7 +213,7 @@ jobs:
       - name: Start Clickhouse
         if: inputs.warehouse-type == 'clickhouse'
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        run: docker compose up -d clickhouse
+        run: docker compose up -d --wait clickhouse
 
       - name: Start Trino
         if: inputs.warehouse-type == 'trino'
@@ -229,7 +229,7 @@ jobs:
           # run the setup container separately.  Using --exit-code-from would
           # imply --abort-on-container-exit, killing all services when the
           # setup container finishes.
-          docker compose up -d --wait dremio dremio-minio nessie
+          docker compose up -d --wait dremio dremio-rustfs nessie
           docker compose run --rm dremio-setup
 
       - name: Start Spark
@@ -308,6 +308,8 @@ jobs:
             databricks_catalog) DBT_ADAPTER="databricks" ;;
             athena) DBT_ADAPTER="athena-community" ;;
             spark) DBT_ADAPTER_EXTRA="[PyHive]" ;;
+            # dbt-sqlserver 1.12 moved pyodbc (still its default backend) to the [pyodbc] extra.
+            sqlserver) DBT_ADAPTER_EXTRA="[pyodbc]" ;;
             # dbt-fabric 1.11 (requires Python >=3.11) switched pyodbc ->
             # mssql-python, and its service-principal connection string
             # ("Authority Id=...") is rejected by the driver.
