@@ -238,6 +238,15 @@ jobs:
         run: |
           docker compose up -d --build --wait spark-thrift
 
+      # The Spark image build can take most of the default 1-hour AWS session,
+      # expiring the token before the report upload steps at the end of the job.
+      - name: Refresh AWS credentials
+        if: inputs.warehouse-type == 'spark'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          aws-region: eu-west-1
+
       - name: Start SQL Server
         if: inputs.warehouse-type == 'sqlserver'
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
