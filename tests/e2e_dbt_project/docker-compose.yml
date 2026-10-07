@@ -252,7 +252,7 @@ services:
       context: ./docker/spark
       dockerfile: Dockerfile
       # Not 3.5 until CORE-1558 lands (PyHive fails on its DDL results); not
-      # v3.3.2, whose JDK crashes on the cgroup v2 GitHub runners.
+      # v3.3.2, whose JDK 11.0.16 crashes on GitHub's runners (JDK-8287073).
       args:
         SPARK_IMAGE: apache/spark:3.3.3
         DELTA_ARTIFACT: delta-core_2.12
