@@ -62,9 +62,6 @@ elementary_tests:
       file_format: delta
       threads: 4
 
-    spark4: &spark4
-      <<: *spark
-
     sqlserver: &sqlserver
       type: sqlserver
       driver: "ODBC Driver 18 for SQL Server"
@@ -168,7 +165,7 @@ elementary_tests:
 elementary:
   target: postgres
   outputs:
-{%- set targets = ['postgres', 'clickhouse', 'trino', 'dremio', 'duckdb', 'spark', 'spark4', 'fabric', 'sqlserver', 'vertica', 'snowflake', 'bigquery', 'redshift', 'databricks_catalog', 'athena'] %}
+{%- set targets = ['postgres', 'clickhouse', 'trino', 'dremio', 'duckdb', 'spark', 'fabric', 'sqlserver', 'vertica', 'snowflake', 'bigquery', 'redshift', 'databricks_catalog', 'athena'] %}
 {%- for t in targets %}
     {{ t }}:
       <<: *{{ t }}

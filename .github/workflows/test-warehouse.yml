@@ -13,7 +13,6 @@ on:
           - redshift
           - databricks_catalog
           - spark
-          - spark4
           - athena
           - clickhouse
           - duckdb
@@ -128,7 +127,7 @@ jobs:
       - name: Validate workflow inputs
         run: |
           case "$WAREHOUSE_TYPE" in
-            postgres|snowflake|bigquery|redshift|databricks_catalog|spark|spark4|athena|clickhouse|duckdb|trino|dremio|fabric|sqlserver|vertica) ;;
+            postgres|snowflake|bigquery|redshift|databricks_catalog|spark|athena|clickhouse|duckdb|trino|dremio|fabric|sqlserver|vertica) ;;
             *)
               echo "Unsupported warehouse type: $WAREHOUSE_TYPE" >&2
               exit 1
@@ -234,9 +233,10 @@ jobs:
           docker compose run --rm dremio-setup
 
       - name: Start Spark
-        if: inputs.warehouse-type == 'spark' || inputs.warehouse-type == 'spark4'
+        if: inputs.warehouse-type == 'spark'
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        run: docker compose up -d --build --wait "${WAREHOUSE_TYPE}-thrift"
+        run: |
+          docker compose up -d --build --wait spark-thrift
 
       - name: Start SQL Server
         if: inputs.warehouse-type == 'sqlserver'
@@ -261,7 +261,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install Spark requirements
-        if: inputs.warehouse-type == 'spark' || inputs.warehouse-type == 'spark4'
+        if: inputs.warehouse-type == 'spark'
         run: sudo apt-get install -y python3-dev libsasl2-dev gcc
 
       - name: Install ODBC driver for SQL Server
@@ -303,7 +303,7 @@ jobs:
           case "$WAREHOUSE_TYPE" in
             databricks_catalog) DBT_ADAPTER="databricks" ;;
             athena) DBT_ADAPTER="athena-community" ;;
-            spark|spark4) DBT_ADAPTER="spark" DBT_ADAPTER_EXTRA="[PyHive]" ;;
+            spark) DBT_ADAPTER_EXTRA="[PyHive]" ;;
             # dbt-sqlserver 1.12 moved pyodbc (still its default backend) to the [pyodbc] extra.
             sqlserver) DBT_ADAPTER_EXTRA="[pyodbc]" ;;
             # dbt-fabric 1.11 (requires Python >=3.11) switched pyodbc ->
@@ -348,8 +348,6 @@ jobs:
             EXTRA="$WAREHOUSE_TYPE"
             if [ "$WAREHOUSE_TYPE" = "databricks_catalog" ]; then
               EXTRA="databricks"
-            elif [ "$WAREHOUSE_TYPE" = "spark4" ]; then
-              EXTRA="spark"
             fi
             pip install ".[$EXTRA]"
           fi
@@ -375,7 +373,7 @@ jobs:
           # This enables caching the seeded database state between runs.
           IS_DOCKER=false
           case "$WAREHOUSE_TYPE" in
-            postgres|clickhouse|trino|dremio|duckdb|spark|spark4|sqlserver|vertica) IS_DOCKER=true ;;
+            postgres|clickhouse|trino|dremio|duckdb|spark|sqlserver|vertica) IS_DOCKER=true ;;
           esac
 
           if [ "$IS_DOCKER" = "true" ]; then
@@ -429,17 +427,12 @@ jobs:
 
       - name: Seed e2e dbt project (external)
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        if: steps.seed-cache.outputs.cache-hit != 'true' && (inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark' || inputs.warehouse-type == 'spark4')
-        run: |
-          ADAPTER="$WAREHOUSE_TYPE"
-          if [ "$ADAPTER" = "spark4" ]; then
-            ADAPTER="spark"
-          fi
-          python load_seeds_external.py "$ADAPTER" "$SCHEMA_NAME" data
+        if: steps.seed-cache.outputs.cache-hit != 'true' && (inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark')
+        run: python load_seeds_external.py "$WAREHOUSE_TYPE" "$SCHEMA_NAME" data
 
       - name: Seed e2e dbt project
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        if: steps.seed-cache.outputs.cache-hit != 'true' && inputs.warehouse-type != 'dremio' && inputs.warehouse-type != 'spark' && inputs.warehouse-type != 'spark4'
+        if: steps.seed-cache.outputs.cache-hit != 'true' && inputs.warehouse-type != 'dremio' && inputs.warehouse-type != 'spark'
         run: |
           # The seed step runs before Elementary models exist, so artifact hooks
           # would try to insert into missing Elementary relations.

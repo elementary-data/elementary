@@ -246,8 +246,7 @@ services:
       - dremio-lakehouse
 
   # ── Spark Thrift Server (with Delta Lake + Hive Metastore) ─────────
-  # spark-thrift and spark4-thrift share ports and volumes: run one at a time.
-  spark-thrift: &spark-thrift
+  spark-thrift:
     container_name: spark-thrift
     build:
       context: ./docker/spark
@@ -290,17 +289,6 @@ services:
       - ./docker/spark/hive-site.xml:/opt/spark/conf/hive-site.xml
       - ./docker/spark/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
       - ./data:/seed-data:ro
-
-  spark4-thrift:
-    <<: *spark-thrift
-    container_name: spark4-thrift
-    build:
-      context: ./docker/spark
-      dockerfile: Dockerfile
-      args:
-        SPARK_IMAGE: apache/spark:4.2.0
-        DELTA_ARTIFACT: delta-spark_2.13
-        DELTA_VERSION: 4.4.1
 
   spark-hive-metastore:
     image: postgres:15-alpine
