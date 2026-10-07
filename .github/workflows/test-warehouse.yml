@@ -236,9 +236,7 @@ jobs:
       - name: Start Spark
         if: inputs.warehouse-type == 'spark' || inputs.warehouse-type == 'spark4'
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
-        run: |
-          # spark-thrift (Spark 3) or spark4-thrift (Spark 4)
-          docker compose up -d --build --wait "${WAREHOUSE_TYPE}-thrift"
+        run: docker compose up -d --build --wait "${WAREHOUSE_TYPE}-thrift"
 
       - name: Start SQL Server
         if: inputs.warehouse-type == 'sqlserver'
@@ -252,8 +250,6 @@ jobs:
         run: |
           docker compose up -d --wait vertica
 
-      # `docker compose up --wait` only says that a container exited or is
-      # unhealthy, so print the containers' own logs when a start step fails.
       - name: Show warehouse service logs
         if: failure()
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
@@ -435,7 +431,6 @@ jobs:
         working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
         if: steps.seed-cache.outputs.cache-hit != 'true' && (inputs.warehouse-type == 'dremio' || inputs.warehouse-type == 'spark' || inputs.warehouse-type == 'spark4')
         run: |
-          # The seeders are keyed by adapter; spark4 uses the spark adapter.
           ADAPTER="$WAREHOUSE_TYPE"
           if [ "$ADAPTER" = "spark4" ]; then
             ADAPTER="spark"

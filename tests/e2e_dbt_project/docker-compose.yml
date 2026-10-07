@@ -246,18 +246,14 @@ services:
       - dremio-lakehouse
 
   # ── Spark Thrift Server (with Delta Lake + Hive Metastore) ─────────
-  # spark-thrift and spark4-thrift share the port, metastore and warehouse, so
-  # run one at a time and `docker compose down -v` before switching.
+  # spark-thrift and spark4-thrift share ports and volumes: run one at a time.
   spark-thrift: &spark-thrift
     container_name: spark-thrift
     build:
       context: ./docker/spark
       dockerfile: Dockerfile
-      # Not Spark 3.5 yet: its thrift server returns no row set for DDL/DML,
-      # which PyHive's fetchall() can't handle, and Elementary fetches the
-      # result of its CREATE TABLE AS statements. Not apache/spark:v3.3.2
-      # either: its JDK 11.0.16 fails container detection on cgroup v2 hosts
-      # such as the GitHub runners, which makes Spark crash on startup.
+      # Not 3.5 until CORE-1558 lands (PyHive fails on its DDL results); not
+      # v3.3.2, whose JDK crashes on the cgroup v2 GitHub runners.
       args:
         SPARK_IMAGE: apache/spark:3.3.3
         DELTA_ARTIFACT: delta-core_2.12
@@ -271,9 +267,6 @@ services:
     command: >
       --class org.apache.spark.sql.hive.thriftserver.HiveThriftServer2
       --name Thrift JDBC/ODBC Server
-    # Run a query through the official image's beeline client, which checks
-    # that the thrift server opens sessions and answers queries, not only
-    # that the port is open.
     healthcheck:
       test:
         [

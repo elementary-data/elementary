@@ -1,8 +1,7 @@
 ARG SPARK_IMAGE=apache/spark:3.3.3
 FROM ${SPARK_IMAGE}
 
-# Delta 3.0 renamed delta-core to delta-spark, so the artifact name (with its
-# Scala suffix) is passed in alongside the version.
+# delta-core_<scala> before Delta 3.0, delta-spark_<scala> from 3.0.
 ARG DELTA_ARTIFACT=delta-core_2.12
 ARG DELTA_VERSION=2.2.0
 ARG POSTGRES_JDBC_VERSION=42.7.13
@@ -16,8 +15,7 @@ ADD --chmod=a+r \
     "https://repo1.maven.org/maven2/org/postgresql/postgresql/${POSTGRES_JDBC_VERSION}/postgresql-${POSTGRES_JDBC_VERSION}.jar" \
     ${SPARK_HOME}/jars/
 
-# Spark's default warehouse dir is relative to the working directory; keep it
-# at /spark-warehouse, where docker-compose mounts its volume.
+# Spark's warehouse dir is relative to the workdir; /spark-warehouse is the volume.
 WORKDIR /
 
 ENTRYPOINT ["spark-submit"]
