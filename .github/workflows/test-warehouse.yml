@@ -259,6 +259,11 @@ jobs:
         run: |
           docker compose up -d --wait vertica
 
+      - name: Show warehouse service logs
+        if: failure()
+        working-directory: ${{ env.E2E_DBT_PROJECT_DIR }}
+        run: docker compose logs --no-color
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:

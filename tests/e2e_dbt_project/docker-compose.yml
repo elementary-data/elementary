@@ -251,6 +251,12 @@ services:
     build:
       context: ./docker/spark
       dockerfile: Dockerfile
+      # Not 3.5 until CORE-1558 lands (PyHive fails on its DDL results); not
+      # v3.3.2, whose JDK 11.0.16 crashes on GitHub's runners (JDK-8287073).
+      args:
+        SPARK_IMAGE: apache/spark:3.3.3
+        DELTA_ARTIFACT: delta-core_2.12
+        DELTA_VERSION: 2.2.0
     ports:
       - "10000:10000"
       - "4040:4040"
@@ -261,7 +267,18 @@ services:
       --class org.apache.spark.sql.hive.thriftserver.HiveThriftServer2
       --name Thrift JDBC/ODBC Server
     healthcheck:
-      test: ["CMD-SHELL", "nc -z localhost 10000"]
+      test:
+        [
+          "CMD",
+          "beeline",
+          "-u",
+          "jdbc:hive2://localhost:10000",
+          "-n",
+          "dbt",
+          "--silent=true",
+          "-e",
+          "select 1",
+        ]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -269,11 +286,9 @@ services:
     user: "0"
     volumes:
       - spark-warehouse:/spark-warehouse/
-      - ./docker/spark/hive-site.xml:/usr/spark/conf/hive-site.xml
-      - ./docker/spark/spark-defaults.conf:/usr/spark/conf/spark-defaults.conf
+      - ./docker/spark/hive-site.xml:/opt/spark/conf/hive-site.xml
+      - ./docker/spark/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
       - ./data:/seed-data:ro
-    environment:
-      - WAIT_FOR=spark-hive-metastore:5432
 
   spark-hive-metastore:
     image: postgres:15-alpine
@@ -284,7 +299,11 @@ services:
       - POSTGRES_PASSWORD=${SPARK_METASTORE_PASSWORD:-dbt}
       - POSTGRES_DB=metastore
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${SPARK_METASTORE_USER:-dbt}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -h 127.0.0.1 -U ${SPARK_METASTORE_USER:-dbt} -d metastore",
+        ]
       interval: 5s
       timeout: 5s
       retries: 10
