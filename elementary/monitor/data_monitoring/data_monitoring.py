@@ -3,10 +3,10 @@ from typing import Any, Dict, Optional, cast
 
 from packaging import version
 
-from elementary.clients.dbt.factory import create_dbt_runner
+from elementary.clients.dbt.factory import create_dbt_runner_from_config
 from elementary.config.config import Config
-from elementary.monitor import dbt_project_utils
 from elementary.monitor.data_monitoring.schema import FiltersSchema, WarehouseInfo
+from elementary.monitor.dbt_project_utils import CLI_DBT_PROJECT_PATH
 from elementary.tracking.anonymous_tracking import AnonymousTracking
 from elementary.tracking.tracking_interface import Tracking
 from elementary.utils import package
@@ -58,12 +58,9 @@ class DataMonitoring:
         self.selector_filter = selector_filter
 
     def _init_internal_dbt_runner(self):
-        internal_dbt_runner = create_dbt_runner(
-            dbt_project_utils.CLI_DBT_PROJECT_PATH,
-            self.config.profiles_dir,
-            self.config.profile_target,
-            env_vars=self.config.env_vars,
-            run_deps_if_needed=self.config.run_dbt_deps_if_needed,
+        internal_dbt_runner = create_dbt_runner_from_config(
+            self.config,
+            CLI_DBT_PROJECT_PATH,
             force_dbt_deps=self.force_update_dbt_package,
         )
         return internal_dbt_runner
