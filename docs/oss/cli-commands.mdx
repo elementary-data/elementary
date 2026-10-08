@@ -122,6 +122,15 @@ Here is a list of all the available options:
 -d, --days-back INTEGER
 ```
 
+- **dbt vars:**
+  Pass [vars](https://docs.getdbt.com/docs/build/project-variables) to the internal dbt project that `edr` runs, as a YAML mapping.
+  Supported by `edr monitor`, `edr report`, `edr send-report`, `edr monitor debug` and `edr run-operation upload-source-freshness`.
+  If you also pass `--days-back`, it takes precedence over a `days_back` var.
+
+```shell
+--dbt-vars '{query_max_size: 1000000}'
+```
+
 - **Report file path:**
   The local file path where Elementary's report will be saved.
 
