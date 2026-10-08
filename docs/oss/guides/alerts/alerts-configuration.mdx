@@ -9,6 +9,21 @@ import AlertsCodeConfiguration from '/snippets/guides/alerts-code-configuration.
 
 <AlertsCodeConfiguration />
 
+## Tagging owners and subscribers on Slack
+
+When you send alerts with a [Slack token](/oss/deployment-and-configuration/slack#token-vs-webhook), Elementary tags
+the owners and subscribers of each alert. A value that starts with `@` is matched, case-insensitively, in this order:
+
+1. A Slack user whose email address starts with the handle (`@jessica.jones` tags jessica.jones@marvel.com).
+2. A Slack user whose display name matches the handle.
+3. A Slack user group whose handle matches (`@data-team` tags the `data-team` group). This requires the
+   `usergroups:read` scope.
+
+You can also use a full email address, without `@` (`jessica.jones@marvel.com`).
+
+If several users match, full members take precedence over guests. Bots and deactivated users are ignored.
+A handle that doesn't match anything is shown as plain text, and the alert is still sent.
+
 ## Alerts CLI flags
 
 <Warning>
