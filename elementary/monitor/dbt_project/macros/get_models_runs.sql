@@ -5,6 +5,7 @@
                 *,
                 row_number() over (partition by unique_id order by generated_at desc) as invocations_rank_index
             from {{ ref('elementary', 'model_run_results') }}
+            where {{ elementary_cli.days_back_filter('generated_at', days_back, partition_column='created_at', column_is_string=true) }}
         )
 
         select
@@ -22,9 +23,8 @@
             case when invocations_rank_index = 1 then compiled_code else NULL end as compiled_code,
             generated_at
         from model_runs
-        where {{ elementary.edr_datediff(elementary.edr_cast_as_timestamp('generated_at'), elementary.edr_current_timestamp(), 'day') }} < {{ days_back }}
         {% if exclude_elementary %}
-          and unique_id not like 'model.elementary.%'
+          where unique_id not like 'model.elementary.%'
         {% endif %}
         order by generated_at
     {% endset %}
