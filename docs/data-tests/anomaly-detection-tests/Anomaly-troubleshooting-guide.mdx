@@ -177,7 +177,7 @@ anomaly tests on partitioned tables scan the whole table, and tables with `requi
 
 To use plain timestamp casts again:
 
-1. Fix the nanosecond values that earlier versions already uploaded:
+1. If needed, fix the nanosecond values that earlier versions already uploaded:
 
    ```shell
    dbt run-operation elementary.fix_nanosecond_timing_values
@@ -185,6 +185,10 @@ To use plain timestamp casts again:
 
    This updates the timing columns of `dbt_run_results` and `dbt_source_freshness_results` in place, truncating them
    to microseconds. It scans both tables, and only needs to run once.
+
+   You can skip this step if no rows with nanosecond values are within the time range that your reports and alerts
+   read (`days_back`). For example, if you upgraded to 0.26.1 longer ago than that time range, the older rows are
+   never read. The same is true if you didn't run an earlier Elementary version with dbt Fusion or dbt Core 1.11.
 
 2. Disable the truncation:
 
@@ -194,8 +198,8 @@ To use plain timestamp casts again:
    ```
 
 <Warning>
-  Run `fix_nanosecond_timing_values` before you set `bigquery_truncate_nanosecond_timestamps` to `false`. Otherwise,
-  queries that read rows with nanosecond values fail.
+  If rows with nanosecond values are within that time range, run `fix_nanosecond_timing_values` before you set
+  `bigquery_truncate_nanosecond_timestamps` to `false`. Otherwise, queries that read those rows fail.
 </Warning>
 
 </Accordion>
