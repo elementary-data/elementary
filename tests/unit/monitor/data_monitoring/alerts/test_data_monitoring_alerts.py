@@ -9,12 +9,17 @@ from elementary.messages.messaging_integrations.slack_web import (
 from elementary.monitor.alerts.model_alert import ModelAlertModel
 from elementary.monitor.alerts.source_freshness_alert import SourceFreshnessAlertModel
 from elementary.monitor.alerts.test_alert import TestAlertModel
+from elementary.monitor.data_monitoring.schema import ResourceType
 from elementary.monitor.fetchers.alerts.schema.alert_data import (
     ModelAlertDataSchema,
     SourceFreshnessAlertDataSchema,
     TestAlertDataSchema,
 )
-from elementary.monitor.fetchers.alerts.schema.pending_alerts import PendingAlertSchema
+from elementary.monitor.fetchers.alerts.schema.pending_alerts import (
+    AlertStatus,
+    AlertTypes,
+    PendingAlertSchema,
+)
 from tests.mocks.api.alerts_api_mock import MockAlertsAPI
 from tests.mocks.data_monitoring.alerts.data_monitoring_alerts_mock import (
     DataMonitoringAlertsMock,
@@ -240,3 +245,83 @@ def test_format_alerts(data_monitoring_alerts_mock: DataMonitoringAlertsMock):
 @pytest.fixture
 def data_monitoring_alerts_mock() -> DataMonitoringAlertsMock:
     return DataMonitoringAlertsMock()
+
+
+def _skipped_test_alert() -> PendingAlertSchema:
+    return PendingAlertSchema(
+        id="alert_id_6",
+        alert_class_id="test_id_6.column.generic",
+        type=AlertTypes.TEST,
+        detected_at=datetime(2022, 10, 10, 10, 0, 0),
+        created_at=datetime(2022, 10, 10, 10, 0, 0),
+        updated_at=datetime(2022, 10, 10, 10, 0, 0),
+        status=AlertStatus.PENDING,
+        data=TestAlertDataSchema(
+            id="6",
+            alert_class_id="test_id_6.column.generic",
+            model_unique_id="model_id_3",
+            test_unique_id="test_id_6",
+            test_name="test_6",
+            tags=["best_test"],
+            model_meta=dict(owner='["jeff"]'),
+            status="skipped",
+            elementary_unique_id="elementary.model_id_3.test_id_6.9cf2f5f6ad.None.generic",
+            detected_at=datetime(2022, 10, 10, 10, 0, 0),
+            database_name="test_db",
+            schema_name="test_schema",
+            table_name="table",
+            test_type="dbt_test",
+            test_sub_type="generic",
+            test_results_description="a mock alert",
+            test_results_query="select * from table",
+            test_short_name="short",
+            severity="ERROR",
+            resource_type=ResourceType.TEST,
+        ),
+    )
+
+
+def test_run_alerts_marks_filtered_out_alerts_as_skipped(
+    data_monitoring_alerts_mock: DataMonitoringAlertsMock, monkeypatch
+):
+    data_monitoring_alerts_mock.should_populate_data = False
+    skipped_test_alert = _skipped_test_alert()
+    original_query_pending_alerts = (
+        data_monitoring_alerts_mock.alerts_api.alerts_fetcher.query_pending_alerts
+    )
+
+    def query_pending_alerts_with_skipped_alert(*args, **kwargs):
+        return [
+            *original_query_pending_alerts(*args, **kwargs),
+            skipped_test_alert,
+        ]
+
+    monkeypatch.setattr(
+        data_monitoring_alerts_mock.alerts_api.alerts_fetcher,
+        "query_pending_alerts",
+        query_pending_alerts_with_skipped_alert,
+    )
+
+    sent_alert_ids = []
+    skipped_alert_ids = []
+
+    def mock_send_alerts(alerts):
+        sent_alert_ids.extend(alert.id for alert in alerts)
+
+    def mock_skip_alerts(alerts):
+        skipped_alert_ids.extend(alert.id for alert in alerts)
+
+    monkeypatch.setattr(data_monitoring_alerts_mock, "_send_alerts", mock_send_alerts)
+    monkeypatch.setattr(
+        data_monitoring_alerts_mock.alerts_api, "skip_alerts", mock_skip_alerts
+    )
+
+    fetched_alert_ids = {
+        alert.id for alert in data_monitoring_alerts_mock._fetch_data(days_back=1)
+    }
+
+    data_monitoring_alerts_mock.run_alerts(days_back=1)
+
+    terminal_alert_ids = set(sent_alert_ids) | set(skipped_alert_ids)
+    assert fetched_alert_ids == terminal_alert_ids
+    assert "alert_id_6" in skipped_alert_ids
