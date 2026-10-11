@@ -162,7 +162,8 @@ source virtualenv_elementary/bin/activate
 python3 -m ensurepip --upgrade
 python3 -m pip install --upgrade pip
 python3 -m pip install elementary-data
-python3 -m pip install elementary-data[<adapter>]
+## Only if you use dbt Core 1.x (not needed for dbt v2 / Fusion):
+python3 -m pip install 'elementary-data[dbt1-<adapter>]'
 ```
 
 </Accordion>
