@@ -79,6 +79,21 @@ vars:
 The size of the queries depends on the amount of models/tests executed in the run.
 The time the run results adds to the invocation shouldn't be significant.
 
+## Long invocations on BigQuery
+
+Elementary stores test results in temporary tables during a dbt invocation, and the `on-run-end` hooks read them when
+the invocation ends. On BigQuery, these tables expire after 1 hour. If your dbt invocation runs longer than that, the
+tables can expire before the hooks read them, and the hooks fail.
+
+To keep the tables longer, set their expiration in hours:
+
+```yaml dbt_project.yml
+vars:
+  temp_table_expiration_hours: 6
+```
+
+This applies to all temporary tables Elementary creates on BigQuery, not only test tables. Other warehouses ignore it.
+
 ## Can I disable the `on-run-end` hooks?
 
 Yes, but note that this may cause missing results and/or outdated metadata in Elementary report and alerts.

@@ -158,6 +158,31 @@ Failed test row samples. Each row contains a sample of data that caused a test t
 - `created_at` (timestamp) - When the record was created.
 </Accordion>
 
+<Accordion title="Partitioning of elementary_test_results and test_result_rows on BigQuery">
+
+Starting with version 0.26.1, `elementary_test_results` and `test_result_rows` are partitioned by day on
+`created_at`, like `dbt_run_results` and `dbt_invocations`. This reduces the data scanned when Elementary reads
+recent test results.
+
+dbt only applies partitioning when it creates a table, so tables created by earlier versions keep their current
+layout and keep working as before. To partition an existing table and keep its rows, rebuild it while no dbt
+invocation is running:
+
+```sql
+create table `<project>.<elementary_schema>.elementary_test_results__partitioned`
+partition by timestamp_trunc(created_at, day)
+as select * from `<project>.<elementary_schema>.elementary_test_results`;
+```
+
+Then check that the row counts match, drop the original table, and rename the new table to `elementary_test_results`.
+Repeat for `test_result_rows`.
+
+<Warning>
+  Don't use a full refresh to partition these tables. They hold your test history, and a full refresh deletes it.
+</Warning>
+
+</Accordion>
+
 ### dbt_source_freshness_results
 
 _Incremental model_
