@@ -56,6 +56,26 @@ Elementary prioritizes configuration in the following order:
 
 <Subscribers />
 
+#### Tagging owners and subscribers on Slack
+
+Elementary tags the owners and subscribers of each alert on Slack. A value that starts with `@` is matched,
+case-insensitively, in this order:
+
+1. A Slack user whose email address starts with the handle (`@jessica.jones` tags jessica.jones@marvel.com).
+2. A Slack user whose display name matches the handle.
+3. A Slack user group whose handle matches (`@data-team` tags the `data-team` group). This requires the Slack app to
+   have the `usergroups:read` scope.
+
+You can also use a full email address, without `@` (`jessica.jones@marvel.com`).
+
+If several users match, full members take precedence over guests. Bots and deactivated users are ignored.
+A handle that doesn't match anything is shown as plain text, and the alert is still sent.
+
+<Info>
+  With the Elementary CLI, tagging requires a [Slack token](/oss/deployment-and-configuration/slack#token-vs-webhook).
+  A Slack webhook posts the handles as plain text.
+</Info>
+
 #### Test description
 
 <Description />
