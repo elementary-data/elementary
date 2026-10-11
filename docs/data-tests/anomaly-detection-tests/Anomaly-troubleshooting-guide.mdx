@@ -164,3 +164,38 @@ If you change it after executing elementary tests, you will need to run a full r
 
 If you want the Elementary UI to show data for a longer period of time, use the days-back option of the CLI: **`edr report --days-back 45`**
 </Accordion>
+
+<Accordion title="BigQuery: anomaly tests scan the whole table or fail on require_partition_filter">
+
+dbt Fusion and dbt Core 1.11 record run timings (such as `execute_started_at`) with nanosecond precision, which
+BigQuery timestamps don't support. Starting with version 0.26.1, Elementary truncates these values to microseconds
+when it uploads them. Rows uploaded by earlier versions may still contain nanosecond values, so by default Elementary
+also truncates timestamps whenever it casts them on BigQuery.
+
+The truncation converts each timestamp to a string and back, so BigQuery can't prune partitions on it. As a result,
+anomaly tests on partitioned tables scan the whole table, and tables with `require_partition_filter` reject the query.
+
+To use plain timestamp casts again:
+
+1. Fix the nanosecond values that earlier versions already uploaded:
+
+   ```shell
+   dbt run-operation elementary.fix_nanosecond_timing_values
+   ```
+
+   This updates the timing columns of `dbt_run_results` and `dbt_source_freshness_results` in place, truncating them
+   to microseconds. It scans both tables, and only needs to run once.
+
+2. Disable the truncation:
+
+   ```yaml dbt_project.yml
+   vars:
+     bigquery_truncate_nanosecond_timestamps: false
+   ```
+
+<Warning>
+  Run `fix_nanosecond_timing_values` before you set `bigquery_truncate_nanosecond_timestamps` to `false`. Otherwise,
+  queries that read rows with nanosecond values fail.
+</Warning>
+
+</Accordion>
