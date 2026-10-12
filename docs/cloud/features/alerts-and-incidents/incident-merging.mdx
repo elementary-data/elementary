@@ -27,9 +27,23 @@ After merging:
 
 ## Auto-merge rules
 
-Auto-merge rules let Elementary automatically group related incidents as they are created, without manual intervention.
+Auto-merge rules let Elementary automatically group related failures into incidents without manual intervention. Each rule can be enabled or disabled independently for an environment.
 
 To configure auto-merge rules, click the **gear icon** on the incidents page to open the settings menu.
+
+### Asset run errors
+
+When enabled, asset runs that fail with the same error can be grouped into one incident, even when there are no freshness issues. For example, model runs that fail because of the same missing table can share an incident.
+
+Related freshness issues can join that incident when they open within one day of an active asset run failure and the affected assets are connected through lineage. If a freshness issue is equally close to multiple eligible incidents, it stays separate.
+
+### Tests connected by lineage
+
+When enabled, failed tests of the same type on connected upstream or downstream assets and columns can be grouped into one incident.
+
+### Similar test errors
+
+When enabled, failed tests can be grouped when they share the same error, such as a missing table, or have similar, informative error messages. Generic messages alone do not cause tests to be grouped. This rule applies to test errors; asset run errors use the **Asset run errors** rule.
 
 ### Freshness issues
 
