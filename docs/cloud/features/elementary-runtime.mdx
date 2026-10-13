@@ -19,7 +19,7 @@ Elementary Runtime is a small service that runs in your network. It uses an outb
   <img src="/pics/cloud/elementary-runtime-architecture.webp" alt="Elementary Runtime architecture: the runtime pulls pre-approved tasks from Elementary Cloud over outbound HTTPS, runs them locally against data systems in the customer environment, and returns bounded results to Cloud" />
 </Frame>
 
-Elementary Cloud remains the control plane. It decides what should run, prepares the SQL, schedules tests, interprets results, and manages incidents. Elementary Runtime is the data plane for supported operations. It checks and executes the SQL, then returns only the result needed by the Cloud workflow.
+Elementary Cloud remains the control plane. It decides what should run, prepares the SQL, schedules tests, interprets results, and manages incidents. Elementary Runtime is the data plane for supported operations. It checks and executes the SQL, then returns only the result needed by the Cloud workflow. For sensitive samples, it can write the rows to your object storage and return only the object location.
 
 ## Why use Elementary Runtime
 
@@ -31,7 +31,7 @@ Elementary Cloud remains the control plane. It decides what should run, prepares
     The runtime checks SQL before execution and enforces local limits for time, concurrency, and result size.
   </Card>
   <Card title="Control what leaves your network" icon="filter">
-    Queries return bounded results. Row samples can be limited or disabled for sensitive workloads.
+    Queries return bounded results. Row samples can be limited, stored in your object storage, or disabled for sensitive workloads.
   </Card>
   <Card title="Keep the managed Cloud experience" icon="cloud">
     Elementary Cloud continues to handle scheduling, test results, health visibility, incidents, and alerts.
@@ -42,7 +42,7 @@ Elementary Cloud remains the control plane. It decides what should run, prepares
 
 <CardGroup cols={2}>
   <Card title="Configuration" icon="sliders" href="/cloud/features/elementary-runtime/configuration">
-    Configuration file reference, local limits, secrets, and least-privilege warehouse roles.
+    Configuration file reference, local limits, secrets, object storage, and least-privilege warehouse roles.
   </Card>
   <Card title="Deployment" icon="rocket" href="/cloud/features/elementary-runtime/deployment">
     Run the runtime as a Docker service or on Kubernetes with the Helm chart.
