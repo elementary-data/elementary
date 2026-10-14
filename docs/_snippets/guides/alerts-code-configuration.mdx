@@ -172,6 +172,17 @@ tests:
 
 </CodeGroup>
 
+Source freshness alerts read the same `description` key from the source's `meta`, and fall back to the default freshness description when it isn't set.
+
+```yml source
+sources:
+  - name: my_source
+    tables:
+      - name: my_table
+        meta:
+          description: "This is the source freshness description"
+```
+
 #### Tags
 
 You can use [tags](https://docs.getdbt.com/reference/resource-configs/tags) to provide context to your alerts.
