@@ -8,7 +8,7 @@ class MessageIntegrationReplyNotSupportedError(MessagingIntegrationError):
         super().__init__(f"{integration_name} does not support replying to messages")
 
 
-class MessagingIntegrationChannelNotFoundError(MessagingIntegrationError):
+class MessagingIntegrationDestinationNotFoundError(MessagingIntegrationError):
     def __init__(self, channel_name: str):
         self.channel_name = channel_name
         super().__init__(

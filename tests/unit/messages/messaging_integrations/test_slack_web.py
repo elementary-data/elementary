@@ -6,7 +6,7 @@ from slack_sdk.errors import SlackApiError
 from elementary.messages.blocks import LineBlock, LinesBlock, MentionBlock
 from elementary.messages.message_body import MessageBody
 from elementary.messages.messaging_integrations.exceptions import (
-    MessagingIntegrationChannelNotFoundError,
+    MessagingIntegrationDestinationNotFoundError,
     MessagingIntegrationError,
 )
 from elementary.messages.messaging_integrations.slack_web import (
@@ -247,7 +247,7 @@ def test_send_raises_channel_not_found_error():
     integration.client.chat_postMessage.side_effect = SlackApiError(
         "error", MagicMock(data={"error": "channel_not_found"})
     )
-    with pytest.raises(MessagingIntegrationChannelNotFoundError) as exc_info:
+    with pytest.raises(MessagingIntegrationDestinationNotFoundError) as exc_info:
         integration.send_message("alerts", HANDLE_MENTION_BODY)
     assert exc_info.value.channel_name == "alerts"
     assert isinstance(exc_info.value, MessagingIntegrationError)
@@ -260,4 +260,4 @@ def test_send_raises_generic_error_for_other_slack_errors():
     )
     with pytest.raises(MessagingIntegrationError) as exc_info:
         integration.send_message("alerts", HANDLE_MENTION_BODY)
-    assert not isinstance(exc_info.value, MessagingIntegrationChannelNotFoundError)
+    assert not isinstance(exc_info.value, MessagingIntegrationDestinationNotFoundError)

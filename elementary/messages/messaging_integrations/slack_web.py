@@ -19,7 +19,7 @@ from elementary.messages.messaging_integrations.base_messaging_integration impor
     MessageSendResult,
 )
 from elementary.messages.messaging_integrations.exceptions import (
-    MessagingIntegrationChannelNotFoundError,
+    MessagingIntegrationDestinationNotFoundError,
     MessagingIntegrationError,
 )
 from elementary.tracking.tracking_interface import Tracking
@@ -142,7 +142,7 @@ class SlackWebMessagingIntegration(
             self._join_channel(channel_id=channel_id)
             logger.info(f"Joined channel {channel_name}")
         elif err_type == "channel_not_found":
-            raise MessagingIntegrationChannelNotFoundError(channel_name)
+            raise MessagingIntegrationDestinationNotFoundError(channel_name)
         raise MessagingIntegrationError(
             f"Failed to send a message to channel - {channel_name}"
         )
