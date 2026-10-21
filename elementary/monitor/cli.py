@@ -779,7 +779,7 @@ def send_report(
             project_name=project_name,
             remote_file_path=bucket_file_path,
             disable_html_attachment=(disable == "html_attachment"),
-            include_description=(include == "description"),
+            include_description=(include in ("description", "descriptions")),
         )
 
         anonymous_tracking.track_cli_end(
