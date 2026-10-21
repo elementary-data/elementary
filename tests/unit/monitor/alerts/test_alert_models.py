@@ -116,15 +116,20 @@ class TestSourceFreshnessAlertModel:
         alert = _make_source_freshness_alert(source_name="raw", identifier="orders")
         assert alert.concise_name == "raw.orders"
 
-    # dbt-core writes lowercase statuses, dbt Fusion capitalized ones.
     @pytest.mark.parametrize("status", ["runtime error", "Runtime Error"])
     def test_runtime_error_status_is_case_insensitive(self, status: str) -> None:
+        """dbt-core writes "runtime error", dbt Fusion "Runtime Error": both are runtime errors."""
         alert = _make_source_freshness_alert(original_status=status)
         assert alert.is_runtime_error
+        assert (
+            alert.error_message
+            == "Failed to calculate the source freshness\n```None```"
+        )
         assert alert.summary.startswith("Failed to calculate the source freshness")
 
     @pytest.mark.parametrize("status", ["error", "Error", "warn", "Pass"])
     def test_other_statuses_are_not_runtime_errors(self, status: str) -> None:
+        """Other statuses, in either casing, get the freshness-exceeded summary."""
         alert = _make_source_freshness_alert(original_status=status)
         assert not alert.is_runtime_error
         assert alert.summary.startswith("Freshness exceeded the acceptable times")
