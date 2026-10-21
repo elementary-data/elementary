@@ -142,7 +142,9 @@ class SlackWebMessagingIntegration(
             self._join_channel(channel_id=channel_id)
             logger.info(f"Joined channel {channel_name}")
         elif err_type == "channel_not_found":
-            raise MessagingIntegrationDestinationNotFoundError(channel_name)
+            raise MessagingIntegrationDestinationNotFoundError(
+                f"Channel {channel_name} was not found by the Elementary app. Please add the app to the channel."
+            )
         raise MessagingIntegrationError(
             f"Failed to send a message to channel - {channel_name}"
         )

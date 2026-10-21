@@ -249,7 +249,7 @@ def test_send_raises_channel_not_found_error():
     )
     with pytest.raises(MessagingIntegrationDestinationNotFoundError) as exc_info:
         integration.send_message("alerts", HANDLE_MENTION_BODY)
-    assert exc_info.value.channel_name == "alerts"
+    assert "alerts" in str(exc_info.value)
     assert isinstance(exc_info.value, MessagingIntegrationError)
 
 

@@ -9,8 +9,4 @@ class MessageIntegrationReplyNotSupportedError(MessagingIntegrationError):
 
 
 class MessagingIntegrationDestinationNotFoundError(MessagingIntegrationError):
-    def __init__(self, channel_name: str):
-        self.channel_name = channel_name
-        super().__init__(
-            f"Channel {channel_name} was not found by the Elementary app. Please add the app to the channel."
-        )
+    pass
