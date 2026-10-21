@@ -5,6 +5,10 @@ from slack_sdk.errors import SlackApiError
 
 from elementary.messages.blocks import LineBlock, LinesBlock, MentionBlock
 from elementary.messages.message_body import MessageBody
+from elementary.messages.messaging_integrations.exceptions import (
+    MessagingIntegrationDestinationNotFoundError,
+    MessagingIntegrationError,
+)
 from elementary.messages.messaging_integrations.slack_web import (
     SlackWebMessageContext,
     SlackWebMessagingIntegration,
@@ -236,3 +240,24 @@ def test_resolve_user_id_when_users_list_cursor_does_not_advance():
     }
     assert integration.resolve_user_id("@jessica.jones") == "U_JESSICA"
     assert integration.client.users_list.call_count == 2
+
+
+def test_send_raises_channel_not_found_error():
+    integration = _build_integration()
+    integration.client.chat_postMessage.side_effect = SlackApiError(
+        "error", MagicMock(data={"error": "channel_not_found"})
+    )
+    with pytest.raises(MessagingIntegrationDestinationNotFoundError) as exc_info:
+        integration.send_message("alerts", HANDLE_MENTION_BODY)
+    assert "alerts" in str(exc_info.value)
+    assert isinstance(exc_info.value, MessagingIntegrationError)
+
+
+def test_send_raises_generic_error_for_other_slack_errors():
+    integration = _build_integration()
+    integration.client.chat_postMessage.side_effect = SlackApiError(
+        "error", MagicMock(data={"error": "is_archived"})
+    )
+    with pytest.raises(MessagingIntegrationError) as exc_info:
+        integration.send_message("alerts", HANDLE_MENTION_BODY)
+    assert not isinstance(exc_info.value, MessagingIntegrationDestinationNotFoundError)
