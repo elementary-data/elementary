@@ -55,13 +55,15 @@ def _make_model_alert(
 
 
 def _make_source_freshness_alert(
-    source_name: str = "my_source", identifier: str = "my_table"
+    source_name: str = "my_source",
+    identifier: str = "my_table",
+    original_status: str = "fail",
 ) -> SourceFreshnessAlertModel:
     return SourceFreshnessAlertModel(
         id="id",
         source_name=source_name,
         identifier=identifier,
-        original_status="fail",
+        original_status=original_status,
         path="models/src.yml",
         error=None,
         alert_class_id="acid",
@@ -113,6 +115,19 @@ class TestSourceFreshnessAlertModel:
     def test_concise_name_is_source_dot_identifier(self) -> None:
         alert = _make_source_freshness_alert(source_name="raw", identifier="orders")
         assert alert.concise_name == "raw.orders"
+
+    # dbt-core writes lowercase statuses, dbt Fusion capitalized ones.
+    @pytest.mark.parametrize("status", ["runtime error", "Runtime Error"])
+    def test_runtime_error_status_is_case_insensitive(self, status: str) -> None:
+        alert = _make_source_freshness_alert(original_status=status)
+        assert alert.is_runtime_error
+        assert alert.summary.startswith("Failed to calculate the source freshness")
+
+    @pytest.mark.parametrize("status", ["error", "Error", "warn", "Pass"])
+    def test_other_statuses_are_not_runtime_errors(self, status: str) -> None:
+        alert = _make_source_freshness_alert(original_status=status)
+        assert not alert.is_runtime_error
+        assert alert.summary.startswith("Freshness exceeded the acceptable times")
 
 
 class TestAlertModelDetectedAtTimezone:
