@@ -10,7 +10,7 @@ We'll take a few of your key assets and run them through the core reliability st
 
 [ ] In the [Catalog](/cloud/features/collaboration-and-communication/catalog), identify and mark three [critical assets](/cloud/features/data-governance/critical_assets)  
 [ ] Add or update [descriptions, tags, and owners](/cloud/features/data-governance/manage-metadata) for these assets  
-[ ] Leverage the [Governance AI agent](/cloud/ai-agents/governance-agent) - Complete missing metadata based on project context and according to your instructions.  
+[ ] Use [AI Governance](/cloud/ai-agents/ai-governance) to complete missing metadata based on project context and according to your instructions.  
 [ ] View [end-to-end, column-level lineage](/cloud/features/data-lineage/lineage) for each critical asset
 
 ## Setup monitoring on critical assets
@@ -19,7 +19,7 @@ We'll take a few of your key assets and run them through the core reliability st
 
 [ ] Open the [Test Coverage](/cloud/features/data-tests/test-coverage-screen) view to understand existing coverage by dimension  
 [ ] [Add missing tests](/cloud/features/data-tests/data-tests-overview#test-configuration) such as freshness, volume, uniqueness, [anomaly detection](/data-tests/how-anomaly-detection-works), [schema changes](/data-tests/schema-tests/schema-changes) or custom logic  
-[ ] Leverage the [Test Recommendation AI agent](/cloud/ai-agents/test-recommendation-agent) for suggested tests based on patterns and lineage  
+[ ] Use [AI Test Coverage](/cloud/ai-agents/ai-test-coverage) for suggested tests based on patterns and lineage  
 [ ] For source monitoring: Elementary automatically adds ML-based [freshness](/cloud/features/anomaly-detection/automated-freshness) and [volume](/cloud/features/anomaly-detection/automated-volume) tests to all sources to catch pipeline and ingestion issues early
 
 ## Setup Alerts
@@ -35,7 +35,7 @@ We'll take a few of your key assets and run them through the core reliability st
 *Goal: Investigate and resolve issues quickly and confidently.*
 
 [ ] Triage: Review lineage and upstream failures alongside recent commits and dbt run history to understand what changed and what the issue is impacting  
-[ ] Use the [Triage & Resolution AI agent](/cloud/ai-agents/triage-resolution-agent) to run the investigation for you by analyzing lineage, failures, recent changes, and dependencies, and surfacing root causes  
+[ ] Use [AI Triage & Resolution](/cloud/ai-agents/ai-triage-resolution) to run the investigation for you by analyzing lineage, failures, recent changes, and dependencies, and surfacing root causes  
 [ ] Use the [Incidents](/cloud/features/alerts-and-incidents/incident-management) screen to manage issues collaboratively and keep track of everything that's currently open
 
 ## Optimize Performance
@@ -43,7 +43,7 @@ We'll take a few of your key assets and run them through the core reliability st
 *Goal: Meet your SLAs, improve run times, and ensure your pipelines operate efficiently.*
 
 [ ] Identify long-running tests and models using the [Performance pages](/cloud/features/performance-monitoring/performance-monitoring)  
-[ ] Use the [Optimization AI agent](/cloud/ai-agents/performance-cost-agent) to optimize queries by surfacing inefficiencies, suggesting improved SQL patterns, and identifying opportunities to reduce data scans or simplify logic
+[ ] Use [AI Performance & Cost](/cloud/ai-agents/ai-performance-cost) to optimize queries by surfacing inefficiencies, suggesting improved SQL patterns, and identifying opportunities to reduce data scans or simplify logic
 
 ## Measure Progress and Data Health
 
@@ -58,7 +58,7 @@ We'll take a few of your key assets and run them through the core reliability st
 
 [ ] Use the [Catalog](/cloud/features/collaboration-and-communication/catalog) to explore assets, their definitions, ownership, and current health status  
 [ ] Review [Lineage](/cloud/features/data-lineage/lineage) to see how the asset is built, what depends on it, and whether any upstream issues or test failures affect it  
-[ ] Use the [Discovery AI agent](/cloud/ai-agents/catalog-agent) to get clear explanations of the asset, how it's calculated, and any current reliability concerns
+[ ] Use [AI Catalog](/cloud/ai-agents/ai-catalog) to get clear explanations of the asset, how it's calculated, and any current reliability concerns
 
 ## Advanced: Use MCP to Extend Elementary Everywhere
 

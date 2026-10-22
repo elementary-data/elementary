@@ -7,31 +7,29 @@ badge: "Elementary Cloud"
 
 The Elementary AI Agent automates the workflows that slow data teams down most: finding coverage gaps, triaging incidents, fixing broken pipelines, enriching metadata, and optimizing query performance.
 
-It's a single agent backed by the [Context Engine](/cloud/ai-agents/context-engine) — a continuously updated knowledge layer built from every integration you connect. Because it has full context across your stack, it can act on incidents, recommend tests, and surface insights without requiring you to pull together the picture manually.
+It's one agent with a set of capabilities, each built for a specific workflow. You work with the same agent whether you open it from an incident, the catalog, the test coverage screen, or a Slack thread.
 
 Every action the agent takes goes through a pull request or requires explicit confirmation. Your team stays in control of what gets merged.
 
-## Specialized agents
-
-The Elementary AI Agent orchestrates a set of specialized agents, each focused on a specific workflow:
+## Capabilities
 
 <CardGroup cols={3}>
-  <Card title="Governance" icon="tags" href="/cloud/ai-agents/governance-agent">
+  <Card title="AI Governance" icon="tags" href="/cloud/ai-agents/ai-governance">
     Enriches metadata and enforces documentation standards across your data assets.
   </Card>
-  <Card title="Triage & Resolution" icon="toolbox" href="/cloud/ai-agents/triage-resolution-agent">
+  <Card title="AI Triage & Resolution" icon="toolbox" href="/cloud/ai-agents/ai-triage-resolution">
     Investigates incidents, traces root causes, and opens pull requests with proposed fixes.
   </Card>
-  <Card title="Test Recommendation" icon="vial-circle-check" href="/cloud/ai-agents/test-recommendation-agent">
+  <Card title="AI Test Coverage" icon="vial-circle-check" href="/cloud/ai-agents/ai-test-coverage">
     Identifies coverage gaps and recommends or generates tests for the right assets.
   </Card>
-  <Card title="Catalog" icon="book-open" href="/cloud/ai-agents/catalog-agent">
-    Surfaces data assets, their relationships, and usage context in natural language.
+  <Card title="AI Catalog" icon="book-open" href="/cloud/ai-agents/ai-catalog">
+    Finds the right data assets in natural language, with their relationships, usage, and health.
   </Card>
-  <Card title="Performance & Cost" icon="comments-dollar" href="/cloud/ai-agents/performance-cost-agent">
+  <Card title="AI Performance & Cost" icon="comments-dollar" href="/cloud/ai-agents/ai-performance-cost">
     Detects slow or expensive models, flags redundant tests that slow down the pipeline, and suggests optimizations.
   </Card>
-  <Card title="Code Review" icon="comment-code" href="/cloud/features/ci">
+  <Card title="AI Code Review" icon="comment-code" href="/cloud/features/ci">
     Reviews every pull request that touches your dbt models, with a summary comment and findings on the changed lines.
   </Card>
 </CardGroup>
@@ -39,7 +37,7 @@ The Elementary AI Agent orchestrates a set of specialized agents, each focused o
 ## Where you can use it
 
 <CardGroup cols={2}>
-  <Card title="Slack" icon="slack" href="/cloud/ai-agents/slack-agent">
+  <Card title="Slack agent" icon="slack" href="/cloud/ai-agents/slack-agent">
     Tag `@Elementary` in an alert thread to investigate without leaving Slack.
   </Card>
   <Card title="MCP connections" icon="plug" href="/cloud/ai-agents/mcp-connections">
@@ -47,13 +45,27 @@ The Elementary AI Agent orchestrates a set of specialized agents, each focused o
   </Card>
 </CardGroup>
 
+## What the agent works from
+
+The agent reasons over what Elementary already collects from your connected integrations, tied together through [lineage](/cloud/features/data-lineage/lineage):
+
+- **Lineage** across your warehouse, dbt models, BI dashboards, and code, down to the column level
+- **Test results and incidents** from dbt, Python, and cloud tests, including history and coverage gaps
+- **Run and performance history** for models, tests, and orchestration jobs, including execution time and cost
+- **Code changes** from your connected repository, such as recent commits and pull requests
+- **Metadata** such as descriptions, tags, owners, and table usage
+
+This is what lets the agent trace a failure back to the commit that caused it, or tell you which dashboards an incident affects, without you assembling the picture first.
+
+<Note>The more integrations you connect, the more the agent can see. Lineage between dbt and BI tools, for example, only works when both are connected. See [integrations](/cloud/integrations/elementary-integrations).</Note>
+
 ## How it works
 
-The agent runs on self-hosted models through Amazon Bedrock. No data leaves your environment, and all AI features are opt-in by default. Agent behavior is governed by AI policies you define — reviewable, adjustable, and aligned to your governance standards.
+The agent runs on self-hosted models through Amazon Bedrock. No data leaves your environment, and all AI features are opt-in by default. Agent behavior is governed by AI policies you define: reviewable, adjustable, and aligned to your governance standards.
 
 <CardGroup cols={2}>
-  <Card title="Context Engine" icon="brain-circuit" href="/cloud/ai-agents/context-engine">
-    Understand what the agent knows and how it knows it.
+  <Card title="AI credits" icon="coins" href="/cloud/ai-agents/ai-credits">
+    What uses AI credits, and how to get more from them.
   </Card>
   <Card title="AI Privacy Policy" icon="user-lock" href="/cloud/general/ai-privacy-policy">
     How AI features are secured and what data is accessed.

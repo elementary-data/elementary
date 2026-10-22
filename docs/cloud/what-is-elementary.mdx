@@ -22,7 +22,7 @@ From there, Elementary builds a connected model of your data and operates on it:
 - **Testing and monitoring.** Anomaly detection, no-code cloud tests, and tests defined in code, run in your pipeline or via [Elementary Runtime](/cloud/features/elementary-runtime) (optional).
 - **Column-level lineage across systems.** From source through the warehouse to BI dashboards and AI consumption.
 - **Incident management.** Related failures are grouped into one incident and routed by ownership, criticality, and impact, so one root problem does not turn into hundreds of alerts.
-- **AI agents and an MCP server.** Backed by a context model of your whole stack, they handle triage, test recommendations, governance, and root cause analysis, and expose data health to your own AI tools.
+- **An AI agent and an MCP server.** Working from the lineage, test results, and incidents across your whole stack, the agent handles triage, test coverage, governance, and root cause analysis, and the MCP server exposes data health to your own AI tools.
 
 <Note>Elementary does not require dbt. You connect your warehouse directly. If you do use dbt, the Elementary dbt package adds automatic collection of your dbt test and run results on top.</Note>
 
@@ -40,7 +40,7 @@ Use it to:
 - Give engineers, analysts, and stakeholders a shared view of what is trusted and what is broken
 - Run checks in your pipeline as code, or via [Elementary Runtime](/cloud/features/elementary-runtime) (optional)
 - Reduce alert noise by grouping and routing alerts based on criticality, ownership, and impact
-- Automate test recommendations, coverage, incident triage, and root cause analysis with AI agents
+- Automate test recommendations, coverage, incident triage, and root cause analysis with the Elementary AI Agent
 - Expose data health, lineage, and quality to your AI agents through the MCP server
 - Enforce governance and support AI readiness, with enterprise security like RBAC, SSO, and audit logs
 
