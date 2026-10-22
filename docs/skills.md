@@ -103,8 +103,8 @@ The [MCP server](https://docs.elementary-data.com/cloud/mcp/intro) exposes Eleme
 - When documenting [MCP tools](https://docs.elementary-data.com/cloud/mcp/mcp-tools), describe each tool's purpose and expected output precisely.
 - If a feature is accessible via MCP, note it on the feature page.
 
-### AI agents
-Elementary's [AI agents](https://docs.elementary-data.com/cloud/ai-agents/overview) ([governance](https://docs.elementary-data.com/cloud/ai-agents/governance-agent), [triage](https://docs.elementary-data.com/cloud/ai-agents/triage-resolution-agent), [test recommendation](https://docs.elementary-data.com/cloud/ai-agents/test-recommendation-agent), etc.) are documented individually. When writing or updating these pages:
+### AI agent capabilities
+The [Elementary AI Agent](https://docs.elementary-data.com/cloud/ai-agents/overview) is one agent with a set of capabilities ([AI Governance](https://docs.elementary-data.com/cloud/ai-agents/ai-governance), [AI Triage & Resolution](https://docs.elementary-data.com/cloud/ai-agents/ai-triage-resolution), [AI Test Coverage](https://docs.elementary-data.com/cloud/ai-agents/ai-test-coverage), etc.), each documented on its own page. Refer to them as capabilities of the agent, not as separate agents. When writing or updating these pages:
 - Describe what the agent *decides* and *acts on*, not just what it shows.
 - Include the trigger / entry point (which screen, which action).
 - Mention what the agent needs to work well (e.g. metadata coverage, policies set up).

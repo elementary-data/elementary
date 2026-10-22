@@ -1,6 +1,5 @@
 ---
 title: "Data Catalog"
-badge: "Context Engine"
 ---
 
 The Elementary Cloud catalog is a dynamic workspace for managing data assets. It combines your dbt models, sources, columns, tests, and metrics with metadata, test results, and ownership in one place.
@@ -40,9 +39,9 @@ You can view the data assets by their location in the DWH or in the dbt project,
 
 You can edit metadata directly in the catalog — model and column descriptions, owners, tags, and critical asset status — individually or in bulk. For example, assign an owner to multiple models at once or apply a shared tag to a group of assets. All edits are synced back to your dbt project as a pull request, so documentation stays version-controlled.
 
-You can also use the [Governance Agent](/cloud/ai-agents/governance-agent) to identify missing documentation, unowned assets, or inconsistent tags and generate suggested changes automatically.
+You can also use [AI Governance](/cloud/ai-agents/ai-governance) to identify missing documentation, unowned assets, or inconsistent tags and generate suggested changes automatically.
 
-<Card title="Governance Agent" icon="tags" href="/cloud/ai-agents/governance-agent" horizontal="true">
+<Card title="AI Governance" icon="tags" href="/cloud/ai-agents/ai-governance" horizontal="true">
   Identify metadata gaps and generate descriptions, tags, and ownership assignments automatically.
 </Card>
 
@@ -70,10 +69,10 @@ View upstream and downstream dependencies for each dataset, and export the full 
 <img src="https://res.cloudinary.com/dvmtceykh/image/upload/v1740576976/ec20159d-7d83-4f88-8cc3-c0f9d539d9d2.png" alt="Lineage export" />
 
 ### Table usage
-See how often each table is queried in production over a rolling 30-day window, compare usage at a glance from the **Metadata** tab, and hover for percentile rank, query volume, and unique users. Usage is also available as context to Elementary’s AI agents. Read more in [Table usage](/cloud/features/table-usage).
+See how often each table is queried in production over a rolling 30-day window, compare usage at a glance from the **Metadata** tab, and hover for percentile rank, query volume, and unique users. Usage is also available to the Elementary AI Agent. Read more in [Table usage](/cloud/features/table-usage).
 
-### AI Agents for Discovery and Governance
-Elementary includes two agents that use the catalog to support your team:
-- The [Catalog agent](/cloud/ai-agents/catalog-agent) helps users find relevant models, columns, or metrics using natural language. This is especially helpful for new team members or business users who are less familiar with your dbt structure.
-- The [Governance agent](/cloud/ai-agents/governance-agent) identifies missing documentation, unowned assets, or inconsistent tags. It surfaces these issues automatically and can suggest actions to improve coverage.
-These agents run continuously and help keep the catalog useful and complete without requiring constant manual work.
+### AI Catalog and AI Governance
+Two capabilities of the Elementary AI Agent use the catalog to support your team:
+- [AI Catalog](/cloud/ai-agents/ai-catalog) helps users find relevant models, columns, or metrics using natural language. This is especially helpful for new team members or business users who are less familiar with your dbt structure.
+- [AI Governance](/cloud/ai-agents/ai-governance) identifies missing documentation, unowned assets, or inconsistent tags. It surfaces these issues automatically and can suggest actions to improve coverage.
+Both run continuously and help keep the catalog useful and complete without requiring constant manual work.

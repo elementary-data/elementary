@@ -40,12 +40,11 @@
             "group": "Elementary AI Agent",
             "pages": [
               "cloud/ai-agents/overview",
-              "cloud/ai-agents/context-engine",
-              "cloud/ai-agents/governance-agent",
-              "cloud/ai-agents/triage-resolution-agent",
-              "cloud/ai-agents/test-recommendation-agent",
-              "cloud/ai-agents/catalog-agent",
-              "cloud/ai-agents/performance-cost-agent",
+              "cloud/ai-agents/ai-governance",
+              "cloud/ai-agents/ai-triage-resolution",
+              "cloud/ai-agents/ai-test-coverage",
+              "cloud/ai-agents/ai-catalog",
+              "cloud/ai-agents/ai-performance-cost",
               "cloud/features/ci",
               "cloud/ai-agents/slack-agent",
               "cloud/ai-agents/mcp-connections",
@@ -934,6 +933,34 @@
     {
       "source": "/cloud/features/anomaly-detection/monitor-dwh-assets",
       "destination": "/cloud/environments"
+    },
+    {
+      "source": "/cloud/ai-agents/context-engine",
+      "destination": "/cloud/ai-agents/overview"
+    },
+    {
+      "source": "/cloud/ai-agents/governance-agent",
+      "destination": "/cloud/ai-agents/ai-governance"
+    },
+    {
+      "source": "/cloud/ai-agents/triage-resolution-agent",
+      "destination": "/cloud/ai-agents/ai-triage-resolution"
+    },
+    {
+      "source": "/cloud/ai-agents/test-recommendation-agent",
+      "destination": "/cloud/ai-agents/ai-test-coverage"
+    },
+    {
+      "source": "/cloud/ai-agents/catalog-agent",
+      "destination": "/cloud/ai-agents/ai-catalog"
+    },
+    {
+      "source": "/cloud/ai-agents/performance-cost-agent",
+      "destination": "/cloud/ai-agents/ai-performance-cost"
+    },
+    {
+      "source": "/cloud/ai-agents",
+      "destination": "/cloud/ai-agents/overview"
     }
   ]
 }

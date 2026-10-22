@@ -1,7 +1,7 @@
 ---
 title: "Frequently asked questions"
 sidebarTitle: "FAQ"
-description: "Common questions about Elementary: dbt, cloud tests, Cloud vs OSS, AI agents, credits, security, and supported data warehouses."
+description: "Common questions about Elementary: dbt, cloud tests, Cloud vs OSS, the AI agent, credits, security, and supported data warehouses."
 icon: "circle-question"
 ---
 
@@ -19,7 +19,7 @@ icon: "circle-question"
   </Accordion>
 
   <Accordion title="How do I know if I need Cloud or OSS?">
-    Short answer: choose **OSS** for free, self-hosted observability on a single dbt project; choose **Cloud** to cover your entire data stack with automation, governance, AI agents, and enterprise security - and Cloud works with your warehouse directly, so dbt isn't required to start.
+    Short answer: choose **OSS** for free, self-hosted observability on a single dbt project; choose **Cloud** to cover your entire data stack with automation, governance, an AI agent, and enterprise security - and Cloud works with your warehouse directly, so dbt isn't required to start.
 
     **Elementary OSS** is a free, open-source dbt package and CLI you host yourself. It covers one dbt project: dbt test and run results, table-level lineage, anomaly detection tests for freshness and volume, and basic Slack or Teams alerts, all in a self-hosted report. Your data and metadata stay entirely in your environment.
 
@@ -29,22 +29,22 @@ icon: "circle-question"
     - **Incident management** with alert rules and routing
     - **Governance**: catalog, metadata management, AI-generated descriptions, critical assets
     - **Performance and cost monitoring**
-    - A team of **AI agents** and an **MCP server**, backed by a Context Engine that knows your whole stack
+    - The **Elementary AI Agent** and an **MCP server**, working from the lineage, test results, and incidents across your whole stack
     - **Enterprise security**: RBAC, SSO, audit logs, PrivateLink, SOC 2 Type II and HIPAA
 
     If you're not sure, [talk to the team](https://meetings-eu1.hubspot.com/joost-boonzajer-flaes/intro-call-docs) and they'll help you decide. See the full [Cloud vs OSS comparison](/cloud/cloud-vs-oss).
   </Accordion>
 
-  <Accordion title="What are the Elementary AI agents?">
-    A team of specialized agents - [governance](/cloud/ai-agents/governance-agent), [triage & resolution](/cloud/ai-agents/triage-resolution-agent), [test recommendation](/cloud/ai-agents/test-recommendation-agent), [catalog](/cloud/ai-agents/catalog-agent), [performance & cost](/cloud/ai-agents/performance-cost-agent), and [code review](/cloud/features/ci) - backed by a [Context Engine](/cloud/ai-agents/context-engine) built from every integration you connect. Every action goes through a pull request or explicit confirmation, so your team stays in control of what gets merged. Available on Elementary Cloud.
+  <Accordion title="What is the Elementary AI Agent?">
+    One agent with a set of capabilities: [AI Governance](/cloud/ai-agents/ai-governance), [AI Triage & Resolution](/cloud/ai-agents/ai-triage-resolution), [AI Test Coverage](/cloud/ai-agents/ai-test-coverage), [AI Catalog](/cloud/ai-agents/ai-catalog), [AI Performance & Cost](/cloud/ai-agents/ai-performance-cost), and [AI Code Review](/cloud/features/ci). It works from the lineage, test results, incidents, and metadata Elementary collects from every integration you connect. Every action goes through a pull request or explicit confirmation, so your team stays in control of what gets merged. Available on Elementary Cloud.
   </Accordion>
 
   <Accordion title="Is data quality and health exposed to agents?">
-    Yes. Through the [MCP server](/cloud/mcp/overview) and the [Context Engine](/cloud/ai-agents/context-engine), Elementary exposes data health, quality dimensions, test results, and lineage to your AI agents and copilots - so an agent can check whether a table is trusted and fresh before it acts on it. This is how Elementary helps make your data ready for AI.
+    Yes. Through the [MCP server](/cloud/mcp/overview), Elementary exposes data health, quality dimensions, test results, and lineage to your AI agents and copilots - so an agent can check whether a table is trusted and fresh before it acts on it. This is how Elementary helps make your data ready for AI.
   </Accordion>
 
   <Accordion title="What are AI credits, and what uses them?">
-    [AI credits](/cloud/ai-agents/ai-credits) are consumed only when Elementary's AI does the reasoning - incident investigation, data discovery, test generation, and CI PR review. Things that use no credits: all MCP tool calls (the connected LLM reasons and bills to its own provider), anomaly detection and monitors (statistical, not LLM), Slack alerts, and lineage or catalog browsing. You can also [bring your own LLM key (BYOK)](/cloud/ai-agents/byok) so reasoning bills to your Anthropic or OpenAI account instead of Elementary credits.
+    [AI credits](/cloud/ai-agents/ai-credits) are consumed only when Elementary's AI does the reasoning - incident investigation, data discovery, test generation, and AI Code Review. Things that use no credits: all MCP tool calls (the connected LLM reasons and bills to its own provider), anomaly detection and monitors (statistical, not LLM), Slack alerts, and lineage or catalog browsing. You can also [bring your own LLM key (BYOK)](/cloud/ai-agents/byok) so reasoning bills to your Anthropic or OpenAI account instead of Elementary credits.
   </Accordion>
 
   <Accordion title="Does Elementary access my data? Is it secure?">
