@@ -16,6 +16,11 @@ def try_load_json(value: Optional[Union[str, dict, list]]):
         return None
 
 
+def normalize_scalar_token(raw: str, decoded: Any) -> str:
+    """Use decoded JSON strings; keep other scalar tokens as written."""
+    return (decoded if isinstance(decoded, str) else raw).strip()
+
+
 def unpack_and_flatten_str_to_list(list_as_str: str) -> List[str]:
     """
     if given a simple token like "marketing" -> return ["marketing"]
@@ -33,7 +38,10 @@ def unpack_and_flatten_str_to_list(list_as_str: str) -> List[str]:
 
     if isinstance(list_unpacked, list):
         return list_unpacked
-    return []  # edge case of a string of an empty dict or IDK
+    if isinstance(list_unpacked, dict):
+        return []  # edge case of a string of an empty dict or IDK
+    # A JSON scalar such as 12345 or true is just a plain token.
+    return [normalize_scalar_token(list_as_str, list_unpacked)]
 
 
 def sum_lists(list_of_lists: List[List]) -> List:
@@ -44,7 +52,7 @@ def sum_lists(list_of_lists: List[List]) -> List:
 
 
 def unpack_and_flatten_and_dedup_list_of_strings(
-    list_maybe_jsoned: Optional[Union[List[str], str]]
+    list_maybe_jsoned: Optional[Union[List[str], str]],
 ) -> List[str]:
     if not list_maybe_jsoned:
         return []
@@ -54,11 +62,16 @@ def unpack_and_flatten_and_dedup_list_of_strings(
     elif isinstance(list_maybe_jsoned, list):
         ret = sum_lists(
             [
-                unpack_and_flatten_str_to_list(x)
+                unpack_and_flatten_str_to_list(x) if isinstance(x, str) else [x]
                 for x in list_maybe_jsoned
-                if isinstance(x, str)
             ]
         )
+    # Owners/tags need strings, but the general parser also handles sample rows.
+    ret = [
+        item.strip() if isinstance(item, str) else json.dumps(item)
+        for item in ret
+        if isinstance(item, (str, int, float, bool))
+    ]
     return list(set(ret))
 
 
