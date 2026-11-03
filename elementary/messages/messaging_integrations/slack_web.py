@@ -108,6 +108,7 @@ class SlackWebMessagingIntegration(
         formatted_message: FormattedBlockKitMessage,
         thread_ts: Optional[str] = None,
         reply_broadcast: bool = False,
+        join_if_not_in_channel: bool = True,
     ) -> MessageSendResult[SlackWebMessageContext]:
         try:
             response = self.client.chat_postMessage(
@@ -119,8 +120,14 @@ class SlackWebMessagingIntegration(
                 reply_broadcast=reply_broadcast,
             )
         except SlackApiError as e:
-            self._handle_send_err(e, destination)
-            return self._send_message(destination, formatted_message, thread_ts)
+            self._handle_send_err(e, destination, join_if_not_in_channel)
+            return self._send_message(
+                destination,
+                formatted_message,
+                thread_ts,
+                reply_broadcast,
+                join_if_not_in_channel=False,
+            )
 
         return MessageSendResult(
             message_context=SlackWebMessageContext(
@@ -130,24 +137,28 @@ class SlackWebMessagingIntegration(
             message_format="block_kit",
         )
 
-    def _handle_send_err(self, err: SlackApiError, channel_name: str):
+    def _handle_send_err(
+        self, err: SlackApiError, channel_name: str, join_if_not_in_channel: bool
+    ) -> None:
+        """Returns after joining the channel, so the caller can retry the send."""
         if self.tracking:
             self.tracking.record_internal_exception(err)
         err_type = err.response.data["error"]
-        if err_type == "not_in_channel":
+        if err_type == "not_in_channel" and join_if_not_in_channel:
             logger.info(
                 f'Elementary app is not in the channel "{channel_name}". Attempting to join.'
             )
             channel_id = self._get_channel_id(channel_name, only_public=True)
             self._join_channel(channel_id=channel_id)
             logger.info(f"Joined channel {channel_name}")
-        elif err_type == "channel_not_found":
+            return
+        if err_type == "channel_not_found":
             raise MessagingIntegrationDestinationNotFoundError(
                 f"Channel {channel_name} was not found by the Elementary app. Please add the app to the channel."
-            )
+            ) from err
         raise MessagingIntegrationError(
-            f"Failed to send a message to channel - {channel_name}"
-        )
+            f"Failed to send a message to channel - {channel_name} ({err_type})"
+        ) from err
 
     @sleep_and_retry
     @limits(calls=20, period=ONE_MINUTE)
