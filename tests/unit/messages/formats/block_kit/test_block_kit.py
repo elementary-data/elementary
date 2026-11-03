@@ -139,3 +139,15 @@ def test_long_code_block_is_split_into_code_sections():
     assert all(len(text) <= 3000 for text in texts)
     assert all(text.startswith("```") and text.endswith("```") for text in texts)
     assert "\n".join(text[3:-3] for text in texts).split("\n") == code_lines
+
+
+def test_split_keeps_other_spaces_and_adds_no_empty_section():
+    line = "x" * 3000 + " " + "a  b"
+    message = MessageBody(
+        blocks=[
+            LinesBlock(lines=[LineBlock(inlines=[TextBlock(text=line)])]),
+            LinesBlock(lines=[LineBlock(inlines=[TextBlock(text="x" * 3000 + " ")])]),
+        ]
+    )
+    texts = _section_texts(format_block_kit(message))
+    assert texts == ["x" * 3000, "a  b", "x" * 3000]

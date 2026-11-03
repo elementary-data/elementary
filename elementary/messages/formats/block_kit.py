@@ -201,11 +201,14 @@ class BlockKitBuilder:
         parts: List[str] = []
         while len(line) > max_length:
             cut = line.rfind(" ", 0, max_length + 1)
-            if cut <= 0:
-                cut = max_length
-            parts.append(line[:cut])
-            line = line[cut:].lstrip(" ")
-        parts.append(line)
+            if cut > 0:
+                parts.append(line[:cut])
+                line = line[cut + 1 :]
+            else:
+                parts.append(line[:max_length])
+                line = line[max_length:]
+        if line or not parts:
+            parts.append(line)
         return parts
 
     @classmethod
