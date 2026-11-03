@@ -226,14 +226,16 @@ class BlockKitBuilder:
             for part in cls._split_long_line(line, max_length):
                 added_length = len(part) + (1 if current else 0)
                 if current and current_length + added_length > max_length:
-                    if preserve_empty or any(current):
-                        chunks.append("\n".join(current))
+                    text = "\n".join(current)
+                    if preserve_empty or text:
+                        chunks.append(text)
                     current, current_length = [], 0
                     added_length = len(part)
                 current.append(part)
                 current_length += added_length
-        if preserve_empty or any(current):
-            chunks.append("\n".join(current))
+        text = "\n".join(current)
+        if preserve_empty or text:
+            chunks.append(text)
         return chunks
 
     def _add_lines_block(self, block: LinesBlock) -> None:
