@@ -165,3 +165,18 @@ def test_split_adds_no_section_for_a_leading_empty_line():
         ]
     )
     assert _section_texts(format_block_kit(message)) == ["x" * 3000]
+
+
+def test_split_adds_no_section_for_empty_lines_only():
+    message = MessageBody(
+        blocks=[
+            LinesBlock(lines=[LineBlock(inlines=[TextBlock(text="")])]),
+            LinesBlock(
+                lines=[
+                    LineBlock(inlines=[TextBlock(text="x" * 3000)]),
+                    LineBlock(inlines=[TextBlock(text="")]),
+                ]
+            ),
+        ]
+    )
+    assert _section_texts(format_block_kit(message)) == ["x" * 3000]
