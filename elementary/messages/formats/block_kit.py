@@ -196,11 +196,48 @@ class BlockKitBuilder:
         else:
             self._attachment_blocks.append(block)
 
+    @staticmethod
+    def _split_long_line(line: str, max_length: int) -> List[str]:
+        parts: List[str] = []
+        while len(line) > max_length:
+            cut = line.rfind(" ", 0, max_length + 1)
+            if cut <= 0:
+                cut = max_length
+            parts.append(line[:cut])
+            line = line[cut:].lstrip(" ")
+        parts.append(line)
+        return parts
+
+    @classmethod
+    def _chunk_lines(cls, lines: List[str], max_length: int) -> List[str]:
+        """
+        Slack cuts a section's text at 3000 characters, so long text is split into
+        several sections at line breaks (or at spaces, for a line that is too long).
+        """
+        chunks: List[str] = []
+        current: List[str] = []
+        current_length = 0
+        for line in lines:
+            for part in cls._split_long_line(line, max_length):
+                added_length = len(part) + (1 if current else 0)
+                if current and current_length + added_length > max_length:
+                    chunks.append("\n".join(current))
+                    current, current_length = [], 0
+                    added_length = len(part)
+                current.append(part)
+                current_length += added_length
+        if current:
+            chunks.append("\n".join(current))
+        return chunks
+
     def _add_lines_block(self, block: LinesBlock) -> None:
         formatted_lines = [
             self._format_line_block_text(line_block) for line_block in block.lines
         ]
-        self._add_block(self._format_markdown_section("\n".join(formatted_lines)))
+        for chunk in self._chunk_lines(
+            formatted_lines, slack_blocks.SectionBlock.text_max_length
+        ):
+            self._add_block(self._format_markdown_section(chunk))
 
     def _add_header_block(self, block: HeaderBlock) -> None:
         if len(block.text) > slack_blocks.HeaderBlock.text_max_length:
@@ -218,7 +255,9 @@ class BlockKitBuilder:
         )
 
     def _add_code_block(self, block: CodeBlock) -> None:
-        self._add_block(self._format_markdown_section(f"```{block.text}```"))
+        max_length = slack_blocks.SectionBlock.text_max_length - 2 * len("```")
+        for chunk in self._chunk_lines(block.text.split("\n"), max_length):
+            self._add_block(self._format_markdown_section(f"```{chunk}```"))
 
     def _add_primary_fact(self, fact: FactBlock) -> None:
         self._add_block(
