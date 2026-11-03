@@ -212,7 +212,9 @@ class BlockKitBuilder:
         return parts
 
     @classmethod
-    def _chunk_lines(cls, lines: List[str], max_length: int) -> List[str]:
+    def _chunk_lines(
+        cls, lines: List[str], max_length: int, preserve_empty: bool = False
+    ) -> List[str]:
         """
         Slack cuts a section's text at 3000 characters, so long text is split into
         several sections at line breaks (or at spaces, for a line that is too long).
@@ -224,13 +226,13 @@ class BlockKitBuilder:
             for part in cls._split_long_line(line, max_length):
                 added_length = len(part) + (1 if current else 0)
                 if current and current_length + added_length > max_length:
-                    if any(current):
+                    if preserve_empty or any(current):
                         chunks.append("\n".join(current))
                     current, current_length = [], 0
                     added_length = len(part)
                 current.append(part)
                 current_length += added_length
-        if any(current):
+        if preserve_empty or any(current):
             chunks.append("\n".join(current))
         return chunks
 
@@ -260,7 +262,9 @@ class BlockKitBuilder:
 
     def _add_code_block(self, block: CodeBlock) -> None:
         max_length = slack_blocks.SectionBlock.text_max_length - 2 * len("```")
-        for chunk in self._chunk_lines(block.text.split("\n"), max_length):
+        for chunk in self._chunk_lines(
+            block.text.split("\n"), max_length, preserve_empty=True
+        ):
             self._add_block(self._format_markdown_section(f"```{chunk}```"))
 
     def _add_primary_fact(self, fact: FactBlock) -> None:

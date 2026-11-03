@@ -180,3 +180,8 @@ def test_split_adds_no_section_for_empty_lines_only():
         ]
     )
     assert _section_texts(format_block_kit(message)) == ["x" * 3000]
+
+
+def test_split_keeps_newline_only_code_block():
+    message = MessageBody(blocks=[CodeBlock(text="\n")])
+    assert _section_texts(format_block_kit(message)) == ["```\n```"]
