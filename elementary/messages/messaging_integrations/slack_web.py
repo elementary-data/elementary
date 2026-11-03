@@ -192,7 +192,7 @@ class SlackWebMessagingIntegration(
 
     def _get_channel_id(self, channel_name: str, only_public: bool = False) -> str:
         for channel in self._iter_channels(only_public=only_public):
-            if channel["name"] == channel_name:
+            if channel_name in (channel["name"], channel["id"]):
                 return channel["id"]
         raise MessagingIntegrationError(f"Channel {channel_name} not found")
 

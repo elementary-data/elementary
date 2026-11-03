@@ -284,7 +284,8 @@ def test_send_joins_public_channel_and_retries():
     ]
     result = integration.send_message("alerts", HANDLE_MENTION_BODY)
     integration.client.conversations_join.assert_called_once_with(channel="C_ALERTS")
-    assert integration.client.chat_postMessage.call_count == 2
+    first_send, retry = integration.client.chat_postMessage.call_args_list
+    assert retry.kwargs == first_send.kwargs
     assert result.message_context.id == "123.456"
 
 
@@ -311,7 +312,18 @@ def test_send_joins_only_once_when_still_not_in_channel():
     with pytest.raises(MessagingIntegrationError) as exc_info:
         integration.send_message("alerts", HANDLE_MENTION_BODY)
     integration.client.conversations_join.assert_called_once()
+    assert integration.client.chat_postMessage.call_count == 2
     assert "not_in_channel" in str(exc_info.value)
+
+
+def test_send_joins_public_channel_given_by_id():
+    integration = _integration_with_public_channel()
+    integration.client.chat_postMessage.side_effect = [
+        _not_in_channel_error(),
+        {"ts": "123.456", "channel": "C_ALERTS"},
+    ]
+    integration.send_message("C_ALERTS", HANDLE_MENTION_BODY)
+    integration.client.conversations_join.assert_called_once_with(channel="C_ALERTS")
 
 
 def test_send_error_keeps_slack_error_code():
