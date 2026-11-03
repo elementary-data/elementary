@@ -3,10 +3,12 @@ from pathlib import Path
 
 from elementary.messages.blocks import (
     ActionsBlock,
+    CodeBlock,
     LineBlock,
     LinesBlock,
     MentionBlock,
     TableBlock,
+    TextBlock,
     UserSelectActionBlock,
 )
 from elementary.messages.formats.block_kit import (
@@ -95,3 +97,45 @@ class TestBlockKit(BaseTestFormat[FormattedBlockKitMessage]):
         for row in table_block["rows"][1:]:  # skip header row
             for cell in row:
                 assert cell["text"], f"raw_text cell must not be empty, got: {cell}"
+
+
+def _section_texts(result: FormattedBlockKitMessage) -> list:
+    return [block["text"]["text"] for block in result.blocks]
+
+
+def test_long_lines_block_is_split_into_sections_at_line_breaks():
+    lines = [f"line {i} " + "x" * 90 for i in range(80)]
+    message = MessageBody(
+        blocks=[
+            LinesBlock(
+                lines=[LineBlock(inlines=[TextBlock(text=line)]) for line in lines]
+            )
+        ]
+    )
+    texts = _section_texts(format_block_kit(message))
+    assert len(texts) == 3
+    assert all(len(text) <= 3000 for text in texts)
+    assert "\n".join(texts).split("\n") == lines
+
+
+def test_single_long_line_is_split_at_spaces():
+    words = ["word" + str(i).zfill(4) for i in range(700)]
+    message = MessageBody(
+        blocks=[
+            LinesBlock(lines=[LineBlock(inlines=[TextBlock(text=" ".join(words))])])
+        ]
+    )
+    texts = _section_texts(format_block_kit(message))
+    assert len(texts) == 3
+    assert all(len(text) <= 3000 for text in texts)
+    assert " ".join(texts).split(" ") == words
+
+
+def test_long_code_block_is_split_into_code_sections():
+    code_lines = [f"select {i} as col_{i}" + " " * 30 for i in range(150)]
+    message = MessageBody(blocks=[CodeBlock(text="\n".join(code_lines))])
+    texts = _section_texts(format_block_kit(message))
+    assert len(texts) == 3
+    assert all(len(text) <= 3000 for text in texts)
+    assert all(text.startswith("```") and text.endswith("```") for text in texts)
+    assert "\n".join(text[3:-3] for text in texts).split("\n") == code_lines
