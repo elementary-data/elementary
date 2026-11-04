@@ -316,14 +316,57 @@ def test_send_joins_only_once_when_still_not_in_channel():
     assert "not_in_channel" in str(exc_info.value)
 
 
-def test_send_joins_public_channel_given_by_id():
+def test_send_joins_public_channel_given_by_id_without_listing_channels():
+    integration = _build_integration()
+    integration.client.chat_postMessage.side_effect = [
+        _not_in_channel_error(),
+        {"ts": "123.456", "channel": "C0123ABCD"},
+    ]
+    integration.send_message("C0123ABCD", HANDLE_MENTION_BODY)
+    integration.client.conversations_join.assert_called_once_with(channel="C0123ABCD")
+    integration.client.conversations_list.assert_not_called()
+
+
+def test_successful_join_and_retry_records_no_exception():
     integration = _integration_with_public_channel()
+    integration.tracking = MagicMock()
     integration.client.chat_postMessage.side_effect = [
         _not_in_channel_error(),
         {"ts": "123.456", "channel": "C_ALERTS"},
     ]
-    integration.send_message("C_ALERTS", HANDLE_MENTION_BODY)
-    integration.client.conversations_join.assert_called_once_with(channel="C_ALERTS")
+    integration.send_message("alerts", HANDLE_MENTION_BODY)
+    integration.tracking.record_internal_exception.assert_not_called()
+
+
+def test_join_failure_keeps_slack_error_code():
+    integration = _integration_with_public_channel()
+    join_error = SlackApiError("error", MagicMock(data={"error": "missing_scope"}))
+    integration.client.chat_postMessage.side_effect = _not_in_channel_error()
+    integration.client.conversations_join.side_effect = join_error
+    with pytest.raises(MessagingIntegrationError) as exc_info:
+        integration.send_message("alerts", HANDLE_MENTION_BODY)
+    assert "missing_scope" in str(exc_info.value)
+    assert exc_info.value.__cause__ is join_error
+    assert integration.client.chat_postMessage.call_count == 1
+
+
+def test_channel_missing_from_public_list_is_destination_not_found():
+    integration = _integration_with_public_channel()
+    not_in_channel = _not_in_channel_error()
+    integration.client.chat_postMessage.side_effect = not_in_channel
+    with pytest.raises(MessagingIntegrationDestinationNotFoundError) as exc_info:
+        integration.send_message("private-alerts", HANDLE_MENTION_BODY)
+    assert exc_info.value.__cause__ is not_in_channel
+    integration.client.conversations_join.assert_not_called()
+
+
+def test_channel_not_found_keeps_slack_error_as_cause():
+    integration = _build_integration()
+    slack_error = SlackApiError("error", MagicMock(data={"error": "channel_not_found"}))
+    integration.client.chat_postMessage.side_effect = slack_error
+    with pytest.raises(MessagingIntegrationDestinationNotFoundError) as exc_info:
+        integration.send_message("alerts", HANDLE_MENTION_BODY)
+    assert exc_info.value.__cause__ is slack_error
 
 
 def test_send_error_keeps_slack_error_code():
