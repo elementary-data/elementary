@@ -197,16 +197,30 @@ class BlockKitBuilder:
             self._attachment_blocks.append(block)
 
     @staticmethod
-    def _split_long_line(line: str, max_length: int) -> List[str]:
+    def _find_split(line: str, max_length: int) -> Tuple[int, int]:
+        """
+        Where to split a line that is too long, as (end of the first part, start of
+        the rest): at the last space that isn't inside a <url|text> link, else before
+        a link that crosses the limit, else at the limit.
+        """
+        cut = line.rfind(" ", 0, max_length + 1)
+        while cut > 0:
+            link_start = line.rfind("<", 0, cut)
+            if link_start == -1 or ">" in line[link_start:cut]:
+                return cut, cut + 1
+            cut = line.rfind(" ", 0, link_start)
+        link_start = line.rfind("<", 0, max_length)
+        if link_start > 0 and ">" not in line[link_start:max_length]:
+            return link_start, link_start
+        return max_length, max_length
+
+    @classmethod
+    def _split_long_line(cls, line: str, max_length: int) -> List[str]:
         parts: List[str] = []
         while len(line) > max_length:
-            cut = line.rfind(" ", 0, max_length + 1)
-            if cut > 0:
-                parts.append(line[:cut])
-                line = line[cut + 1 :]
-            else:
-                parts.append(line[:max_length])
-                line = line[max_length:]
+            end, start = cls._find_split(line, max_length)
+            parts.append(line[:end])
+            line = line[start:]
         if line or not parts:
             parts.append(line)
         return parts

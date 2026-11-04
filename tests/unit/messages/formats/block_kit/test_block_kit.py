@@ -6,6 +6,7 @@ from elementary.messages.blocks import (
     CodeBlock,
     LineBlock,
     LinesBlock,
+    LinkBlock,
     MentionBlock,
     TableBlock,
     TextBlock,
@@ -129,6 +130,28 @@ def test_single_long_line_is_split_at_spaces():
     assert len(texts) == 3
     assert all(len(text) <= 3000 for text in texts)
     assert " ".join(texts).split(" ") == words
+
+
+def _line_with_link(prefix: str, suffix: str = "") -> MessageBody:
+    inlines = [
+        TextBlock(text=prefix),
+        LinkBlock(text="see the full report", url="https://example.com"),
+    ]
+    if suffix:
+        inlines.append(TextBlock(text=suffix))
+    return MessageBody(blocks=[LinesBlock(lines=[LineBlock(inlines=inlines)])])
+
+
+def test_split_skips_spaces_inside_a_link():
+    message = _line_with_link("x" * 2970, suffix="after")
+    texts = _section_texts(format_block_kit(message))
+    assert texts == ["x" * 2970, "<https://example.com|see the full report> after"]
+
+
+def test_split_cuts_before_a_link_that_crosses_the_limit():
+    message = _line_with_link("x" * 2990)
+    texts = _section_texts(format_block_kit(message))
+    assert texts == ["x" * 2990, "<https://example.com|see the full report>"]
 
 
 def test_long_code_block_is_split_into_code_sections():
