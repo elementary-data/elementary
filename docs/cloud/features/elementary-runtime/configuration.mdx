@@ -1,7 +1,7 @@
 ---
 title: "Elementary Runtime configuration"
 sidebarTitle: "Configuration"
-description: "Configuration reference for Elementary Runtime: Cloud connection, local limits, secrets, warehouse connections, and least-privilege database roles."
+description: "Configuration reference for Elementary Runtime: Cloud connection, local limits, secrets, warehouse connections, object storage for query samples, and least-privilege database roles."
 badge: "Private Beta"
 ---
 
@@ -9,9 +9,9 @@ import RuntimePrivateBeta from '/snippets/cloud/features/elementary-runtime/priv
 
 <RuntimePrivateBeta />
 
-Elementary Runtime reads a single versioned YAML file at startup. The file defines how the runtime reaches Elementary Cloud, the local limits that cap what every task can do, and the warehouse connections the runtime is allowed to use.
+Elementary Runtime reads a single versioned YAML file at startup. The file defines how the runtime reaches Elementary Cloud, the local limits that cap what every task can do, the warehouse connections the runtime is allowed to use, and, optionally, the object storage where query samples are written.
 
-Only this file decides which warehouses the runtime can query and which credentials it uses. Elementary Cloud can only send tasks to connections defined here. It cannot add connections, change credentials, or raise local limits.
+Only this file decides which warehouses the runtime can query, which credentials it uses, and where samples are stored. Elementary Cloud can only send tasks to connections defined here. It cannot add connections, change credentials, raise local limits, or read objects in your bucket.
 
 ## Example
 
@@ -45,6 +45,8 @@ connections:
     private_key_file: /run/secrets/elementary/snowflake-private-key
     private_key_passphrase_file: /run/secrets/elementary/snowflake-private-key-passphrase
 ```
+
+This example sends query samples to Elementary Cloud. To keep the row values in a bucket you control, add a [`storage`](#object-storage) block. Elementary Cloud then receives the object location instead of the rows.
 
 ## Validation
 
@@ -93,6 +95,7 @@ The secret fields are:
 | Snowflake connection | `password`, `private_key`, `private_key_passphrase` |
 | Databricks connection | `token`, `client_secret` |
 | Postgres and Redshift connections | `password` |
+| `storage` | S3: `secret_access_key`, `session_token`. Google Cloud Storage: `credentials`. Azure Blob Storage: `account_key`, `connection_string`, `sas_token`. |
 
 ## Configuration reference
 
@@ -106,6 +109,7 @@ The secret fields are:
 | `limits` | No | Local limits applied to every task. |
 | `concurrency` | No | Task parallelism and heartbeat interval. |
 | `connections` | Yes | Warehouse connections. At least one is required, and each `warehouse_connection_id` must be unique. |
+| `storage` | No | Object storage for query samples. See [Object storage](#object-storage). |
 
 ### `cloud`
 
@@ -266,21 +270,119 @@ If a connection cannot enforce a statement timeout, the runtime refuses to run t
 
 ### Sample rows
 
-`max_sample_rows_returned` caps how many result rows leave your network per query. This is the main control over which business data reaches Elementary Cloud.
+`max_sample_rows_returned` caps how many result rows are sampled per query. This is the main control over how much business data a sample can contain.
 
 The runtime never fetches a full result. It wraps the query in a `LIMIT` of the sample size plus one row. If more rows exist, it runs a separate `count(*)` over the same query to get the total row count. Only the capped sample and the count are returned.
 
+When [`storage`](#object-storage) is omitted, the sample is sent to Elementary Cloud. When `storage` is set, the same sample is written to your bucket, and Elementary Cloud receives the object URI.
+
 <Tip>
-  Set `max_sample_rows_returned: 0` to keep all row values inside your network. The runtime then runs only a `count(*)` over the query, and Elementary Cloud receives the row count with no sample. Tests that pass or fail on row count keep working. Failed-row samples are not shown in Elementary Cloud.
+  Set `max_sample_rows_returned: 0` to keep all row values inside your network. The runtime then runs only a `count(*)` over the query, and Elementary Cloud receives the row count with no sample. No sample object is written. Tests that pass or fail on row count keep working. Failed-row samples are not shown in Elementary Cloud.
 </Tip>
 
 ### Result size
 
-`max_result_bytes` caps the JSON-encoded size of the sample sent for one query. When the sample exceeds the cap, the runtime drops whole rows from the end until it fits. Partial rows are never sent. Independently of this setting, samples are limited to the first 1,000 columns.
+`max_result_bytes` caps the encoded size of the sample for one query: JSON when it is sent to Elementary Cloud, CSV when it is written to object storage. When the sample exceeds the cap, the runtime drops whole rows from the end until it fits. Partial rows are never sent or stored. Independently of this setting, samples are limited to the first 1,000 columns.
 
 ### Concurrency
 
 `max_concurrent_tasks` caps parallel tasks on one instance. Each task runs its queries one after another, so it uses at most one warehouse session at a time. Use it to keep the runtime within warehouse concurrency and connection limits. With several replicas, the total is `max_concurrent_tasks` × replicas.
+
+## Object storage
+
+`storage` writes each query sample to a bucket you control. The object is a UTF-8 CSV of the sampled rows, with a header of column names. Elementary Cloud receives the object URI and shows it on the result. The URI does not grant access, and Elementary Cloud has no credentials for the bucket.
+
+Omit `storage` to send samples to Elementary Cloud. [Local limits](#local-limits) cap a stored CSV the same way they cap a sample sent to Cloud. `max_sample_rows_returned: 0` writes no file. A failed upload fails the task.
+
+One query produces one object. `prefix` defaults to `elementary/`. Each sample uses a new key. Expire objects with a lifecycle rule on the prefix.
+
+```text
+<prefix><warehouse_connection_id>/<yyyy>/<mm>/<dd>/<task_id>/<sample_id>.csv
+```
+
+```csv
+order_id,status
+1001,returned
+1002,shipped
+```
+
+The runtime connects outbound on port 443. Prefer the cloud identity attached to the runtime. Otherwise set a `_file` secret.
+
+<Tabs>
+  <Tab title="Amazon S3">
+    | Key | Required | Description |
+    | --- | --- | --- |
+    | `type` | Yes | `s3` |
+    | `bucket` | Yes | Bucket name. |
+    | `region` | Yes | Region, for example `eu-central-1`. |
+    | `prefix` | No | Key prefix. Default `elementary/`. |
+    | `endpoint` | No | API endpoint for a private endpoint or an S3-compatible store. Omit it for AWS. |
+    | `use_path_style` | No | Path-style addressing. Default `false`. |
+    | `kms_key_id` | No | KMS key ID or ARN for SSE-KMS. If omitted, the bucket's default encryption applies. |
+    | `access_key_id` | No | Access key ID. Requires `secret_access_key`. If omitted, the runtime uses the AWS credential chain. |
+    | `secret_access_key` | With `access_key_id` | Secret access key. Use `secret_access_key_file`. |
+    | `session_token` | No | Session token for temporary keys. Use `session_token_file`. |
+
+    Upload destination: `<bucket>.s3.<region>.amazonaws.com`, or the host of `endpoint`.
+
+    ```yaml
+    storage:
+      type: s3
+      bucket: elementary-runtime-samples
+      region: eu-central-1
+    ```
+
+    Allow `s3:PutObject` and `s3:AbortMultipartUpload` on `arn:aws:s3:::<bucket>/<prefix>*`. With `kms_key_id`, also allow `kms:GenerateDataKey` and `kms:Decrypt` on that key. Grant `s3:GetObject` on the prefix to the people who open samples.
+  </Tab>
+  <Tab title="Google Cloud Storage">
+    | Key | Required | Description |
+    | --- | --- | --- |
+    | `type` | Yes | `gcs` |
+    | `bucket` | Yes | Bucket name. |
+    | `prefix` | No | Key prefix. Default `elementary/`. |
+    | `endpoint` | No | API endpoint. Omit it for `storage.googleapis.com`. |
+    | `kms_key` | No | Cloud KMS key resource name. |
+    | `credentials` | No | Service account JSON key. Use `credentials_file`. If omitted, the runtime uses Application Default Credentials. |
+
+    Upload destination: `storage.googleapis.com`, or the host of `endpoint`.
+
+    ```yaml
+    storage:
+      type: gcs
+      bucket: elementary-runtime-samples
+      credentials_file: /run/secrets/elementary/gcs-service-account.json
+    ```
+
+    Grant the runtime `roles/storage.objectCreator` on the bucket. With `kms_key`, also grant `roles/cloudkms.cryptoKeyEncrypterDecrypter` on the key. Grant `roles/storage.objectViewer` to the people who open samples.
+  </Tab>
+  <Tab title="Azure Blob Storage">
+    | Key | Required | Description |
+    | --- | --- | --- |
+    | `type` | Yes | `azure` |
+    | `account` | Yes | Storage account name. |
+    | `container` | Yes | Container name. |
+    | `prefix` | No | Key prefix. Default `elementary/`. |
+    | `endpoint` | No | Blob endpoint. Default `https://<account>.blob.core.windows.net`. |
+    | `account_key` | One of | Account key. Use `account_key_file`. |
+    | `connection_string` | One of | Connection string. Use `connection_string_file`. |
+    | `sas_token` | One of | SAS with create and write only. Use `sas_token_file`. |
+
+    Set at most one of `account_key`, `connection_string`, and `sas_token`. When none are set, the runtime uses a managed identity. The URI Elementary Cloud shows is the blob address, with no SAS token.
+
+    ```yaml
+    storage:
+      type: azure
+      account: elementaryruntime
+      container: samples
+    ```
+
+    <Warning>
+      An account key or connection string can read the whole storage account. Prefer a managed identity, or a SAS limited to create and write (`cw`) on this container.
+    </Warning>
+
+    Grant the runtime identity `blobs/write` and `blobs/add/action` on the container. Grant read access to the people who open samples.
+  </Tab>
+</Tabs>
 
 ## SQL validation
 
@@ -298,15 +400,16 @@ Rejected queries are never sent to the warehouse. The task fails with a validati
 
 ## What leaves your network
 
-The runtime sends Elementary Cloud only what it needs to report the result of each task.
+The runtime sends Elementary Cloud only what it needs to report the result of each task. With [`storage`](#object-storage) set, that includes the object URI of each sample. The row values stay in your bucket.
 
 | Sent to Elementary Cloud | Never sent |
 | --- | --- |
-| Execution status, duration, and row count | Warehouse credentials and secrets |
-| A row sample, capped by the limits above | SQL text, in logs or telemetry |
+| Execution status, duration, and row count | Warehouse credentials, storage credentials, and other secrets |
+| A row sample, capped by the limits above, when `storage` is omitted | Row values, when `storage` is set |
+| The object URI of a stored sample, when `storage` is set | Presigned or signed URLs |
 | A fixed, redacted error message, for example `Query failed because of insufficient permissions.` | Raw warehouse error messages |
-| Connection health and warehouse identity: type, account or host identifier, database | Rows beyond the sample |
-| Telemetry: start and stop events, task outcomes, exception types and code locations | Row values in logs or telemetry |
+| Connection health and warehouse identity: type, account or host identifier, database | SQL text, in logs or telemetry |
+| Telemetry: start and stop events, task outcomes, exception types and code locations | Row values and object contents in logs or telemetry. Rows beyond the sample. |
 
 Runtime logs never contain task SQL text, row values, or credentials.
 
@@ -362,7 +465,7 @@ The warehouse role is the main security boundary. Give the runtime its own user 
     ```
 
     - Snowflake enforces the lower of the session and warehouse statement timeouts, so the warehouse setting caps queries even if the runtime configuration changes.
-    - Masking policies and row access policies apply to the runtime role like any other role. Use them to hide sensitive columns and rows from samples.
+    - Masking policies and row access policies apply to the runtime role like any other role. Use them to hide sensitive columns and rows from samples, including samples written to object storage.
     - Attach a [network policy](https://docs.snowflake.com/en/user-guide/network-policies) to the user to accept logins only from the runtime's egress IPs.
     - Add a resource monitor on the warehouse to cap credit usage.
   </Tab>
@@ -377,7 +480,7 @@ The warehouse role is the main security boundary. Give the runtime its own user 
 
     - Privileges granted on the catalog are inherited by all current and future schemas and tables in it. Grant on individual schemas instead to narrow the scope.
     - Use a dedicated SQL warehouse to isolate cost and concurrency from other workloads.
-    - Column masks and row filters apply to the service principal. Use them to hide sensitive columns and rows from samples.
+    - Column masks and row filters apply to the service principal. Use them to hide sensitive columns and rows from samples, including samples written to object storage.
   </Tab>
   <Tab title="Postgres">
     ```sql
@@ -415,7 +518,24 @@ The warehouse role is the main security boundary. Give the runtime its own user 
 
 ## Recommended baseline for sensitive data
 
-For environments where no business data may leave the network, combine a read-only scoped role with these limits:
+For environments where business data must stay out of Elementary Cloud, combine a read-only scoped role with one of the following.
+
+### Samples in your object storage
+
+Elementary Cloud receives the test status, the row count, and the object URI. Your team reads the rows from the bucket. See [Object storage](#object-storage) for Google Cloud Storage, Azure Blob Storage, and credential options.
+
+```yaml
+limits:
+  max_query_timeout_seconds: 300
+  max_sample_rows_returned: 1000
+
+storage:
+  type: s3
+  bucket: elementary-runtime-samples
+  region: eu-central-1
+```
+
+### No row values
 
 ```yaml
 limits:
@@ -423,4 +543,4 @@ limits:
   max_sample_rows_returned: 0
 ```
 
-Elementary Cloud then receives only the test status and row count for each query, plus connection health and redacted error messages.
+Elementary Cloud then receives only the test status and row count for each query, plus connection health and redacted error messages. No sample object is written.

@@ -21,13 +21,14 @@ The runtime only opens outbound connections. It exposes no ports and needs no in
 | --- | --- | --- |
 | `app.elementary-data.com`, or the host of `cloud.api_url` | 443 | Register, receive tasks, send results and telemetry. |
 | Each warehouse in `connections` | Snowflake and Databricks: 443. Postgres: 5432. Redshift: 5439. | Run queries. |
+| Object storage API, when [`storage`](/cloud/features/elementary-runtime/configuration#object-storage) is set | 443 | Upload query samples. The host depends on the provider. |
 | DNS resolver | 53 | Name resolution. |
 
 To route Cloud traffic through a proxy, set the standard `HTTPS_PROXY` and `NO_PROXY` environment variables. Some warehouse drivers also read these variables, so add warehouse hosts to `NO_PROXY` if their traffic must bypass the proxy.
 
 ### Resources
 
-Start with 0.5 vCPU and 1 GiB of memory for the default limits. Memory scales with `max_concurrent_tasks` and the sample size, because each running task holds its sample in memory until it is sent.
+Start with 0.5 vCPU and 1 GiB of memory for the default limits. Memory scales with `max_concurrent_tasks` and the sample size, because each running task holds its sample in memory until it is sent or uploaded.
 
 ### Container image
 
@@ -251,7 +252,7 @@ The image includes the drivers for all supported warehouses.
     | `/tmp` | `emptyDir` volume |
     | Secret volume | Mounted read-only with mode `0400` |
 
-    With `networkPolicy.enabled: true`, the chart denies all ingress and allows egress only to DNS and to the destinations in `networkPolicy.egress`. NetworkPolicy matches IP ranges, not hostnames. Restrict `egress` to your warehouse and egress-proxy CIDRs where your network allows it.
+    With `networkPolicy.enabled: true`, the chart denies all ingress and allows egress only to DNS and to the destinations in `networkPolicy.egress`. NetworkPolicy matches IP ranges, not hostnames. Restrict `egress` to your warehouse, object storage, and egress-proxy CIDRs where your network allows it.
 
     **Values reference**
 
