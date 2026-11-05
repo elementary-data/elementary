@@ -196,11 +196,70 @@ class BlockKitBuilder:
         else:
             self._attachment_blocks.append(block)
 
+    @staticmethod
+    def _find_split(line: str, max_length: int) -> Tuple[int, int]:
+        """
+        Where to split a line that is too long, as (end of the first part, start of
+        the rest): at the last space that isn't inside a <url|text> link, else before
+        a link that crosses the limit, else at the limit.
+        """
+        cut = line.rfind(" ", 0, max_length + 1)
+        while cut > 0:
+            link_start = line.rfind("<", 0, cut)
+            if link_start == -1 or ">" in line[link_start:cut]:
+                return cut, cut + 1
+            cut = line.rfind(" ", 0, link_start)
+        link_start = line.rfind("<", 0, max_length)
+        if link_start > 0 and ">" not in line[link_start:max_length]:
+            return link_start, link_start
+        return max_length, max_length
+
+    @classmethod
+    def _split_long_line(cls, line: str, max_length: int) -> List[str]:
+        parts: List[str] = []
+        while len(line) > max_length:
+            end, start = cls._find_split(line, max_length)
+            parts.append(line[:end])
+            line = line[start:]
+        if line or not parts:
+            parts.append(line)
+        return parts
+
+    @classmethod
+    def _chunk_lines(
+        cls, lines: List[str], max_length: int, preserve_empty: bool = False
+    ) -> List[str]:
+        """
+        Slack cuts a section's text at 3000 characters, so long text is split into
+        several sections at line breaks (or at spaces, for a line that is too long).
+        """
+        chunks: List[str] = []
+        current: List[str] = []
+        current_length = 0
+        for line in lines:
+            for part in cls._split_long_line(line, max_length):
+                added_length = len(part) + (1 if current else 0)
+                if current and current_length + added_length > max_length:
+                    text = "\n".join(current)
+                    if preserve_empty or text:
+                        chunks.append(text)
+                    current, current_length = [], 0
+                    added_length = len(part)
+                current.append(part)
+                current_length += added_length
+        text = "\n".join(current)
+        if preserve_empty or text:
+            chunks.append(text)
+        return chunks
+
     def _add_lines_block(self, block: LinesBlock) -> None:
         formatted_lines = [
             self._format_line_block_text(line_block) for line_block in block.lines
         ]
-        self._add_block(self._format_markdown_section("\n".join(formatted_lines)))
+        for chunk in self._chunk_lines(
+            formatted_lines, slack_blocks.SectionBlock.text_max_length
+        ):
+            self._add_block(self._format_markdown_section(chunk))
 
     def _add_header_block(self, block: HeaderBlock) -> None:
         if len(block.text) > slack_blocks.HeaderBlock.text_max_length:
@@ -218,7 +277,11 @@ class BlockKitBuilder:
         )
 
     def _add_code_block(self, block: CodeBlock) -> None:
-        self._add_block(self._format_markdown_section(f"```{block.text}```"))
+        max_length = slack_blocks.SectionBlock.text_max_length - 2 * len("```")
+        for chunk in self._chunk_lines(
+            block.text.split("\n"), max_length, preserve_empty=True
+        ):
+            self._add_block(self._format_markdown_section(f"```{chunk}```"))
 
     def _add_primary_fact(self, fact: FactBlock) -> None:
         self._add_block(
