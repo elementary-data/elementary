@@ -1,7 +1,8 @@
 import json
+import re
 import ssl
 import time
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, Dict, Iterator, List, NoReturn, Optional
 
 from ratelimit import limits, sleep_and_retry
 from slack_sdk import WebClient
@@ -30,6 +31,7 @@ logger = get_logger(__name__)
 
 ONE_MINUTE = 60
 ONE_SECOND = 1
+PUBLIC_CHANNEL_ID_PATTERN = re.compile(r"C[A-Z0-9]{8,}")
 
 
 Channel: TypeAlias = str
@@ -108,6 +110,7 @@ class SlackWebMessagingIntegration(
         formatted_message: FormattedBlockKitMessage,
         thread_ts: Optional[str] = None,
         reply_broadcast: bool = False,
+        join_if_not_in_channel: bool = True,
     ) -> MessageSendResult[SlackWebMessageContext]:
         try:
             response = self.client.chat_postMessage(
@@ -119,8 +122,16 @@ class SlackWebMessagingIntegration(
                 reply_broadcast=reply_broadcast,
             )
         except SlackApiError as e:
+            if join_if_not_in_channel and e.response.data["error"] == "not_in_channel":
+                self._join_channel(destination, not_in_channel_err=e)
+                return self._send_message(
+                    destination,
+                    formatted_message,
+                    thread_ts,
+                    reply_broadcast,
+                    join_if_not_in_channel=False,
+                )
             self._handle_send_err(e, destination)
-            return self._send_message(destination, formatted_message, thread_ts)
 
         return MessageSendResult(
             message_context=SlackWebMessageContext(
@@ -130,24 +141,17 @@ class SlackWebMessagingIntegration(
             message_format="block_kit",
         )
 
-    def _handle_send_err(self, err: SlackApiError, channel_name: str):
+    def _handle_send_err(self, err: SlackApiError, channel_name: str) -> NoReturn:
         if self.tracking:
             self.tracking.record_internal_exception(err)
         err_type = err.response.data["error"]
-        if err_type == "not_in_channel":
-            logger.info(
-                f'Elementary app is not in the channel "{channel_name}". Attempting to join.'
-            )
-            channel_id = self._get_channel_id(channel_name, only_public=True)
-            self._join_channel(channel_id=channel_id)
-            logger.info(f"Joined channel {channel_name}")
-        elif err_type == "channel_not_found":
+        if err_type == "channel_not_found":
             raise MessagingIntegrationDestinationNotFoundError(
                 f"Channel {channel_name} was not found by the Elementary app. Please add the app to the channel."
-            )
+            ) from err
         raise MessagingIntegrationError(
-            f"Failed to send a message to channel - {channel_name}"
-        )
+            f"Failed to send a message to channel - {channel_name} ({err_type})"
+        ) from err
 
     @sleep_and_retry
     @limits(calls=20, period=ONE_MINUTE)
@@ -183,15 +187,34 @@ class SlackWebMessagingIntegration(
         for channel in self._iter_channels(only_public=only_public):
             if channel["name"] == channel_name:
                 return channel["id"]
-        raise MessagingIntegrationError(f"Channel {channel_name} not found")
+        raise MessagingIntegrationDestinationNotFoundError(
+            f"Channel {channel_name} not found"
+        )
 
-    def _join_channel(self, channel_id: str) -> None:
+    def _join_channel(
+        self, destination: Channel, not_in_channel_err: SlackApiError
+    ) -> None:
+        logger.info(
+            f'Elementary app is not in the channel "{destination}". Attempting to join.'
+        )
+        if PUBLIC_CHANNEL_ID_PATTERN.fullmatch(destination):
+            channel_id = destination
+        else:
+            try:
+                channel_id = self._get_channel_id(destination, only_public=True)
+            except MessagingIntegrationDestinationNotFoundError:
+                raise MessagingIntegrationDestinationNotFoundError(
+                    f"Channel {destination} is not a public channel the Elementary app can join. Please add the app to the channel."
+                ) from not_in_channel_err
         try:
             self.client.conversations_join(channel=channel_id)
         except SlackApiError as e:
             if self.tracking:
                 self.tracking.record_internal_exception(e)
-            raise MessagingIntegrationError(f"Failed to join channel {channel_id}")
+            raise MessagingIntegrationError(
+                f"Failed to join channel {destination} ({e.response.data['error']})"
+            ) from e
+        logger.info(f"Joined channel {destination}")
 
     def resolve_user_id(self, user: str) -> Optional[str]:
         if user.startswith("@"):
