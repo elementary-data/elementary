@@ -30,6 +30,7 @@ urllib3 = ">=2.8.0"  # transitive dependency via requests, which caps the major 
 idna = ">=3.15"  # transitive dependency via requests, floored to address CVE-2026-45409 (GHSA-65pc-fj4g-8rjx) ReDoS in idna.encode()
 pyasn1 = ">=0.6.4"  # transitive dependency via google-auth/pyasn1-modules, floored to address BER/CER/DER decoder DoS advisories
 cryptography = ">=50.0.0"  # transitive dependency via google-auth/azure-storage-blob, floored to address CVE-2026-69247 (PKCS#7 Bleichenbacher oracle)
+oauthlib = ">=4.0.0"  # transitive dependency via databricks-sql-connector/requests-oauthlib, floored to address GHSA-hj66-6f7g-4r5v and GHSA-xpv3-w29h-x7cv
 beautifulsoup4 = "<5.0.0"
 ratelimit = "*"
 posthog = "<3.0.0"
