@@ -8,7 +8,7 @@
         ),
 
         test_invocation as (
-            select {% if elementary.is_tsql() %}top 1{% endif %} distinct invocation_id, detected_at
+            select distinct {% if elementary.is_tsql() %}top 1{% endif %} invocation_id, detected_at
             from elementary_test_results
             {% if invocation_id %}
                 where invocation_id = {{ "'" ~ invocation_id ~ "'" }}
