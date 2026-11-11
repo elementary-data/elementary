@@ -125,30 +125,30 @@
     )
 
     select 
-        all_alerts.alert_id,
-        all_alerts.unique_id,
+        all_alerts.alert_id as alert_id,
+        all_alerts.unique_id as unique_id,
         {# Currently alert_class_id equals to unique_id - might change in the future so we return both #}
         all_alerts.unique_id as alert_class_id,
         {{ elementary.edr_cast_as_timestamp("all_alerts.generated_at") }} as detected_at,
         {{ elementary.edr_current_timestamp() }} as created_at,
-        all_alerts.database_name,
-        all_alerts.materialization,
-        all_alerts.path,
-        all_alerts.original_path,
-        all_alerts.schema_name,
-        all_alerts.message,
+        all_alerts.database_name as database_name,
+        all_alerts.materialization as materialization,
+        all_alerts.path as path,
+        all_alerts.original_path as original_path,
+        all_alerts.schema_name as schema_name,
+        all_alerts.message as message,
         all_alerts.owner as owners,
-        all_alerts.tags,
-        all_alerts.alias,
-        all_alerts.status,
-        all_alerts.full_refresh,
+        all_alerts.tags as tags,
+        all_alerts.alias as alias,
+        all_alerts.status as status,
+        all_alerts.full_refresh as full_refresh,
         artifacts_meta.meta as model_meta,
-        invocations.job_id,
-        invocations.job_name,
-        invocations.job_run_id,
-        invocations.job_url,
-        invocations.job_run_url,
-        invocations.orchestrator
+        invocations.job_id as job_id,
+        invocations.job_name as job_name,
+        invocations.job_run_id as job_run_id,
+        invocations.job_url as job_url,
+        invocations.job_run_url as job_run_url,
+        invocations.orchestrator as orchestrator
     from all_alerts
     left join artifacts_meta on all_alerts.unique_id = artifacts_meta.unique_id
     left join dbt_run_results on all_alerts.alert_id = dbt_run_results.model_execution_id
