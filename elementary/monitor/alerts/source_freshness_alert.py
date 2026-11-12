@@ -165,10 +165,6 @@ class SourceFreshnessAlertModel(AlertModel):
 
     @property
     def is_runtime_error(self) -> bool:
-        """Whether the freshness check failed to run, in either engine's casing.
-
-        dbt-core writes "runtime error", dbt Fusion writes it capitalized.
-        """
         return (self.original_status or "").lower() == "runtime error"
 
     @property
