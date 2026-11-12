@@ -118,7 +118,6 @@ class TestSourceFreshnessAlertModel:
 
     @pytest.mark.parametrize("status", ["runtime error", "Runtime Error"])
     def test_runtime_error_status_is_case_insensitive(self, status: str) -> None:
-        """dbt-core writes "runtime error", dbt Fusion "Runtime Error": both are runtime errors."""
         alert = _make_source_freshness_alert(original_status=status)
         assert alert.is_runtime_error
         assert (
