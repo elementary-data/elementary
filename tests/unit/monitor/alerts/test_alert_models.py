@@ -129,7 +129,6 @@ class TestSourceFreshnessAlertModel:
 
     @pytest.mark.parametrize("status", ["error", "Error", "warn", "Pass"])
     def test_other_statuses_are_not_runtime_errors(self, status: str) -> None:
-        """Other statuses, in either casing, get the freshness-exceeded summary."""
         alert = _make_source_freshness_alert(original_status=status)
         assert not alert.is_runtime_error
         assert alert.summary.startswith("Freshness exceeded the acceptable times")
