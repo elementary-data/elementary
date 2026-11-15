@@ -168,7 +168,7 @@ class SlackWebMessagingIntegration(
             if self.tracking:
                 self.tracking.record_internal_exception(err)
             logger.warning(f"Failed to {action.value} Slack reaction: {err_type}")
-        except (SlackClientError, OSError, HTTPException) as err:
+        except (SlackClientError, OSError, HTTPException, json.JSONDecodeError) as err:
             if self.tracking:
                 self.tracking.record_internal_exception(err)
             logger.warning(
@@ -379,4 +379,7 @@ class SlackWebMessagingIntegration(
 def _get_slack_error_code(err: SlackApiError) -> Optional[str]:
     # Non-JSON error bodies (e.g. a proxy's HTML 502) come back as a plain dict.
     data = getattr(err.response, "data", err.response)
-    return data.get("error") if isinstance(data, dict) else None
+    if not isinstance(data, dict):
+        return None
+    error = data.get("error")
+    return error if isinstance(error, str) else None

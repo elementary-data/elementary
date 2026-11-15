@@ -1,3 +1,4 @@
+import json
 from http.client import IncompleteRead
 from unittest.mock import MagicMock
 
@@ -326,6 +327,8 @@ def test_react_does_not_raise_on_slack_errors(error):
         SlackRequestError("request failed"),
         TimeoutError("timed out"),
         IncompleteRead(b"partial"),
+        json.JSONDecodeError("Expecting value", '{"ok":', 6),
+        SlackApiError("error", MagicMock(data={"ok": False, "error": []})),
         SlackApiError("error", {"status": 502, "headers": {}, "body": "<html>"}),
     ],
 )
