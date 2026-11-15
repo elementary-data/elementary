@@ -5,10 +5,11 @@ from typing import Any, Dict, Iterator, List, Optional
 
 from ratelimit import limits, sleep_and_retry
 from slack_sdk import WebClient
-from slack_sdk.errors import SlackApiError
+from slack_sdk.errors import SlackApiError, SlackClientError
 from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
 from typing_extensions import TypeAlias
 
+from elementary.messages.blocks import Icon
 from elementary.messages.formats.block_kit import (
     FormattedBlockKitMessage,
     format_block_kit,
@@ -17,6 +18,7 @@ from elementary.messages.message_body import MessageBody
 from elementary.messages.messaging_integrations.base_messaging_integration import (
     BaseMessagingIntegration,
     MessageSendResult,
+    ReactionAction,
 )
 from elementary.messages.messaging_integrations.exceptions import (
     MessagingIntegrationDestinationNotFoundError,
@@ -33,6 +35,41 @@ ONE_SECOND = 1
 
 
 Channel: TypeAlias = str
+
+ICON_TO_SLACK_EMOJI_NAME = {
+    Icon.RED_TRIANGLE: "small_red_triangle",
+    Icon.X: "x",
+    Icon.WARNING: "warning",
+    Icon.EXCLAMATION: "exclamation",
+    Icon.CHECK: "white_check_mark",
+    Icon.MAGNIFYING_GLASS: "mag_right",
+    Icon.HAMMER_AND_WRENCH: "hammer_and_wrench",
+    Icon.POLICE_LIGHT: "rotating_light",
+    Icon.INFO: "information_source",
+    Icon.EYE: "eye",
+    Icon.GEAR: "gear",
+    Icon.BELL: "bell",
+    Icon.GEM: "gem",
+    Icon.SPARKLES: "sparkles",
+    Icon.LINK: "link",
+    Icon.NEW: "new",
+}
+
+# Reactions are best effort: e.g. a token without the reactions:write scope, or a
+# reaction that is already there, must never fail the caller.
+_SKIPPED_REACTION_ERRORS = frozenset(
+    {
+        "missing_scope",
+        "not_allowed_token_type",
+        "already_reacted",
+        "no_reaction",
+        "message_not_found",
+        "channel_not_found",
+        "not_in_channel",
+        "is_archived",
+        "thread_locked",
+    }
+)
 
 
 class SlackWebMessageContext(BaseModel):
@@ -99,6 +136,43 @@ class SlackWebMessagingIntegration(
             thread_ts=message_context.id,
             reply_broadcast=self.reply_broadcast,
         )
+
+    def react(
+        self,
+        destination: Channel,
+        message_context: SlackWebMessageContext,
+        icon: Icon,
+        action: ReactionAction = ReactionAction.ADD,
+    ) -> None:
+        emoji_name = ICON_TO_SLACK_EMOJI_NAME.get(icon)
+        if emoji_name is None:
+            logger.debug(f"Skipping Slack reaction: no emoji for icon {icon.value}")
+            return
+        method = (
+            self.client.reactions_add
+            if action == ReactionAction.ADD
+            else self.client.reactions_remove
+        )
+        try:
+            method(
+                channel=message_context.channel,
+                timestamp=message_context.id,
+                name=emoji_name,
+            )
+        except SlackApiError as err:
+            err_type = err.response.data.get("error")
+            if err_type in _SKIPPED_REACTION_ERRORS:
+                logger.info(f"Skipped Slack reaction {action.value}: {err_type}")
+                return
+            if self.tracking:
+                self.tracking.record_internal_exception(err)
+            logger.warning(f"Failed to {action.value} Slack reaction: {err_type}")
+        except (SlackClientError, OSError) as err:
+            if self.tracking:
+                self.tracking.record_internal_exception(err)
+            logger.warning(
+                f"Failed to {action.value} Slack reaction: {type(err).__name__}"
+            )
 
     @sleep_and_retry
     @limits(calls=1, period=ONE_SECOND)

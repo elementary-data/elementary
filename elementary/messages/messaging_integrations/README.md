@@ -13,6 +13,7 @@ The core of the new messaging system is the `BaseMessagingIntegration` abstract 
 - `send_message()`: Send a message to a specific destination
 - `supports_reply()`: Check if the integration supports message threading/replies
 - `reply_to_message()`: Reply to an existing message (if supported)
+- `react()`: Add or remove an icon reaction on a sent message. Best effort: it never raises, and the default does nothing
 
 ### Key Components
 

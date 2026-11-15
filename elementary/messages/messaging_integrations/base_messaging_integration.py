@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
+from enum import Enum
 from typing import Any, Generic, Optional, TypeVar
 
+from elementary.messages.blocks import Icon
 from elementary.messages.message_body import MessageBody
 from elementary.messages.messaging_integrations.exceptions import (
     MessageIntegrationReplyNotSupportedError,
@@ -19,6 +21,11 @@ class MessageSendResult(BaseModel, Generic[T]):
     timestamp: datetime
     message_format: str
     message_context: Optional[T] = None
+
+
+class ReactionAction(Enum):
+    ADD = "add"
+    REMOVE = "remove"
 
 
 DestinationType = TypeVar("DestinationType")
@@ -54,3 +61,12 @@ class BaseMessagingIntegration(ABC, Generic[DestinationType, MessageContextType]
         if not self.supports_reply():
             raise MessageIntegrationReplyNotSupportedError(type(self).__name__)
         raise NotImplementedError
+
+    def react(
+        self,
+        destination: DestinationType,
+        message_context: MessageContextType,
+        icon: Icon,
+        action: ReactionAction = ReactionAction.ADD,
+    ) -> None:
+        return

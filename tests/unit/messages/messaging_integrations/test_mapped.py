@@ -4,11 +4,12 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from elementary.messages.blocks import HeaderBlock
+from elementary.messages.blocks import HeaderBlock, Icon
 from elementary.messages.message_body import MessageBody
 from elementary.messages.messaging_integrations.base_messaging_integration import (
     BaseMessagingIntegration,
     MessageSendResult,
+    ReactionAction,
 )
 from elementary.messages.messaging_integrations.exceptions import (
     MessagingIntegrationError,
@@ -181,3 +182,39 @@ def test_reply_to_message_invalid_destination(
     with pytest.raises(MessagingIntegrationError) as exc_info:
         mapped_integration.reply_to_message(destination, message_context, body)
     assert str(exc_info.value) == "Invalid destination: invalid_destination"
+
+
+def test_react_defaults_to_no_op(mock_integration: MockMessagingIntegration) -> None:
+    assert (
+        mock_integration.react(None, MockMessageContext(id="test_id"), Icon.CHECK)
+        is None
+    )
+
+
+@pytest.mark.parametrize("action", [ReactionAction.ADD, ReactionAction.REMOVE])
+def test_react_delegates_to_destination_integration(
+    mapped_integration: MappedMessagingIntegration,
+    mock_integration: MockMessagingIntegration,
+    action: ReactionAction,
+) -> None:
+    react_mock = MagicMock()
+    mock_integration.react = react_mock  # type: ignore[method-assign]
+    message_context = MockMessageContext(id="test_id")
+
+    mapped_integration.react("test_destination", message_context, Icon.CHECK, action)
+
+    react_mock.assert_called_once_with(None, message_context, Icon.CHECK, action)
+
+
+def test_react_skips_invalid_destination(
+    mapped_integration: MappedMessagingIntegration,
+    mock_integration: MockMessagingIntegration,
+) -> None:
+    react_mock = MagicMock()
+    mock_integration.react = react_mock  # type: ignore[method-assign]
+
+    mapped_integration.react(
+        "invalid_destination", MockMessageContext(id="test_id"), Icon.CHECK
+    )
+
+    react_mock.assert_not_called()

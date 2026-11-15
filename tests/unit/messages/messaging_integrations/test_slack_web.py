@@ -1,15 +1,19 @@
 from unittest.mock import MagicMock
 
 import pytest
-from slack_sdk.errors import SlackApiError
+from slack_sdk.errors import SlackApiError, SlackRequestError
 
-from elementary.messages.blocks import LineBlock, LinesBlock, MentionBlock
+from elementary.messages.blocks import Icon, LineBlock, LinesBlock, MentionBlock
 from elementary.messages.message_body import MessageBody
+from elementary.messages.messaging_integrations.base_messaging_integration import (
+    ReactionAction,
+)
 from elementary.messages.messaging_integrations.exceptions import (
     MessagingIntegrationDestinationNotFoundError,
     MessagingIntegrationError,
 )
 from elementary.messages.messaging_integrations.slack_web import (
+    ICON_TO_SLACK_EMOJI_NAME,
     SlackWebMessageContext,
     SlackWebMessagingIntegration,
 )
@@ -261,3 +265,78 @@ def test_send_raises_generic_error_for_other_slack_errors():
     with pytest.raises(MessagingIntegrationError) as exc_info:
         integration.send_message("alerts", HANDLE_MENTION_BODY)
     assert not isinstance(exc_info.value, MessagingIntegrationDestinationNotFoundError)
+
+
+REACTION_CONTEXT = SlackWebMessageContext(id="123.456", channel="C_ALERTS")
+
+
+def test_react_adds_emoji_to_message():
+    integration = _build_integration()
+    integration.react("alerts", REACTION_CONTEXT, Icon.CHECK)
+    integration.client.reactions_add.assert_called_once_with(
+        channel="C_ALERTS", timestamp="123.456", name="white_check_mark"
+    )
+    integration.client.reactions_remove.assert_not_called()
+
+
+def test_react_removes_emoji_from_message():
+    integration = _build_integration()
+    integration.react("alerts", REACTION_CONTEXT, Icon.CHECK, ReactionAction.REMOVE)
+    integration.client.reactions_remove.assert_called_once_with(
+        channel="C_ALERTS", timestamp="123.456", name="white_check_mark"
+    )
+    integration.client.reactions_add.assert_not_called()
+
+
+def test_react_maps_every_icon_to_an_emoji_name():
+    assert set(ICON_TO_SLACK_EMOJI_NAME) == set(Icon)
+
+
+def test_react_skips_icon_without_emoji_name(monkeypatch):
+    monkeypatch.delitem(ICON_TO_SLACK_EMOJI_NAME, Icon.CHECK)
+    integration = _build_integration()
+    integration.react("alerts", REACTION_CONTEXT, Icon.CHECK)
+    integration.client.reactions_add.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        "missing_scope",
+        "already_reacted",
+        "no_reaction",
+        "message_not_found",
+        "is_archived",
+        "ratelimited",
+    ],
+)
+def test_react_does_not_raise_on_slack_errors(error):
+    integration = _build_integration()
+    integration.client.reactions_add.side_effect = SlackApiError(
+        "error", MagicMock(data={"error": error})
+    )
+    integration.react("alerts", REACTION_CONTEXT, Icon.CHECK)
+    integration.client.reactions_add.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "exception", [SlackRequestError("request failed"), TimeoutError("timed out")]
+)
+def test_react_does_not_raise_on_request_errors(exception):
+    integration = _build_integration()
+    integration.client.reactions_add.side_effect = exception
+    integration.react("alerts", REACTION_CONTEXT, Icon.CHECK)
+    integration.client.reactions_add.assert_called_once()
+
+
+def test_react_records_unexpected_slack_errors_only():
+    tracking = MagicMock()
+    integration = SlackWebMessagingIntegration(MagicMock(), tracking)
+    integration.client.reactions_add.side_effect = [
+        SlackApiError("error", MagicMock(data={"error": "already_reacted"})),
+        SlackApiError("error", MagicMock(data={"error": "ratelimited"})),
+    ]
+    integration.react("alerts", REACTION_CONTEXT, Icon.CHECK)
+    tracking.record_internal_exception.assert_not_called()
+    integration.react("alerts", REACTION_CONTEXT, Icon.CHECK)
+    tracking.record_internal_exception.assert_called_once()

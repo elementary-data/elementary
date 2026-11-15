@@ -1,10 +1,12 @@
 from typing import Any, Generic, Mapping
 
+from elementary.messages.blocks import Icon
 from elementary.messages.message_body import MessageBody
 from elementary.messages.messaging_integrations.base_messaging_integration import (
     BaseMessagingIntegration,
     MessageContextType,
     MessageSendResult,
+    ReactionAction,
 )
 from elementary.messages.messaging_integrations.exceptions import (
     MessagingIntegrationError,
@@ -49,3 +51,14 @@ class MappedMessagingIntegration(
         if destination not in self._mapping:
             raise MessagingIntegrationError(f"Invalid destination: {destination}")
         return self._mapping[destination].reply_to_message(None, message_context, body)
+
+    def react(
+        self,
+        destination: str,
+        message_context: MessageContextType,
+        icon: Icon,
+        action: ReactionAction = ReactionAction.ADD,
+    ) -> None:
+        integration = self._mapping.get(destination)
+        if integration is not None:
+            integration.react(None, message_context, icon, action)
