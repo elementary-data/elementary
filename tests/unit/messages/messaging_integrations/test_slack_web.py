@@ -1,3 +1,4 @@
+from http.client import IncompleteRead
 from unittest.mock import MagicMock
 
 import pytest
@@ -320,7 +321,13 @@ def test_react_does_not_raise_on_slack_errors(error):
 
 
 @pytest.mark.parametrize(
-    "exception", [SlackRequestError("request failed"), TimeoutError("timed out")]
+    "exception",
+    [
+        SlackRequestError("request failed"),
+        TimeoutError("timed out"),
+        IncompleteRead(b"partial"),
+        SlackApiError("error", {"status": 502, "headers": {}, "body": "<html>"}),
+    ],
 )
 def test_react_does_not_raise_on_request_errors(exception):
     integration = _build_integration()

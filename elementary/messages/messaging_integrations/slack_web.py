@@ -1,6 +1,7 @@
 import json
 import ssl
 import time
+from http.client import HTTPException
 from typing import Any, Dict, Iterator, List, Optional
 
 from ratelimit import limits, sleep_and_retry
@@ -160,14 +161,14 @@ class SlackWebMessagingIntegration(
                 name=emoji_name,
             )
         except SlackApiError as err:
-            err_type = err.response.data.get("error")
+            err_type = _get_slack_error_code(err)
             if err_type in _SKIPPED_REACTION_ERRORS:
                 logger.info(f"Skipped Slack reaction {action.value}: {err_type}")
                 return
             if self.tracking:
                 self.tracking.record_internal_exception(err)
             logger.warning(f"Failed to {action.value} Slack reaction: {err_type}")
-        except (SlackClientError, OSError) as err:
+        except (SlackClientError, OSError, HTTPException) as err:
             if self.tracking:
                 self.tracking.record_internal_exception(err)
             logger.warning(
@@ -371,3 +372,9 @@ class SlackWebMessagingIntegration(
             if err.response.data["error"] != "users_not_found":
                 logger.error(f"Unable to get Slack user ID from email: {err}.")
             return None
+
+
+def _get_slack_error_code(err: SlackApiError) -> Optional[str]:
+    # Non-JSON error bodies (e.g. a proxy's HTML 502) come back as a plain dict.
+    data = getattr(err.response, "data", err.response)
+    return data.get("error") if isinstance(data, dict) else None
