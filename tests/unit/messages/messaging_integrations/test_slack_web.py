@@ -1,6 +1,6 @@
 import json
 from http.client import IncompleteRead
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from slack_sdk.errors import SlackApiError, SlackRequestError
@@ -334,11 +334,17 @@ def test_react_does_not_raise_on_slack_errors(error):
         SlackApiError("error", {"status": 502, "headers": {}, "body": "<html>"}),
     ],
 )
-def test_react_does_not_raise_on_request_errors(exception):
-    integration = _build_integration()
+def test_react_tracks_and_warns_on_request_errors(exception):
+    tracking = MagicMock()
+    integration = SlackWebMessagingIntegration(MagicMock(), tracking)
     integration.client.reactions_add.side_effect = exception
-    integration.react_to_message("alerts", REACTION_CONTEXT, Icon.CHECK)
+    with patch(
+        "elementary.messages.messaging_integrations.slack_web.logger"
+    ) as mock_logger:
+        integration.react_to_message("alerts", REACTION_CONTEXT, Icon.CHECK)
     integration.client.reactions_add.assert_called_once()
+    tracking.record_internal_exception.assert_called_once_with(exception)
+    mock_logger.warning.assert_called_once()
 
 
 def test_react_records_unexpected_slack_errors_only():
