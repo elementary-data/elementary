@@ -261,3 +261,79 @@ def test_send_raises_generic_error_for_other_slack_errors():
     with pytest.raises(MessagingIntegrationError) as exc_info:
         integration.send_message("alerts", HANDLE_MENTION_BODY)
     assert not isinstance(exc_info.value, MessagingIntegrationDestinationNotFoundError)
+
+
+def _build_bare_owner_integration() -> SlackWebMessagingIntegration:
+    client = MagicMock()
+    client.users_list.return_value = {
+        "members": [
+            {
+                "id": "U_ADA",
+                "name": "adauser",
+                "profile": {"email": "ada@example.com", "display_name": "countess"},
+            }
+        ]
+    }
+
+    def lookup_by_email(email):
+        if email == "ada@example.com":
+            return {"user": {"id": "U_ADA"}}
+        raise SlackApiError("error", MagicMock(data={"error": "users_not_found"}))
+
+    client.users_lookupByEmail.side_effect = lookup_by_email
+    client.usergroups_list.return_value = {
+        "usergroups": [{"id": "S_DATA_TEAM", "handle": "data-team"}]
+    }
+    client.chat_postMessage.return_value = {"ts": "123.456", "channel": "C1"}
+    return SlackWebMessagingIntegration(client)
+
+
+def test_resolve_user_id_full_email_uses_email_lookup():
+    integration = _build_bare_owner_integration()
+    assert integration.resolve_user_id("ada@example.com") == "U_ADA"
+    integration.client.users_lookupByEmail.assert_called_once_with(
+        email="ada@example.com"
+    )
+    integration.client.users_list.assert_not_called()
+
+
+@pytest.mark.parametrize("owner", ["@ada", "ada", "Ada", "countess"])
+def test_resolve_user_id_bare_owner_as_handle(owner):
+    integration = _build_bare_owner_integration()
+    assert integration.resolve_user_id(owner) == "U_ADA"
+    integration.client.users_lookupByEmail.assert_not_called()
+
+
+def test_resolve_user_id_bare_owner_as_usergroup_handle():
+    integration = _build_bare_owner_integration()
+    assert integration.resolve_user_id("data-team") == "S_DATA_TEAM"
+    integration.client.users_lookupByEmail.assert_not_called()
+
+
+def test_resolve_user_id_bare_owner_matching_nothing():
+    integration = _build_bare_owner_integration()
+    assert integration.resolve_user_id("not-a-person") is None
+    integration.client.users_lookupByEmail.assert_not_called()
+
+
+def test_send_resolves_bare_owner_mentions():
+    integration = _build_bare_owner_integration()
+    body = MessageBody(
+        blocks=[
+            LinesBlock(
+                lines=[
+                    LineBlock(
+                        inlines=[
+                            MentionBlock(user="ada"),
+                            MentionBlock(user="not-a-person"),
+                        ],
+                        sep=", ",
+                    )
+                ]
+            )
+        ]
+    )
+    integration.send_message("C1", body)
+    sent = integration.client.chat_postMessage.call_args.kwargs
+    rendered = sent["blocks"] + sent["attachments"]
+    assert "<@U_ADA>, not-a-person" in rendered
