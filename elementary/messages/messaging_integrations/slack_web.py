@@ -157,12 +157,10 @@ class SlackWebMessagingIntegration(
             if action == ReactionAction.ADD
             else self.client.reactions_remove
         )
+        channel = message_context.channel
+        timestamp = message_context.id
         try:
-            method(
-                channel=message_context.channel,
-                timestamp=message_context.id,
-                name=emoji_name,
-            )
+            method(channel=channel, timestamp=timestamp, name=emoji_name)
         except SlackApiError as err:
             err_type = _get_slack_error_code(err)
             if err_type in _SKIPPED_REACTION_ERRORS:
@@ -171,7 +169,14 @@ class SlackWebMessagingIntegration(
             if self.tracking:
                 self.tracking.record_internal_exception(err)
             logger.warning(f"Failed to {action.value} Slack reaction: {err_type}")
-        except (SlackClientError, OSError, HTTPException, json.JSONDecodeError) as err:
+        except (
+            SlackClientError,
+            OSError,
+            HTTPException,
+            json.JSONDecodeError,
+            # The SDK raises AttributeError when the response JSON is not an object.
+            AttributeError,
+        ) as err:
             if self.tracking:
                 self.tracking.record_internal_exception(err)
             logger.warning(

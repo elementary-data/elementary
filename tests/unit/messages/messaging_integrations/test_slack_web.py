@@ -3,6 +3,7 @@ from http.client import IncompleteRead
 from unittest.mock import MagicMock, patch
 
 import pytest
+from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError, SlackRequestError
 
 from elementary.messages.blocks import Icon, LineBlock, LinesBlock, MentionBlock
@@ -434,3 +435,21 @@ def test_send_resolves_bare_owner_mentions():
     sent = integration.client.chat_postMessage.call_args.kwargs
     rendered = sent["blocks"] + sent["attachments"]
     assert "<@U_ADA>, not-a-person" in rendered
+
+
+def test_react_tracks_and_warns_on_non_object_json_response():
+    tracking = MagicMock()
+    integration = SlackWebMessagingIntegration(WebClient(token="xoxb-test"), tracking)
+    with patch.object(
+        WebClient,
+        "_perform_urllib_http_request",
+        return_value={"status": 200, "headers": {}, "body": "[1]"},
+    ), patch(
+        "elementary.messages.messaging_integrations.slack_web.logger"
+    ) as mock_logger:
+        integration.react_to_message("alerts", REACTION_CONTEXT, Icon.CHECK)
+    tracking.record_internal_exception.assert_called_once()
+    assert isinstance(
+        tracking.record_internal_exception.call_args.args[0], AttributeError
+    )
+    mock_logger.warning.assert_called_once()
