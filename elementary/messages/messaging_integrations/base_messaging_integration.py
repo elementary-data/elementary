@@ -6,6 +6,7 @@ from typing import Any, Generic, Optional, TypeVar
 from elementary.messages.blocks import Icon
 from elementary.messages.message_body import MessageBody
 from elementary.messages.messaging_integrations.exceptions import (
+    MessageIntegrationReactionNotSupportedError,
     MessageIntegrationReplyNotSupportedError,
 )
 from elementary.utils.log import get_logger
@@ -52,6 +53,9 @@ class BaseMessagingIntegration(ABC, Generic[DestinationType, MessageContextType]
     def supports_actions(self) -> bool:
         return False
 
+    def supports_reactions(self) -> bool:
+        return False
+
     def reply_to_message(
         self,
         destination: DestinationType,
@@ -62,11 +66,13 @@ class BaseMessagingIntegration(ABC, Generic[DestinationType, MessageContextType]
             raise MessageIntegrationReplyNotSupportedError(type(self).__name__)
         raise NotImplementedError
 
-    def react(
+    def react_to_message(
         self,
         destination: DestinationType,
         message_context: MessageContextType,
         icon: Icon,
         action: ReactionAction = ReactionAction.ADD,
     ) -> None:
-        return
+        if not self.supports_reactions():
+            raise MessageIntegrationReactionNotSupportedError(type(self).__name__)
+        raise NotImplementedError

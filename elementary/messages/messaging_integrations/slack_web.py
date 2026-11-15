@@ -115,6 +115,9 @@ class SlackWebMessagingIntegration(
     def supports_reply(self) -> bool:
         return True
 
+    def supports_reactions(self) -> bool:
+        return True
+
     def supports_actions(self) -> bool:
         return True
 
@@ -138,7 +141,7 @@ class SlackWebMessagingIntegration(
             reply_broadcast=self.reply_broadcast,
         )
 
-    def react(
+    def react_to_message(
         self,
         destination: Channel,
         message_context: SlackWebMessageContext,

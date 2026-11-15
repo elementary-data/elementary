@@ -274,7 +274,7 @@ REACTION_CONTEXT = SlackWebMessageContext(id="123.456", channel="C_ALERTS")
 
 def test_react_adds_emoji_to_message():
     integration = _build_integration()
-    integration.react("alerts", REACTION_CONTEXT, Icon.CHECK)
+    integration.react_to_message("alerts", REACTION_CONTEXT, Icon.CHECK)
     integration.client.reactions_add.assert_called_once_with(
         channel="C_ALERTS", timestamp="123.456", name="white_check_mark"
     )
@@ -283,7 +283,9 @@ def test_react_adds_emoji_to_message():
 
 def test_react_removes_emoji_from_message():
     integration = _build_integration()
-    integration.react("alerts", REACTION_CONTEXT, Icon.CHECK, ReactionAction.REMOVE)
+    integration.react_to_message(
+        "alerts", REACTION_CONTEXT, Icon.CHECK, ReactionAction.REMOVE
+    )
     integration.client.reactions_remove.assert_called_once_with(
         channel="C_ALERTS", timestamp="123.456", name="white_check_mark"
     )
@@ -297,7 +299,7 @@ def test_react_maps_every_icon_to_an_emoji_name():
 def test_react_skips_icon_without_emoji_name(monkeypatch):
     monkeypatch.delitem(ICON_TO_SLACK_EMOJI_NAME, Icon.CHECK)
     integration = _build_integration()
-    integration.react("alerts", REACTION_CONTEXT, Icon.CHECK)
+    integration.react_to_message("alerts", REACTION_CONTEXT, Icon.CHECK)
     integration.client.reactions_add.assert_not_called()
 
 
@@ -317,7 +319,7 @@ def test_react_does_not_raise_on_slack_errors(error):
     integration.client.reactions_add.side_effect = SlackApiError(
         "error", MagicMock(data={"error": error})
     )
-    integration.react("alerts", REACTION_CONTEXT, Icon.CHECK)
+    integration.react_to_message("alerts", REACTION_CONTEXT, Icon.CHECK)
     integration.client.reactions_add.assert_called_once()
 
 
@@ -335,7 +337,7 @@ def test_react_does_not_raise_on_slack_errors(error):
 def test_react_does_not_raise_on_request_errors(exception):
     integration = _build_integration()
     integration.client.reactions_add.side_effect = exception
-    integration.react("alerts", REACTION_CONTEXT, Icon.CHECK)
+    integration.react_to_message("alerts", REACTION_CONTEXT, Icon.CHECK)
     integration.client.reactions_add.assert_called_once()
 
 
@@ -346,9 +348,9 @@ def test_react_records_unexpected_slack_errors_only():
         SlackApiError("error", MagicMock(data={"error": "already_reacted"})),
         SlackApiError("error", MagicMock(data={"error": "ratelimited"})),
     ]
-    integration.react("alerts", REACTION_CONTEXT, Icon.CHECK)
+    integration.react_to_message("alerts", REACTION_CONTEXT, Icon.CHECK)
     tracking.record_internal_exception.assert_not_called()
-    integration.react("alerts", REACTION_CONTEXT, Icon.CHECK)
+    integration.react_to_message("alerts", REACTION_CONTEXT, Icon.CHECK)
     tracking.record_internal_exception.assert_called_once()
 
 
