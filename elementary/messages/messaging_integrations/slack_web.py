@@ -271,7 +271,9 @@ class SlackWebMessagingIntegration(
     def resolve_user_id(self, user: str) -> Optional[str]:
         if user.startswith("@"):
             return self.get_user_id_from_handle(user[1:])
-        return self.get_user_id_from_email(user)
+        if "@" in user:
+            return self.get_user_id_from_email(user)
+        return self.get_user_id_from_handle(user)
 
     def get_user_id_from_handle(self, handle: str) -> Optional[str]:
         if self._handle_to_user_id_cache is None:
