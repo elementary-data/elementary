@@ -1,7 +1,11 @@
 pytest
 pytest-parametrization>=2022.2.1
 pre-commit
+# Transitive via pre-commit/virtualenv, floored to address GHSA advisories fixed in filelock 4.2.1.
+filelock>=4.2.1
 jinja2
+# Transitive via beautifulsoup4, floored to address the advisories fixed in soupsieve 4.0.0.
+soupsieve>=4.0.0; python_full_version >= "3.11.5"
 # Pinned below 1.16 because mypy >=1.16 crashes with INTERNAL ERROR on this codebase.
 mypy<1.16
 deepdiff
