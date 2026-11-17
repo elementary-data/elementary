@@ -4,13 +4,15 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from elementary.messages.blocks import HeaderBlock
+from elementary.messages.blocks import HeaderBlock, Icon
 from elementary.messages.message_body import MessageBody
 from elementary.messages.messaging_integrations.base_messaging_integration import (
     BaseMessagingIntegration,
     MessageSendResult,
+    ReactionAction,
 )
 from elementary.messages.messaging_integrations.exceptions import (
+    MessageIntegrationReactionNotSupportedError,
     MessagingIntegrationError,
 )
 from elementary.messages.messaging_integrations.mapped import MappedMessagingIntegration
@@ -181,3 +183,48 @@ def test_reply_to_message_invalid_destination(
     with pytest.raises(MessagingIntegrationError) as exc_info:
         mapped_integration.reply_to_message(destination, message_context, body)
     assert str(exc_info.value) == "Invalid destination: invalid_destination"
+
+
+def test_react_to_message_not_supported_by_default(
+    mock_integration: MockMessagingIntegration,
+) -> None:
+    assert not mock_integration.supports_reactions()
+    with pytest.raises(MessageIntegrationReactionNotSupportedError):
+        mock_integration.react_to_message(
+            None, MockMessageContext(id="test_id"), Icon.CHECK
+        )
+
+
+def test_supports_reactions_requires_every_integration(
+    mapped_integration: MappedMessagingIntegration,
+    mock_integration: MockMessagingIntegration,
+) -> None:
+    assert not mapped_integration.supports_reactions()
+    mock_integration.supports_reactions = lambda: True  # type: ignore[method-assign]
+    assert mapped_integration.supports_reactions()
+
+
+@pytest.mark.parametrize("action", [ReactionAction.ADD, ReactionAction.REMOVE])
+def test_react_to_message_delegates_to_destination_integration(
+    mapped_integration: MappedMessagingIntegration,
+    mock_integration: MockMessagingIntegration,
+    action: ReactionAction,
+) -> None:
+    react_mock = MagicMock()
+    mock_integration.react_to_message = react_mock  # type: ignore[method-assign]
+    message_context = MockMessageContext(id="test_id")
+
+    mapped_integration.react_to_message(
+        "test_destination", message_context, Icon.CHECK, action
+    )
+
+    react_mock.assert_called_once_with(None, message_context, Icon.CHECK, action)
+
+
+def test_react_to_message_invalid_destination(
+    mapped_integration: MappedMessagingIntegration,
+) -> None:
+    with pytest.raises(MessagingIntegrationError):
+        mapped_integration.react_to_message(
+            "invalid_destination", MockMessageContext(id="test_id"), Icon.CHECK
+        )
