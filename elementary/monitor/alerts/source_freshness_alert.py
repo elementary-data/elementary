@@ -164,8 +164,12 @@ class SourceFreshnessAlertModel(AlertModel):
         return f"{self.source_name}.{self.identifier}"
 
     @property
+    def is_runtime_error(self) -> bool:
+        return (self.original_status or "").lower() == "runtime error"
+
+    @property
     def error_message(self) -> str:
-        if self.original_status == "runtime error":
+        if self.is_runtime_error:
             return f"Failed to calculate the source freshness\n```{self.error}```"
         return self.result_description
 
@@ -178,7 +182,7 @@ class SourceFreshnessAlertModel(AlertModel):
                 if part
             ]
         )
-        if self.original_status == "runtime error":
+        if self.is_runtime_error:
             return f'Failed to calculate the source freshness of "{source_fqn}"'
         return f'Freshness exceeded the acceptable times on source "{source_fqn}"'
 
