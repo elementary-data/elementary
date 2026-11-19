@@ -5,6 +5,7 @@ import pytest
 
 from elementary.monitor.fetchers.alerts.schema.alert_data import (
     BaseAlertDataSchema,
+    SourceFreshnessAlertDataSchema,
     TestAlertDataSchema,
 )
 from elementary.utils.time import DATETIME_FORMAT
@@ -36,6 +37,15 @@ TEST_ALERT = dict(
     severity="warning",
     test_meta=dict(),
     elementary_unique_id="e_id_1"
+)
+SOURCE_FRESHNESS_ALERT = dict(
+    **BASE_ALERT,
+    source_freshness_execution_id="sfe_id_1",
+    source_name="source_1",
+    identifier="table_1",
+    original_status="error",
+    path="models/sources.yml",
+    freshness_description="default"
 )
 
 
@@ -119,3 +129,18 @@ def test_tags():
 
     base_alert = BaseAlertDataSchema(**{**BASE_ALERT, "tags": "a"})
     assert sorted(base_alert.tags) == sorted(["a"])
+
+
+@pytest.mark.parametrize(
+    "model_meta,expected",
+    [
+        (dict(), "default"),
+        (dict(description="custom"), "custom"),
+        (dict(alerts_config=dict(description="custom")), "custom"),
+    ],
+)
+def test_source_freshness_alert_description(model_meta, expected):
+    alert_data = SourceFreshnessAlertDataSchema(
+        **{**SOURCE_FRESHNESS_ALERT, "model_meta": model_meta}
+    )
+    assert alert_data.format_alert().freshness_description == expected
