@@ -430,16 +430,20 @@ class DataMonitoringAlerts(DataMonitoring):
 
         # Fetch and filter data
         alerts = self._fetch_data(days_back)
-        alerts = self._filter_data(alerts)
+        filtered_alerts = self._filter_data(alerts)
+        filtered_alert_ids = {alert.id for alert in filtered_alerts}
+        filtered_out_alerts = [
+            alert for alert in alerts if alert.id not in filtered_alert_ids
+        ]
         alerts_last_sent_times = self._fetch_last_sent_times(days_back)
         sorted_alerts = self._sort_alerts(
-            alerts=alerts, alerts_last_sent_times=alerts_last_sent_times
+            alerts=filtered_alerts, alerts_last_sent_times=alerts_last_sent_times
         )
         alerts_to_skip = sorted_alerts.skip
         alerts_to_send = sorted_alerts.send
 
         # Skip alerts
-        self._skip_alerts(alerts_to_skip)
+        self._skip_alerts([*alerts_to_skip, *filtered_out_alerts])
 
         # Format alerts
         formatted_alerts = self._format_alerts(alerts=alerts_to_send)
