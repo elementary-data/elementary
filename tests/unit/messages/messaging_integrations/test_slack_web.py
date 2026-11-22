@@ -270,6 +270,48 @@ def test_send_raises_generic_error_for_other_slack_errors():
     assert not isinstance(exc_info.value, MessagingIntegrationDestinationNotFoundError)
 
 
+NOT_IN_CHANNEL_ERROR = SlackApiError(
+    "error", MagicMock(data={"error": "not_in_channel"})
+)
+
+
+def _build_not_in_channel_integration() -> SlackWebMessagingIntegration:
+    integration = _build_integration()
+    integration.client.conversations_list.return_value = {
+        "channels": [{"id": "C_ALERTS", "name": "alerts"}],
+        "response_metadata": {"next_cursor": ""},
+    }
+    return integration
+
+
+@pytest.mark.parametrize("reply", [False, True])
+def test_send_joins_channel_and_retries_on_not_in_channel(reply):
+    integration = _build_not_in_channel_integration()
+    integration.reply_broadcast = True
+    integration.client.chat_postMessage.side_effect = [
+        NOT_IN_CHANNEL_ERROR,
+        {"ts": "123.456", "channel": "C_ALERTS"},
+    ]
+    if reply:
+        context = SlackWebMessageContext(id="111.222", channel="C_ALERTS")
+        result = integration.reply_to_message("alerts", context, HANDLE_MENTION_BODY)
+    else:
+        result = integration.send_message("alerts", HANDLE_MENTION_BODY)
+    assert result.message_context.id == "123.456"
+    integration.client.conversations_join.assert_called_once_with(channel="C_ALERTS")
+    first_call, retry_call = integration.client.chat_postMessage.call_args_list
+    assert retry_call.kwargs == first_call.kwargs
+
+
+def test_send_raises_when_still_not_in_channel_after_join():
+    integration = _build_not_in_channel_integration()
+    integration.client.chat_postMessage.side_effect = NOT_IN_CHANNEL_ERROR
+    with pytest.raises(MessagingIntegrationError):
+        integration.send_message("alerts", HANDLE_MENTION_BODY)
+    integration.client.conversations_join.assert_called_once()
+    assert integration.client.chat_postMessage.call_count == 2
+
+
 REACTION_CONTEXT = SlackWebMessageContext(id="123.456", channel="C_ALERTS")
 
 
