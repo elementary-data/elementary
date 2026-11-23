@@ -3,10 +3,13 @@ from pathlib import Path
 
 from elementary.messages.blocks import (
     ActionsBlock,
+    CodeBlock,
     LineBlock,
     LinesBlock,
+    LinkBlock,
     MentionBlock,
     TableBlock,
+    TextBlock,
     UserSelectActionBlock,
 )
 from elementary.messages.formats.block_kit import (
@@ -95,3 +98,127 @@ class TestBlockKit(BaseTestFormat[FormattedBlockKitMessage]):
         for row in table_block["rows"][1:]:  # skip header row
             for cell in row:
                 assert cell["text"], f"raw_text cell must not be empty, got: {cell}"
+
+
+def _section_texts(result: FormattedBlockKitMessage) -> list:
+    return [block["text"]["text"] for block in result.blocks]
+
+
+def test_long_lines_block_is_split_into_sections_at_line_breaks():
+    lines = [f"line {i} " + "x" * 90 for i in range(80)]
+    message = MessageBody(
+        blocks=[
+            LinesBlock(
+                lines=[LineBlock(inlines=[TextBlock(text=line)]) for line in lines]
+            )
+        ]
+    )
+    texts = _section_texts(format_block_kit(message))
+    assert len(texts) == 3
+    assert all(len(text) <= 3000 for text in texts)
+    assert "\n".join(texts).split("\n") == lines
+
+
+def test_single_long_line_is_split_at_spaces():
+    words = ["word" + str(i).zfill(4) for i in range(700)]
+    message = MessageBody(
+        blocks=[
+            LinesBlock(lines=[LineBlock(inlines=[TextBlock(text=" ".join(words))])])
+        ]
+    )
+    texts = _section_texts(format_block_kit(message))
+    assert len(texts) == 3
+    assert all(len(text) <= 3000 for text in texts)
+    assert " ".join(texts).split(" ") == words
+
+
+def _line_with_link(prefix: str, suffix: str = "") -> MessageBody:
+    inlines = [
+        TextBlock(text=prefix),
+        LinkBlock(text="see the full report", url="https://example.com"),
+    ]
+    if suffix:
+        inlines.append(TextBlock(text=suffix))
+    return MessageBody(blocks=[LinesBlock(lines=[LineBlock(inlines=inlines)])])
+
+
+def test_split_skips_spaces_inside_a_link():
+    message = _line_with_link("x" * 2970, suffix="after")
+    texts = _section_texts(format_block_kit(message))
+    assert texts == ["x" * 2970, "<https://example.com|see the full report> after"]
+
+
+def test_split_cuts_before_a_link_that_crosses_the_limit():
+    message = _line_with_link("x" * 2990)
+    texts = _section_texts(format_block_kit(message))
+    assert texts == ["x" * 2990, "<https://example.com|see the full report>"]
+
+
+def test_long_code_block_is_split_into_code_sections():
+    code_lines = [f"select {i} as col_{i}" + " " * 30 for i in range(150)]
+    message = MessageBody(blocks=[CodeBlock(text="\n".join(code_lines))])
+    texts = _section_texts(format_block_kit(message))
+    assert len(texts) == 3
+    assert all(len(text) <= 3000 for text in texts)
+    assert all(text.startswith("```") and text.endswith("```") for text in texts)
+    assert "\n".join(text[3:-3] for text in texts).split("\n") == code_lines
+
+
+def test_split_keeps_other_spaces_and_adds_no_empty_section():
+    line = "x" * 3000 + " " + "a  b"
+    message = MessageBody(
+        blocks=[
+            LinesBlock(lines=[LineBlock(inlines=[TextBlock(text=line)])]),
+            LinesBlock(lines=[LineBlock(inlines=[TextBlock(text="x" * 3000 + " ")])]),
+        ]
+    )
+    texts = _section_texts(format_block_kit(message))
+    assert texts == ["x" * 3000, "a  b", "x" * 3000]
+
+
+def test_split_adds_no_section_for_a_leading_empty_line():
+    message = MessageBody(
+        blocks=[
+            LinesBlock(
+                lines=[
+                    LineBlock(inlines=[TextBlock(text="")]),
+                    LineBlock(inlines=[TextBlock(text="x" * 3000)]),
+                ]
+            )
+        ]
+    )
+    assert _section_texts(format_block_kit(message)) == ["x" * 3000]
+
+
+def test_split_keeps_section_of_several_empty_lines():
+    message = MessageBody(
+        blocks=[
+            LinesBlock(
+                lines=[
+                    LineBlock(inlines=[TextBlock(text="")]),
+                    LineBlock(inlines=[TextBlock(text="")]),
+                ]
+            )
+        ]
+    )
+    assert _section_texts(format_block_kit(message)) == ["\n"]
+
+
+def test_split_adds_no_section_for_empty_lines_only():
+    message = MessageBody(
+        blocks=[
+            LinesBlock(lines=[LineBlock(inlines=[TextBlock(text="")])]),
+            LinesBlock(
+                lines=[
+                    LineBlock(inlines=[TextBlock(text="x" * 3000)]),
+                    LineBlock(inlines=[TextBlock(text="")]),
+                ]
+            ),
+        ]
+    )
+    assert _section_texts(format_block_kit(message)) == ["x" * 3000]
+
+
+def test_split_keeps_newline_only_code_block():
+    message = MessageBody(blocks=[CodeBlock(text="\n")])
+    assert _section_texts(format_block_kit(message)) == ["```\n```"]
