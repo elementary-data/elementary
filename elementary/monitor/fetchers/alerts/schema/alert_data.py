@@ -350,7 +350,7 @@ class SourceFreshnessAlertDataSchema(BaseAlertDataSchema):
             max_loaded_at=self.max_loaded_at,
             max_loaded_at_time_ago_in_s=self.max_loaded_at_time_ago_in_s,
             filter=self.filter,
-            freshness_description=self.freshness_description,
+            freshness_description=self.description or self.freshness_description,
             alert_class_id=self.alert_class_id,
             model_unique_id=self.model_unique_id,
             detected_at=self.detected_at,
