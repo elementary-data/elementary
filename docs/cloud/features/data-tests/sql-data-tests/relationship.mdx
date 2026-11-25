@@ -1,0 +1,57 @@
+---
+title: "Relationship test"
+sidebarTitle: "Relationship"
+description: "Detect values that have no matching value in another table."
+badge: "Elementary Cloud"
+---
+
+import SqlTestsRequirements from '/snippets/cloud/features/data-tests/sql-tests-requirements.mdx';
+
+Validates referential integrity between two tables: every value in the tested table must exist in a target table. Use it for foreign keys, such as orders that reference customers, or events that reference users.
+
+This is a [SQL data test](/cloud/features/data-tests/sql-data-tests): Elementary runs it against your warehouse on a schedule, with no SQL to write and no pull request.
+
+<SqlTestsRequirements />
+
+## How it works
+
+On each run, Elementary returns every row of the tested table whose value has no equal value in the target table's target field. Each failing row is one row of the tested table, and the row sample contains the full rows.
+
+- **Null source values are ignored.** A row with a null value in the tested field never fails. To require a value, add a [completeness test](/cloud/features/data-tests/sql-data-tests/completeness).
+- **The `where` clause applies to the tested table only.** All rows of the target table are used as valid values.
+- **Both tables must use the same warehouse connection**, and the target table must be an asset in the Elementary Catalog.
+
+Results count toward the **Consistency** [data quality dimension](/cloud/features/collaboration-and-communication/data-quality-dimensions).
+
+## Configuration
+
+| Setting | Description |
+| --- | --- |
+| **Tested field** | The column, or an expression, in the tested table that references the target, for example `customer_id` |
+| **Target table** | The table that holds the valid values, for example `analytics.core.customers` |
+| **Target field** | The column, or an expression, in the target table to match against, for example `id` |
+| **Where clause** | Optional condition that limits the rows of the tested table |
+
+<Frame caption="Relationship test configuration">
+  <img src="/pics/cloud/data-tests/sql-data-tests-relationship.webp" alt="Relationship test configuration with the tested field, target table, and target field set to columns" />
+</Frame>
+
+Severity, thresholds, sampled rows, and cadence work the same for all SQL data tests. See [Configuration](/cloud/features/data-tests/sql-data-tests#configuration).
+
+The test is linked to the tested table: it appears on that table in the Catalog, and its incidents are grouped there.
+
+## Examples
+
+| Goal | Tested table and field | Target table and field | Where clause |
+| --- | --- | --- | --- |
+| Every order references a customer | `orders.customer_id` | `customers.id` | — |
+| Every event references a user | `events.user_id` | `users.user_id` | `event_type != 'anonymous'` |
+| Product codes match the catalog, regardless of case | `order_items`, expression `upper(sku)` | `products`, expression `upper(sku)` | — |
+
+<Tip>
+If the target table is updated later than the tested table, new rows can fail until the target catches up. Schedule the test after both tables load, or use a `where` clause to skip the most recent rows, for example `created_at < current_date`.
+</Tip>
+
+## dbt equivalent
+
+The dbt [`relationships`](https://docs.getdbt.com/reference/resource-properties/data-tests#relationships) test checks the same rule from your dbt project. See [Cloud tests or dbt tests](/cloud/features/data-tests/cloud-or-dbt-tests) to decide which to use.

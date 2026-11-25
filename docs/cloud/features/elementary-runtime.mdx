@@ -21,6 +21,16 @@ Elementary Runtime is a small service that runs in your network. It uses an outb
 
 Elementary Cloud remains the control plane. It decides what should run, prepares the SQL, schedules tests, interprets results, and manages incidents. Elementary Runtime is the data plane for supported operations. It checks and executes the SQL, then returns only the result needed by the Cloud workflow.
 
+## What runs on the runtime
+
+When a runtime reports a warehouse connection as healthy, Elementary sends the queries that read table data on that connection through the runtime, instead of connecting to the warehouse directly:
+
+- [SQL data tests](/cloud/features/data-tests/sql-data-tests): uniqueness, completeness, validity, and relationship tests, including their previews
+- [Custom SQL tests](/cloud/features/data-tests/custom-sql-tests), including query validation runs
+- Warehouse queries that the [Elementary AI agent](/cloud/ai-agents/ai-test-coverage) runs after you approve them
+
+Metadata-based monitors, such as [cloud freshness](/cloud/features/anomaly-detection/automated-freshness) and [cloud volume](/cloud/features/anomaly-detection/automated-volume) tests, are not affected.
+
 ## Why use Elementary Runtime
 
 <CardGroup cols={2}>

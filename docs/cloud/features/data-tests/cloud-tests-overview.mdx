@@ -1,7 +1,7 @@
 ---
 title: "Cloud Tests"
 sidebarTitle: "Cloud tests"
-description: "Tests that run in Elementary Cloud, outside your dbt pipeline - freshness, volume, data contracts, and custom SQL, configured in the UI with no dbt project required."
+description: "Tests that run in Elementary Cloud, outside your dbt pipeline - freshness, volume, data contracts, SQL data tests, and custom SQL, configured in the UI with no dbt project required."
 badge: "Elementary Cloud"
 ---
 
@@ -20,9 +20,17 @@ Cloud test types include:
 | [Cloud freshness test](/cloud/features/anomaly-detection/automated-freshness) | Tables that haven't been updated within their expected window |
 | [Cloud volume test](/cloud/features/anomaly-detection/automated-volume) | Unexpected drops or spikes in row count |
 | [Data contract test](/cloud/features/data-tests/data-contract-test) | Schema mismatches against a defined contract — column names, types, nullability |
+| [Uniqueness test](/cloud/features/data-tests/sql-data-tests/uniqueness) | Duplicate values in a column or expression |
+| [Completeness test](/cloud/features/data-tests/sql-data-tests/completeness) | Null, empty, or zero values where a value is required |
+| [Validity test](/cloud/features/data-tests/sql-data-tests/validity) | Values that break an allow list, deny list, range, regex, or length rule |
+| [Relationship test](/cloud/features/data-tests/sql-data-tests/relationship) | Values with no match in another table |
 | [Custom SQL test](/cloud/features/data-tests/custom-sql-tests) | Rows that violate a business rule defined in a SQL query |
 
-Freshness, volume, and data contract tests use warehouse metadata collected by Elementary. Custom SQL tests execute against table data and consume compute in your data warehouse.
+Freshness, volume, and data contract tests use warehouse metadata collected by Elementary. [SQL data tests](/cloud/features/data-tests/sql-data-tests) (uniqueness, completeness, validity, and relationship) and custom SQL tests execute against table data and consume compute in your data warehouse. They need data access to the warehouse, through Elementary Cloud or an [Elementary Runtime](/cloud/features/elementary-runtime) in your network.
+
+<Tip>
+If your environment also has a dbt project, many checks can be added either as a cloud test or as a dbt test. See [Cloud tests or dbt tests](/cloud/features/data-tests/cloud-or-dbt-tests).
+</Tip>
 
 ## Adding cloud tests
 
@@ -30,8 +38,8 @@ Cloud freshness and volume tests are activated automatically on all your sources
 
 1. Navigate to the **Test Configuration** page and click **Add Test**. For asset-based tests, you can also start by selecting assets in the Catalog.
 2. Filter on **Elementary Cloud** and choose a test.
-3. Select the assets to test. For a custom SQL test, enter the query instead; Elementary derives its referenced assets from the SQL.
-4. Configure the test parameters, schedule, and metadata.
+3. Select the assets to test. SQL data tests are added to one table at a time. For a custom SQL test, enter the query instead; Elementary derives its referenced assets from the SQL.
+4. Configure the test parameters, schedule, and metadata. For SQL data tests and custom SQL tests, run the test to preview its result before saving.
 5. Submit — no pull request is required.
 
 ## Editing cloud tests

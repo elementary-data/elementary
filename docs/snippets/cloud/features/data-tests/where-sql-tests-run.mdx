@@ -1,0 +1,16 @@
+Elementary runs these queries in one of two ways, depending on how the environment's warehouse connection is set up:
+
+| | Elementary Cloud connection | Elementary Runtime |
+| --- | --- | --- |
+| Where the query runs | Elementary Cloud connects to your warehouse | A service you host in your network connects to your warehouse |
+| Warehouse credentials | The connection configured for the environment in Elementary | Stay in your environment, in the runtime configuration |
+| What Elementary Cloud receives | Test status, failing-row count, and a row sample | Test status, failing-row count, and a row sample, within the limits you set locally |
+| Setup | None beyond enabling data access for the connection | [Deploy](/cloud/features/elementary-runtime/deployment) and [configure](/cloud/features/elementary-runtime/configuration) the runtime |
+
+With [Elementary Runtime](/cloud/features/elementary-runtime), Elementary Cloud still prepares the SQL, schedules the test, and manages results and incidents, but the runtime validates and executes the query inside your network. When a runtime reports a warehouse connection as healthy, Elementary sends all test runs and previews for that connection through the runtime instead of connecting directly.
+
+The runtime also enforces its own local limits for query time, concurrency, and result size, and can limit or disable row samples entirely. See [Local limits](/cloud/features/elementary-runtime/configuration#local-limits) and [What leaves your network](/cloud/features/elementary-runtime/configuration#what-leaves-your-network).
+
+<Tip>
+Use a dedicated, read-only warehouse role for these tests, whichever way they run. It only needs to read the tables your tests query. See [Database roles](/cloud/features/elementary-runtime/configuration#database-roles) for examples per warehouse.
+</Tip>

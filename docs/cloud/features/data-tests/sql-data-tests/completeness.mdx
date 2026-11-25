@@ -1,0 +1,55 @@
+---
+title: "Completeness test"
+sidebarTitle: "Completeness"
+description: "Detect rows where a required value is null, empty, or zero."
+badge: "Elementary Cloud"
+---
+
+import SqlTestsRequirements from '/snippets/cloud/features/data-tests/sql-tests-requirements.mdx';
+
+Validates that a column or expression has a value in every row. Use it for required fields such as IDs, foreign keys, amounts, and status columns.
+
+This is a [SQL data test](/cloud/features/data-tests/sql-data-tests): Elementary runs it against your warehouse on a schedule, with no SQL to write and no pull request.
+
+<SqlTestsRequirements />
+
+## How it works
+
+On each run, Elementary returns every row where the tested value counts as missing. You choose what counts as missing:
+
+| Missing value check | A row fails when |
+| --- | --- |
+| **Null** (default) | The value is `null` |
+| **Empty** | The value is an empty string, `''`. Strings that contain only spaces are not empty |
+| **Zero** | The value is `0`. Use it on numeric columns only |
+
+When you select more than one check, a row fails if it matches any of them. Each failing row is one table row, and the row sample contains the full rows.
+
+Results count toward the **Completeness** [data quality dimension](/cloud/features/collaboration-and-communication/data-quality-dimensions).
+
+## Configuration
+
+| Setting | Description |
+| --- | --- |
+| **Tested field** | The column, or an expression, that must have a value |
+| **Missing values** | One or more of **Null**, **Empty**, and **Zero**. At least one is required |
+| **Where clause** | Optional condition that limits the rows checked |
+
+Severity, thresholds, sampled rows, and cadence work the same for all SQL data tests. See [Configuration](/cloud/features/data-tests/sql-data-tests#configuration).
+
+## Examples
+
+| Goal | Tested field | Missing values | Where clause |
+| --- | --- | --- | --- |
+| Every order has a customer | Column `customer_id` | Null | — |
+| Every user has an email | Column `email` | Null, Empty | — |
+| Every paid invoice has an amount | Column `amount` | Null, Zero | `status = 'paid'` |
+| Trimmed names aren't empty | Expression `trim(name)` | Null, Empty | — |
+
+<Tip>
+Allow a small number of missing values with a threshold instead of a filter, for example **Error if > 100**. See [Results](/cloud/features/data-tests/sql-data-tests#results).
+</Tip>
+
+## dbt equivalent
+
+The dbt [`not_null`](https://docs.getdbt.com/reference/resource-properties/data-tests#not_null) test checks for nulls from your dbt project. Checks for empty strings or zeros need a package test or a custom test in dbt. See [Cloud tests or dbt tests](/cloud/features/data-tests/cloud-or-dbt-tests) to decide which to use.
