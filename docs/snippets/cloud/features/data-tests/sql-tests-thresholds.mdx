@@ -1,0 +1,10 @@
+Every row the test returns is a failing row. Elementary compares the number of failing rows to the test's **Severity** setting:
+
+| Severity setting | Result |
+| --- | --- |
+| **Use simple severity** (default) | Any failing row produces the selected severity: **Error** or **Warning** |
+| **Use conditional severity**, with **Return error if the number of failures >** `X` | **Failure** when the failing-row count is greater than `X` |
+| **Use conditional severity**, with **Return warn if the number of failures >** `Y` | **Warning** when the failing-row count is greater than `Y` |
+| **Use conditional severity**, with both | **Failure** above `X`, otherwise **Warning** above `Y`, otherwise **Pass**. The warning threshold must be lower than the error threshold |
+
+A run that can't complete, for example because the query timed out, a column no longer exists, or the warehouse role lacks permissions, gets the **Error** status with the reason. The test stays enabled and runs again on its next schedule.

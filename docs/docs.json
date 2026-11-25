@@ -68,6 +68,7 @@
           {
             "group": "Data Tests",
             "pages": [
+              "cloud/features/data-tests/cloud-or-dbt-tests",
               {
                 "group": "Cloud Tests",
                 "pages": [
@@ -76,6 +77,16 @@
                   "cloud/features/anomaly-detection/automated-volume",
                   "cloud/features/anomaly-detection/cloud-pipeline-task-performance",
                   "cloud/features/data-tests/data-contract-test",
+                  {
+                    "group": "SQL data tests",
+                    "pages": [
+                      "cloud/features/data-tests/sql-data-tests",
+                      "cloud/features/data-tests/sql-data-tests/uniqueness",
+                      "cloud/features/data-tests/sql-data-tests/completeness",
+                      "cloud/features/data-tests/sql-data-tests/validity",
+                      "cloud/features/data-tests/sql-data-tests/relationship"
+                    ]
+                  },
                   "cloud/features/data-tests/custom-sql-tests",
                   "cloud/features/anomaly-detection/metrics"
                 ]

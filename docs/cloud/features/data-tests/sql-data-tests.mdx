@@ -1,0 +1,140 @@
+---
+title: "SQL Data Tests"
+sidebarTitle: "Overview"
+description: "Built-in uniqueness, completeness, validity, and relationship tests that Elementary Cloud runs against your warehouse, configured in the UI without writing SQL or opening a pull request."
+badge: "Elementary Cloud"
+---
+
+import SqlTestsRequirements from '/snippets/cloud/features/data-tests/sql-tests-requirements.mdx';
+import SqlTestsThresholds from '/snippets/cloud/features/data-tests/sql-tests-thresholds.mdx';
+import WhereSqlTestsRun from '/snippets/cloud/features/data-tests/where-sql-tests-run.mdx';
+
+SQL data tests are built-in checks for the most common data quality rules. You choose a table, a column or expression, and the rule to enforce. Elementary generates the SQL for your warehouse, runs it on a schedule, and reports the rows that break the rule.
+
+They are [cloud tests](/cloud/features/data-tests/cloud-tests-overview): you create and manage them in the Elementary UI, they run outside your dbt pipeline, and they don't need a pull request or a dbt project. They work on any supported table in the environment, including tables that aren't part of a dbt project.
+
+<SqlTestsRequirements />
+
+## Test types
+
+| Test | What it checks | Fails on | Quality dimension |
+| --- | --- | --- | --- |
+| [Uniqueness](/cloud/features/data-tests/sql-data-tests/uniqueness) | Values that should not repeat | Each value that appears more than once | Uniqueness |
+| [Completeness](/cloud/features/data-tests/sql-data-tests/completeness) | Required values are present | Each row whose value is null, empty, or zero | Completeness |
+| [Validity](/cloud/features/data-tests/sql-data-tests/validity) | Values match an allow list, deny list, range, regex, or length rule | Each row whose value breaks the rule | Validity |
+| [Relationship](/cloud/features/data-tests/sql-data-tests/relationship) | Values exist in another table | Each row whose value has no match in the target table | Consistency |
+
+Results count toward the [data quality dimension](/cloud/features/collaboration-and-communication/data-quality-dimensions) shown for each test type.
+
+<Tip>
+For a rule that none of these types can express, such as a calculation or a check across several tables, use a [custom SQL test](/cloud/features/data-tests/custom-sql-tests).
+</Tip>
+
+## How it works
+
+The saved configuration is the test. On every run, Elementary generates the query for your warehouse from that configuration, runs it, and counts the failing rows. Improvements to the generated SQL apply to existing tests without editing them.
+
+Each run:
+
+1. Scans the **entire table**, filtered by the optional `where` clause.
+2. Counts the failing rows and stores a sample of them with the result.
+3. Sets the result to **Pass**, **Warning**, **Failure**, or **Error** based on the test's severity and thresholds.
+4. Stores the exact query that ran with the result, so any past result can be reproduced.
+
+Results appear with your other tests in test results, incidents, alerts, the Catalog, and [test coverage](/cloud/features/data-tests/test-coverage-screen).
+
+<Warning>
+SQL data tests read table data and use compute in your data warehouse. Every run scans the full table. On large tables, add a `where` clause to limit the scanned data and pick a schedule that matches how often the data changes. The preview shows the table size each run will scan.
+</Warning>
+
+## Where the queries run
+
+<WhereSqlTestsRun />
+
+## Create a SQL data test
+
+<Steps>
+  <Step title="Start a new test">
+    Go to **Test Configuration**, click **Add test**, and choose **Table test** or **Column test**. You can also start from an asset in the Catalog.
+  </Step>
+  <Step title="Choose the table and the test type">
+    Select one table. SQL data tests are added to one table at a time. In the test picker, filter on **Elementary cloud** and choose **Uniqueness**, **Completeness**, **Validity**, or **Relationship**.
+
+    <Frame caption="SQL data tests in the test picker, with the Elementary cloud source filter selected">
+      <img src="/pics/cloud/data-tests/sql-data-tests-test-picker.webp" alt="Add test page with the Elementary cloud source filter selected, showing the Uniqueness, Completeness, Validity, and Relationship test cards" />
+    </Frame>
+  </Step>
+  <Step title="Configure the test">
+    Choose the **Tested field**, either a column or a SQL expression, and fill in the fields of the test type. Optionally add a `where` clause.
+  </Step>
+  <Step title="Set severity, sampled rows, and cadence">
+    Choose the severity and optional thresholds, how many failing rows to store with each result, and the test cadence. Add owners, tags, and a description.
+  </Step>
+  <Step title="Run the test">
+    Click **Run test** in the **Preview** section to run the test against your warehouse. The preview shows the result status, the number of failed rows, a sample of them, and the size of the table each run will scan. You must run the preview after your last change before you can save the test.
+  </Step>
+  <Step title="Save">
+    Submit the test. No pull request is required. Elementary runs the test right away and then on its schedule.
+  </Step>
+</Steps>
+
+You can also ask the [Elementary AI agent](/cloud/ai-agents/ai-test-coverage) to recommend and create SQL data tests. The agent previews each test before it proposes the plan, and you review the plan before anything is created. The [MCP server](/cloud/mcp/intro) provides the same create and preview tools.
+
+## Configuration
+
+These settings are shared by all SQL data test types. Each test type page lists its own fields.
+
+| Setting | Description | Default |
+| --- | --- | --- |
+| **Tested field** | A **Column** of the table, or an **Expression**: a single SQL expression over the table's columns, such as `lower(email)` or `amount * quantity` | — |
+| **Where clause** | Optional SQL condition, without the `WHERE` keyword, to limit the scanned data or exclude rows, for example `status = 'completed'` | None |
+| **Severity** | **Use simple severity** (**Error** or **Warning**), or **Use conditional severity** with thresholds on the number of failures. See [Results](#results) | — |
+| **Sampled rows** | Number of failing rows stored with each result, from 1 to 1000 | 5 |
+| **Test cadence** | How often the test runs. See [Scheduling](#scheduling) | Daily at 09:00 |
+| **Owners, tags, description** | Metadata used for alert routing, filtering, and context | — |
+
+Expressions and `where` clauses must be a single expression. They can't contain subqueries, aggregate or window functions, `*`, or table-qualified column names such as `t.amount`.
+
+Scheduled runs time out after 5 minutes and return an **Error** result. Previews time out after 30 seconds.
+
+## Scheduling
+
+Set the **Test cadence** to one of:
+
+- **Every** N hours, from 1 to 23
+- **Daily** at a time of day
+- **Weekly** on a day and time
+- **Custom**, with a cron expression
+
+Times are in your account's timezone. Tests can't run more often than every 15 minutes.
+
+## Results
+
+<SqlTestsThresholds />
+
+Each result shows the failing-row count and, when available, a sample of the failing rows.
+
+## Edit or delete a test
+
+Open the test from test results or an incident and go to the **Configuration** tab to change its settings. The test type can't be changed. Saving re-runs the test with the new configuration.
+
+To delete tests, select them on the **Test Configuration** page and use the delete option, or open a test result and click `...` → **Delete test**. Every create, edit, and delete is recorded in the [audit logs](/cloud/features/collaboration-and-communication/audit_logs/overview).
+
+## Alerts
+
+SQL data test failures map to the **Cloud data tests** category in [alert rules](/cloud/features/alerts-and-incidents/alert-rules). In environments with data access, the category is selected by default on new rules and included in the default rule. Check existing rules if you want them to include SQL data test failures.
+
+## Supported warehouses
+
+SQL data tests run on tables and other materialized assets in:
+
+- Snowflake
+- Databricks
+- Redshift
+- Postgres
+
+Ephemeral models and assets without a table in the warehouse can't be tested.
+
+## SQL data tests or dbt tests
+
+Each SQL data test has a dbt equivalent. If your environment has both data access and a dbt project, see [Cloud tests or dbt tests](/cloud/features/data-tests/cloud-or-dbt-tests) to choose where each check should live.

@@ -1,0 +1,57 @@
+---
+title: "Uniqueness test"
+sidebarTitle: "Uniqueness"
+description: "Detect values that appear more than once in a column or expression."
+badge: "Elementary Cloud"
+---
+
+import SqlTestsRequirements from '/snippets/cloud/features/data-tests/sql-tests-requirements.mdx';
+
+Validates that a column or expression has no duplicate values. Use it for primary keys, natural keys, and any value that should identify a single row.
+
+This is a [SQL data test](/cloud/features/data-tests/sql-data-tests): Elementary runs it against your warehouse on a schedule, with no SQL to write and no pull request.
+
+<SqlTestsRequirements />
+
+## How it works
+
+On each run, Elementary groups the table by the tested value and returns every value that appears more than once, together with the number of times it appears.
+
+- **Failing rows are duplicated values.** If the value `1042` appears in three rows, it counts as one failing row with a duplicate count of 3.
+- **Nulls are ignored.** Rows where the value is null are never counted as duplicates. To require a value in every row, add a [completeness test](/cloud/features/data-tests/sql-data-tests/completeness).
+- **The `where` clause applies before grouping.** Only rows that match the condition are compared with each other.
+
+Results count toward the **Uniqueness** [data quality dimension](/cloud/features/collaboration-and-communication/data-quality-dimensions).
+
+## Configuration
+
+| Setting | Description |
+| --- | --- |
+| **Tested field** | The column, or an expression, whose values should be unique |
+| **Where clause** | Optional condition that limits the rows checked |
+
+Severity, thresholds, sampled rows, and cadence work the same for all SQL data tests. See [Configuration](/cloud/features/data-tests/sql-data-tests#configuration).
+
+## Examples
+
+| Goal | Tested field | Where clause |
+| --- | --- | --- |
+| Order IDs are unique | Column `order_id` | — |
+| One row per customer per day | Expression `customer_id \|\| '-' \|\| cast(order_date as varchar)` | — |
+| Emails are unique regardless of case | Expression `lower(email)` | — |
+| Active subscriptions are unique per account | Column `account_id` | `status = 'active'` |
+
+## Example result
+
+The sample lists each duplicated value and its count:
+
+| value | duplicate_count |
+| --- | --- |
+| 1042 | 3 |
+| 2210 | 2 |
+
+The failing-row count for this result is 2: two values are duplicated.
+
+## dbt equivalent
+
+The dbt [`unique`](https://docs.getdbt.com/reference/resource-properties/data-tests#unique) test checks the same rule from your dbt project. For a combination of columns, use an expression here, or `dbt_utils.unique_combination_of_columns` in dbt. See [Cloud tests or dbt tests](/cloud/features/data-tests/cloud-or-dbt-tests) to decide which to use.

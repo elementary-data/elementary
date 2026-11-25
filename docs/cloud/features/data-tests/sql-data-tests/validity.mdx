@@ -1,0 +1,77 @@
+---
+title: "Validity test"
+sidebarTitle: "Validity"
+description: "Detect values that break an allow list, deny list, range, regex, or length rule."
+badge: "Elementary Cloud"
+---
+
+import SqlTestsRequirements from '/snippets/cloud/features/data-tests/sql-tests-requirements.mdx';
+
+Validates that the values of a column or expression follow a rule. Use it for status codes and categories, numeric ranges, formats such as email addresses or IDs, and string lengths.
+
+This is a [SQL data test](/cloud/features/data-tests/sql-data-tests): Elementary runs it against your warehouse on a schedule, with no SQL to write and no pull request.
+
+<SqlTestsRequirements />
+
+## How it works
+
+On each run, Elementary returns every row whose value breaks the test's rule. Each failing row is one table row, and the row sample contains the full rows.
+
+- **One rule per test.** To check several rules on the same field, for example a range and a regex, add a test for each rule. For combined logic, use a [custom SQL test](/cloud/features/data-tests/custom-sql-tests).
+- **Nulls are ignored.** A null value never breaks a validity rule. To require a value, add a [completeness test](/cloud/features/data-tests/sql-data-tests/completeness).
+
+Results count toward the **Validity** [data quality dimension](/cloud/features/collaboration-and-communication/data-quality-dimensions).
+
+## Rules
+
+| Rule | A row fails when | Settings |
+| --- | --- | --- |
+| **Allow list** | The value isn't one of the allowed values | **Allowed values**: 1 to 1000 strings or numbers |
+| **Deny list** | The value is one of the denied values | **Denied values**: 1 to 1000 strings or numbers |
+| **Range** | The value is lower than the minimum or higher than the maximum | **Range**: a minimum, a maximum, or both. Bounds are inclusive |
+| **Regex** | The value doesn't match the pattern | **Pattern**: a regular expression of up to 1000 characters |
+| **Length** | The value's length is shorter than the minimum or longer than the maximum | **Length**: a minimum, a maximum, or both, as whole numbers of 0 or more. Bounds are inclusive |
+
+<Frame caption="Choosing the rule of a validity test">
+  <img src="/pics/cloud/data-tests/sql-data-tests-validity-rule.webp" alt="Validity test configuration with the Rule dropdown open, listing Allow list, Deny list, Range, Regex, and Length" />
+</Frame>
+
+### Regex patterns
+
+A value matches when the pattern is found anywhere in it. To validate the whole value, anchor the pattern with `^` and `$`:
+
+| Pattern | `abc-123` | `id: abc-123` |
+| --- | --- | --- |
+| `[a-z]+-[0-9]+` | Matches | Matches |
+| `^[a-z]+-[0-9]+$` | Matches | Doesn't match |
+
+Regex and length rules compare the value as text, so they also work on numeric columns.
+
+<Note>
+Regular expression support differs between warehouses. Use standard syntax, such as character classes, anchors, and quantifiers, and run the preview to confirm the pattern behaves as expected on your warehouse.
+</Note>
+
+## Configuration
+
+| Setting | Description |
+| --- | --- |
+| **Tested field** | The column, or an expression, whose values should follow the rule |
+| **Rule** | **Allow list**, **Deny list**, **Range**, **Regex**, or **Length**, with the rule's settings |
+| **Where clause** | Optional condition that limits the rows checked |
+
+Severity, thresholds, sampled rows, and cadence work the same for all SQL data tests. See [Configuration](/cloud/features/data-tests/sql-data-tests#configuration).
+
+## Examples
+
+| Goal | Tested field | Rule |
+| --- | --- | --- |
+| Order status is a known value | Column `status` | Allow list: `pending`, `shipped`, `delivered`, `cancelled` |
+| No test accounts in production data | Column `account_type` | Deny list: `test`, `internal` |
+| Discounts are between 0% and 100% | Column `discount_pct` | Range: min `0`, max `100` |
+| Emails have a valid format | Column `email` | Regex: `^[^@\s]+@[^@\s]+\.[^@\s]+$` |
+| Country codes have two characters | Column `country_code` | Length: min `2`, max `2` |
+| Order totals are not negative | Expression `amount - discount` | Range: min `0` |
+
+## dbt equivalent
+
+In dbt, these rules map to the [`accepted_values`](https://docs.getdbt.com/reference/resource-properties/data-tests#accepted_values) test and to package tests such as `dbt_expectations.expect_column_values_to_be_between`, `expect_column_values_to_match_regex`, and `expect_column_value_lengths_to_be_between`. See [Cloud tests or dbt tests](/cloud/features/data-tests/cloud-or-dbt-tests) to decide which to use.

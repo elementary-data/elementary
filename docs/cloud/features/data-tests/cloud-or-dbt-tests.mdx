@@ -1,0 +1,67 @@
+---
+title: "Cloud tests or dbt tests"
+sidebarTitle: "Cloud or dbt tests"
+description: "When your environment supports both, choose whether a data test should run in Elementary Cloud or in your dbt project."
+---
+
+Elementary monitors two kinds of data tests:
+
+- **dbt tests** are defined in your dbt project and run in your dbt pipeline. Elementary collects their results. You can add them in code or from the Elementary UI, which opens a pull request through your [code repository](/cloud/integrations/code-repo/connect-code-repo) integration.
+- **Cloud tests** are defined in the Elementary UI and run by Elementary Cloud on their own schedule. [SQL data tests](/cloud/features/data-tests/sql-data-tests) and [custom SQL tests](/cloud/features/data-tests/custom-sql-tests) query your warehouse directly, through Elementary Cloud or an [Elementary Runtime](/cloud/features/elementary-runtime).
+
+If your environment has a dbt project **and** [data access](/cloud/features/data-tests/sql-data-tests#where-the-queries-run) to its warehouse, you can add most data quality checks either way. Both kinds appear in the same test results, incidents, alerts, Catalog, and coverage views.
+
+## Equivalent tests
+
+| Check | Cloud test | dbt test |
+| --- | --- | --- |
+| No duplicate values | [Uniqueness](/cloud/features/data-tests/sql-data-tests/uniqueness) | `unique`, `dbt_utils.unique_combination_of_columns` |
+| No missing values | [Completeness](/cloud/features/data-tests/sql-data-tests/completeness) | `not_null` |
+| Values follow a rule | [Validity](/cloud/features/data-tests/sql-data-tests/validity) | `accepted_values`, `dbt_expectations` tests for ranges, regex, and length |
+| References exist in another table | [Relationship](/cloud/features/data-tests/sql-data-tests/relationship) | `relationships` |
+| Custom business rule in SQL | [Custom SQL test](/cloud/features/data-tests/custom-sql-tests) | [Singular test](/data-tests/dbt/singular-tests) |
+| Schema matches a baseline | [Data contract](/cloud/features/data-tests/data-contract-test) | [`schema_changes_from_baseline`](/data-tests/schema-tests/schema-changes-from-baseline) |
+
+## How they compare
+
+| | Cloud test | dbt test |
+| --- | --- | --- |
+| Where it's defined | Elementary UI | Your dbt project's code |
+| Pull request required | No | Yes |
+| When it runs | Its own schedule in Elementary | With your dbt jobs, for example `dbt build` or `dbt test` |
+| Can stop a pipeline | No. Results are reported after the data is loaded | Yes. With `dbt build`, a failing test can stop downstream models |
+| Preview before saving | Runs against your warehouse and shows failing rows | Runs when the dbt job runs |
+| Assets it can test | Any supported table in the environment, including tables outside dbt | dbt models, sources, seeds, and snapshots |
+| Version control and review | Changes are recorded in the audit logs | Changes go through your code review |
+| Warehouse credentials | The environment's connection, or a runtime in your network | Your dbt profile |
+| Supported warehouses | Snowflake, Databricks, Redshift, and Postgres for SQL data tests | Any warehouse dbt supports |
+
+## When to use cloud tests
+
+Use a cloud test when:
+
+- **You want coverage without a code change.** Analysts, data stewards, and business users can add and tune tests in the UI with no pull request or dbt knowledge.
+- **The table isn't in dbt.** Cloud tests work on tables loaded by ingestion tools, other pipelines, or anything else in the warehouse.
+- **The test needs its own schedule.** For example, check a source table hourly while your dbt jobs run daily, or check a table after an external load.
+- **You want to see results before you commit.** The preview runs the test against your data and shows the failing rows before you save.
+- **Warehouse credentials must stay in your network.** Run the tests through [Elementary Runtime](/cloud/features/elementary-runtime).
+
+## When to use dbt tests
+
+Use a dbt test when:
+
+- **A failure should stop the pipeline.** Tests that run with `dbt build` can prevent bad data from reaching downstream models and dashboards.
+- **Test configuration must be version-controlled.** The test lives next to the model, goes through code review, and is deployed with it.
+- **The test must run with every model change**, including in CI on pull requests.
+- **The check needs a test type or warehouse that cloud tests don't support**, such as ephemeral models, BigQuery, or tests from dbt packages.
+
+## Defaults in the Elementary UI
+
+When the environment has data access, Elementary suggests cloud tests first:
+
+- In the add-test flow, the test picker starts filtered on **Elementary cloud**. Switch the filter to **dbt** to add a dbt test instead.
+- For custom query tests, the selector next to the page title defaults to **Elementary Cloud (recommended)**. Choose **dbt** to open a pull request with a singular test. The dbt option requires a connected code repository.
+
+## Avoid duplicates
+
+If the same check exists as both a cloud test and a dbt test, **both run**. You get two results, possibly two alerts, and pay for both queries in your warehouse. When you move a check from dbt to the cloud, or the other way, remove the old test.
