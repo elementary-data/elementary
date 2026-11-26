@@ -1,3 +1,5 @@
+import math
+import operator
 import re
 from datetime import datetime
 from enum import Enum
@@ -5,7 +7,7 @@ from functools import cached_property
 from typing import Any, Generic, Iterable, List, Optional, Pattern, Set, Tuple, TypeVar
 
 from elementary.utils.log import get_logger
-from elementary.utils.pydantic_shim import BaseModel, Field, validator
+from elementary.utils.pydantic_shim import BaseModel, Field, root_validator, validator
 from elementary.utils.time import DATETIME_FORMAT, convert_local_time_to_timezone
 
 logger = get_logger(__name__)
@@ -36,6 +38,11 @@ class FilterType(str, Enum):
     IS_NOT = "is_not"
     CONTAINS = "contains"
     NOT_CONTAINS = "not_contains"
+    # Cloud only filters
+    GT = "gt"
+    GTE = "gte"
+    LT = "lt"
+    LTE = "lte"
 
 
 class FilterFields(BaseModel):
@@ -58,6 +65,12 @@ ValueT = TypeVar("ValueT")
 ANY_OPERATORS = [FilterType.IS, FilterType.CONTAINS]
 ALL_OPERATORS = [FilterType.IS_NOT, FilterType.NOT_CONTAINS]
 NEGATIVE_OPERATORS = [FilterType.IS_NOT, FilterType.NOT_CONTAINS]
+NUMERIC_OPERATORS = {
+    FilterType.GT: operator.gt,
+    FilterType.GTE: operator.ge,
+    FilterType.LT: operator.lt,
+    FilterType.LTE: operator.le,
+}
 
 
 class FilterSchema(BaseModel, Generic[ValueT]):
@@ -69,6 +82,22 @@ class FilterSchema(BaseModel, Generic[ValueT]):
         # Make sure that serializing Enum return values
         use_enum_values = True
 
+    @root_validator(skip_on_failure=True)
+    def validate_numeric_operator_values(cls, values):
+        if values.get("type") in NUMERIC_OPERATORS:
+            filter_values = values.get("values") or []
+            if (
+                len(filter_values) != 1
+                or FilterSchema.to_number(
+                    FilterSchema.normalize_value(filter_values[0])
+                )
+                is None
+            ):
+                raise ValueError(
+                    f"Filter type {values['type']} requires exactly one numeric value"
+                )
+        return values
+
     @staticmethod
     def normalize_value(value: Any) -> str:
         if isinstance(value, Enum):
@@ -78,6 +107,14 @@ class FilterSchema(BaseModel, Generic[ValueT]):
     @staticmethod
     def normalize_values(values: Iterable[ValueT]) -> Set[str]:
         return {FilterSchema.normalize_value(value) for value in values}
+
+    @staticmethod
+    def to_number(value: str) -> Optional[float]:
+        try:
+            number = float(value)
+        except ValueError:
+            return None
+        return None if math.isnan(number) else number
 
     @cached_property
     def _normalized_values(self) -> Set[str]:
@@ -112,6 +149,19 @@ class FilterSchema(BaseModel, Generic[ValueT]):
             if len(matching_values) != len(values):
                 return set()
             return matching_values
+        if self.type in NUMERIC_OPERATORS:
+            threshold = FilterSchema.to_number(
+                FilterSchema.normalize_value(self.values[0])
+            )
+            if threshold is None:
+                return set()
+            compare = NUMERIC_OPERATORS[self.type]
+            return set(
+                value
+                for value in values
+                if (number := FilterSchema.to_number(value)) is not None
+                and compare(number, threshold)
+            )
         raise ValueError(f"Unsupported filter type: {self.type}")
 
     def get_matching_values(self, values: Iterable[ValueT]) -> Set[str]:
