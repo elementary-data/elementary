@@ -1,3 +1,4 @@
+import math
 import re
 from datetime import datetime
 from enum import Enum
@@ -101,9 +102,10 @@ class FilterSchema(BaseModel, Generic[ValueT]):
     @staticmethod
     def to_number(value: str) -> Optional[float]:
         try:
-            return float(value)
+            number = float(value)
         except ValueError:
             return None
+        return None if math.isnan(number) else number
 
     @cached_property
     def _normalized_values(self) -> Set[str]:

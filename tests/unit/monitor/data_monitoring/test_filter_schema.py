@@ -119,7 +119,7 @@ def test_filter_schema_lte_operator():
 
 
 @pytest.mark.parametrize("filter_type", [FilterType.GTE, FilterType.LTE])
-@pytest.mark.parametrize("values", [[], [1, 2], ["abc"], [True]])
+@pytest.mark.parametrize("values", [[], [1, 2], ["abc"], [True], ["nan"]])
 def test_filter_schema_numeric_operator_invalid_values(filter_type, values):
     with pytest.raises(ValueError):
         FilterSchema(values=values, type=filter_type)
