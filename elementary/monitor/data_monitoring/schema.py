@@ -1,4 +1,5 @@
 import math
+import operator
 import re
 from datetime import datetime
 from enum import Enum
@@ -38,7 +39,9 @@ class FilterType(str, Enum):
     CONTAINS = "contains"
     NOT_CONTAINS = "not_contains"
     # Cloud only filters
+    GT = "gt"
     GTE = "gte"
+    LT = "lt"
     LTE = "lte"
 
 
@@ -62,7 +65,12 @@ ValueT = TypeVar("ValueT")
 ANY_OPERATORS = [FilterType.IS, FilterType.CONTAINS]
 ALL_OPERATORS = [FilterType.IS_NOT, FilterType.NOT_CONTAINS]
 NEGATIVE_OPERATORS = [FilterType.IS_NOT, FilterType.NOT_CONTAINS]
-NUMERIC_OPERATORS = [FilterType.GTE, FilterType.LTE]
+NUMERIC_OPERATORS = {
+    FilterType.GT: operator.gt,
+    FilterType.GTE: operator.ge,
+    FilterType.LT: operator.lt,
+    FilterType.LTE: operator.le,
+}
 
 
 class FilterSchema(BaseModel, Generic[ValueT]):
@@ -147,16 +155,13 @@ class FilterSchema(BaseModel, Generic[ValueT]):
             )
             if threshold is None:
                 return set()
-            matching_values = set()
-            for value in values:
-                number = FilterSchema.to_number(value)
-                if number is None:
-                    continue
-                if (self.type == FilterType.GTE and number >= threshold) or (
-                    self.type == FilterType.LTE and number <= threshold
-                ):
-                    matching_values.add(value)
-            return matching_values
+            compare = NUMERIC_OPERATORS[self.type]
+            return set(
+                value
+                for value in values
+                if (number := FilterSchema.to_number(value)) is not None
+                and compare(number, threshold)
+            )
         raise ValueError(f"Unsupported filter type: {self.type}")
 
     def get_matching_values(self, values: Iterable[ValueT]) -> Set[str]:
