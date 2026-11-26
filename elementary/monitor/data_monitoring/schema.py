@@ -37,6 +37,7 @@ class FilterType(str, Enum):
     IS_NOT = "is_not"
     CONTAINS = "contains"
     NOT_CONTAINS = "not_contains"
+    # Cloud only filters
     GTE = "gte"
     LTE = "lte"
 
