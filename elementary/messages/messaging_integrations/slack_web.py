@@ -1,14 +1,17 @@
 import json
+import re
 import ssl
 import time
-from typing import Any, Dict, Iterator, List, Optional
+from http.client import HTTPException
+from typing import Any, Dict, Iterator, List, NoReturn, Optional
 
 from ratelimit import limits, sleep_and_retry
 from slack_sdk import WebClient
-from slack_sdk.errors import SlackApiError
+from slack_sdk.errors import SlackApiError, SlackClientError
 from slack_sdk.http_retry.builtin_handlers import RateLimitErrorRetryHandler
 from typing_extensions import TypeAlias
 
+from elementary.messages.blocks import Icon
 from elementary.messages.formats.block_kit import (
     FormattedBlockKitMessage,
     format_block_kit,
@@ -17,6 +20,7 @@ from elementary.messages.message_body import MessageBody
 from elementary.messages.messaging_integrations.base_messaging_integration import (
     BaseMessagingIntegration,
     MessageSendResult,
+    ReactionAction,
 )
 from elementary.messages.messaging_integrations.exceptions import (
     MessagingIntegrationDestinationNotFoundError,
@@ -30,9 +34,45 @@ logger = get_logger(__name__)
 
 ONE_MINUTE = 60
 ONE_SECOND = 1
+PUBLIC_CHANNEL_ID_PATTERN = re.compile(r"C[A-Z0-9]{8,}")
 
 
 Channel: TypeAlias = str
+
+ICON_TO_SLACK_EMOJI_NAME = {
+    Icon.RED_TRIANGLE: "small_red_triangle",
+    Icon.X: "x",
+    Icon.WARNING: "warning",
+    Icon.EXCLAMATION: "exclamation",
+    Icon.CHECK: "white_check_mark",
+    Icon.MAGNIFYING_GLASS: "mag_right",
+    Icon.HAMMER_AND_WRENCH: "hammer_and_wrench",
+    Icon.POLICE_LIGHT: "rotating_light",
+    Icon.INFO: "information_source",
+    Icon.EYE: "eye",
+    Icon.GEAR: "gear",
+    Icon.BELL: "bell",
+    Icon.GEM: "gem",
+    Icon.SPARKLES: "sparkles",
+    Icon.LINK: "link",
+    Icon.NEW: "new",
+}
+
+# Reactions are best effort: e.g. a token without the reactions:write scope, or a
+# reaction that is already there, must never fail the caller.
+_SKIPPED_REACTION_ERRORS = frozenset(
+    {
+        "missing_scope",
+        "not_allowed_token_type",
+        "already_reacted",
+        "no_reaction",
+        "message_not_found",
+        "channel_not_found",
+        "not_in_channel",
+        "is_archived",
+        "thread_locked",
+    }
+)
 
 
 class SlackWebMessageContext(BaseModel):
@@ -77,6 +117,9 @@ class SlackWebMessagingIntegration(
     def supports_reply(self) -> bool:
         return True
 
+    def supports_reactions(self) -> bool:
+        return True
+
     def supports_actions(self) -> bool:
         return True
 
@@ -100,6 +143,48 @@ class SlackWebMessagingIntegration(
             reply_broadcast=self.reply_broadcast,
         )
 
+    def react_to_message(
+        self,
+        destination: Channel,
+        message_context: SlackWebMessageContext,
+        icon: Icon,
+        action: ReactionAction = ReactionAction.ADD,
+    ) -> None:
+        emoji_name = ICON_TO_SLACK_EMOJI_NAME.get(icon)
+        if emoji_name is None:
+            logger.debug(f"Skipping Slack reaction: no emoji for icon {icon.value}")
+            return
+        method = (
+            self.client.reactions_add
+            if action == ReactionAction.ADD
+            else self.client.reactions_remove
+        )
+        channel = message_context.channel
+        timestamp = message_context.id
+        try:
+            method(channel=channel, timestamp=timestamp, name=emoji_name)
+        except SlackApiError as err:
+            err_type = _get_slack_error_code(err)
+            if err_type in _SKIPPED_REACTION_ERRORS:
+                logger.info(f"Skipped Slack reaction {action.value}: {err_type}")
+                return
+            if self.tracking:
+                self.tracking.record_internal_exception(err)
+            logger.warning(f"Failed to {action.value} Slack reaction: {err_type}")
+        except (
+            SlackClientError,
+            OSError,
+            HTTPException,
+            json.JSONDecodeError,
+            # The SDK raises AttributeError when the response JSON is not an object.
+            AttributeError,
+        ) as err:
+            if self.tracking:
+                self.tracking.record_internal_exception(err)
+            logger.warning(
+                f"Failed to {action.value} Slack reaction: {type(err).__name__}"
+            )
+
     @sleep_and_retry
     @limits(calls=1, period=ONE_SECOND)
     def _send_message(
@@ -108,6 +193,7 @@ class SlackWebMessagingIntegration(
         formatted_message: FormattedBlockKitMessage,
         thread_ts: Optional[str] = None,
         reply_broadcast: bool = False,
+        join_if_not_in_channel: bool = True,
     ) -> MessageSendResult[SlackWebMessageContext]:
         try:
             response = self.client.chat_postMessage(
@@ -119,8 +205,16 @@ class SlackWebMessagingIntegration(
                 reply_broadcast=reply_broadcast,
             )
         except SlackApiError as e:
+            if join_if_not_in_channel and e.response.data["error"] == "not_in_channel":
+                self._join_channel(destination, not_in_channel_err=e)
+                return self._send_message(
+                    destination,
+                    formatted_message,
+                    thread_ts,
+                    reply_broadcast,
+                    join_if_not_in_channel=False,
+                )
             self._handle_send_err(e, destination)
-            return self._send_message(destination, formatted_message, thread_ts)
 
         return MessageSendResult(
             message_context=SlackWebMessageContext(
@@ -130,24 +224,17 @@ class SlackWebMessagingIntegration(
             message_format="block_kit",
         )
 
-    def _handle_send_err(self, err: SlackApiError, channel_name: str):
+    def _handle_send_err(self, err: SlackApiError, channel_name: str) -> NoReturn:
         if self.tracking:
             self.tracking.record_internal_exception(err)
         err_type = err.response.data["error"]
-        if err_type == "not_in_channel":
-            logger.info(
-                f'Elementary app is not in the channel "{channel_name}". Attempting to join.'
-            )
-            channel_id = self._get_channel_id(channel_name, only_public=True)
-            self._join_channel(channel_id=channel_id)
-            logger.info(f"Joined channel {channel_name}")
-        elif err_type == "channel_not_found":
+        if err_type == "channel_not_found":
             raise MessagingIntegrationDestinationNotFoundError(
                 f"Channel {channel_name} was not found by the Elementary app. Please add the app to the channel."
-            )
+            ) from err
         raise MessagingIntegrationError(
-            f"Failed to send a message to channel - {channel_name}"
-        )
+            f"Failed to send a message to channel - {channel_name} ({err_type})"
+        ) from err
 
     @sleep_and_retry
     @limits(calls=20, period=ONE_MINUTE)
@@ -183,20 +270,41 @@ class SlackWebMessagingIntegration(
         for channel in self._iter_channels(only_public=only_public):
             if channel["name"] == channel_name:
                 return channel["id"]
-        raise MessagingIntegrationError(f"Channel {channel_name} not found")
+        raise MessagingIntegrationDestinationNotFoundError(
+            f"Channel {channel_name} not found"
+        )
 
-    def _join_channel(self, channel_id: str) -> None:
+    def _join_channel(
+        self, destination: Channel, not_in_channel_err: SlackApiError
+    ) -> None:
+        logger.info(
+            f'Elementary app is not in the channel "{destination}". Attempting to join.'
+        )
+        if PUBLIC_CHANNEL_ID_PATTERN.fullmatch(destination):
+            channel_id = destination
+        else:
+            try:
+                channel_id = self._get_channel_id(destination, only_public=True)
+            except MessagingIntegrationDestinationNotFoundError:
+                raise MessagingIntegrationDestinationNotFoundError(
+                    f"Channel {destination} is not a public channel the Elementary app can join. Please add the app to the channel."
+                ) from not_in_channel_err
         try:
             self.client.conversations_join(channel=channel_id)
         except SlackApiError as e:
             if self.tracking:
                 self.tracking.record_internal_exception(e)
-            raise MessagingIntegrationError(f"Failed to join channel {channel_id}")
+            raise MessagingIntegrationError(
+                f"Failed to join channel {destination} ({e.response.data['error']})"
+            ) from e
+        logger.info(f"Joined channel {destination}")
 
     def resolve_user_id(self, user: str) -> Optional[str]:
         if user.startswith("@"):
             return self.get_user_id_from_handle(user[1:])
-        return self.get_user_id_from_email(user)
+        if "@" in user:
+            return self.get_user_id_from_email(user)
+        return self.get_user_id_from_handle(user)
 
     def get_user_id_from_handle(self, handle: str) -> Optional[str]:
         if self._handle_to_user_id_cache is None:
@@ -297,3 +405,12 @@ class SlackWebMessagingIntegration(
             if err.response.data["error"] != "users_not_found":
                 logger.error(f"Unable to get Slack user ID from email: {err}.")
             return None
+
+
+def _get_slack_error_code(err: SlackApiError) -> Optional[str]:
+    # Non-JSON error bodies (e.g. a proxy's HTML 502) come back as a plain dict.
+    data = getattr(err.response, "data", err.response)
+    if not isinstance(data, dict):
+        return None
+    error = data.get("error")
+    return error if isinstance(error, str) else None

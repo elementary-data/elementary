@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "elementary-data"
-version = "0.26.1"
+version = "0.26.2"
 description = "Data monitoring and lineage"
 authors = ["Elementary"]
 keywords = ["data", "lineage", "data lineage", "data warehouse", "DWH", "observability", "data monitoring", "data observability", "Snowflake", "BigQuery", "Redshift", "data reliability", "analytics engineering"]
@@ -13,7 +13,6 @@ classifiers = [
     "Natural Language :: English",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -23,14 +22,16 @@ classifiers = [
 packages = [{include = "elementary"}]
 
 [tool.poetry.dependencies]
-python = ">=3.10,<3.14"
+python = ">=3.11,<3.14"
 click = ">=7.0,<9.0"
 requests = ">=2.28.1,<3.0.0"
 urllib3 = ">=2.8.0"  # transitive dependency via requests, which caps the major itself
 idna = ">=3.15"  # transitive dependency via requests, floored to address CVE-2026-45409 (GHSA-65pc-fj4g-8rjx) ReDoS in idna.encode()
 pyasn1 = ">=0.6.4"  # transitive dependency via google-auth/pyasn1-modules, floored to address BER/CER/DER decoder DoS advisories
 cryptography = ">=50.0.0"  # transitive dependency via google-auth/azure-storage-blob, floored to address CVE-2026-69247 (PKCS#7 Bleichenbacher oracle)
+oauthlib = ">=4.0.0"  # transitive dependency via databricks-sql-connector/requests-oauthlib, floored to address GHSA-hj66-6f7g-4r5v and GHSA-xpv3-w29h-x7cv
 beautifulsoup4 = "<5.0.0"
+soupsieve = { version = ">=4.0.0", python = ">=3.11.5" }
 ratelimit = "*"
 posthog = "<3.0.0"
 boto3 = "<2.0.0"

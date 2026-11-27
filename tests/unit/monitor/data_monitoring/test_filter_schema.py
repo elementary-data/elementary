@@ -94,3 +94,52 @@ def test_get_matching_values() -> None:
     filter_schema.type = "unsupported"  # type: ignore
     with pytest.raises(ValueError, match="Unsupported filter type: unsupported"):
         filter_schema.get_matching_values(values)
+
+
+def test_filter_schema_gte_operator():
+    filter_schema = FilterSchema(values=[10], type=FilterType.GTE)
+
+    assert filter_schema.apply_filter_on_value(10) is True
+    assert filter_schema.apply_filter_on_value("10.5") is True
+    assert filter_schema.apply_filter_on_value(9.99) is False
+    assert filter_schema.apply_filter_on_value("abc") is False
+    assert filter_schema.apply_filter_on_values([]) is False
+    assert filter_schema.get_matching_values(["5", "10", "20", "abc"]) == {"10", "20"}
+
+
+def test_filter_schema_gt_operator():
+    filter_schema = FilterSchema(values=[10], type=FilterType.GT)
+
+    assert filter_schema.apply_filter_on_value(10) is False
+    assert filter_schema.apply_filter_on_value("10.5") is True
+    assert filter_schema.apply_filter_on_value("abc") is False
+    assert filter_schema.get_matching_values(["5", "10", "20", "abc"]) == {"20"}
+
+
+def test_filter_schema_lt_operator():
+    filter_schema = FilterSchema(values=["10"], type=FilterType.LT)
+
+    assert filter_schema.apply_filter_on_value(10) is False
+    assert filter_schema.apply_filter_on_value("9.5") is True
+    assert filter_schema.apply_filter_on_value("abc") is False
+    assert filter_schema.get_matching_values(["5", "10", "20", "abc"]) == {"5"}
+
+
+def test_filter_schema_lte_operator():
+    filter_schema = FilterSchema(values=["10"], type=FilterType.LTE)
+
+    assert filter_schema.apply_filter_on_value(10) is True
+    assert filter_schema.apply_filter_on_value("-1") is True
+    assert filter_schema.apply_filter_on_value(10.01) is False
+    assert filter_schema.apply_filter_on_value("abc") is False
+    assert filter_schema.apply_filter_on_values([]) is False
+    assert filter_schema.get_matching_values(["5", "10", "20", "abc"]) == {"5", "10"}
+
+
+@pytest.mark.parametrize(
+    "filter_type", [FilterType.GT, FilterType.GTE, FilterType.LT, FilterType.LTE]
+)
+@pytest.mark.parametrize("values", [[], [1, 2], ["abc"], [True], ["nan"]])
+def test_filter_schema_numeric_operator_invalid_values(filter_type, values):
+    with pytest.raises(ValueError):
+        FilterSchema(values=values, type=filter_type)
