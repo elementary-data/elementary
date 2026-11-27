@@ -31,6 +31,22 @@ class InvalidArgumentsError(ConfigError):
         }
 
 
+class NoDbtInstallationError(ConfigError):
+    """Exception raised when no dbt installation is found in the environment"""
+
+    def __init__(self) -> None:
+        super().__init__(
+            "No dbt installation was found. Please either install dbt v2 "
+            "(`pip install dbt` or `pip install dbt-oss`), or install "
+            "elementary-data with your warehouse's dbt 1.x adapter "
+            "(e.g. `pip install 'elementary-data[dbt1-snowflake]'`)."
+        )
+
+    @property
+    def anonymous_tracking_context(self):
+        return {"exception_message": str(self)}
+
+
 class DbtCommandError(Error):
     """Exception raised while executing a dbt command"""
 
