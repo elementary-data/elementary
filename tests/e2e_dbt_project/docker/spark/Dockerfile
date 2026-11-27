@@ -1,33 +1,22 @@
-ARG OPENJDK_VERSION=8
-FROM eclipse-temurin:${OPENJDK_VERSION}-jre
+ARG SPARK_IMAGE=apache/spark:3.3.3
+FROM ${SPARK_IMAGE}
 
-ARG SPARK_VERSION=3.3.2
-ARG HADOOP_VERSION=3
+# delta-core_<scala> before Delta 3.0, delta-spark_<scala> from 3.0.
+ARG DELTA_ARTIFACT=delta-core_2.12
 ARG DELTA_VERSION=2.2.0
+ARG POSTGRES_JDBC_VERSION=42.7.13
 
-ENV SPARK_HOME /usr/spark
-ENV PATH="/usr/spark/bin:/usr/spark/sbin:${PATH}"
+ENV PATH="${SPARK_HOME}/bin:${SPARK_HOME}/sbin:${PATH}"
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends wget netcat-openbsd procps libpostgresql-jdbc-java && \
-    wget -q "https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" && \
-    tar xzf "spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" && \
-    rm "spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz" && \
-    mv "spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}" /usr/spark && \
-    ln -s /usr/share/java/postgresql-jdbc4.jar /usr/spark/jars/postgresql-jdbc4.jar && \
-    wget -q "https://repo1.maven.org/maven2/io/delta/delta-core_2.12/${DELTA_VERSION}/delta-core_2.12-${DELTA_VERSION}.jar" \
-         -P /usr/spark/jars/ && \
-    wget -q "https://repo1.maven.org/maven2/io/delta/delta-storage/${DELTA_VERSION}/delta-storage-${DELTA_VERSION}.jar" \
-         -P /usr/spark/jars/ && \
-    apt-get remove -y wget && \
-    apt-get autoremove -y && \
-    apt-get clean
+# ADD gives files downloaded from a URL mode 600 (root only), hence a+r.
+ADD --chmod=a+r \
+    "https://repo1.maven.org/maven2/io/delta/${DELTA_ARTIFACT}/${DELTA_VERSION}/${DELTA_ARTIFACT}-${DELTA_VERSION}.jar" \
+    "https://repo1.maven.org/maven2/io/delta/delta-storage/${DELTA_VERSION}/delta-storage-${DELTA_VERSION}.jar" \
+    "https://repo1.maven.org/maven2/org/postgresql/postgresql/${POSTGRES_JDBC_VERSION}/postgresql-${POSTGRES_JDBC_VERSION}.jar" \
+    ${SPARK_HOME}/jars/
 
-COPY entrypoint.sh /scripts/
-RUN chmod +x /scripts/entrypoint.sh && \
-    groupadd -r spark && useradd -r -g spark -m spark && \
-    chown -R spark:spark /usr/spark /scripts
+# Spark's warehouse dir is relative to the workdir; /spark-warehouse is the volume.
+WORKDIR /
 
-USER spark
-ENTRYPOINT ["/scripts/entrypoint.sh"]
+ENTRYPOINT ["spark-submit"]
 CMD ["--help"]

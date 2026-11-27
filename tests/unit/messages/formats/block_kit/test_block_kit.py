@@ -1,7 +1,14 @@
 import os
 from pathlib import Path
 
-from elementary.messages.blocks import TableBlock
+from elementary.messages.blocks import (
+    ActionsBlock,
+    LineBlock,
+    LinesBlock,
+    MentionBlock,
+    TableBlock,
+    UserSelectActionBlock,
+)
 from elementary.messages.formats.block_kit import (
     FormattedBlockKitMessage,
     format_block_kit,
@@ -37,6 +44,43 @@ class TestBlockKit(BaseTestFormat[FormattedBlockKitMessage]):
                 os.environ["TEST_SLACK_CHANNEL"], result
             )
         assert_expected_json(result.dict(), expected_file_path)
+
+    def test_usergroup_id_formats_as_subteam_mention(self):
+        message = MessageBody(
+            blocks=[
+                LinesBlock(lines=[LineBlock(inlines=[MentionBlock(user="@data")])]),
+                ActionsBlock(
+                    actions=[
+                        UserSelectActionBlock(
+                            action_id="assign_user",
+                            placeholder="Assign to user",
+                            initial_user="@data",
+                        )
+                    ]
+                ),
+            ]
+        )
+        result = format_block_kit(message, resolve_mention=lambda user: "S_DATA")
+        assert result.blocks[0]["text"]["text"] == "<!subteam^S_DATA>"
+        assert "initial_user" not in result.blocks[1]["elements"][0]
+
+        user_message = MessageBody(
+            blocks=[
+                ActionsBlock(
+                    actions=[
+                        UserSelectActionBlock(
+                            action_id="assign_user",
+                            placeholder="Assign to user",
+                            initial_user="@jessica",
+                        )
+                    ]
+                )
+            ]
+        )
+        user_result = format_block_kit(
+            user_message, resolve_mention=lambda user: "U_JESSICA"
+        )
+        assert user_result.blocks[0]["elements"][0]["initial_user"] == "U_JESSICA"
 
     def test_table_block_none_and_empty_cells_produce_non_empty_text(self):
         table = TableBlock.from_dicts(

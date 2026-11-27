@@ -21,13 +21,18 @@ def get_dbt_core_version() -> Optional[version.Version]:
     return _get_package_version("dbt-core")
 
 
-def get_dbt_package_version() -> Optional[version.Version]:
-    """Version of the installed `dbt` package, or None if not installed.
+def get_dbt2_package_version() -> Optional[version.Version]:
+    """Version of the installed dbt v2 package, or None if not installed.
 
-    From 2.0, the `dbt` package on PyPI ships the dbt (Fusion) binary as a
-    platform wheel with no importable Python module.
+    dbt v2 (the Fusion engine) is distributed on PyPI as the `dbt` package (full
+    feature set) and the `dbt-oss` package (Apache 2 subset); both ship the dbt
+    binary. dbt-core stays on 1.x.
     """
-    return _get_package_version("dbt")
+    for package_name in ("dbt", "dbt-oss"):
+        package_version = _get_package_version(package_name)
+        if package_version is not None and package_version.major >= 2:
+            return package_version
+    return None
 
 
 def is_dbt2_binary_available() -> bool:
@@ -35,8 +40,7 @@ def is_dbt2_binary_available() -> bool:
     if env_path and os.path.exists(os.path.expanduser(env_path)):
         return True
 
-    dbt_package_version = get_dbt_package_version()
-    if dbt_package_version is not None and dbt_package_version.major >= 2:
+    if get_dbt2_package_version() is not None:
         return True
     return os.path.exists(os.path.expanduser(DEFAULT_DBT_FUSION_PATH))
 
@@ -49,10 +53,9 @@ def get_dbt2_binary_path() -> str:
     # When only dbt-core 1.x is installed, the `dbt` executable on PATH is its
     # entrypoint, so it can't be trusted to be the dbt 2.0 binary.
     dbt_core_version = get_dbt_core_version()
-    dbt_package_version = get_dbt_package_version()
-    dbt2_installed_via_pip = (
-        dbt_package_version is not None and dbt_package_version.major >= 2
-    ) or (dbt_core_version is not None and dbt_core_version.major >= 2)
+    dbt2_installed_via_pip = get_dbt2_package_version() is not None or (
+        dbt_core_version is not None and dbt_core_version.major >= 2
+    )
     if dbt2_installed_via_pip or dbt_core_version is None:
         which_path = shutil.which("dbt")
         if which_path:
